@@ -2,6 +2,7 @@ const chapter = document.querySelector('.chapter');
 const chapterTitle = chapter.querySelector('h1');
 const index = document.querySelector('.index ol');
 const sheet = document.querySelector('.sheet');
+const greninjaLink = document.querySelector('.to-greninja');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const icon = (step) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${step < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}"/></svg>`;
 
@@ -59,7 +60,9 @@ function renderIndex() {
       image.dataset.src = imagePath(id);
       fan.append(image);
     }
-    item.append(fan, textElement('span', 'idx-n', number(position)), textElement('strong', '', entry.title), textElement('span', 'idx-v', entry.value));
+    if (entry.theme) item.dataset.theme = entry.theme;
+    item.append(fan, textElement('span', 'idx-n', number(position)), textElement('strong', '', entry.title),
+      textElement('span', 'idx-v', entry.value ?? `${entry.cards.length} Karten`));
     li.append(item);
     index.append(li);
     thumbnails.observe(fan);
@@ -77,9 +80,19 @@ function showChapter(position, { address = true, scroll = false, focus = false }
   if (position !== chapterIndex) {
     if (sheet.open) sheet.close();
     chapterIndex = position;
-    chapterTitle.textContent = entry.title;
+    chapter.dataset.theme = entry.theme ?? '';
+    const edition = chapter.querySelector('.edition');
+    edition.hidden = !entry.edition;
+    if (entry.edition) {
+      edition.querySelector('.edition-number').textContent = entry.edition;
+      const [name, series] = entry.title.split(' · ');
+      chapterTitle.replaceChildren(name, textElement('span', 'edition-series', ` · ${series}`));
+    } else {
+      chapterTitle.textContent = entry.title;
+    }
     chapter.querySelector('.desc').textContent = entry.description;
-    chapter.querySelector('.meta').textContent = `Kapitel ${position + 1} von ${chapters.length} · Seitenwert ${entry.value}`;
+    const summary = entry.value ? `Seitenwert ${entry.value}` : `${entry.cards.length} Karten`;
+    chapter.querySelector('.meta').textContent = `Kapitel ${position + 1} von ${chapters.length} · ${summary}`;
     const grid = document.createElement('div');
     grid.className = 'grid';
     const rows = entry.cards.map((card, i) => {
@@ -149,6 +162,7 @@ function showCard(position, trigger) {
   if (trigger) opener = trigger;
   const title = sheet.querySelector('h2');
   const art = sheet.querySelector('.big');
+  sheet.dataset.theme = entry.theme ?? '';
   art.src = imagePath(card.id);
   art.alt = `Kartenbild ${card.name}`;
   title.textContent = card.name;
@@ -157,9 +171,13 @@ function showCard(position, trigger) {
   sheet.querySelector('.set-name').textContent = card.set;
   sheet.querySelector('.facts .type').className = `type t-${card.type}`;
   sheet.querySelector('.facts-text').textContent = card.facts;
+  const priceLabel = sheet.querySelector('.tag-label');
+  priceLabel.querySelector('.price-label').textContent = entry.priceDate ? 'Cardmarket-Preistrend' : 'Richtpreis Near Mint';
+  priceLabel.querySelector('small').textContent = entry.priceDate ? 'ohne Filter für Sprache oder Zustand' : 'günstigste Ausgabe, Deutsch oder Englisch';
   sheet.querySelector('.tag strong').textContent = card.price;
   sheet.querySelector('.lowest').textContent = card.lowest;
   sheet.querySelector('.average').textContent = card.average30;
+  sheet.querySelector('.note').textContent = `Stand ${entry.priceDate ?? '7. November 2026'}. Das günstigste Angebot kann auch andere Sprachen oder schlechtere Zustände betreffen.`;
   sheet.querySelector('.market').href = card.cardmarket;
   const focused = document.activeElement;
   cardControls[0].disabled = position === 0;
@@ -199,6 +217,10 @@ function enableSwipe(element, navigate) {
 }
 
 function fromHash() {
+  if (location.hash === '#greninja') {
+    const position = chapters.findIndex((entry) => entry.theme === 'greninja');
+    showChapter(position, { address: false, scroll: true });
+  }
   const match = /^#kapitel-([1-9]\d*)$/.exec(location.hash);
   if (match) showChapter(Number(match[1]) - 1, { address: false, scroll: true });
   if (chapterIndex < 0) showChapter(0, { address: false });
@@ -206,6 +228,10 @@ function fromHash() {
 
 function start(data) {
   chapters = data;
+  const totalCards = chapters.reduce((total, entry) => total + entry.cards.length, 0);
+  document.title = `Kartenarchiv · ${totalCards} Pokémon-Karten in ${chapters.length} Kapiteln`;
+  document.querySelector('.collection-count').textContent = `${totalCards} Karten in ${chapters.length} Kapiteln`;
+  greninjaLink.hidden = !chapters.some((entry) => entry.theme === 'greninja');
   renderIndex();
   fromHash();
   addEventListener('hashchange', fromHash);

@@ -2398,5 +2398,249 @@
         "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715703"
       }
     ]
+  },
+  {
+    "title": "Greninja · Grails",
+    "description": "Seltene Promos, Shiny und Rainbow GX. In der Mitte die drei großen ex-Motive.",
+    "theme": "greninja",
+    "edition": "01 / 02",
+    "priceDate": "7. November 2026",
+    "covers": [
+      "greninja-me04-116",
+      "greninja-sv06-214",
+      "greninja-me04-122"
+    ],
+    "cards": [
+      {
+        "id": "greninja-xyp-xy133",
+        "name": "Ash-Greninja-EX",
+        "number": "XY133",
+        "set": "XY Black Star Promos",
+        "type": "water",
+        "facts": "Wasser · Promo · gezeichnet von 5ban Graphics",
+        "price": "32,38 €",
+        "lowest": "10,00 €",
+        "average30": "31,30 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=289562"
+      },
+      {
+        "id": "greninja-xyp-xy24",
+        "name": "Greninja",
+        "number": "XY24",
+        "set": "XY Black Star Promos",
+        "type": "dark",
+        "facts": "Finsternis · Promo · gezeichnet von Akira Komayama",
+        "price": "112,55 €",
+        "lowest": "—",
+        "average30": "53,07 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=289696"
+      },
+      {
+        "id": "greninja-swshp-swsh144",
+        "name": "Greninja ☆",
+        "number": "SWSH144",
+        "set": "SWSH Black Star Promos",
+        "type": "dark",
+        "facts": "Finsternis · Promo · gezeichnet von Masakazu Fukuda",
+        "price": "33,77 €",
+        "lowest": "13,50 €",
+        "average30": "30,10 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=576743"
+      },
+      {
+        "id": "greninja-me04-116",
+        "name": "Mega Greninja ex",
+        "number": "116/122",
+        "set": "Chaos Rising",
+        "type": "water",
+        "facts": "Wasser · Special Illustration Rare · gezeichnet von Susumu Maeya",
+        "price": "100,70 €",
+        "lowest": "89,00 €",
+        "average30": "128,19 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=886509"
+      },
+      {
+        "id": "greninja-sv06-214",
+        "name": "Greninja ex",
+        "number": "214/167",
+        "set": "Twilight Masquerade",
+        "type": "fighting",
+        "facts": "Kampf · Special Illustration Rare · gezeichnet von akagi",
+        "price": "161,23 €",
+        "lowest": "75,00 €",
+        "average30": "175,24 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769388"
+      },
+      {
+        "id": "greninja-me04-122",
+        "name": "Mega Greninja ex",
+        "number": "122/122",
+        "set": "Chaos Rising",
+        "type": "water",
+        "facts": "Wasser · Mega Hyper Rare · gezeichnet von takuyoa",
+        "price": "118,67 €",
+        "lowest": "79,99 €",
+        "average30": "120,19 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=886515"
+      },
+      {
+        "id": "greninja-swshp-swsh305",
+        "name": "Greninja",
+        "number": "SWSH305",
+        "set": "SWSH Black Star Promos",
+        "type": "water",
+        "facts": "Wasser · Promo · gezeichnet von Taiga Kasai",
+        "price": "67,50 €",
+        "lowest": "59,95 €",
+        "average30": "57,39 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=690367"
+      },
+      {
+        "id": "greninja-sma-sv56",
+        "name": "Greninja-GX",
+        "number": "SV56/SV94",
+        "set": "Hidden Fates Shiny Vault",
+        "type": "water",
+        "facts": "Wasser · Shiny Rare · gezeichnet von 5ban Graphics",
+        "price": "58,79 €",
+        "lowest": "24,99 €",
+        "average30": "55,65 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=396927"
+      },
+      {
+        "id": "greninja-sm6-133",
+        "name": "Greninja-GX",
+        "number": "133/131",
+        "set": "Forbidden Light",
+        "type": "water",
+        "facts": "Wasser · Secret Rare · gezeichnet von 5ban Graphics",
+        "price": "131,32 €",
+        "lowest": "9,99 €",
+        "average30": "103,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=355644"
+      }
+    ]
+  },
+  {
+    "title": "Greninja · Epochen",
+    "description": "Von den frühen XY-Promos über Greninja BREAK bis zur Jubiläumsausgabe.",
+    "theme": "greninja",
+    "edition": "02 / 02",
+    "priceDate": "7. November 2026",
+    "covers": [
+      "greninja-xy9-41",
+      "greninja-svp-132",
+      "greninja-30th-148"
+    ],
+    "cards": [
+      {
+        "id": "greninja-xyp-xy20",
+        "name": "Greninja-EX",
+        "number": "XY20",
+        "set": "XY Black Star Promos",
+        "type": "water",
+        "facts": "Wasser · Promo · gezeichnet von 5ban Graphics",
+        "price": "8,78 €",
+        "lowest": "1,00 €",
+        "average30": "11,21 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=281310"
+      },
+      {
+        "id": "greninja-xy9-41",
+        "name": "Greninja BREAK",
+        "number": "41/122",
+        "set": "BREAKpoint",
+        "type": "water",
+        "facts": "Wasser · Ultra Rare · gezeichnet von 5ban Graphics",
+        "price": "17,72 €",
+        "lowest": "2,00 €",
+        "average30": "17,09 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=288216"
+      },
+      {
+        "id": "greninja-xyp-xy162",
+        "name": "Greninja",
+        "number": "XY162",
+        "set": "XY Black Star Promos",
+        "type": "water",
+        "facts": "Wasser · Promo · gezeichnet von Sanosuke Sakuma",
+        "price": "5,60 €",
+        "lowest": "0,70 €",
+        "average30": "5,15 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=295153"
+      },
+      {
+        "id": "greninja-sm6-120",
+        "name": "Greninja-GX",
+        "number": "120/131",
+        "set": "Forbidden Light",
+        "type": "water",
+        "facts": "Wasser · Ultra Rare · gezeichnet von 5ban Graphics",
+        "price": "25,54 €",
+        "lowest": "5,00 €",
+        "average30": "34,59 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=355631"
+      },
+      {
+        "id": "greninja-det1-9",
+        "name": "Greninja",
+        "number": "9/18",
+        "set": "Detective Pikachu",
+        "type": "water",
+        "facts": "Wasser · Ultra Rare · gezeichnet von MPC Film",
+        "price": "7,21 €",
+        "lowest": "1,50 €",
+        "average30": "5,97 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=370773"
+      },
+      {
+        "id": "greninja-sm10-117",
+        "name": "Greninja",
+        "number": "117/214",
+        "set": "Unbroken Bonds",
+        "type": "dark",
+        "facts": "Finsternis · Rare · gezeichnet von Yusuke Ohmura",
+        "price": "22,94 €",
+        "lowest": "8,12 €",
+        "average30": "17,76 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=372407"
+      },
+      {
+        "id": "greninja-swsh10-046",
+        "name": "Radiant Greninja",
+        "number": "046/189",
+        "set": "Astral Radiance",
+        "type": "water",
+        "facts": "Wasser · Radiant Rare · gezeichnet von Souichirou Gunjima",
+        "price": "2,17 €",
+        "lowest": "0,50 €",
+        "average30": "2,56 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=658586"
+      },
+      {
+        "id": "greninja-svp-132",
+        "name": "Greninja ex",
+        "number": "132",
+        "set": "SVP Black Star Promos",
+        "type": "water",
+        "facts": "Wasser · Promo · gezeichnet von SIE NANAHARA",
+        "price": "43,43 €",
+        "lowest": "20,00 €",
+        "average30": "45,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=770951"
+      },
+      {
+        "id": "greninja-30th-148",
+        "name": "Greninja ex",
+        "number": "148/128",
+        "set": "30th Celebration",
+        "type": "water",
+        "facts": "Wasser · Special Illustration Rare · gezeichnet von GIDORA",
+        "price": "16,35 €",
+        "lowest": "13,99 €",
+        "average30": "19,21 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=907755"
+      }
+    ]
   }
 ]

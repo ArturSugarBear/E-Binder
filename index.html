@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#efebe3">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Ein digitales Sammelalbum mit 180 Pokémon-Karten in 20 Themenkapiteln.">
-  <title>Kartenarchiv · 180 Pokémon-Karten in 20 Kapiteln</title>
+  <meta name="description" content="Ein digitales Pokémon-Sammelalbum mit Themenkapiteln und einer Greninja-Sonderedition.">
+  <title>Kartenarchiv · Digitales Pokémon-Sammelalbum</title>
   <link rel="stylesheet" href="./src/styles.css">
   <link rel="preload" href="./assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
   <script type="module" src="./src/app.js"></script>
@@ -15,17 +15,32 @@
   <div class="app">
     <header class="top">
       <a class="mark" href="#top">Kartenarchiv</a>
-      <a class="to-index" href="#kapitel">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/>
-          <rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>
-        </svg>
-        <span>Kapitel</span>
-      </a>
+      <nav class="top-links" aria-label="Schnellzugriff">
+        <a class="to-index to-greninja" href="#greninja" hidden>
+          <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="m16 1 4 10 11 5-10 4-5 11-4-10-11-5 10-4Z"/><circle cx="16" cy="16" r="2.5" fill="#172b40"/></svg>
+          <span>Greninja</span>
+        </a>
+        <a class="to-index" href="#kapitel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/>
+            <rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>
+          </svg>
+          <span>Kapitel</span>
+        </a>
+      </nav>
     </header>
     <main>
       <section class="chapter" aria-labelledby="chapter-title">
         <div class="head">
+          <div class="edition" hidden>
+            <span class="edition-label">Sonderedition <span class="edition-number"></span></span>
+            <svg class="edition-mark" viewBox="0 0 128 128" aria-hidden="true">
+              <circle cx="64" cy="64" r="62" fill="none" stroke="currentColor" stroke-width="1"/>
+              <circle cx="64" cy="64" r="51" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 5"/>
+              <path d="m64 12 15 36 37 16-36 15-16 37-15-36-37-16 36-15Z" fill="none" stroke="currentColor" stroke-width="1.3"/>
+              <circle cx="64" cy="64" r="12" fill="none" stroke="currentColor" stroke-width="1.3"/>
+            </svg>
+          </div>
           <h1 id="chapter-title" tabindex="-1">Kartenarchiv</h1>
           <p class="desc">Ein digitales Sammelalbum für Pokémon-Karten</p>
           <p class="meta" aria-live="polite"></p>
@@ -43,14 +58,14 @@
       <section class="index" id="kapitel" aria-labelledby="index-title">
         <div class="index-head">
           <h2 id="index-title">Alle Kapitel</h2>
-          <p>180 Karten in 20 Kapiteln, zusammen ca. 2.370 €</p>
+          <p class="collection-count"></p>
         </div>
         <ol></ol>
       </section>
     </main>
     <footer class="foot">
-      <p>Preise sind Richtwerte aus Cardmarket-Daten vom 7. November 2026. Sie gelten für Near Mint und die günstigere der beiden Ausgaben Deutsch oder Englisch. Aktuelle Angebote findest du bei Cardmarket.</p>
-      <p>Kartenbilder und Daten von <a href="https://www.tcgdex.net/">TCGdex</a>. Privates Sammelalbum, kein offizielles Pokémon-Produkt.</p>
+      <p>Die Preise im Binder sind Momentaufnahmen. Bei jeder Karte steht, welche Preisangabe verwendet wurde. Aktuelle Angebote findest du bei Cardmarket.</p>
+      <p>Kartenbilder und Daten von <a href="https://www.tcgdex.net/">TCGdex</a> und <a href="https://pokemontcg.io/">Pokémon TCG API</a>. Privates Sammelalbum, kein offizielles Pokémon-Produkt.</p>
     </footer>
     <noscript><p class="load-error">Aktiviere JavaScript, um das Kartenarchiv zu öffnen.</p></noscript>
     <p class="load-error" id="load-error" role="alert" hidden>Der Binder konnte nicht geladen werden. Bitte lade die Seite neu.</p>
@@ -72,7 +87,7 @@
         <div class="price">
           <div class="tag">
             <span class="tag-hole" aria-hidden="true"></span>
-            <span class="tag-label">Richtpreis Near Mint<small>günstigste Ausgabe, Deutsch oder Englisch</small></span>
+            <span class="tag-label"><span class="price-label">Richtpreis Near Mint</span><small>günstigste Ausgabe, Deutsch oder Englisch</small></span>
             <strong></strong>
           </div>
           <ul>
