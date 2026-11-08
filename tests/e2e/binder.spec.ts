@@ -8,7 +8,7 @@ for (const [position, chapter] of collection.entries()) {
   }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('./');
+    await page.goto('./archive.html');
     await expect(page.locator('.index .idx')).toHaveCount(22);
     await page.evaluate(
       (hash) => {
@@ -53,7 +53,7 @@ for (const [position, chapter] of collection.entries()) {
 test('deep links, keyboard navigation and browser history work together', async ({
   page,
 }) => {
-  await page.goto('./#greninja');
+  await page.goto('./archive.html#greninja');
   await expect(page.locator('#chapter-title')).toHaveText('Greninja · Grails');
   await page.keyboard.press('ArrowRight');
   await expect(page).toHaveURL(/#kapitel-22$/);
@@ -81,7 +81,7 @@ test('failed loading is recoverable and repeated clicks do not duplicate the app
       await route.fulfill({ status: 503, body: 'Unavailable' });
     else await route.fallback();
   });
-  await page.goto('./#greninja');
+  await page.goto('./archive.html#greninja');
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.locator('main')).toHaveAttribute('aria-busy', 'false');
   await page.getByRole('button', { name: 'Erneut versuchen' }).click();
@@ -95,7 +95,7 @@ test('invalid remote data is not rendered', async ({ page }) => {
   await page.route('**/collection.json', (route) =>
     route.fulfill({ json: [{ title: 'Incomplete' }] }),
   );
-  await page.goto('./');
+  await page.goto('./archive.html');
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.locator('.pocket')).toHaveCount(0);
 });
@@ -105,7 +105,7 @@ test('first load fetches only the visible card images', async ({ page }) => {
   page.on('request', (request) => {
     if (request.url().includes('/assets/cards/')) images.add(request.url());
   });
-  await page.goto('./#greninja');
+  await page.goto('./archive.html#greninja');
   await expect(page.locator('.pocket')).toHaveCount(9);
   await expect.poll(() => images.size).toBeGreaterThanOrEqual(9);
   expect(images.size).toBeLessThan(40);
@@ -115,7 +115,7 @@ test('standard and Greninja chapters and dialogs pass automated accessibility ru
   page,
 }) => {
   for (const hash of ['#kapitel-1', '#greninja']) {
-    await page.goto(`./${hash}`);
+    await page.goto(`./archive.html${hash}`);
     await expect(page.locator('.pocket')).toHaveCount(9);
     expect(
       (
@@ -141,7 +141,7 @@ test('narrow screens and reduced motion retain the binder layout', async ({
 }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./#greninja');
+  await page.goto('./archive.html#greninja');
   await expect(page.locator('.pocket')).toHaveCount(9);
   expect(
     await page.evaluate(
@@ -173,7 +173,7 @@ test('touch swipes turn chapters without accidentally opening a card', async ({
     browserName !== 'chromium' || !isMobile,
     'Real touch event injection uses Chromium CDP on the mobile project.',
   );
-  await page.goto('./#greninja');
+  await page.goto('./archive.html#greninja');
   const pocket = page.locator('.pocket').nth(4);
   await expect(pocket).toBeVisible();
   await pocket.scrollIntoViewIfNeeded();

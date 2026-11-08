@@ -1,0 +1,149 @@
+import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
+import type { PersonalStore } from './personal-store';
+
+export class CardImages {
+  private urls = new Map<string, Promise<string>>();
+  private palettes = new Map<string, Promise<Palette | undefined>>();
+  constructor(
+    private store: PersonalStore,
+    private mode: () => PersonalState['mode'],
+  ) {}
+  url(card: PersonalCard): Promise<string> {
+    if (card.photoId) {
+      const key = `${this.mode()}:${card.photoId}`;
+      if (!this.urls.has(key)) {
+        const mode = this.mode();
+        this.urls.set(
+          key,
+          this.store
+            .photo(mode, card.photoId)
+            .then((blob) =>
+              blob ? URL.createObjectURL(blob) : this.remote(card),
+            ),
+        );
+      }
+      return this.urls.get(key)!;
+    }
+    return Promise.resolve(this.remote(card));
+  }
+  private remote(card: PersonalCard): string {
+    return card.image.startsWith('assets/')
+      ? `${import.meta.env.BASE_URL}${card.image}`
+      : card.image;
+  }
+  artwork(card: PersonalCard, className = ''): HTMLElement {
+    const frame = document.createElement('span');
+    frame.className = `card-art ${className}`;
+    const fallback = document.createElement('span');
+    fallback.className = 'art-fallback';
+    fallback.textContent = card.name;
+    const image = document.createElement('img');
+    image.alt = `${card.name}, ${card.setName} ${card.number}`;
+    image.width = 63;
+    image.height = 88;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    image.addEventListener('error', () => {
+      image.hidden = true;
+      fallback.hidden = false;
+    });
+    frame.append(fallback, image);
+    void this.url(card)
+      .then((url) => {
+        if (url) {
+          image.src = url;
+          fallback.hidden = true;
+        } else image.hidden = true;
+      })
+      .catch(() => {
+        image.hidden = true;
+      });
+    return frame;
+  }
+  palette(card: PersonalCard): Promise<Palette | undefined> {
+    if (card.palette) return Promise.resolve(card.palette);
+    const key = `${this.mode()}:${card.photoId ?? card.image}`;
+    if (!this.palettes.has(key)) this.palettes.set(key, this.measure(card));
+    return this.palettes.get(key)!;
+  }
+  private async measure(card: PersonalCard): Promise<Palette | undefined> {
+    try {
+      const url = await this.url(card);
+      if (!url) return undefined;
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          image.onload = null;
+          image.onerror = null;
+          image.src = '';
+          reject(new Error('Bild lädt zu lange.'));
+        }, 10000);
+        image.onload = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        image.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error('Bild nicht auswertbar.'));
+        };
+        image.src = url;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) return undefined;
+      context.drawImage(
+        image,
+        image.width * 0.06,
+        image.height * 0.15,
+        image.width * 0.88,
+        image.height * 0.43,
+        0,
+        0,
+        32,
+        32,
+      );
+      const pixels = context.getImageData(0, 0, 32, 32).data;
+      let x = 0,
+        y = 0,
+        saturation = 0,
+        lightness = 0,
+        count = 0;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const r = pixels[index]! / 255,
+          g = pixels[index + 1]! / 255,
+          b = pixels[index + 2]! / 255;
+        const max = Math.max(r, g, b),
+          min = Math.min(r, g, b),
+          delta = max - min;
+        const sat = max ? delta / max : 0;
+        lightness += (max + min) / 2;
+        if (sat < 0.2 || max < 0.15 || max > 0.95) continue;
+        const angle =
+          ((delta === 0
+            ? 0
+            : max === r
+              ? ((g - b) / delta + 6) % 6
+              : max === g
+                ? (b - r) / delta + 2
+                : (r - g) / delta + 4) *
+            Math.PI) /
+          3;
+        x += sat * Math.cos(angle);
+        y += sat * Math.sin(angle);
+        saturation += sat;
+        count++;
+      }
+      if (!count || Math.hypot(x, y) < 0.001) return undefined;
+      return {
+        hue: ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360,
+        saturation: saturation / count,
+        lightness: lightness / (pixels.length / 4),
+      };
+    } catch {
+      return undefined;
+    }
+  }
+}

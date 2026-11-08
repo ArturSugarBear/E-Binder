@@ -1,66 +1,81 @@
 # E-Binder
 
-Digitales Pokémon-Sammelalbum mit 198 Karten in 22 Themenkapiteln, inklusive zwei Greninja-Seiten.
+Deine Pokémon-Karten, dein Bestand und deine eigenen Neun-Pocket-Seiten. Mit Fotoerfassung, lokaler Texterkennung, Artist- und Seitenideen, Wunschkarten und exportierbaren Sicherungen.
 
-[Binder öffnen](https://artursugarbear.github.io/E-Binder/) · [Greninja](https://artursugarbear.github.io/E-Binder/#greninja)
+Die Anwendung speichert persönliche Daten **in IndexedDB auf diesem Gerät**. Sie überträgt keine Sammlungen oder Fotos an einen Server. Die Demo hat einen getrennten Bestand. Die bisherigen 198 Karten und 22 Themenkapitel bleiben als Inspirationsarchiv erhalten.
+
+## Benutzen
+
+1. **Karten hinzufügen:** Eine genaue Ausgabe suchen oder ein eigenes Foto aufnehmen/importieren. Die Suche nach Name oder Sammlernummer verwendet den deutschen oder englischen [TCGdex-Katalog](https://tcgdex.dev/); eine manuelle Erfassung ist ebenfalls möglich.
+2. **Bestätigen:** Set, Sammlernummer, Sprache, Druckvariante und die gesamte vorhandene Menge prüfen. Ein wiederholtes Foto oder eine zweite Bestätigung erhöht die Menge nicht automatisch.
+3. **Binder gestalten:** Eigene Binder und Seiten anlegen, Plätze belegen, tauschen, leeren oder festhalten. Vorlagen übernehmen; fehlende Karten bleiben geplant und erzeugen keinen Besitz.
+4. **Seiten vorschlagen:** Höchstens drei Geschmacksfragen zu Zusammenhang, Pflichtkarte und Ausschlüssen. Vorschläge verwenden tatsächliche Bilder und verfügbare Exemplare. Ein Artist-Fokus füllt bei zu wenigen passenden Karten keine anderen Illustratoren auf.
+5. **Sichern:** JSONL herunterladen, einschließlich Originalfotos, offener Erfassungen und Binderplätzen. Wiederherstellung zuerst prüfen und dann ausdrücklich übernehmen.
+
+Ein Exemplar belegt höchstens einen angenommenen Binderplatz. Ein Entwurf reserviert Exemplare; der tatsächliche Aufbau wird gesondert vom Nutzer markiert. Besitz, Wünsche und explizite Tauschmengen sind unabhängig.
+
+## Fotoerkennung
+
+Die Open-Source-OCR [Tesseract.js 6.0.1](https://github.com/naptha/tesseract.js/tree/v6.0.1) arbeitet lokal mit einem LSTM-Modell in WebAssembly. Sie liest zuerst eine schmale Set-/Nummernzeile und bei Bedarf den größeren unteren Kartenstreifen: Original, Graustufen/Kontrast, invertierte Darstellung sowie globales und adaptives Schwarzweiß. Der Kartenname dient als weitere Gegenprüfung. Erkannte Nummern und unterstützte gedruckte Setcodes werden mit Katalogdaten abgeglichen.
+
+Fotografiere eine Karte aufrecht und möglichst bildfüllend, mit scharfem unteren Rand. Erstmalig werden Worker, Wasm und deutsche/englische Sprachmodelle geladen. Fotos werden dafür nicht hochgeladen. Originale bleiben unverändert. Die Sitzung lässt sich unterbrechen und später fortsetzen.
+
+Das ist eine überprüfbare Erkennungshilfe mit Bestätigung, keine Zusage fehlerfreier Identifikation. Alte Sets mit Symbolen, verdeckte Ränder, spiegelnde Hüllen, Perspektive und Druckvarianten können zusätzliche Klärung verlangen. Unklare Fotos bleiben erhalten. Ergebnisse kleiner Prüfungen mit Katalogbildern ersetzen keine Prüfung mit realen Sammlerfotos. Die Online-Suche zeigt bis zu 48 Treffer je Abfrage; engere Namen oder genaue Nummern helfen bei großen Treffermengen.
 
 ## Entwickeln
 
-Voraussetzung ist Node.js 24 (siehe `.nvmrc`).
+Node.js 24 (siehe `.nvmrc`):
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Den von Vite ausgegebenen Link mit dem Pfad `/E-Binder/` öffnen. Der Entwicklungsserver aktualisiert die Vorschau bei Änderungen automatisch. Es werden keine Tokens oder API-Schlüssel benötigt.
-
-## Prüfen und bauen
+Den ausgegebenen Link mit `/E-Binder/` öffnen. `/E-Binder/archive.html` enthält das Inspirationsarchiv. Alte `#kapitel-N`- und `#greninja`-Links werden dorthin weitergeleitet. Die App benötigt keine API-Schlüssel.
 
 ```sh
 npm run check
-npx playwright install chromium webkit
+npx playwright install --with-deps chromium webkit
 npm run test:e2e
 ```
 
-`check` prüft Formatierung, Lint-Regeln, Unit-Tests, Kartendaten, Bilddateien und TypeScript und erstellt anschließend `dist/`. Die Browser-Tests starten automatisch den Produktionsbuild über `vite preview`. Unter Linux installiert `npx playwright install --with-deps chromium webkit` zusätzlich die Systembibliotheken.
+`check` prüft Formatierung, Lint, Unit-Tests, Daten, Bilddateien und TypeScript und baut `dist/`. Browser-Tests verwenden den echten Vite-HTTP-Server und prüfen Desktop-Chromium, mobiles Chromium und mobiles WebKit. Ein vorhandenes Chromium lässt sich mit `PLAYWRIGHT_CHROMIUM_EXECUTABLE` verwenden. Wenn WebKit-Systembibliotheken fehlen, ist das kein abgeschlossener Safari-Test.
 
-| Befehl               | Zweck                                                     |
-| -------------------- | --------------------------------------------------------- |
-| `npm run dev`        | Entwicklung mit Live-Reload                               |
-| `npm run build`      | Daten prüfen, Typen prüfen und Produktionsbuild erstellen |
-| `npm run preview`    | Bereits gebauten Stand lokal ansehen                      |
-| `npm run test`       | Unit-Tests einmal ausführen                               |
-| `npm run test:watch` | Unit-Tests während der Entwicklung                        |
-| `npm run test:e2e`   | Chromium Desktop, Chromium Mobil und WebKit Mobil         |
-| `npm run format`     | Code einheitlich formatieren                              |
-| `npm run check`      | Alle Prüfungen außer Browser-Tests                        |
+Eine optionale echte OCR-Prüfung gegen die laufende Vorschau:
+
+```sh
+node scripts/smoke-recognition.mjs
+# alternativ eigene, aufrechte Testbilder als Argumente übergeben
+```
+
+Diese Prüfung lädt echte OCR-Modelle und nutzt den externen Katalog. Ihre Ergebnisse sind getrennt von den deterministischen Unit- und Browser-Tests zu bewerten.
 
 ## Aufbau
 
-| Pfad                       | Verantwortung                                         |
-| -------------------------- | ----------------------------------------------------- |
-| `src/main.ts`              | Laden, Fehleranzeige und erneuter Versuch             |
-| `src/domain/`              | Kartenschema und reine Navigationsregeln              |
-| `src/data/`                | HTTP-Zugriff, Timeout und Validierung der Antwort     |
-| `src/app.ts`               | Kapitelzustand und Zusammenspiel der Oberfläche       |
-| `src/ui/`                  | Dialog, Kapitelübersicht, DOM-Helfer und Touch-Gesten |
-| `src/styles.css`           | Gemeinsame Gestaltung und Greninja-Variante           |
-| `public/collection.json`   | Redaktionelle Kartendaten                             |
-| `public/assets/`           | Kartenbilder, lokale Schriften und Schriftlizenzen    |
-| `tests/`                   | Unit-Tests und Browser-Regressionstests               |
-| `.github/workflows/ci.yml` | Prüfung, Build und Veröffentlichung                   |
+| Pfad                                            | Verantwortung                                                              |
+| ----------------------------------------------- | -------------------------------------------------------------------------- |
+| `src/main.ts`, `src/ui/workspace.ts`            | persönlicher Arbeitsbereich und Speicherstatus                             |
+| `src/domain/personal.ts`                        | Ausgaben, bestätigte Mengen, Exemplare und Reservierungen                  |
+| `src/domain/recommend.ts`                       | einfache erklärbare Anordnungsregeln                                       |
+| `src/data/personal-store.ts`                    | IndexedDB, Konfliktprüfung und JSONL-Sicherung                             |
+| `src/data/card-catalog.ts`                      | TCGdex-Adapter, Illustrator-Provenienz und OCR-Kandidaten                  |
+| `src/data/recognize.ts`, `recognition-image.ts` | lokale OCR und Bildvorverarbeitung                                         |
+| `src/ui/`                                       | Sammlung, Fotoerfassung, Binder, Vorschläge, Wünsche und Wiederherstellung |
+| `src/archive-main.ts`, `src/app.ts`             | bestehendes Inspirationsarchiv                                             |
+| `src/styles.css`, `src/workspace.css`           | gemeinsame dunkle Farbrollen und Oberflächen                               |
+| `public/collection.json`, `public/assets/`      | öffentliche Vorlagen, Kartenbilder und lokale Schriften                    |
+| `.github/workflows/pages.yml`                   | Prüfungen und Veröffentlichung nach bestandenem Build                      |
 
-Mehr zur [Architektur](docs/architecture.md), zum [Designvertrag](docs/design.md) und zum [Veröffentlichen](docs/deployment.md). Hinweise für Änderungen stehen in [CONTRIBUTING.md](CONTRIBUTING.md).
+[Implementierung und Prüfgrenzen](docs/implementation.md) · [Architektur](docs/architecture.md) · [Designvertrag](docs/design.md) · [Deployment](docs/deployment.md) · [Untersuchung des einzelnen Seitenworkflows](docs/research/one-page/README.md)
 
-## Veröffentlichung
+## Speicherung und Grenzen
 
-Ziel ist GitHub Pages mit **GitHub Actions** als Quelle. Der Workflow prüft jeden Pull Request und veröffentlicht Änderungen an `master` erst nach erfolgreichen Prüfungen einschließlich Browser-Tests. Nur `dist/` wird hochgeladen. Abhängigkeiten werden über `package-lock.json` mit `npm ci` reproduzierbar installiert.
+Browserdaten können gelöscht werden. Exportiere vor Gerätewechsel oder Browserbereinigung eine Sicherung. Andere Geräte erhalten den Bestand ausschließlich durch eine bewusst importierte Sicherung; Konten und Synchronisation sind nicht implementiert. Konkurrierende Tabs werden anhand der gespeicherten Revision erkannt, statt Änderungen stillschweigend zu überschreiben. Rückgängig steht für die letzten 20 Bearbeitungen der geöffneten Sitzung zur Verfügung.
 
-## Kartendaten und Preise
+Der Online-Katalog ist ein externer Dienst. Fehlende Metadaten bleiben unbekannt. Neun geprüfte Illustrator-Credits sind im Forschungsbericht mit Publisher-Quellen belegt; weitere Artist-Angaben tragen ihre Katalog- oder manuelle Provenienz. Eine gemeinsame Illustration oder Farbe ist kein Beleg dafür, dass einem Sammler eine Seite gefällt.
 
-Die ursprünglichen Kapitel enthalten Richtpreise aus der Vorlage vom 7. November 2026. Die Greninja-Kapitel enthalten den [Cardmarket-Preistrend](https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json) mit Datumsangabe. Das sind Momentaufnahmen, keine Live-Preise.
+## Rechte und Preise
 
-Die Produkt-IDs wurden über englische Kartennamen, Set-IDs und Sammlernummern bei [TCGdex](https://www.tcgdex.net/) ermittelt und mit dem [Cardmarket-Katalog](https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json) abgeglichen. Die Browser-Tests prüfen die zugeordneten URLs; die Erreichbarkeit von Cardmarket selbst hängt vom Anbieter ab.
+Kartenabbildungen und Pokémon-Marken gehören den jeweiligen Rechteinhabern. TCGdex und einzelne Bilder der Pokémon TCG API liefern öffentliche Katalogabbildungen. Die Code-Lizenz überträgt keine Rechte an Bildern oder Marken. Schriftlizenzen liegen bei den lokalen Schriftdateien.
 
-Greninja-Bilder stammen von TCGdex und für SWSH305 von der [Pokémon TCG API](https://pokemontcg.io/). Kartenbilder und Pokémon-Marken gehören ihren jeweiligen Rechteinhabern. Die Code-Lizenz überträgt keine Rechte an diesen Bildern oder Marken. Schriftlizenzen liegen bei den Schriftdateien.
+Das Inspirationsarchiv enthält datierte Preisbeobachtungen aus der ursprünglichen Vorlage und Cardmarket, keine Live-Preise und keinen persönlichen Sammlungswert. Der neue Bestandsworkflow berechnet daraus keinen Wert.
