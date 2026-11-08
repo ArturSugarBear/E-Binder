@@ -3,6 +3,17 @@ import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
 
+test.afterEach(async ({ page }, info) => {
+  if (info.status !== info.expectedStatus)
+    console.log(
+      'Visible app errors:',
+      await page
+        .locator('.w-form-notices, .w-dialog-alerts, #workspace-storage-error')
+        .allTextContents()
+        .catch(() => []),
+    );
+});
+
 async function ready(page: Page): Promise<void> {
   await page.goto('./');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
@@ -264,8 +275,12 @@ test('photo capture resumes without ownership, deduplicates originals and restor
     .toString('utf8')
     .trim()
     .split('\n')
-    .map((line) => JSON.parse(line) as { record: string });
+    .map((line) => JSON.parse(line) as { record: string; data?: string });
   expect(records.filter((line) => line.record === 'photo')).toHaveLength(1);
+  const originalBytes = records.find((line) => line.record === 'photo')!.data!;
+  expect(Buffer.from(originalBytes, 'base64')).toEqual(
+    await readFile(original),
+  );
   expect(records.filter((line) => line.record === 'capture')).toHaveLength(1);
   expect(records.filter((line) => line.record === 'holding')).toHaveLength(0);
   await addFirst(page);
@@ -467,13 +482,10 @@ test('OCR cancellation during initialization keeps the original and leaves inven
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
-  await page.route(
-    '**/tesseract.js@6.0.1/dist/worker.min.js',
-    async (route) => {
-      await held;
-      await route.abort().catch(() => undefined);
-    },
-  );
+  await page.route('**/assets/ocr/ppocrv4-rec.onnx', async (route) => {
+    await held;
+    await route.abort().catch(() => undefined);
+  });
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
@@ -497,4 +509,53 @@ test('OCR cancellation during initialization keeps the original and leaves inven
   await page.keyboard.press('Escape');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   expect(failures).toEqual([]);
+});
+
+test('local vision model reads a printed identifier while the original remains unconfirmed', async ({
+  page,
+}) => {
+  await ready(page);
+  const writes: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() !== 'GET') writes.push(request.url());
+  });
+  await page.route('https://api.tcgdex.net/**', (route) =>
+    route.fulfill({
+      json: {
+        id: 'sv01-211',
+        localId: '211',
+        name: 'Trasla',
+        illustrator: 'Jiro Sasumo',
+        image: 'https://assets.tcgdex.net/de/sv/sv01/211',
+        set: {
+          id: 'sv01',
+          name: 'Karmesin & Purpur',
+          cardCount: { official: 198 },
+        },
+        variants: { holo: true },
+      },
+    }),
+  );
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  await page
+    .getByRole('dialog')
+    .locator('input[type=file][multiple]')
+    .setInputFiles('public/assets/cards/svi-211.webp');
+  await page
+    .getByRole('button', { name: 'Text auf dem Foto erkennen', exact: true })
+    .click();
+  await expect(page.locator('.w-form-notices')).toContainText(
+    'Erkennungsvorschläge',
+    { timeout: 45000 },
+  );
+  await expect(page.locator('.w-ocr-text')).toContainText('211/198');
+  await expect(page.locator('.w-search-results')).toContainText('Trasla');
+  await expect(page.locator('.w-capture-queue')).toContainText(
+    '1 offen · 0 übernommen',
+  );
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  expect(writes).toEqual([]);
 });

@@ -122,7 +122,7 @@ export function openAddCards(
   );
   sheet.footer.append(
     message(
-      'Fotos und Texterkennung bleiben in diesem Browser. Beim ersten OCR-Start werden Programm- und Sprachdaten geladen.',
+      'Fotos und Texterkennung bleiben in diesem Browser. Beim ersten Start werden die lokalen Erkennungsdaten geladen. Katalogabfragen verwenden TCGdex.',
     ),
   );
 
@@ -330,6 +330,7 @@ export function openAddCards(
     status.setAttribute('role', 'status');
     const progress = el('progress', 'w-progress');
     progress.max = 1;
+    progress.setAttribute('aria-label', 'Fortschritt der Kartenerkennung');
     const stop = action(
       'Erkennung abbrechen',
       () => controller.abort(),
@@ -349,6 +350,7 @@ export function openAddCards(
           if (!closed && ocrController === controller) {
             status.textContent = label;
             if (fraction !== undefined) progress.value = fraction;
+            else progress.removeAttribute('value');
           }
         },
       );

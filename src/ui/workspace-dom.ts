@@ -177,6 +177,8 @@ export function modal(
 export const message = (text: string, kind = 'note'): HTMLElement =>
   el('p', `w-message w-message-${kind}`, text);
 export function errorText(error: unknown): string {
+  if (error instanceof DOMException)
+    return error.message || 'Der Browser konnte die Aktion nicht abschließen.';
   return error instanceof Error && !('issues' in error)
     ? error.message
     : 'Die Angaben sind nicht vollständig oder enthalten ungültige Werte. Bitte prüfe sie.';

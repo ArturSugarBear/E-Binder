@@ -16,9 +16,11 @@ Ein Exemplar belegt höchstens einen angenommenen Binderplatz. Ein Entwurf reser
 
 ## Fotoerkennung
 
-Die Open-Source-OCR [Tesseract.js 6.0.1](https://github.com/naptha/tesseract.js/tree/v6.0.1) arbeitet lokal mit einem LSTM-Modell in WebAssembly. Sie liest zuerst eine schmale Set-/Nummernzeile und bei Bedarf den größeren unteren Kartenstreifen: Original, Graustufen/Kontrast, invertierte Darstellung sowie globales und adaptives Schwarzweiß. Der Kartenname dient als weitere Gegenprüfung. Erkannte Nummern und unterstützte gedruckte Setcodes werden mit Katalogdaten abgeglichen.
+Die Erkennung verwendet das Open-Source-Modell **PaddleOCR PP-OCRv4** mit **ONNX Runtime Web 1.31.1** lokal in einem beendbaren Worker. Der kleine Stack benötigt ein Erkennungsmodell und gezielte Canvas-Ausschnitte; ein zusätzliches Objekterkennungsmodell und OpenCV werden nicht geladen. Nummer und Setcode werden zuerst im Original gelesen. Bei Unklarheit folgen Graustufen/Kontrast, Inversion und Schwarzweiß sowie ein weiterer Nummernbereich. Der Kartenname dient zur Gegenprüfung. Gelesene Kennungen werden mit TCGdex abgeglichen. Sprache, Druckvariante und Gesamtmenge bleiben ausdrücklich zu bestätigen.
 
-Fotografiere eine Karte aufrecht und möglichst bildfüllend, mit scharfem unteren Rand. Erstmalig werden Worker, Wasm und deutsche/englische Sprachmodelle geladen. Fotos werden dafür nicht hochgeladen. Originale bleiben unverändert. Die Sitzung lässt sich unterbrechen und später fortsetzen.
+Das Modell und Wörterbuch stammen aus `@gutenye/ocr-models@1.4.2` und stehen unter Apache-2.0. [Herkunft, Dateigrößen und SHA-256](public/assets/ocr/model-source.json) und [Lizenz](public/assets/ocr/LICENSE-PaddleOCR.txt) liegen neben den Dateien. Das Modell umfasst rund 11 MB; beim ersten Start wird zusätzlich die WebAssembly-Laufzeit geladen. Diese Dateien sind kein Bestandteil der privaten Sammlungsdaten.
+
+Fotografiere eine Karte aufrecht und möglichst bildfüllend, mit scharfem unteren Rand. Erstmalig werden Worker, Wasm und das Erkennungsmodell geladen. Fotos werden dafür nicht hochgeladen. Originale bleiben unverändert. Die Sitzung lässt sich unterbrechen und später fortsetzen.
 
 Das ist eine überprüfbare Erkennungshilfe mit Bestätigung, keine Zusage fehlerfreier Identifikation. Alte Sets mit Symbolen, verdeckte Ränder, spiegelnde Hüllen, Perspektive und Druckvarianten können zusätzliche Klärung verlangen. Unklare Fotos bleiben erhalten. Ergebnisse kleiner Prüfungen mit Katalogbildern ersetzen keine Prüfung mit realen Sammlerfotos. Die Online-Suche zeigt bis zu 48 Treffer je Abfrage; engere Namen oder genaue Nummern helfen bei großen Treffermengen.
 
@@ -52,19 +54,19 @@ Diese Prüfung lädt echte OCR-Modelle und nutzt den externen Katalog. Ihre Erge
 
 ## Aufbau
 
-| Pfad                                            | Verantwortung                                                              |
-| ----------------------------------------------- | -------------------------------------------------------------------------- |
-| `src/main.ts`, `src/ui/workspace.ts`            | persönlicher Arbeitsbereich und Speicherstatus                             |
-| `src/domain/personal.ts`                        | Ausgaben, bestätigte Mengen, Exemplare und Reservierungen                  |
-| `src/domain/recommend.ts`                       | einfache erklärbare Anordnungsregeln                                       |
-| `src/data/personal-store.ts`                    | IndexedDB, Konfliktprüfung und JSONL-Sicherung                             |
-| `src/data/card-catalog.ts`                      | TCGdex-Adapter, Illustrator-Provenienz und OCR-Kandidaten                  |
-| `src/data/recognize.ts`, `recognition-image.ts` | lokale OCR und Bildvorverarbeitung                                         |
-| `src/ui/`                                       | Sammlung, Fotoerfassung, Binder, Vorschläge, Wünsche und Wiederherstellung |
-| `src/archive-main.ts`, `src/app.ts`             | bestehendes Inspirationsarchiv                                             |
-| `src/styles.css`, `src/workspace.css`           | gemeinsame dunkle Farbrollen und Oberflächen                               |
-| `public/collection.json`, `public/assets/`      | öffentliche Vorlagen, Kartenbilder und lokale Schriften                    |
-| `.github/workflows/pages.yml`                   | Prüfungen und Veröffentlichung nach bestandenem Build                      |
+| Pfad                                        | Verantwortung                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `src/main.ts`, `src/ui/workspace.ts`        | persönlicher Arbeitsbereich und Speicherstatus                             |
+| `src/domain/personal.ts`                    | Ausgaben, bestätigte Mengen, Exemplare und Reservierungen                  |
+| `src/domain/recommend.ts`                   | einfache erklärbare Anordnungsregeln                                       |
+| `src/data/personal-store.ts`                | IndexedDB, Konfliktprüfung und JSONL-Sicherung                             |
+| `src/data/card-catalog.ts`                  | TCGdex-Adapter, Illustrator-Provenienz und OCR-Kandidaten                  |
+| `src/data/recognize.ts`, `vision-worker.ts` | lokale OCR und Bildvorverarbeitung                                         |
+| `src/ui/`                                   | Sammlung, Fotoerfassung, Binder, Vorschläge, Wünsche und Wiederherstellung |
+| `src/archive-main.ts`, `src/app.ts`         | bestehendes Inspirationsarchiv                                             |
+| `src/styles.css`, `src/workspace.css`       | gemeinsame dunkle Farbrollen und Oberflächen                               |
+| `public/collection.json`, `public/assets/`  | öffentliche Vorlagen, Kartenbilder und lokale Schriften                    |
+| `.github/workflows/pages.yml`               | Prüfungen und Veröffentlichung nach bestandenem Build                      |
 
 [Implementierung und Prüfgrenzen](docs/implementation.md) · [Architektur](docs/architecture.md) · [Designvertrag](docs/design.md) · [Deployment](docs/deployment.md) · [Untersuchung des einzelnen Seitenworkflows](docs/research/one-page/README.md)
 

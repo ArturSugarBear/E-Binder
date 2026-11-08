@@ -7,6 +7,7 @@ import {
 } from '../../src/data/card-catalog';
 import {
   addWish,
+  normalize,
   availableUnits,
   changeState,
   confirmHolding,
@@ -339,4 +340,10 @@ describe('regressions at the boundary of inventory and layout', () => {
       new Set(['original', 'candidate-original']),
     );
   });
+});
+
+it('keeps non-Latin illustrator names and set names distinct during normalization', () => {
+  expect(normalize('江川')).not.toBe(normalize('森山'));
+  expect(normalize('が')).not.toBe(normalize('か'));
+  expect(normalize('Pokémon Café')).toBe('pokemoncafe');
 });

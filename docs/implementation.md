@@ -15,24 +15,40 @@ Diese Lieferung macht den lokalen Kern aus der Produktreview benutzbar. Sie bele
 
 ## Erkennung als eigener Prüfschritt
 
-Der kleine Open-Source-Stack besteht aus Tesseract.js 6.0.1, seinem LSTM-Modell in WebAssembly und eigener Canvas-Vorverarbeitung. Es läuft kein Bildklassifikator, der nur auf die 198 Vorlagen trainiert ist. Die Pipeline liest Set-/Nummernzeile, prüft mehrere Darstellungen und ergänzt den Kartenname. Gedruckte Set-Abkürzungen können den TCGdex-Abruf eingrenzen; Nummer und Nenner werden anschließend gegen die Antwort geprüft. Unterschiedliche OCR-Nummern bleiben mehrere Kandidaten. Ein fehlgeschlagener Kandidat darf einen anderen gültigen nicht verwerfen.
+Der ausgelieferte Stack verwendet **PaddleOCR PP-OCRv4** über **ONNX Runtime Web 1.31.1** in einem beendbaren Worker. Modell und Wörterbuch aus `@gutenye/ocr-models@1.4.2` sind unter Apache-2.0 mit Herkunft, Größe und Prüfsummen eingecheckt. Die Inferenz benötigt kein zusätzliches Textdetektionsmodell und kein OpenCV. Canvas liefert die schmale Set-/Nummernzeile, eine eigene Nummernregion und einen Titelbereich. Bei unklaren Ergebnissen folgen Graustufen/Kontrast, Inversion, Schwarzweiß und ein weiterer Nummernbereich. Die Originalfotos bleiben unverändert.
+
+Gelesene Nummern und unterstützte Setcodes werden gegen TCGdex geprüft. Aneinander gedruckte Felder wie `HSSPDE234/191` werden als Regulierungszeichen, Set, Sprache und Nummer zerlegt. Unterschiedliche OCR-Nummern bleiben mehrere Kandidaten. Ein fehlgeschlagener Kandidat darf einen anderen gültigen nicht verwerfen. Die übliche Verwechslung `0BF`/`OBF` wird ausschließlich zur Kandidatensuche normalisiert; Besitz entsteht weiterhin nur durch Bestätigung.
 
 Eine Nummer allein bestimmt nicht immer Sprache, Finish oder Druckauflage. Diese Angaben und die Gesamtmenge sind ausdrücklich zu bestätigen. Unsichere Fotos erzeugen keinen Besitz. Der Ablauf ist auch mit manueller Auswahl vollständig nutzbar.
 
-Tatsächlich ausgeführte erste Prüfung im Chromium-Browser, ausschließlich mit öffentlichen digitalen Kartenbildern:
+### Beobachteter Modellvergleich
 
-| Bild                                            | Gelesene Nummer         | Beobachtetes Ergebnis                                              |
-| ----------------------------------------------- | ----------------------- | ------------------------------------------------------------------ |
-| Trasla, `svi-211`                               | `211/198`               | richtige Ausgabe als Vorschlag, kein Besitz erzeugt                |
-| Taubsi, `obf-207`                               | `207/197`               | richtige Ausgabe als Vorschlag, kein Besitz erzeugt                |
-| Espinodon, `pal-210`                            | `210/193`               | richtige Ausgabe als Vorschlag, kein Besitz erzeugt                |
-| Tengulist, `sv05-163`, nicht im lokalen Katalog | keine brauchbare Nummer | keine eindeutige Karte; Foto bleibt zur manuellen Klärung erhalten |
+Tesseract.js wurde zuerst mit Ganzbild-OCR, engeren Streifen, Graustufen, globalem/adaptivem Schwarzweiß und Inversion tatsächlich im Browser geprüft. Trasla blieb im ersten Ganzbildversuch ohne Vorschlag. Die Streifenverarbeitung las später Trasla `211/198`, Taubsi `207/197` und Espinodon `210/193` korrekt; Tengulist `163/162` blieb auch nach zusätzlichem Zuschnitt und Inversion ohne brauchbaren Kandidaten. Die Varianten benötigten unter parallel laufenden Tests auf zwei Cloud-CPU-Kernen etwa 24–57 Sekunden pro Bild. Dieser Fehler begründete den Modellwechsel.
 
-Quelle der zusätzlichen Karte: [TCGdex sv05-163](https://api.tcgdex.net/v2/de/cards/sv05-163), zugehöriges deutsches `high.webp`. Die ersten drei Bilder liegen bereits öffentlich im Repository. Im ersten Ganzbild-OCR-Versuch blieb selbst Trasla ohne Kandidat; die Streifenverarbeitung verbessert diesen Fall nachvollziehbar. Die Ganzbild- und Streifenversuche sind kein kontrollierter Genauigkeitsbenchmark.
+Der direkte PaddleOCR-Erkenner las in einem isolierten Modellvergleich Tengulist `163/162` und `TEF DE` sowie Trasla `211/198` korrekt. Die vier reinen Inferenzläufe auf Nummer-/Setzeilen dauerten dort etwa 0,17–0,88 Sekunden; Modellstart, Downloads und Katalogabfrage sind darin nicht enthalten. Die Integration wurde danach durch die tatsächliche Fotooberfläche geprüft:
 
-Der fehlgeschlagene unabhängige Tengulist-Check hat den zusätzlichen engen Nummernausschnitt und die Inversion veranlasst. Er gehört dadurch anschließend zum Entwicklungsmaterial. Auch der erneute Versuch mit enger Set-/Nummernzeile und Inversion blieb für Tengulist ohne eindeutigen Kandidaten; dieser Fehler ist weiterhin offen. Er darf bei einer erneuten Prüfung nicht als unberührter Holdout ausgegeben werden. Ein neuer unabhängiger Kartensatz und Originalfotos eines Sammlers fehlen weiterhin. Kein Prozentwert für Erkennungsgenauigkeit wird aus diesen vier Beispielen abgeleitet.
+| Bild                                                       | Gelesene Nummer | Aufgelöste Ausgabe                 |
+| ---------------------------------------------------------- | --------------- | ---------------------------------- |
+| Trasla, lokales Katalogbild                                | `211/198`       | Trasla, Karmesin & Purpur          |
+| Taubsi, lokales Katalogbild                                | `207/197`       | Taubsi, Obsidian Flammen           |
+| Espinodon, lokales Katalogbild                             | `210/193`       | Espinodon, Entwicklungen in Paldea |
+| Tengulist, Entwicklungstest außerhalb des lokalen Katalogs | `163/162`       | Tengulist, Gewalten der Zeit       |
+| Mopex-ex, zusätzlicher externer Test                       | `228/191`       | Mopex-ex, Stürmische Funken        |
 
-Die ersten vier Varianten brauchten unter gleichzeitig laufenden Browser-Tests auf einer auf zwei CPU-Kerne begrenzten Cloud-Umgebung etwa 24–54 Sekunden pro Bild. Das ist kein verlässlicher Mobilbenchmark und noch kein akzeptierter Nachweis schneller Stapelerfassung. Abbruch, Modell-Ladefehler und manuelle Fortsetzung gehören daher zum nutzbaren Ablauf. `scripts/smoke-recognition.mjs` wiederholt die echte OCR getrennt von den deterministischen Tests.
+Xenias Aufruf wurde zunächst als `234/191` gelesen, aber wegen des anliegenden Regulierungszeichens `H` im Setcode nicht aufgelöst. Diese Beobachtung führte zur Korrektur der Feldzerlegung und zu einem eigenen Regressionstest. Xenia gehört anschließend zum Entwicklungsmaterial. Kronjuwild wurde ebenfalls korrekt gelesen, war aber bereits im lokalen Katalog und zählt deshalb nicht als unabhängiger Test.
+
+### Vorher reservierte, bisher nicht verwendete Karten
+
+Nach der Korrektur wurden zwei konkrete Ausgaben vor dem Test anhand ihrer Katalogmetadaten reserviert und gegen den lokalen Katalog abgeglichen. Ihre Bilder wurden erstmals im fertigen Fotoablauf gelesen, ohne danach die Erkennung an ihnen anzupassen:
+
+| Neue Ausgabe                                                               | Ergebnis im echten Fotoablauf         | Gemessene Gesamtdauer |
+| -------------------------------------------------------------------------- | ------------------------------------- | --------------------- |
+| [Citros Scharfsinn, sv08-229](https://api.tcgdex.net/v2/de/cards/sv08-229) | `229/191`, `SSP DE`, richtige Ausgabe | 5,41 Sekunden         |
+| [Dracena, sv08-231](https://api.tcgdex.net/v2/de/cards/sv08-231)           | `231/191`, `SSP DE`, richtige Ausgabe | 4,56 Sekunden         |
+
+Quelle: die jeweiligen deutschen TCGdex-`high.webp`-Abbildungen. Es wurden keine originalen Sammlerfotos verwendet. In beiden Abläufen blieb der Besitz bei null. Die erste Vorschlagsausgabe entsprach der vorher festgehaltenen Ausgabe; es traten keine JavaScript-Seitenfehler auf. Diese zwei positiven Ergebnisse sind ein begrenzter technischer Check, keine allgemeine Genauigkeitsquote und keine Aussage über Hüllen, Reflexionen, Perspektive oder reale Mobilgeräte.
+
+Die ersten integrierten Entwicklungsbeispiele benötigten einschließlich Workerstart und Katalogabfrage ungefähr 8–14 Sekunden unter parallelen Tests; die beiden späteren reservierten Beispiele etwa fünf Sekunden. Kalter Download und echtes Mobilfunknetz sind gesondert zu messen. `scripts/smoke-recognition.mjs` wiederholt die echte Erkennung getrennt von den deterministischen Tests.
 
 ## Gestaltung und Kontrast
 
@@ -54,11 +70,11 @@ Die ersten gerenderten Prüfungen mit axe auf leerer Sammlung, Binder und Vorsch
 
 ## Softwareprüfungen
 
-`npm run check` erfolgreich: Formatierung, Lint, 43 Unit-Tests, TypeScript, Validierung der 22 Kapitel und 198 Bilddateien sowie der mehrseitige Produktionsbuild. Die Tests prüfen insbesondere Gesamtmengen statt automatischer Addition, doppelte Erfassung, Reservierungen über Seiten, hohe Exemplarnummern, Fixierungen, Teilseiten, unbekannte Credits, Katalogkorrekturen und fehlende Originalfotos in Backups.
+`npm run check` erfolgreich: Formatierung, Lint, 48 Unit-Tests, TypeScript, Validierung der 22 Kapitel und 198 Bilddateien sowie der mehrseitige Produktionsbuild. Die Tests prüfen insbesondere Gesamtmengen statt automatischer Addition, doppelte Erfassung, Reservierungen über Seiten, hohe Exemplarnummern, Fixierungen, Teilseiten, unbekannte Credits, Katalogkorrekturen und fehlende Originalfotos in Backups.
 
 Die erweiterten Playwright-Tests prüfen den echten Vite-HTTP-Server: Hinzufügen, Korrektur, Reload, Rückgängig, getrennte Demo, geplante Vorlagen, Tauschkonflikte, Artist-Teilseite, festgehaltene Pflichtkarte, originale Fotos, vollständigen JSONL-Roundtrip, Tab-Konflikt, OCR-Abbruch, Tastaturfokus, 320-Pixel-Reflow und axe. Die bisherigen Kapitel-, Cardmarket-, Dialog-, Deep-Link- und Touch-Prüfungen bleiben enthalten. Insgesamt wurden 75 unterschiedliche Prüfungen in Desktop- und mobilem Chromium erfolgreich ausgeführt; eine zusätzliche Desktop-Touch-Prüfung ist erwartungsgemäß übersprungen. Zwei zunächst fehlgeschlagene OCR-Abbruchprüfungen wurden nach einer Korrektur am Worker-Start erneut ausgeführt und bestanden.
 
-WebKit wurde heruntergeladen und ein Start tatsächlich versucht. Die Umgebung hat keine benötigten GTK-/Graphene-/Harfbuzz-ICU-/Manette-/Hyphen-/GLES-Bibliotheken; der Installationsversuch scheiterte an fehlender administrativer Ausführung. WebKit/Safari ist deshalb hier nicht erfolgreich geprüft. CI installiert die benötigten Systembibliotheken und verlangt diese Suite zusätzlich.
+Der erste GitHub-CI-Lauf führte auch WebKit aus und fand Fehler in der Fotoerfassung sowie einen mobilen Kontrastfehler. Die Veröffentlichung wurde dadurch gestoppt. Nach der Korrektur bestanden alle 30 persönlichen Workflow-Prüfungen lokal in Desktop-Chromium, mobilem Chromium und WebKit, einschließlich echter Modellinferenz ohne Foto-Upload. Die Fotoablage speichert deshalb unveränderte Bytes und MIME-Typ statt dateigebundener Blob-Objekte; bestehende Blob-Datensätze bleiben lesbar. Fotoerfassung, Sicherungs-Roundtrip, Abbruch und echte Modellinferenz wurden danach auch mit WebKit erfolgreich geprüft. Die mobile Kontrastprüfung wartet das Ende der Öffnungsanimation ab, und der kleine Preislabel-Hinweis verwendet eine kontrastreichere Textrolle. Reale iPhones und eine manuelle Screenreader-Prüfung bleiben unabhängig davon ungetestet.
 
 ## Was noch nicht belegt ist
 

@@ -1,0 +1,20 @@
+{
+  "model": "PaddleOCR PP-OCRv4 recognition, ONNX conversion",
+  "sourcePackage": "@gutenye/ocr-models@1.4.2",
+  "source": "https://github.com/gutenye/ocr",
+  "upstream": "https://github.com/PaddlePaddle/PaddleOCR",
+  "license": "Apache-2.0",
+  "runtime": "onnxruntime-web@1.31.1",
+  "files": [
+    {
+      "name": "ppocrv4-rec.onnx",
+      "bytes": 10822323,
+      "sha256": "06b3e6af6c59a1ba5d53790ed8c2e4b2de389870b6cf5a97f349f3412cb269c0"
+    },
+    {
+      "name": "ppocr-keys.txt",
+      "bytes": 26249,
+      "sha256": "28b2362ad4ab2dc38769aa72feb535e3a9ddb3fd2a7585a05920e6393b1dc7f7"
+    }
+  ]
+}

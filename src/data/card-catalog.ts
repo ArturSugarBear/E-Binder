@@ -255,9 +255,11 @@ export interface RecognitionClue {
 /** Printed codes narrow candidates; an OCR string never confirms ownership. */
 export function recognitionClues(text: string): RecognitionClue[] {
   const code = text.match(
-    /\b(SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI)\s*(DE|EN)?\b/i,
+    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI)\s*(DE|EN)?(?=[^A-Z]|$)/i,
   );
-  const setId = code ? setIds[code[1]!.toLowerCase()] : undefined;
+  const setId = code
+    ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
+    : undefined;
   const language = code?.[2]?.toLowerCase() as 'de' | 'en' | undefined;
   const counts = new Map<string, number>();
   for (const match of text.matchAll(

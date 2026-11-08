@@ -2,6 +2,7 @@ import {
   addWish,
   changeState,
   finishLabels,
+  findPage,
   freeCount,
   locations,
   sameCard,
@@ -302,14 +303,14 @@ export function openHolding(ctx: WorkspaceContext, id: string): void {
   const places = el(
     'div',
     'w-location-list',
-    el('h3', '', 'Hier liegen deine Exemplare'),
+    el('h3', '', 'Deine Binder-Zuordnungen'),
   );
   if (!where.length)
     places.append(el('p', 'w-muted', 'Noch keinem Binderplatz zugeordnet.'));
   for (const location of where)
     places.append(
       action(
-        `${location.binder} · ${location.page} · Platz ${location.slot + 1}`,
+        `${location.binder} · ${location.page} · Platz ${location.slot + 1} · ${findPage(ctx.state, location.pageId).assembled ? 'Aufbau markiert' : 'Entwurf'}`,
         () => {
           ctx.commit(
             'Binder geöffnet',

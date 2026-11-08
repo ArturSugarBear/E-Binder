@@ -25,11 +25,17 @@ const resultOf = <T>(request: IDBRequest<T>): Promise<T> =>
   });
 const completed = (transaction: IDBTransaction): Promise<void> =>
   new Promise((resolve, reject) => {
+    let failure: DOMException | null = null;
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () =>
-      reject(transaction.error ?? new Error('Speichern fehlgeschlagen.'));
+    transaction.onerror = (event) => {
+      failure = (event.target as IDBRequest | null)?.error ?? transaction.error;
+    };
     transaction.onabort = () =>
-      reject(transaction.error ?? new Error('Speichern wurde abgebrochen.'));
+      reject(
+        failure ??
+          transaction.error ??
+          new Error('Speichern wurde abgebrochen.'),
+      );
   });
 export class PersonalStore {
   private database = openDatabase();
@@ -55,6 +61,15 @@ export class PersonalStore {
     const operation = this.queue
       .catch(() => undefined)
       .then(async () => {
+        const originals = await Promise.all(
+          [...photos].map(
+            async ([id, photo]) =>
+              [
+                id,
+                { mime: photo.type, data: await photo.arrayBuffer() },
+              ] as const,
+          ),
+        );
         const db = await this.database;
         const transaction = db.transaction(['states', 'photos'], 'readwrite');
         const done = completed(transaction);
@@ -69,7 +84,7 @@ export class PersonalStore {
             'Der Bestand wurde in einem anderen Tab geändert. Sichere deine Änderungen als Export und lade die Seite neu.',
           );
         }
-        for (const [id, photo] of photos)
+        for (const [id, photo] of originals)
           transaction
             .objectStore('photos')
             .put(photo, `${snapshot.mode}:${id}`);
@@ -85,10 +100,12 @@ export class PersonalStore {
     id: string,
     blob: Blob,
   ): Promise<void> {
+    // Preserve exact original bytes without WebKit's File-backed Blob handling.
+    const original = { mime: blob.type, data: await blob.arrayBuffer() };
     const db = await this.database;
     const transaction = db.transaction('photos', 'readwrite');
     const done = completed(transaction);
-    transaction.objectStore('photos').put(blob, `${mode}:${id}`);
+    transaction.objectStore('photos').put(original, `${mode}:${id}`);
     await done;
   }
   async photo(
@@ -96,9 +113,16 @@ export class PersonalStore {
     id: string,
   ): Promise<Blob | undefined> {
     const db = await this.database;
-    return resultOf(
+    const original = (await resultOf(
       db.transaction('photos').objectStore('photos').get(`${mode}:${id}`),
-    ) as Promise<Blob | undefined>;
+    )) as Blob | { mime: string; data: ArrayBuffer } | undefined;
+    if (!original || original instanceof Blob) return original;
+    if (
+      !(original.data instanceof ArrayBuffer) ||
+      typeof original.mime !== 'string'
+    )
+      throw new Error('Das gespeicherte Originalfoto ist beschädigt.');
+    return new Blob([original.data], { type: original.mime });
   }
 }
 

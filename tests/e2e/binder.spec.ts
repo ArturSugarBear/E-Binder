@@ -126,6 +126,11 @@ test('standard and Greninja chapters and dialogs pass automated accessibility ru
     ).toEqual([]);
     await page.locator('.pocket').first().click();
     await expect(page.locator('dialog')).toBeVisible();
+    await page.locator('.sheet-body').evaluate(async (body) => {
+      await Promise.allSettled(
+        body.getAnimations().map((animation) => animation.finished),
+      );
+    });
     expect(
       (
         await new AxeBuilder({ page })

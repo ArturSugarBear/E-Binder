@@ -186,7 +186,7 @@ export const normalize = (value: string): string =>
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('de')
-    .replace(/[^a-z0-9]/g, '');
+    .replace(/[^\p{L}\p{N}\p{M}]/gu, '');
 export const numberKey = (value: string): string =>
   value
     .toLowerCase()

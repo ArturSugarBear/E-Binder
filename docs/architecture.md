@@ -12,7 +12,7 @@ E-Binder hat zwei statisch auslieferbare Vite-Einstiege: `index.html` für den l
 
 ## Speicherung und Sicherung
 
-IndexedDB `e-binder-personal` enthält `states` und `photos`. Demo und persönlicher Bestand haben getrennte Schlüssel und Fotoreferenzen. Das Speichern läuft geordnet in Transaktionen. Vor einem Schreibvorgang wird die im Tab geladene Revision mit der Datenbank verglichen. Ein Konflikt lässt den geöffneten Arbeitsstand exportierbar und überschreibt den anderen Tab nicht.
+IndexedDB `e-binder-personal` enthält `states` und `photos`. Demo und persönlicher Bestand haben getrennte Schlüssel und Fotoreferenzen. Originalfotos liegen als unveränderte ArrayBuffer-Bytes mit MIME-Typ vor; die Leseoperation unterstützt auch ältere Blob-Datensätze. Das vermeidet WebKits fehlerhafte Persistenz dateigebundener Blobs. Das Speichern läuft geordnet in Transaktionen. Vor einem Schreibvorgang wird die im Tab geladene Revision mit der Datenbank verglichen. Ein Konflikt lässt den geöffneten Arbeitsstand exportierbar und überschreibt den anderen Tab nicht.
 
 „Gespeichert“ erscheint erst nach erfolgreichem Transaktionsabschluss. Bei Speicherfehlern bleiben der geöffnete Stand, Wiederholen und Export verfügbar. Fehler beim initialen Laden überschreiben vorhandene Daten nicht.
 
@@ -26,7 +26,9 @@ Der TCGdex-Adapter validiert externe Antworten mit Zod. Die Suche lädt deutsche
 
 Fotoerfassung und bestätigter Bestand sind getrennt. SHA-256 erkennt wiederholt importierte identische Fotos; Bestätigen setzt eine ausdrückliche Gesamtmenge. Ein Foto kann nicht zweimal übernommen werden. Eine Ausgabekorrektur behält die Bestands-ID und gültige Reservierungen.
 
-Die OCR lädt Tesseract.js dynamisch. Das LSTM-Modell läuft im Browser. Canvas extrahiert zunächst die schmale Set-/Nummernzeile einer aufrechten, bildfüllenden Karte. Vergrößerung, Graustufen/Kontrast, Inversion, globaler Otsu-Schwellwert und lokale adaptive Binarisierung erzeugen verschiedene OCR-Eingaben. Zwei gleich gelesene Nummern beenden die schmale Prüfung vorzeitig. Ohne Wiederholung wird zusätzlich der größere untere Streifen geprüft. Ein eigener Titelstreifen ergänzt den Namen. Das Original bleibt erhalten. Abbruch und Timeout führen zurück zur manuellen Auswahl. Programm-/Sprachdaten benötigen beim ersten Start Netzwerk; Fotos bleiben lokal.
+Die Erkennung verwendet PaddleOCR PP-OCRv4 mit ONNX Runtime Web in einem eigenen Worker. Das ONNX-Modell und sein Wörterbuch werden lokal mit ausgeliefert; Herkunft, Version und Prüfsummen stehen in `public/assets/ocr/model-source.json`. Ein zusätzliches Textdetektionsmodell und OpenCV entfallen, weil für diesen begrenzten Ablauf aufrechte, bildfüllende Karten mit bekannten Nummernbereichen verwendet werden.
+
+Der Worker nutzt OffscreenCanvas für die Set-/Nummernzeile, eine separate Nummernregion und einen Titelbereich. Eingaben werden auf 48 Pixel Höhe skaliert, als RGB/CHW auf [-1,1] normalisiert und mit dem CTC-Wörterbuch dekodiert. Bei unklarer Nummer werden Kontrast, Inversion, Schwarzweiß und ein weiterer Nummernbereich geprüft. Das sind alternative Beobachtungen, keine kalibrierten Wahrscheinlichkeiten. Abbruch oder Timeout beenden den Worker einschließlich seiner Inferenz; das Original bleibt in IndexedDB. Beim ersten Start werden Modell und WebAssembly-Laufzeit geladen, Fotos werden dafür nicht hochgeladen.
 
 Nummern aus verschiedenen Durchläufen sind Beobachtungen, keine kalibrierten Wahrscheinlichkeiten. Mehrdeutige Nummern bleiben mehrere Kandidaten. Unterstützte Set-Abkürzungen können eine konkrete TCGdex-Abfrage eingrenzen; deren Nummer und Nenner werden erneut verglichen. Andere Fälle verwenden lokale Kandidaten oder manuelle Katalogsuche. Sprache, Variante und Menge sind vor Besitzübernahme zu bestätigen.
 
