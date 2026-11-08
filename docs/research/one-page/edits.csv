@@ -1,0 +1,1 @@
+session_id,timestamp,candidate_id,operation,from_slot,to_slot,removed_physical_unit_id,added_physical_unit_id,locked_slots,raw_statement,interpretation_codes,evidence_id

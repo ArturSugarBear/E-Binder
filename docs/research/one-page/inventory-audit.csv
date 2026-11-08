@@ -1,0 +1,10 @@
+repo_card_id,tcgdex_id,name,set,printed_number_in_repo_image,language_visible_in_repo_image,illustrator,publisher_source,publisher_web_number_conflict,original_collector_photo,exact_owned_print_confirmed,confirmed_quantity,available_quantity,recognition_test_status
+svi-211,sv01-211,Trasla,Karmesin & Purpur,211/198,de,Jiro Sasumo,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv01/211/,,,not_collected,,,not_run_no_original_photos
+svi-212,sv01-212,Kirlia,Karmesin & Purpur,212/198,de,Jiro Sasumo,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv01/212/,,,not_collected,,,not_run_no_original_photos
+svi-245,sv01-245,Guardevoir-ex,Karmesin & Purpur,245/198,de,Jiro Sasumo,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv01/245/,,,not_collected,,,not_run_no_original_photos
+obf-207,sv03-207,Taubsi,Obsidian Flammen,207/197,de,Jerky,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv03/207/,denominator_227_vs_printed_197,,not_collected,,,not_run_no_original_photos
+obf-208,sv03-208,Tauboga,Obsidian Flammen,208/197,de,Jerky,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv03/208/,denominator_227_vs_printed_197,,not_collected,,,not_run_no_original_photos
+obf-225,sv03-225,Tauboss-ex,Obsidian Flammen,225/197,de,Jerky,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv03/225/,denominator_227_vs_printed_197,,not_collected,,,not_run_no_original_photos
+pal-208,sv02-208,Frospino,Entwicklungen in Paldea,208/193,de,Tomokazu Komiya,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv02/208/,,,not_collected,,,not_run_no_original_photos
+pal-209,sv02-209,Cryospino,Entwicklungen in Paldea,209/193,de,Tomokazu Komiya,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv02/209/,,,not_collected,,,not_run_no_original_photos
+pal-210,sv02-210,Espinodon,Entwicklungen in Paldea,210/193,de,Tomokazu Komiya,https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/series/sv02/210/,,,not_collected,,,not_run_no_original_photos

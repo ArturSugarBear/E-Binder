@@ -1,0 +1,219 @@
+{
+  "status": "catalogue_image_desk_comparison_not_a_collector_test",
+  "ownership_confirmed": false,
+  "base_commit": "46a504d758cb0ae5021553031b49b1393868d047",
+  "collection_sha256": "d6024f39a834ad6b4fd1fbe79bcf213882cb042dfeb7a505f03d8ffc38c1553b",
+  "pillow_version": "13.0.0",
+  "required_pairs_for_this_desk_probe_only": [
+    ["svi-211", "svi-212"],
+    ["svi-212", "svi-245"],
+    ["obf-207", "obf-208"],
+    ["obf-208", "obf-225"],
+    ["pal-208", "pal-209"],
+    ["pal-209", "pal-210"]
+  ],
+  "image_measurements": {
+    "svi-211": {
+      "hue_degrees": 93.07484778922061,
+      "sha256": "e86dde6dc6514b370ab2abe41d5c7fe3ff1a90d0e30bd750259f2e13269cb460"
+    },
+    "svi-212": {
+      "hue_degrees": 36.94125774718952,
+      "sha256": "babe23dc04723c6a0aea5f493f6ebcd022c38aa816bd1d9c0497327a5e6ce433"
+    },
+    "svi-245": {
+      "hue_degrees": 34.548648615868416,
+      "sha256": "e80c4875b91c0b5da2a988ae451d6c917498fbe4580dc94709bf24041a77ee7b"
+    },
+    "obf-207": {
+      "hue_degrees": 99.79335490939093,
+      "sha256": "3dd877dcaa9617bbe552cd21ba65edc9007290517b5267a0f42e4acfc54e2ef1"
+    },
+    "obf-208": {
+      "hue_degrees": 144.75655519482868,
+      "sha256": "fa240cf1382ce59f906a0dbb3925b0c8743b9bda86f964eab4d85123eda08c7c"
+    },
+    "obf-225": {
+      "hue_degrees": 188.2303268188284,
+      "sha256": "78eb892fb1ef34d15cfaffccaa62702b0fa4b13faffb022dd4edbdefeb52054e"
+    },
+    "pal-208": {
+      "hue_degrees": 115.91688166857561,
+      "sha256": "734ea5e098e7563bed4b6d7249a522210869c9d23cca75449843adfd42cee3c7"
+    },
+    "pal-209": {
+      "hue_degrees": 349.7797387427649,
+      "sha256": "8fa2c6acc1e3d3a9718f5c7cbc6156845aa1475fbe1615f6c238a65a826aae8b"
+    },
+    "pal-210": {
+      "hue_degrees": 294.7875330442688,
+      "sha256": "e985ccd0a3e3cbd39a3e0e8ca8192690b1fdd52ab907a693dac1a24411eee446"
+    }
+  },
+  "evaluated_row_orders": [
+    {
+      "slots": [
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        "obf-207",
+        "obf-208",
+        "obf-225",
+        "pal-208",
+        "pal-209",
+        "pal-210"
+      ],
+      "vertical_hue_cost": 3.032627956708102
+    },
+    {
+      "slots": [
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        "pal-208",
+        "pal-209",
+        "pal-210",
+        "obf-207",
+        "obf-208",
+        "obf-225"
+      ],
+      "vertical_hue_cost": 2.4856789882892674
+    },
+    {
+      "slots": [
+        "obf-207",
+        "obf-208",
+        "obf-225",
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        "pal-208",
+        "pal-209",
+        "pal-210"
+      ],
+      "vertical_hue_cost": 2.4332230623674924
+    },
+    {
+      "slots": [
+        "obf-207",
+        "obf-208",
+        "obf-225",
+        "pal-208",
+        "pal-209",
+        "pal-210",
+        "svi-211",
+        "svi-212",
+        "svi-245"
+      ],
+      "vertical_hue_cost": 2.4856789882892674
+    },
+    {
+      "slots": [
+        "pal-208",
+        "pal-209",
+        "pal-210",
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        "obf-207",
+        "obf-208",
+        "obf-225"
+      ],
+      "vertical_hue_cost": 2.4332230623674924
+    },
+    {
+      "slots": [
+        "pal-208",
+        "pal-209",
+        "pal-210",
+        "obf-207",
+        "obf-208",
+        "obf-225",
+        "svi-211",
+        "svi-212",
+        "svi-245"
+      ],
+      "vertical_hue_cost": 3.032627956708102
+    }
+  ],
+  "layouts": [
+    {
+      "id": "relationship_first",
+      "slots": [
+        "obf-207",
+        "obf-208",
+        "obf-225",
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        "pal-208",
+        "pal-209",
+        "pal-210"
+      ],
+      "filled_pockets": 9,
+      "directed_evolution_adjacencies_of_six": 6,
+      "collector_preference": null
+    },
+    {
+      "id": "artist_only_jiro_sasumo",
+      "slots": [
+        "svi-211",
+        "svi-212",
+        "svi-245",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "filled_pockets": 3,
+      "directed_evolution_adjacencies_of_six": 2,
+      "collector_preference": null
+    },
+    {
+      "id": "colour_only",
+      "slots": [
+        "svi-245",
+        "svi-212",
+        "svi-211",
+        "obf-207",
+        "pal-208",
+        "obf-208",
+        "obf-225",
+        "pal-210",
+        "pal-209"
+      ],
+      "filled_pockets": 9,
+      "directed_evolution_adjacencies_of_six": 0,
+      "collector_preference": null
+    }
+  ],
+  "artist_grouping_control_slots": [
+    "obf-207",
+    "obf-208",
+    "obf-225",
+    "svi-211",
+    "svi-212",
+    "svi-245",
+    "pal-208",
+    "pal-209",
+    "pal-210"
+  ],
+  "artist_grouping_equals_relationship": true,
+  "original_editorial_slots": [
+    "svi-211",
+    "svi-212",
+    "svi-245",
+    "obf-207",
+    "obf-208",
+    "obf-225",
+    "pal-208",
+    "pal-209",
+    "pal-210"
+  ],
+  "blind_selections": null,
+  "physical_assembly": null,
+  "retention_day_7": null,
+  "unseen_cards_check": "not_run"
+}

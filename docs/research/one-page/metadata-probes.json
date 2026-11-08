@@ -1,0 +1,275 @@
+[
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv01-211",
+    "retrieved_at": "2026-11-08T13:52:24.640975+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv01-211",
+      "name": "Trasla",
+      "localId": "211",
+      "illustrator": "Jiro Sasumo",
+      "image": "https://assets.tcgdex.net/de/sv/sv01/211",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "stage": "Basis",
+      "dexId": [280],
+      "set": {
+        "id": "sv01",
+        "name": "Karmesin & Purpur",
+        "cardCount": {
+          "official": 198,
+          "total": 258
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv01-212",
+    "retrieved_at": "2026-11-08T13:52:24.642984+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv01-212",
+      "name": "Kirlia",
+      "localId": "212",
+      "illustrator": "Jiro Sasumo",
+      "image": "https://assets.tcgdex.net/de/sv/sv01/212",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Trasla",
+      "stage": "Rang 1",
+      "dexId": [281],
+      "set": {
+        "id": "sv01",
+        "name": "Karmesin & Purpur",
+        "cardCount": {
+          "official": 198,
+          "total": 258
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv01-245",
+    "retrieved_at": "2026-11-08T13:52:24.643786+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv01-245",
+      "name": "Guardevoir-ex",
+      "localId": "245",
+      "illustrator": "Jiro Sasumo",
+      "image": "https://assets.tcgdex.net/de/sv/sv01/245",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Kirlia",
+      "stage": "Rang 2",
+      "dexId": [282],
+      "set": {
+        "id": "sv01",
+        "name": "Karmesin & Purpur",
+        "cardCount": {
+          "official": 198,
+          "total": 258
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv03-207",
+    "retrieved_at": "2026-11-08T13:52:24.645969+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv03-207",
+      "name": "Taubsi",
+      "localId": "207",
+      "illustrator": "Jerky",
+      "image": "https://assets.tcgdex.net/de/sv/sv03/207",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "stage": "Basis",
+      "dexId": [16],
+      "set": {
+        "id": "sv03",
+        "name": "Obsidian Flammen",
+        "cardCount": {
+          "official": 197,
+          "total": 230
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv03-208",
+    "retrieved_at": "2026-11-08T13:52:24.648672+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv03-208",
+      "name": "Tauboga",
+      "localId": "208",
+      "illustrator": "Jerky",
+      "image": "https://assets.tcgdex.net/de/sv/sv03/208",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Taubsi",
+      "stage": "Rang 1",
+      "dexId": [17],
+      "set": {
+        "id": "sv03",
+        "name": "Obsidian Flammen",
+        "cardCount": {
+          "official": 197,
+          "total": 230
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv03-225",
+    "retrieved_at": "2026-11-08T13:52:25.347864+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv03-225",
+      "name": "Tauboss-ex",
+      "localId": "225",
+      "illustrator": "Jerky",
+      "image": "https://assets.tcgdex.net/de/sv/sv03/225",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Tauboga",
+      "stage": "Rang 2",
+      "dexId": [18],
+      "set": {
+        "id": "sv03",
+        "name": "Obsidian Flammen",
+        "cardCount": {
+          "official": 197,
+          "total": 230
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv02-208",
+    "retrieved_at": "2026-11-08T13:52:25.348232+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv02-208",
+      "name": "Frospino",
+      "localId": "208",
+      "illustrator": "Tomokazu Komiya",
+      "image": "https://assets.tcgdex.net/de/sv/sv02/208",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "stage": "Basis",
+      "dexId": [996],
+      "set": {
+        "id": "sv02",
+        "name": "Entwicklungen in Paldea",
+        "cardCount": {
+          "official": 193,
+          "total": 279
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv02-209",
+    "retrieved_at": "2026-11-08T13:52:25.385753+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv02-209",
+      "name": "Cryospino",
+      "localId": "209",
+      "illustrator": "Tomokazu Komiya",
+      "image": "https://assets.tcgdex.net/de/sv/sv02/209",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Frospino",
+      "stage": "Rang 1",
+      "dexId": [997],
+      "set": {
+        "id": "sv02",
+        "name": "Entwicklungen in Paldea",
+        "cardCount": {
+          "official": 193,
+          "total": 279
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.tcgdex.net/v2/de/cards/sv02-210",
+    "retrieved_at": "2026-11-08T13:52:25.414600+00:00",
+    "http_status": 200,
+    "metadata": {
+      "id": "sv02-210",
+      "name": "Espinodon",
+      "localId": "210",
+      "illustrator": "Tomokazu Komiya",
+      "image": "https://assets.tcgdex.net/de/sv/sv02/210",
+      "variants": {
+        "firstEdition": false,
+        "holo": true,
+        "normal": false,
+        "reverse": false,
+        "wPromo": false
+      },
+      "evolveFrom": "Cryospino",
+      "stage": "Rang 2",
+      "dexId": [998],
+      "set": {
+        "id": "sv02",
+        "name": "Entwicklungen in Paldea",
+        "cardCount": {
+          "official": 193,
+          "total": 279
+        }
+      }
+    }
+  },
+  {
+    "url": "https://api.pokemontcg.io/v2/cards/sv1-211",
+    "retrieved_at": "2026-11-08T13:52:25.417665+00:00",
+    "error": "HTTP Error 403: Forbidden",
+    "http_status": 403
+  }
+]
