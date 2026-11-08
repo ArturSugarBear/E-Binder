@@ -1,0 +1,2402 @@
+[
+  {
+    "title": "Familienbande",
+    "description": "Drei Entwicklungsreihen, jede vollständig von der ersten bis zur letzten Stufe",
+    "value": "ca. 195 €",
+    "covers": [
+      "floink",
+      "ferkokel",
+      "flambirex"
+    ],
+    "cards": [
+      {
+        "id": "floink",
+        "name": "Floink",
+        "number": "096/086",
+        "set": "Weiße Flammen",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Orca",
+        "price": "ca. 28 €",
+        "lowest": "17,00 €",
+        "average30": "25,88 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=836084"
+      },
+      {
+        "id": "ferkokel",
+        "name": "Ferkokel",
+        "number": "097/086",
+        "set": "Weiße Flammen",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Masa",
+        "price": "ca. 10 €",
+        "lowest": "4,97 €",
+        "average30": "10,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=836086"
+      },
+      {
+        "id": "flambirex",
+        "name": "Flambirex",
+        "number": "098/086",
+        "set": "Weiße Flammen",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von NC Empire",
+        "price": "ca. 42 €",
+        "lowest": "24,00 €",
+        "average30": "36,58 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=836088"
+      },
+      {
+        "id": "felori",
+        "name": "Felori",
+        "number": "196/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Kouki Saitou",
+        "price": "ca. 19 €",
+        "lowest": "9,00 €",
+        "average30": "20,82 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715671"
+      },
+      {
+        "id": "feliospa",
+        "name": "Feliospa",
+        "number": "197/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Kouki Saitou",
+        "price": "ca. 11 €",
+        "lowest": "3,99 €",
+        "average30": "11,65 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715672"
+      },
+      {
+        "id": "maskagato",
+        "name": "Maskagato-ex",
+        "number": "256/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Special Illustration Rare · gezeichnet von Kouki Saitou",
+        "price": "ca. 20 €",
+        "lowest": "6,69 €",
+        "average30": "20,22 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715731"
+      },
+      {
+        "id": "zwirrlicht",
+        "name": "Zwirrlicht",
+        "number": "068/064",
+        "set": "Nebel der Sagen",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von James Turner",
+        "price": "ca. 24 €",
+        "lowest": "14,50 €",
+        "average30": "24,37 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=780963"
+      },
+      {
+        "id": "zwirrklop",
+        "name": "Zwirrklop",
+        "number": "069/064",
+        "set": "Nebel der Sagen",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von James Turner",
+        "price": "ca. 22 €",
+        "lowest": "13,99 €",
+        "average30": "21,96 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=780964"
+      },
+      {
+        "id": "zwirrfinst",
+        "name": "Zwirrfinst",
+        "number": "070/064",
+        "set": "Nebel der Sagen",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von James Turner",
+        "price": "ca. 20 €",
+        "lowest": "11,99 €",
+        "average30": "19,57 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=780965"
+      }
+    ]
+  },
+  {
+    "title": "Große Verwandlungen",
+    "description": "Trasla, Taubsi und Frospino, jeweils bis zur Endform",
+    "value": "ca. 190 €",
+    "covers": [
+      "svi-211",
+      "svi-212",
+      "svi-245"
+    ],
+    "cards": [
+      {
+        "id": "svi-211",
+        "name": "Trasla",
+        "number": "211/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Jiro Sasumo",
+        "price": "ca. 32 €",
+        "lowest": "9,00 €",
+        "average30": "38,14 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702507"
+      },
+      {
+        "id": "svi-212",
+        "name": "Kirlia",
+        "number": "212/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Jiro Sasumo",
+        "price": "ca. 31 €",
+        "lowest": "9,89 €",
+        "average30": "31,43 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702508"
+      },
+      {
+        "id": "svi-245",
+        "name": "Guardevoir-ex",
+        "number": "245/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Special Illustration Rare · gezeichnet von Jiro Sasumo",
+        "price": "ca. 51 €",
+        "lowest": "25,76 €",
+        "average30": "52,24 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702541"
+      },
+      {
+        "id": "obf-207",
+        "name": "Taubsi",
+        "number": "207/197",
+        "set": "Obsidian Flammen",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 10 €",
+        "lowest": "3,99 €",
+        "average30": "11,52 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725287"
+      },
+      {
+        "id": "obf-208",
+        "name": "Tauboga",
+        "number": "208/197",
+        "set": "Obsidian Flammen",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 9 €",
+        "lowest": "2,00 €",
+        "average30": "11,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725288"
+      },
+      {
+        "id": "obf-225",
+        "name": "Tauboss-ex",
+        "number": "225/197",
+        "set": "Obsidian Flammen",
+        "type": "colorless",
+        "facts": "Farblos · Special Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 16 €",
+        "lowest": "8,00 €",
+        "average30": "17,94 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725305"
+      },
+      {
+        "id": "pal-208",
+        "name": "Frospino",
+        "number": "208/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Tomokazu Komiya",
+        "price": "ca. 12 €",
+        "lowest": "5,00 €",
+        "average30": "11,39 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715683"
+      },
+      {
+        "id": "pal-209",
+        "name": "Cryospino",
+        "number": "209/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Tomokazu Komiya",
+        "price": "ca. 12 €",
+        "lowest": "4,99 €",
+        "average30": "11,67 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715684"
+      },
+      {
+        "id": "pal-210",
+        "name": "Espinodon",
+        "number": "210/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Tomokazu Komiya",
+        "price": "ca. 15 €",
+        "lowest": "3,00 €",
+        "average30": "15,83 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715685"
+      }
+    ]
+  },
+  {
+    "title": "Wald & Unterholz",
+    "description": "Moos, Laub und Rinde: Pokémon, die zwischen Bäumen leben",
+    "value": "ca. 115 €",
+    "covers": [
+      "svi-199",
+      "svi-200",
+      "svi-201"
+    ],
+    "cards": [
+      {
+        "id": "svi-199",
+        "name": "Tarundel",
+        "number": "199/198",
+        "set": "Karmesin & Purpur",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Miki Tanaka",
+        "price": "ca. 6 €",
+        "lowest": "1,49 €",
+        "average30": "6,65 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702495"
+      },
+      {
+        "id": "svi-200",
+        "name": "Olivinio",
+        "number": "200/198",
+        "set": "Karmesin & Purpur",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Oswaldo KATO",
+        "price": "ca. 5 €",
+        "lowest": "1,80 €",
+        "average30": "5,06 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702496"
+      },
+      {
+        "id": "svi-201",
+        "name": "Tentagra",
+        "number": "201/198",
+        "set": "Karmesin & Purpur",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Akira Komayama",
+        "price": "ca. 4 €",
+        "lowest": "0,70 €",
+        "average30": "3,92 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702497"
+      },
+      {
+        "id": "pal-194",
+        "name": "Skaraborn",
+        "number": "194/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Kurata So",
+        "price": "ca. 18 €",
+        "lowest": "7,70 €",
+        "average30": "22,94 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715669"
+      },
+      {
+        "id": "pal-195",
+        "name": "Tropius",
+        "number": "195/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 8,50 €",
+        "lowest": "2,00 €",
+        "average30": "8,28 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715670"
+      },
+      {
+        "id": "pal-198",
+        "name": "Weherba",
+        "number": "198/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von sowsow",
+        "price": "ca. 6,50 €",
+        "lowest": "2,99 €",
+        "average30": "6,56 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715673"
+      },
+      {
+        "id": "sesokitz",
+        "name": "Sesokitz",
+        "number": "165/162",
+        "set": "Gewalten der Zeit",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Susumu Maeya",
+        "price": "ca. 22 €",
+        "lowest": "10,00 €",
+        "average30": "23,93 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760795"
+      },
+      {
+        "id": "kronjuwild",
+        "name": "Kronjuwild",
+        "number": "166/162",
+        "set": "Gewalten der Zeit",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Susumu Maeya",
+        "price": "ca. 25 €",
+        "lowest": "15,00 €",
+        "average30": "25,37 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760796"
+      },
+      {
+        "id": "tef-164",
+        "name": "Chelcarain",
+        "number": "164/162",
+        "set": "Gewalten der Zeit",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Oswaldo KATO",
+        "price": "ca. 20 €",
+        "lowest": "4,78 €",
+        "average30": "17,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760794"
+      }
+    ]
+  },
+  {
+    "title": "Im Blumengarten",
+    "description": "Blüten, Käfer und Schmetterlinge zwischen den Beeten",
+    "value": "ca. 64 €",
+    "covers": [
+      "twm-169",
+      "scr-144",
+      "ssp-193"
+    ],
+    "cards": [
+      {
+        "id": "twm-169",
+        "name": "Sonnflora",
+        "number": "169/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Shinya Komatsu",
+        "price": "ca. 5 €",
+        "lowest": "2,00 €",
+        "average30": "4,99 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769343"
+      },
+      {
+        "id": "scr-144",
+        "name": "Ledian",
+        "number": "144/142",
+        "set": "Stellarkrone",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von HYOGONOSUKE",
+        "price": "ca. 4 €",
+        "lowest": "1,50 €",
+        "average30": "4,14 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=785998"
+      },
+      {
+        "id": "ssp-193",
+        "name": "Vivillon",
+        "number": "193/191",
+        "set": "Stürmische Funken",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von REND",
+        "price": "ca. 4,50 €",
+        "lowest": "0,99 €",
+        "average30": "4,03 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794566"
+      },
+      {
+        "id": "ssp-192",
+        "name": "Owei",
+        "number": "192/191",
+        "set": "Stürmische Funken",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Yuriko Akase",
+        "price": "ca. 7,50 €",
+        "lowest": "2,00 €",
+        "average30": "7,44 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794565"
+      },
+      {
+        "id": "twm-168",
+        "name": "Pinsir",
+        "number": "168/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Yukihiro Tada",
+        "price": "ca. 13 €",
+        "lowest": "4,75 €",
+        "average30": "13,71 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769342"
+      },
+      {
+        "id": "pal-215",
+        "name": "Skarabaks",
+        "number": "215/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von nagimiso",
+        "price": "ca. 5 €",
+        "lowest": "2,00 €",
+        "average30": "4,90 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715690"
+      },
+      {
+        "id": "obf-198",
+        "name": "Duflor",
+        "number": "198/197",
+        "set": "Obsidian Flammen",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Masako Tomii",
+        "price": "ca. 13 €",
+        "lowest": "4,30 €",
+        "average30": "13,49 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725278"
+      },
+      {
+        "id": "tef-172",
+        "name": "Wommel",
+        "number": "172/162",
+        "set": "Gewalten der Zeit",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von REND",
+        "price": "ca. 5,50 €",
+        "lowest": "1,00 €",
+        "average30": "5,12 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760802"
+      },
+      {
+        "id": "dri-185",
+        "name": "Shaymin",
+        "number": "185/182",
+        "set": "Ewige Rivalen",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Heisuke Kitazawa",
+        "price": "ca. 7 €",
+        "lowest": "2,65 €",
+        "average30": "6,94 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826059"
+      }
+    ]
+  },
+  {
+    "title": "Am Ufer",
+    "description": "Strand, Gezeiten und flaches Wasser",
+    "value": "ca. 120 €",
+    "covers": [
+      "svi-204",
+      "svi-205",
+      "svi-206"
+    ],
+    "cards": [
+      {
+        "id": "svi-204",
+        "name": "Flegmon",
+        "number": "204/198",
+        "set": "Karmesin & Purpur",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Toshinao Aoki",
+        "price": "ca. 25 €",
+        "lowest": "9,00 €",
+        "average30": "34,84 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702500"
+      },
+      {
+        "id": "svi-205",
+        "name": "Scampisto",
+        "number": "205/198",
+        "set": "Karmesin & Purpur",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Shinya Komatsu",
+        "price": "ca. 5 €",
+        "lowest": "1,50 €",
+        "average30": "5,15 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702501"
+      },
+      {
+        "id": "svi-206",
+        "name": "Schligda",
+        "number": "206/198",
+        "set": "Karmesin & Purpur",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von You Iribi",
+        "price": "ca. 10 €",
+        "lowest": "2,50 €",
+        "average30": "10,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702502"
+      },
+      {
+        "id": "pal-206",
+        "name": "Kwaks",
+        "number": "206/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Souichirou Gunjima",
+        "price": "ca. 9 €",
+        "lowest": "4,89 €",
+        "average30": "9,72 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715681"
+      },
+      {
+        "id": "par-191",
+        "name": "Reißlaus",
+        "number": "191/182",
+        "set": "Paradoxrift",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Oku",
+        "price": "ca. 6,50 €",
+        "lowest": "2,50 €",
+        "average30": "7,08 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740734"
+      },
+      {
+        "id": "twm-176",
+        "name": "Urgl",
+        "number": "176/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Fujimoto Gold",
+        "price": "ca. 3,50 €",
+        "lowest": "1,49 €",
+        "average30": "3,41 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769350"
+      },
+      {
+        "id": "twm-186",
+        "name": "Nigiragi",
+        "number": "186/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "dragon",
+        "facts": "Drache · Illustration Rare · gezeichnet von osare",
+        "price": "ca. 14 €",
+        "lowest": "7,00 €",
+        "average30": "12,89 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769360"
+      },
+      {
+        "id": "pal-204",
+        "name": "Marill",
+        "number": "204/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Atsuya Uki",
+        "price": "ca. 42 €",
+        "lowest": "10,00 €",
+        "average30": "34,62 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715679"
+      },
+      {
+        "id": "ssp-208",
+        "name": "Alola-Digdri",
+        "number": "208/191",
+        "set": "Stürmische Funken",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Yukihiro Tada",
+        "price": "ca. 6 €",
+        "lowest": "1,84 €",
+        "average30": "6,05 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794581"
+      }
+    ]
+  },
+  {
+    "title": "In der Tiefe",
+    "description": "Riffe, Strömungen und das offene Meer",
+    "value": "ca. 70 €",
+    "covers": [
+      "par-189",
+      "twm-175",
+      "ssp-198"
+    ],
+    "cards": [
+      {
+        "id": "par-189",
+        "name": "Mantirps",
+        "number": "189/182",
+        "set": "Paradoxrift",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von rika",
+        "price": "ca. 15 €",
+        "lowest": "5,50 €",
+        "average30": "16,34 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740732"
+      },
+      {
+        "id": "twm-175",
+        "name": "Phione",
+        "number": "175/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von takashi shiraishi",
+        "price": "ca. 10 €",
+        "lowest": "3,50 €",
+        "average30": "9,46 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769349"
+      },
+      {
+        "id": "ssp-198",
+        "name": "Barschwa",
+        "number": "198/191",
+        "set": "Stürmische Funken",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Kuroimori",
+        "price": "ca. 8,50 €",
+        "lowest": "3,95 €",
+        "average30": "8,56 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794571"
+      },
+      {
+        "id": "ssp-200",
+        "name": "Knirfish",
+        "number": "200/191",
+        "set": "Stürmische Funken",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Mitsuhiro Arita",
+        "price": "ca. 2,50 €",
+        "lowest": "0,99 €",
+        "average30": "2,62 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794573"
+      },
+      {
+        "id": "tef-173",
+        "name": "Relicanth",
+        "number": "173/162",
+        "set": "Gewalten der Zeit",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Mitsuhiro Arita",
+        "price": "ca. 7 €",
+        "lowest": "2,99 €",
+        "average30": "6,74 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760803"
+      },
+      {
+        "id": "jtg-162",
+        "name": "Wailord",
+        "number": "162/159",
+        "set": "Reisegefährten",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Katsunori Sato",
+        "price": "ca. 9,50 €",
+        "lowest": "5,00 €",
+        "average30": "11,17 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817314"
+      },
+      {
+        "id": "par-192",
+        "name": "Agiluza",
+        "number": "192/182",
+        "set": "Paradoxrift",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Shibuzoh.",
+        "price": "ca. 6 €",
+        "lowest": "3,50 €",
+        "average30": "5,89 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740735"
+      },
+      {
+        "id": "ssp-207",
+        "name": "Klopptopus",
+        "number": "207/191",
+        "set": "Stürmische Funken",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von USGMEN",
+        "price": "ca. 4,50 €",
+        "lowest": "0,05 €",
+        "average30": "5,53 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794580"
+      },
+      {
+        "id": "ssp-199",
+        "name": "Seemops",
+        "number": "199/191",
+        "set": "Stürmische Funken",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von miki kudo",
+        "price": "ca. 6,50 €",
+        "lowest": "2,20 €",
+        "average30": "6,70 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794572"
+      }
+    ]
+  },
+  {
+    "title": "Schnee & Eis",
+    "description": "Frost, Pulverschnee und klare Winterluft",
+    "value": "ca. 63 €",
+    "covers": [
+      "par-188",
+      "pal-205",
+      "obf-222"
+    ],
+    "cards": [
+      {
+        "id": "par-188",
+        "name": "Schneppke",
+        "number": "188/182",
+        "set": "Paradoxrift",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Narumi Sato",
+        "price": "ca. 6,50 €",
+        "lowest": "2,30 €",
+        "average30": "6,66 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740731"
+      },
+      {
+        "id": "pal-205",
+        "name": "Kubuin",
+        "number": "205/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Nelnal",
+        "price": "ca. 9 €",
+        "lowest": "4,50 €",
+        "average30": "9,58 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715680"
+      },
+      {
+        "id": "obf-222",
+        "name": "Kubuin-ex",
+        "number": "222/197",
+        "set": "Obsidian Flammen",
+        "type": "fire",
+        "facts": "Feuer · Special Illustration Rare · gezeichnet von Toshinao Aoki",
+        "price": "ca. 4,50 €",
+        "lowest": "1,90 €",
+        "average30": "4,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725302"
+      },
+      {
+        "id": "ssp-201",
+        "name": "Kolowal",
+        "number": "201/191",
+        "set": "Stürmische Funken",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 2,50 €",
+        "lowest": "0,98 €",
+        "average30": "2,69 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794574"
+      },
+      {
+        "id": "jtg-165",
+        "name": "Quiekel",
+        "number": "165/159",
+        "set": "Reisegefährten",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Nakamura Ippan",
+        "price": "ca. 2,50 €",
+        "lowest": "0,79 €",
+        "average30": "2,54 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817317"
+      },
+      {
+        "id": "scr-149",
+        "name": "Krawell",
+        "number": "149/142",
+        "set": "Stellarkrone",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Mitsuhiro Arita",
+        "price": "ca. 2,50 €",
+        "lowest": "0,50 €",
+        "average30": "2,46 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=786003"
+      },
+      {
+        "id": "twm-174",
+        "name": "Frosdedje",
+        "number": "174/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von matazo",
+        "price": "ca. 7,50 €",
+        "lowest": "3,00 €",
+        "average30": "7,47 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769348"
+      },
+      {
+        "id": "tef-168",
+        "name": "Snomnom",
+        "number": "168/162",
+        "set": "Gewalten der Zeit",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von N-DESIGN Inc.",
+        "price": "ca. 8 €",
+        "lowest": "2,45 €",
+        "average30": "8,12 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760798"
+      },
+      {
+        "id": "jtg-161",
+        "name": "Arktos",
+        "number": "161/159",
+        "set": "Reisegefährten",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Kuroimori",
+        "price": "ca. 20 €",
+        "lowest": "7,50 €",
+        "average30": "20,84 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817313"
+      }
+    ]
+  },
+  {
+    "title": "Glut",
+    "description": "Funken, Lava und Abendrot",
+    "value": "ca. 115 €",
+    "covers": [
+      "svi-203",
+      "pal-199",
+      "pal-200"
+    ],
+    "cards": [
+      {
+        "id": "svi-203",
+        "name": "Crimanzo",
+        "number": "203/198",
+        "set": "Karmesin & Purpur",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von nagimiso",
+        "price": "ca. 8,50 €",
+        "lowest": "3,00 €",
+        "average30": "8,60 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702499"
+      },
+      {
+        "id": "pal-199",
+        "name": "Dartignis",
+        "number": "199/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Atsushi Furusawa",
+        "price": "ca. 13 €",
+        "lowest": "3,74 €",
+        "average30": "11,76 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715674"
+      },
+      {
+        "id": "pal-200",
+        "name": "Pyroleo",
+        "number": "200/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Po-Suzuki",
+        "price": "ca. 10 €",
+        "lowest": "4,99 €",
+        "average30": "13,01 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715675"
+      },
+      {
+        "id": "obf-199",
+        "name": "Vulnona",
+        "number": "199/197",
+        "set": "Obsidian Flammen",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von SIE NANAHARA",
+        "price": "ca. 26 €",
+        "lowest": "8,90 €",
+        "average30": "26,36 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725279"
+      },
+      {
+        "id": "par-186",
+        "name": "Magby",
+        "number": "186/182",
+        "set": "Paradoxrift",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Mina Nakai",
+        "price": "ca. 15 €",
+        "lowest": "5,00 €",
+        "average30": "15,34 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740729"
+      },
+      {
+        "id": "tef-167",
+        "name": "Flamiau",
+        "number": "167/162",
+        "set": "Gewalten der Zeit",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Makura Tami",
+        "price": "ca. 15 €",
+        "lowest": "6,00 €",
+        "average30": "15,76 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760797"
+      },
+      {
+        "id": "twm-172",
+        "name": "Qurtel",
+        "number": "172/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Masa",
+        "price": "ca. 5 €",
+        "lowest": "2,00 €",
+        "average30": "5,64 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769346"
+      },
+      {
+        "id": "ssp-195",
+        "name": "Formeo Sonnenform",
+        "number": "195/191",
+        "set": "Stürmische Funken",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Narano",
+        "price": "ca. 6,50 €",
+        "lowest": "2,70 €",
+        "average30": "6,37 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794568"
+      },
+      {
+        "id": "ssp-197",
+        "name": "Azugladis",
+        "number": "197/191",
+        "set": "Stürmische Funken",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Rond",
+        "price": "ca. 15 €",
+        "lowest": "8,90 €",
+        "average30": "15,10 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794570"
+      }
+    ]
+  },
+  {
+    "title": "Fels & Wüste",
+    "description": "Sand, Stein und trockene Ebenen",
+    "value": "ca. 110 €",
+    "covers": [
+      "obf-203",
+      "pal-222",
+      "pal-220"
+    ],
+    "cards": [
+      {
+        "id": "obf-203",
+        "name": "Larvitar",
+        "number": "203/197",
+        "set": "Obsidian Flammen",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Miki Tanaka",
+        "price": "ca. 3,50 €",
+        "lowest": "1,00 €",
+        "average30": "3,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725283"
+      },
+      {
+        "id": "pal-222",
+        "name": "Despotar",
+        "number": "222/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Nurikabe",
+        "price": "ca. 67 €",
+        "lowest": "19,00 €",
+        "average30": "66,92 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715697"
+      },
+      {
+        "id": "pal-220",
+        "name": "Geosali",
+        "number": "220/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Ryota Murayama",
+        "price": "ca. 4,50 €",
+        "lowest": "2,00 €",
+        "average30": "4,57 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715695"
+      },
+      {
+        "id": "par-202",
+        "name": "Saltigant",
+        "number": "202/182",
+        "set": "Paradoxrift",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von kodama",
+        "price": "ca. 3,50 €",
+        "lowest": "1,49 €",
+        "average30": "3,45 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740745"
+      },
+      {
+        "id": "svi-216",
+        "name": "Ganovil",
+        "number": "216/198",
+        "set": "Karmesin & Purpur",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Nurikabe",
+        "price": "ca. 4 €",
+        "lowest": "1,39 €",
+        "average30": "4,42 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702512"
+      },
+      {
+        "id": "svi-217",
+        "name": "Klibbe",
+        "number": "217/198",
+        "set": "Karmesin & Purpur",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Mina Nakai",
+        "price": "ca. 4 €",
+        "lowest": "1,38 €",
+        "average30": "3,78 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702513"
+      },
+      {
+        "id": "par-183",
+        "name": "Castellith",
+        "number": "183/182",
+        "set": "Paradoxrift",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von OKUBO",
+        "price": "ca. 3,50 €",
+        "lowest": "1,40 €",
+        "average30": "3,56 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740726"
+      },
+      {
+        "id": "pal-219",
+        "name": "Mogelbaum",
+        "number": "219/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Narumi Sato",
+        "price": "ca. 15 €",
+        "lowest": "4,77 €",
+        "average30": "16,13 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715694"
+      },
+      {
+        "id": "pal-221",
+        "name": "Paldea-Felino",
+        "number": "221/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Miki Tanaka",
+        "price": "ca. 5,50 €",
+        "lowest": "1,00 €",
+        "average30": "5,22 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715696"
+      }
+    ]
+  },
+  {
+    "title": "Stahl",
+    "description": "Eisen, Klingen und Rüstung",
+    "value": "ca. 77 €",
+    "covers": [
+      "par-208",
+      "par-209",
+      "par-210"
+    ],
+    "cards": [
+      {
+        "id": "par-208",
+        "name": "Stahlos",
+        "number": "208/182",
+        "set": "Paradoxrift",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von nisimono",
+        "price": "ca. 21 €",
+        "lowest": "13,00 €",
+        "average30": "20,99 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740751"
+      },
+      {
+        "id": "par-209",
+        "name": "Tentantel",
+        "number": "209/182",
+        "set": "Paradoxrift",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Kurata So",
+        "price": "ca. 4,50 €",
+        "lowest": "2,00 €",
+        "average30": "4,61 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740752"
+      },
+      {
+        "id": "par-210",
+        "name": "Durengard",
+        "number": "210/182",
+        "set": "Paradoxrift",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Takumi Wada",
+        "price": "ca. 6 €",
+        "lowest": "2,89 €",
+        "average30": "5,97 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740753"
+      },
+      {
+        "id": "tef-178",
+        "name": "Metagross",
+        "number": "178/162",
+        "set": "Gewalten der Zeit",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Katsunori Sato",
+        "price": "ca. 22 €",
+        "lowest": "10,95 €",
+        "average30": "24,74 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760808"
+      },
+      {
+        "id": "ssp-209",
+        "name": "Panzaeron",
+        "number": "209/191",
+        "set": "Stürmische Funken",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Takumi Wada",
+        "price": "ca. 8 €",
+        "lowest": "3,00 €",
+        "average30": "9,24 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794582"
+      },
+      {
+        "id": "tef-179",
+        "name": "Meltan",
+        "number": "179/162",
+        "set": "Gewalten der Zeit",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Masa",
+        "price": "ca. 4,50 €",
+        "lowest": "1,80 €",
+        "average30": "4,25 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760809"
+      },
+      {
+        "id": "twm-184",
+        "name": "Stollrak",
+        "number": "184/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Dsuke",
+        "price": "ca. 4,50 €",
+        "lowest": "1,00 €",
+        "average30": "4,66 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769358"
+      },
+      {
+        "id": "twm-182",
+        "name": "Voluminas",
+        "number": "182/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Kariya",
+        "price": "ca. 3,50 €",
+        "lowest": "1,39 €",
+        "average30": "3,36 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769356"
+      },
+      {
+        "id": "dri-201",
+        "name": "Zamazenta",
+        "number": "201/182",
+        "set": "Ewige Rivalen",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Takumi Wada",
+        "price": "ca. 3 €",
+        "lowest": "0,90 €",
+        "average30": "3,20 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826075"
+      }
+    ]
+  },
+  {
+    "title": "Himmelwärts",
+    "description": "Flügel, Wind und weiter Horizont",
+    "value": "ca. 88 €",
+    "covers": [
+      "svi-221",
+      "par-213",
+      "ssp-203"
+    ],
+    "cards": [
+      {
+        "id": "svi-221",
+        "name": "Staralili",
+        "number": "221/198",
+        "set": "Karmesin & Purpur",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von saino misaki",
+        "price": "ca. 11 €",
+        "lowest": "3,80 €",
+        "average30": "11,08 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702517"
+      },
+      {
+        "id": "par-213",
+        "name": "Wablu",
+        "number": "213/182",
+        "set": "Paradoxrift",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Jiro Sasumo",
+        "price": "ca. 15 €",
+        "lowest": "5,00 €",
+        "average30": "16,34 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740756"
+      },
+      {
+        "id": "ssp-203",
+        "name": "Latios",
+        "number": "203/191",
+        "set": "Stürmische Funken",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von OKACHEKE",
+        "price": "ca. 30 €",
+        "lowest": "10,99 €",
+        "average30": "32,21 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794576"
+      },
+      {
+        "id": "ssp-214",
+        "name": "Washakwil",
+        "number": "214/191",
+        "set": "Stürmische Funken",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Gapao",
+        "price": "ca. 5 €",
+        "lowest": "2,40 €",
+        "average30": "4,89 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794587"
+      },
+      {
+        "id": "pal-225",
+        "name": "Meikro",
+        "number": "225/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von GOSSAN",
+        "price": "ca. 7,50 €",
+        "lowest": "3,00 €",
+        "average30": "7,46 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715700"
+      },
+      {
+        "id": "pal-227",
+        "name": "Flaminkno",
+        "number": "227/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Shibuzoh.",
+        "price": "ca. 6 €",
+        "lowest": "2,00 €",
+        "average30": "6,04 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715702"
+      },
+      {
+        "id": "jtg-169",
+        "name": "eF-eM",
+        "number": "169/159",
+        "set": "Reisegefährten",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von sowsow",
+        "price": "ca. 4,50 €",
+        "lowest": "2,48 €",
+        "average30": "4,69 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817322"
+      },
+      {
+        "id": "svi-219",
+        "name": "Adebom",
+        "number": "219/198",
+        "set": "Karmesin & Purpur",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Shibuzoh.",
+        "price": "ca. 4,50 €",
+        "lowest": "1,00 €",
+        "average30": "4,32 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702515"
+      },
+      {
+        "id": "schlapfel",
+        "name": "Schlapfel",
+        "number": "211/191",
+        "set": "Stürmische Funken",
+        "type": "dragon",
+        "facts": "Drache · Illustration Rare · gezeichnet von MINAMINAMI Take",
+        "price": "ca. 4,50 €",
+        "lowest": "1,40 €",
+        "average30": "4,12 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794584"
+      }
+    ]
+  },
+  {
+    "title": "Wenn es Nacht wird",
+    "description": "Träume, Geister und Schatten im Mondlicht",
+    "value": "ca. 225 €",
+    "covers": [
+      "svi-210",
+      "svi-214",
+      "pal-212"
+    ],
+    "cards": [
+      {
+        "id": "svi-210",
+        "name": "Traumato",
+        "number": "210/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Tomokazu Komiya",
+        "price": "ca. 61 €",
+        "lowest": "18,90 €",
+        "average30": "61,28 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702506"
+      },
+      {
+        "id": "svi-214",
+        "name": "Gruff",
+        "number": "214/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von sowsow",
+        "price": "ca. 12 €",
+        "lowest": "3,00 €",
+        "average30": "11,68 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702510"
+      },
+      {
+        "id": "pal-212",
+        "name": "Traunmagil",
+        "number": "212/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von aoki",
+        "price": "ca. 22 €",
+        "lowest": "11,90 €",
+        "average30": "21,66 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715687"
+      },
+      {
+        "id": "pal-213",
+        "name": "Hypnomorba",
+        "number": "213/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von SIE NANAHARA",
+        "price": "ca. 5,50 €",
+        "lowest": "3,00 €",
+        "average30": "5,63 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715688"
+      },
+      {
+        "id": "par-205",
+        "name": "Yveltal",
+        "number": "205/182",
+        "set": "Paradoxrift",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Masako Tomii",
+        "price": "ca. 16 €",
+        "lowest": "5,00 €",
+        "average30": "15,06 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740748"
+      },
+      {
+        "id": "tef-177",
+        "name": "Nebulak",
+        "number": "177/162",
+        "set": "Gewalten der Zeit",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Mousho",
+        "price": "ca. 85 €",
+        "lowest": "34,99 €",
+        "average30": "78,96 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760807"
+      },
+      {
+        "id": "par-198",
+        "name": "Gierspenst",
+        "number": "198/182",
+        "set": "Paradoxrift",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Akira Komayama",
+        "price": "ca. 7 €",
+        "lowest": "3,92 €",
+        "average30": "6,94 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740741"
+      },
+      {
+        "id": "obf-204",
+        "name": "Hunduster",
+        "number": "204/197",
+        "set": "Obsidian Flammen",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von KYUPIYAMA",
+        "price": "ca. 5 €",
+        "lowest": "1,45 €",
+        "average30": "4,95 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725284"
+      },
+      {
+        "id": "par-207",
+        "name": "Wutpilz",
+        "number": "207/182",
+        "set": "Paradoxrift",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Tomokazu Komiya",
+        "price": "ca. 10 €",
+        "lowest": "5,90 €",
+        "average30": "9,99 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740750"
+      }
+    ]
+  },
+  {
+    "title": "Sterne & Zukunft",
+    "description": "Kometen, Raumfahrt und Maschinen aus einer anderen Zeit",
+    "value": "ca. 100 €",
+    "covers": [
+      "par-201",
+      "obf-202",
+      "tef-171"
+    ],
+    "cards": [
+      {
+        "id": "par-201",
+        "name": "Meteno",
+        "number": "201/182",
+        "set": "Paradoxrift",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von 0313",
+        "price": "ca. 10 €",
+        "lowest": "4,00 €",
+        "average30": "10,34 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740744"
+      },
+      {
+        "id": "obf-202",
+        "name": "Pii",
+        "number": "202/197",
+        "set": "Obsidian Flammen",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von HYOGONOSUKE",
+        "price": "ca. 20 €",
+        "lowest": "6,70 €",
+        "average30": "25,65 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725282"
+      },
+      {
+        "id": "tef-171",
+        "name": "Zytomega",
+        "number": "171/162",
+        "set": "Gewalten der Zeit",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Atsushi Furusawa",
+        "price": "ca. 10 €",
+        "lowest": "1,00 €",
+        "average30": "9,32 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760801"
+      },
+      {
+        "id": "ssp-204",
+        "name": "Vesprit",
+        "number": "204/191",
+        "set": "Stürmische Funken",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von HYOGONOSUKE",
+        "price": "ca. 12 €",
+        "lowest": "3,50 €",
+        "average30": "14,92 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794577"
+      },
+      {
+        "id": "par-214",
+        "name": "Porygon-Z",
+        "number": "214/182",
+        "set": "Paradoxrift",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von GOSSAN",
+        "price": "ca. 8,50 €",
+        "lowest": "4,00 €",
+        "average30": "9,50 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740757"
+      },
+      {
+        "id": "par-216",
+        "name": "Eisenhals",
+        "number": "216/182",
+        "set": "Paradoxrift",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von GIDORA",
+        "price": "ca. 5 €",
+        "lowest": "3,00 €",
+        "average30": "5,17 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740759"
+      },
+      {
+        "id": "svi-244",
+        "name": "Miraidon-ex",
+        "number": "244/198",
+        "set": "Karmesin & Purpur",
+        "type": "electric",
+        "facts": "Elektro · Special Illustration Rare · gezeichnet von kantaro",
+        "price": "ca. 24 €",
+        "lowest": "9,99 €",
+        "average30": "21,61 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702540"
+      },
+      {
+        "id": "scr-151",
+        "name": "Zeraora",
+        "number": "151/142",
+        "set": "Stellarkrone",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von Kazumasa Yasukuni",
+        "price": "ca. 8,50 €",
+        "lowest": "4,50 €",
+        "average30": "8,41 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=786005"
+      },
+      {
+        "id": "par-215",
+        "name": "Mopex",
+        "number": "215/182",
+        "set": "Paradoxrift",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mina Nakai",
+        "price": "ca. 4 €",
+        "lowest": "1,00 €",
+        "average30": "4,22 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740758"
+      }
+    ]
+  },
+  {
+    "title": "Kleine Freunde",
+    "description": "Klein, rund und immer gut gelaunt",
+    "value": "ca. 240 €",
+    "covers": [
+      "svi-208",
+      "par-193",
+      "par-194"
+    ],
+    "cards": [
+      {
+        "id": "svi-208",
+        "name": "Pachirisu",
+        "number": "208/198",
+        "set": "Karmesin & Purpur",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von zig",
+        "price": "ca. 10 €",
+        "lowest": "3,49 €",
+        "average30": "9,89 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702504"
+      },
+      {
+        "id": "par-193",
+        "name": "Plusle",
+        "number": "193/182",
+        "set": "Paradoxrift",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von OKACHEKE",
+        "price": "ca. 29 €",
+        "lowest": "9,00 €",
+        "average30": "25,67 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740736"
+      },
+      {
+        "id": "par-194",
+        "name": "Minun",
+        "number": "194/182",
+        "set": "Paradoxrift",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von OKACHEKE",
+        "price": "ca. 27 €",
+        "lowest": "10,00 €",
+        "average30": "25,26 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740737"
+      },
+      {
+        "id": "par-206",
+        "name": "Morpeko",
+        "number": "206/182",
+        "set": "Paradoxrift",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Yuu Nishida",
+        "price": "ca. 22 €",
+        "lowest": "8,99 €",
+        "average30": "21,45 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740749"
+      },
+      {
+        "id": "pal-211",
+        "name": "Raichu",
+        "number": "211/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von Toshinao Aoki",
+        "price": "ca. 57 €",
+        "lowest": "23,00 €",
+        "average30": "66,71 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715686"
+      },
+      {
+        "id": "pal-216",
+        "name": "Forgita",
+        "number": "216/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Tika Matsuno",
+        "price": "ca. 10 €",
+        "lowest": "3,00 €",
+        "average30": "10,22 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715691"
+      },
+      {
+        "id": "pal-217",
+        "name": "Tafforgita",
+        "number": "217/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Tika Matsuno",
+        "price": "ca. 12 €",
+        "lowest": "5,00 €",
+        "average30": "12,61 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715692"
+      },
+      {
+        "id": "twm-187",
+        "name": "Chaneira",
+        "number": "187/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Toshinao Aoki",
+        "price": "ca. 31 €",
+        "lowest": "13,00 €",
+        "average30": "32,81 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769361"
+      },
+      {
+        "id": "pal-226",
+        "name": "Famieps",
+        "number": "226/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mizue",
+        "price": "ca. 41 €",
+        "lowest": "19,99 €",
+        "average30": "40,34 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715701"
+      }
+    ]
+  },
+  {
+    "title": "Gemütliche Tage",
+    "description": "Faulenzen, Futtern und ein langer Mittagsschlaf",
+    "value": "ca. 84 €",
+    "covers": [
+      "svi-222",
+      "dri-205",
+      "ssp-212"
+    ],
+    "cards": [
+      {
+        "id": "svi-222",
+        "name": "Raffel",
+        "number": "222/198",
+        "set": "Karmesin & Purpur",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Teeziro",
+        "price": "ca. 4,50 €",
+        "lowest": "1,00 €",
+        "average30": "4,63 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702518"
+      },
+      {
+        "id": "dri-205",
+        "name": "Peppers Schlaraffel",
+        "number": "205/182",
+        "set": "Ewige Rivalen",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Natsumi Yoshida",
+        "price": "ca. 2,50 €",
+        "lowest": "0,70 €",
+        "average30": "2,78 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826079"
+      },
+      {
+        "id": "ssp-212",
+        "name": "Bummelz",
+        "number": "212/191",
+        "set": "Stürmische Funken",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mékayu",
+        "price": "ca. 8 €",
+        "lowest": "3,50 €",
+        "average30": "8,01 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794585"
+      },
+      {
+        "id": "jtg-168",
+        "name": "Wiesenior",
+        "number": "168/159",
+        "set": "Reisegefährten",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von REND",
+        "price": "ca. 5,50 €",
+        "lowest": "2,30 €",
+        "average30": "5,72 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817321"
+      },
+      {
+        "id": "schlurp",
+        "name": "Schlurp",
+        "number": "180/162",
+        "set": "Gewalten der Zeit",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Orca",
+        "price": "ca. 18 €",
+        "lowest": "3,50 €",
+        "average30": "17,98 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760810"
+      },
+      {
+        "id": "tef-181",
+        "name": "Plaudagei",
+        "number": "181/162",
+        "set": "Gewalten der Zeit",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Scav",
+        "price": "ca. 8,50 €",
+        "lowest": "6,00 €",
+        "average30": "8,73 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760811"
+      },
+      {
+        "id": "tef-184",
+        "name": "Sen-Long",
+        "number": "184/162",
+        "set": "Gewalten der Zeit",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mékayu",
+        "price": "ca. 12 €",
+        "lowest": "5,00 €",
+        "average30": "12,94 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760814"
+      },
+      {
+        "id": "picochilla",
+        "name": "Picochilla",
+        "number": "182/162",
+        "set": "Gewalten der Zeit",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Shibuzoh.",
+        "price": "ca. 11 €",
+        "lowest": "4,00 €",
+        "average30": "11,48 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760812"
+      },
+      {
+        "id": "chillabell",
+        "name": "Chillabell",
+        "number": "183/162",
+        "set": "Gewalten der Zeit",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Shibuzoh.",
+        "price": "ca. 14 €",
+        "lowest": "4,50 €",
+        "average30": "14,06 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760813"
+      }
+    ]
+  },
+  {
+    "title": "Pokémon-Café",
+    "description": "Äpfel, Gebäck, Sahne und Tee",
+    "value": "ca. 79 €",
+    "covers": [
+      "twm-185",
+      "sirapfel",
+      "dri-188"
+    ],
+    "cards": [
+      {
+        "id": "twm-185",
+        "name": "Knapfel",
+        "number": "185/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "dragon",
+        "facts": "Drache · Illustration Rare · gezeichnet von Katsunori Sato",
+        "price": "ca. 7 €",
+        "lowest": "2,49 €",
+        "average30": "7,01 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769359"
+      },
+      {
+        "id": "sirapfel",
+        "name": "Sirapfel",
+        "number": "170/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Akira Komayama",
+        "price": "ca. 7,50 €",
+        "lowest": "3,00 €",
+        "average30": "6,66 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769344"
+      },
+      {
+        "id": "dri-188",
+        "name": "Hydrapfel",
+        "number": "188/182",
+        "set": "Ewige Rivalen",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Jerky",
+        "price": "ca. 2,50 €",
+        "lowest": "0,60 €",
+        "average30": "2,42 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826061"
+      },
+      {
+        "id": "hefel",
+        "name": "Hefel",
+        "number": "213/198",
+        "set": "Karmesin & Purpur",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Tika Matsuno",
+        "price": "ca. 9 €",
+        "lowest": "3,25 €",
+        "average30": "8,88 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702509"
+      },
+      {
+        "id": "backel",
+        "name": "Backel-ex",
+        "number": "169/142",
+        "set": "Stellarkrone",
+        "type": "psychic",
+        "facts": "Psycho · Special Illustration Rare · gezeichnet von Yuu Nishida",
+        "price": "ca. 33 €",
+        "lowest": "9,90 €",
+        "average30": "32,46 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=786023"
+      },
+      {
+        "id": "hokumil",
+        "name": "Hokumil",
+        "number": "152/142",
+        "set": "Stellarkrone",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Dsuke",
+        "price": "ca. 6,50 €",
+        "lowest": "3,00 €",
+        "average30": "6,76 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=786006"
+      },
+      {
+        "id": "sabbaione",
+        "name": "Sabbaione",
+        "number": "236/217",
+        "set": "Erhabene Helden",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von Yoshimoto Yoshimon",
+        "price": "ca. 3,50 €",
+        "lowest": "1,10 €",
+        "average30": "3,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=869847"
+      },
+      {
+        "id": "pokusan",
+        "name": "Pokusan",
+        "number": "TG08/TG30",
+        "set": "Strahlende Sterne Trainer-Galerie",
+        "type": "psychic",
+        "facts": "Psycho · Trainer-Galerie · gezeichnet von OKACHEKE",
+        "price": "ca. 2,50 €",
+        "lowest": "0,30 €",
+        "average30": "2,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=608740"
+      },
+      {
+        "id": "gelatroppo",
+        "name": "Gelatroppo",
+        "number": "190/182",
+        "set": "Paradoxrift",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Taiga Kayama",
+        "price": "ca. 7,50 €",
+        "lowest": "3,50 €",
+        "average30": "7,46 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740733"
+      }
+    ]
+  },
+  {
+    "title": "Das Maskenfest",
+    "description": "Kitakami feiert: Ogerpon mit allen vier Masken und seine Gäste",
+    "value": "ca. 185 €",
+    "covers": [
+      "twm-211",
+      "twm-212",
+      "twm-213"
+    ],
+    "cards": [
+      {
+        "id": "twm-211",
+        "name": "Türkisgrüne-Maske-Ogerpon-ex",
+        "number": "211/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Special Illustration Rare · gezeichnet von Yano Keiji",
+        "price": "ca. 18 €",
+        "lowest": "13,00 €",
+        "average30": "18,06 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769385"
+      },
+      {
+        "id": "twm-212",
+        "name": "Ofenmaske-Ogerpon-ex",
+        "number": "212/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fire",
+        "facts": "Feuer · Special Illustration Rare · gezeichnet von Yano Keiji",
+        "price": "ca. 10 €",
+        "lowest": "4,99 €",
+        "average30": "10,01 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769386"
+      },
+      {
+        "id": "twm-213",
+        "name": "Brunnenmaske-Ogerpon-ex",
+        "number": "213/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "water",
+        "facts": "Wasser · Special Illustration Rare · gezeichnet von Yano Keiji",
+        "price": "ca. 15 €",
+        "lowest": "10,00 €",
+        "average30": "14,95 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769387"
+      },
+      {
+        "id": "twm-215",
+        "name": "Fundamentmaske-Ogerpon-ex",
+        "number": "215/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fighting",
+        "facts": "Kampf · Special Illustration Rare · gezeichnet von Yano Keiji",
+        "price": "ca. 12 €",
+        "lowest": "9,00 €",
+        "average30": "12,21 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769389"
+      },
+      {
+        "id": "twm-171",
+        "name": "Mortcha",
+        "number": "171/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Saboteri",
+        "price": "ca. 3,50 €",
+        "lowest": "0,99 €",
+        "average30": "3,16 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769345"
+      },
+      {
+        "id": "twm-210",
+        "name": "Fatalitcha-ex",
+        "number": "210/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "grass",
+        "facts": "Pflanze · Special Illustration Rare · gezeichnet von Saboteri",
+        "price": "ca. 19 €",
+        "lowest": "10,00 €",
+        "average30": "18,72 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769384"
+      },
+      {
+        "id": "gemma",
+        "name": "Gemma",
+        "number": "220/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "trainer",
+        "facts": "Trainer · Special Illustration Rare · gezeichnet von GIDORA",
+        "price": "ca. 83 €",
+        "lowest": "39,99 €",
+        "average30": "85,68 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769394"
+      },
+      {
+        "id": "fukano",
+        "name": "Hisui-Fukano",
+        "number": "181/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von GIDORA",
+        "price": "ca. 18 €",
+        "lowest": "7,90 €",
+        "average30": "18,32 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769355"
+      },
+      {
+        "id": "twm-179",
+        "name": "Palimpalim",
+        "number": "179/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von REND",
+        "price": "ca. 4,50 €",
+        "lowest": "1,25 €",
+        "average30": "4,01 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769353"
+      }
+    ]
+  },
+  {
+    "title": "Trainer & Partner",
+    "description": "Pokémon, die zu einem bestimmten Trainer gehören",
+    "value": "ca. 145 €",
+    "covers": [
+      "dri-193",
+      "dri-194",
+      "jtg-167"
+    ],
+    "cards": [
+      {
+        "id": "dri-193",
+        "name": "Mistys Enton",
+        "number": "193/182",
+        "set": "Ewige Rivalen",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von OKACHEKE",
+        "price": "ca. 48 €",
+        "lowest": "17,90 €",
+        "average30": "43,84 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826067"
+      },
+      {
+        "id": "dri-194",
+        "name": "Mistys Lapras",
+        "number": "194/182",
+        "set": "Ewige Rivalen",
+        "type": "water",
+        "facts": "Wasser · Illustration Rare · gezeichnet von Orca",
+        "price": "ca. 19 €",
+        "lowest": "6,81 €",
+        "average30": "22,06 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826068"
+      },
+      {
+        "id": "jtg-167",
+        "name": "Ns Reshiram",
+        "number": "167/159",
+        "set": "Reisegefährten",
+        "type": "dragon",
+        "facts": "Drache · Illustration Rare · gezeichnet von Bun Toujo",
+        "price": "ca. 20 €",
+        "lowest": "14,50 €",
+        "average30": "20,10 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817320"
+      },
+      {
+        "id": "dri-184",
+        "name": "Cynthias Roserade",
+        "number": "184/182",
+        "set": "Ewige Rivalen",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von rika",
+        "price": "ca. 10 €",
+        "lowest": "3,45 €",
+        "average30": "9,63 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826058"
+      },
+      {
+        "id": "dri-190",
+        "name": "Klarins Tornupto",
+        "number": "190/182",
+        "set": "Ewige Rivalen",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von GIDORA",
+        "price": "ca. 18 €",
+        "lowest": "9,50 €",
+        "average30": "22,38 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826064"
+      },
+      {
+        "id": "jtg-164",
+        "name": "Lillys Bandelby",
+        "number": "164/159",
+        "set": "Reisegefährten",
+        "type": "psychic",
+        "facts": "Psycho · Illustration Rare · gezeichnet von saino misaki",
+        "price": "ca. 4,50 €",
+        "lowest": "1,50 €",
+        "average30": "4,29 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817316"
+      },
+      {
+        "id": "jtg-163",
+        "name": "Enigmaras Voltrean",
+        "number": "163/159",
+        "set": "Reisegefährten",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von Terada Tera",
+        "price": "ca. 3 €",
+        "lowest": "0,98 €",
+        "average30": "3,64 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817315"
+      },
+      {
+        "id": "dri-203",
+        "name": "Team Rockets Mauzi",
+        "number": "203/182",
+        "set": "Ewige Rivalen",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Shimaris Yukichi",
+        "price": "ca. 17 €",
+        "lowest": "6,85 €",
+        "average30": "20,59 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=826077"
+      },
+      {
+        "id": "jtg-170",
+        "name": "Hops Wolly",
+        "number": "170/159",
+        "set": "Reisegefährten",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von MINAMINAMI Take",
+        "price": "ca. 3,50 €",
+        "lowest": "0,90 €",
+        "average30": "3,62 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=817323"
+      }
+    ]
+  },
+  {
+    "title": "Kampfgeist",
+    "description": "Kraft, Tempo und Ausdauer",
+    "value": "ca. 66 €",
+    "covers": [
+      "svi-215",
+      "scr-153",
+      "par-200"
+    ],
+    "cards": [
+      {
+        "id": "svi-215",
+        "name": "Riolu",
+        "number": "215/198",
+        "set": "Karmesin & Purpur",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Nelnal",
+        "price": "ca. 17 €",
+        "lowest": "6,90 €",
+        "average30": "17,03 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702511"
+      },
+      {
+        "id": "scr-153",
+        "name": "Meditie",
+        "number": "153/142",
+        "set": "Stellarkrone",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Yuriko Akase",
+        "price": "ca. 5 €",
+        "lowest": "2,00 €",
+        "average30": "5,14 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=786007"
+      },
+      {
+        "id": "par-200",
+        "name": "Wie-Shu",
+        "number": "200/182",
+        "set": "Paradoxrift",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Taira Akitsu",
+        "price": "ca. 6 €",
+        "lowest": "3,80 €",
+        "average30": "6,15 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740743"
+      },
+      {
+        "id": "twm-183",
+        "name": "Praktibalk",
+        "number": "183/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von Yuriko Akase",
+        "price": "ca. 4,50 €",
+        "lowest": "1,90 €",
+        "average30": "4,49 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769357"
+      },
+      {
+        "id": "svi-220",
+        "name": "Gladimperio",
+        "number": "220/198",
+        "set": "Karmesin & Purpur",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Shin Nagasawa",
+        "price": "ca. 5,50 €",
+        "lowest": "2,48 €",
+        "average30": "5,56 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702516"
+      },
+      {
+        "id": "par-212",
+        "name": "Krakeelo",
+        "number": "212/182",
+        "set": "Paradoxrift",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von NC Empire",
+        "price": "ca. 10 €",
+        "lowest": "3,85 €",
+        "average30": "9,89 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740755"
+      },
+      {
+        "id": "obf-206",
+        "name": "Knattox",
+        "number": "206/197",
+        "set": "Obsidian Flammen",
+        "type": "metal",
+        "facts": "Metall · Illustration Rare · gezeichnet von Souichirou Gunjima",
+        "price": "ca. 2 €",
+        "lowest": "0,20 €",
+        "average30": "2,05 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=725286"
+      },
+      {
+        "id": "tef-175",
+        "name": "Pampross",
+        "number": "175/162",
+        "set": "Gewalten der Zeit",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von MINAMINAMI Take",
+        "price": "ca. 5,50 €",
+        "lowest": "2,39 €",
+        "average30": "5,66 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=760805"
+      },
+      {
+        "id": "twm-173",
+        "name": "Panferno",
+        "number": "173/167",
+        "set": "Maskerade im Zwielicht",
+        "type": "fire",
+        "facts": "Feuer · Illustration Rare · gezeichnet von Krgc",
+        "price": "ca. 10 €",
+        "lowest": "6,85 €",
+        "average30": "13,14 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=769347"
+      }
+    ]
+  },
+  {
+    "title": "Sonderlinge",
+    "description": "Die wunderbar Seltsamen, die nirgends sonst hineinpassen",
+    "value": "ca. 44 €",
+    "covers": [
+      "pal-223",
+      "par-204",
+      "ssp-202"
+    ],
+    "cards": [
+      {
+        "id": "pal-223",
+        "name": "Affiti",
+        "number": "223/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Oswaldo KATO",
+        "price": "ca. 5 €",
+        "lowest": "2,25 €",
+        "average30": "5,78 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715698"
+      },
+      {
+        "id": "par-204",
+        "name": "Deponitox",
+        "number": "204/182",
+        "set": "Paradoxrift",
+        "type": "dark",
+        "facts": "Unlicht · Illustration Rare · gezeichnet von Shinya Komatsu",
+        "price": "ca. 8 €",
+        "lowest": "4,00 €",
+        "average30": "7,55 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740747"
+      },
+      {
+        "id": "ssp-202",
+        "name": "Flunschlik",
+        "number": "202/191",
+        "set": "Stürmische Funken",
+        "type": "electric",
+        "facts": "Elektro · Illustration Rare · gezeichnet von N-DESIGN Inc.",
+        "price": "ca. 1,50 €",
+        "lowest": "0,60 €",
+        "average30": "1,71 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794575"
+      },
+      {
+        "id": "svi-202",
+        "name": "Halupenjo",
+        "number": "202/198",
+        "set": "Karmesin & Purpur",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von KIYOTAKA OSHIYAMA",
+        "price": "ca. 3,50 €",
+        "lowest": "1,40 €",
+        "average30": "3,55 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=702498"
+      },
+      {
+        "id": "ssp-213",
+        "name": "Kecleon",
+        "number": "213/191",
+        "set": "Stürmische Funken",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mori Yuu",
+        "price": "ca. 4,50 €",
+        "lowest": "1,00 €",
+        "average30": "4,70 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794586"
+      },
+      {
+        "id": "ssp-206",
+        "name": "Vibrava",
+        "number": "206/191",
+        "set": "Stürmische Funken",
+        "type": "fighting",
+        "facts": "Kampf · Illustration Rare · gezeichnet von toriyufu",
+        "price": "ca. 3,50 €",
+        "lowest": "0,98 €",
+        "average30": "3,22 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=794579"
+      },
+      {
+        "id": "par-184",
+        "name": "Keradar",
+        "number": "184/182",
+        "set": "Paradoxrift",
+        "type": "grass",
+        "facts": "Pflanze · Illustration Rare · gezeichnet von Tetsu Kayama",
+        "price": "ca. 3,50 €",
+        "lowest": "1,20 €",
+        "average30": "3,69 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=740727"
+      },
+      {
+        "id": "pal-229",
+        "name": "Dummimisel",
+        "number": "229/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Saya Tsuruta",
+        "price": "ca. 7 €",
+        "lowest": "2,99 €",
+        "average30": "6,93 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715704"
+      },
+      {
+        "id": "pal-228",
+        "name": "Farigiraf",
+        "number": "228/193",
+        "set": "Entwicklungen in Paldea",
+        "type": "colorless",
+        "facts": "Farblos · Illustration Rare · gezeichnet von Mina Nakai",
+        "price": "ca. 8 €",
+        "lowest": "2,95 €",
+        "average30": "7,40 €",
+        "cardmarket": "https://www.cardmarket.com/en/Pokemon/Products?idProduct=715703"
+      }
+    ]
+  }
+]

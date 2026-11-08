@@ -1,1 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#efebe3">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Ein digitales Sammelalbum mit 180 Pokémon-Karten in 20 Themenkapiteln.">
+  <title>Kartenarchiv · 180 Pokémon-Karten in 20 Kapiteln</title>
+  <link rel="stylesheet" href="./src/styles.css">
+  <link rel="preload" href="./assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body id="top">
+  <div class="app">
+    <header class="top">
+      <a class="mark" href="#top">Kartenarchiv</a>
+      <a class="to-index" href="#kapitel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/>
+          <rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>
+        </svg>
+        <span>Kapitel</span>
+      </a>
+    </header>
+    <main>
+      <section class="chapter" aria-labelledby="chapter-title">
+        <div class="head">
+          <h1 id="chapter-title" tabindex="-1">Kartenarchiv</h1>
+          <p class="desc">Ein digitales Sammelalbum für Pokémon-Karten</p>
+          <p class="meta" aria-live="polite"></p>
+        </div>
+        <div class="sheetpage">
+          <span class="holes" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="grid"></div>
+        </div>
+        <nav class="pager" aria-label="Kapitel blättern"></nav>
+        <section class="inv" aria-label="Karten auf dieser Seite">
+          <h2>Auf dieser Seite</h2>
+          <ol></ol>
+        </section>
+      </section>
+      <section class="index" id="kapitel" aria-labelledby="index-title">
+        <div class="index-head">
+          <h2 id="index-title">Alle Kapitel</h2>
+          <p>180 Karten in 20 Kapiteln, zusammen ca. 2.370 €</p>
+        </div>
+        <ol></ol>
+      </section>
+    </main>
+    <footer class="foot">
+      <p>Preise sind Richtwerte aus Cardmarket-Daten vom 7. November 2026. Sie gelten für Near Mint und die günstigere der beiden Ausgaben Deutsch oder Englisch. Aktuelle Angebote findest du bei Cardmarket.</p>
+      <p>Kartenbilder und Daten von <a href="https://www.tcgdex.net/">TCGdex</a>. Privates Sammelalbum, kein offizielles Pokémon-Produkt.</p>
+    </footer>
+    <noscript><p class="load-error">Aktiviere JavaScript, um das Kartenarchiv zu öffnen.</p></noscript>
+    <p class="load-error" id="load-error" role="alert" hidden>Der Binder konnte nicht geladen werden. Bitte lade die Seite neu.</p>
+  </div>
 
+  <dialog class="sheet" aria-labelledby="card-title">
+    <article class="sheet-body">
+      <div class="sheet-top">
+        <span class="pos"></span>
+        <button class="close" type="button" aria-label="Karte schließen" autofocus>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="stage"><img class="art big" alt="" width="63" height="88"></div>
+      <div class="info">
+        <h2 id="card-title" aria-live="polite"></h2>
+        <p class="set"><span class="nr"></span><span class="set-name"></span></p>
+        <p class="facts"><span class="type"></span><span class="facts-text"></span></p>
+        <div class="price">
+          <div class="tag">
+            <span class="tag-hole" aria-hidden="true"></span>
+            <span class="tag-label">Richtpreis Near Mint<small>günstigste Ausgabe, Deutsch oder Englisch</small></span>
+            <strong></strong>
+          </div>
+          <ul>
+            <li><span>Günstigstes Angebot</span><span class="lowest"></span></li>
+            <li><span>Verkaufsschnitt 30 Tage</span><span class="average"></span></li>
+          </ul>
+          <p class="note">Stand 7. November 2026. Das günstigste Angebot kann auch andere Sprachen oder schlechtere Zustände betreffen.</p>
+        </div>
+        <a class="market" target="_blank" rel="noopener noreferrer">
+          Angebote auf Cardmarket
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+        </a>
+        <nav class="sheet-nav" aria-label="Karten in diesem Kapitel"></nav>
+      </div>
+    </article>
+  </dialog>
+</body>
+</html>
