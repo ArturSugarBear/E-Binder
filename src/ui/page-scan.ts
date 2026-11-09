@@ -351,6 +351,10 @@ export function openPageScanner(
       finish.hidden = true;
       const variant = input('text');
       variant.placeholder = 'Auflage / Stempel beschreiben';
+      variant.setAttribute(
+        'aria-label',
+        `Auflage oder Stempel für Fach ${index + 1}`,
+      );
       variant.maxLength = 200;
       variant.hidden = true;
       const query = input('search');

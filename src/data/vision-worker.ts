@@ -21,10 +21,10 @@ const report = (status: string, id?: number) =>
   scope.postMessage({ type: 'progress', status, id });
 let prepared:
   Promise<{ session: InferenceSession; dictionary: string[] }> | undefined;
-async function modelResources(modelUrl: string, dictionaryUrl: string) {
+async function modelResources(modelUrl: string, dictionaryUrl: string, id?: number) {
   if (!prepared) {
     prepared = (async () => {
-      report('Erkennungsmodell wird geladen …');
+      report('Erkennungsmodell wird geladen …', id);
       env.wasm.numThreads = 1;
       env.wasm.proxy = false;
       env.wasm.wasmPaths = { wasm: wasmUrl, mjs: runtimeUrl };
@@ -82,7 +82,7 @@ async function recognize({
   if (typeof OffscreenCanvas === 'undefined')
     throw new Error('Bildverarbeitung im Hintergrund wird nicht unterstützt.');
   const [{ session, dictionary }, bitmap] = await Promise.all([
-    modelResources(modelUrl, dictionaryUrl),
+    modelResources(modelUrl, dictionaryUrl, id),
     createImageBitmap(photo),
   ]);
   try {
