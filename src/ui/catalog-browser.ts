@@ -133,14 +133,22 @@ export function createCatalogBrowser(options: Options) {
     'Preise sind Cardmarket-Katalogtrends in EUR mit Datenstand, keine Bewertung deiner Sprach-, Zustands- oder Druckvariante. Fehlende Preise stehen am Ende.',
   );
   priceNotice.hidden = true;
+  const filterSummary = el('summary', '', 'Filtern & sortieren');
+  const filterPanel = el(
+    'details',
+    'w-catalog-filter-panel',
+    filterSummary,
+    controls,
+    rarityGuide.element,
+  );
   const element = el(
     'section',
     'w-catalog-browser',
-    browse,
     selectedSet,
-    controls,
+    browse,
+    options.standalone ? filterPanel : controls,
     scopeStatus,
-    rarityGuide.element,
+    options.standalone ? null : rarityGuide.element,
     priceNotice,
   );
   let page = initial.page ?? 1;
@@ -217,10 +225,24 @@ export function createCatalogBrowser(options: Options) {
       marker.hidden = !own && !wish;
     }
   }
+  function updateFilterSummary(): void {
+    const labels = [
+      artist.value.trim(),
+      rarity.value,
+      order.value !== 'number'
+        ? order.options.find((option) => option.checked)?.parentElement
+            ?.textContent
+        : '',
+    ].filter(Boolean);
+    filterSummary.replaceChildren(el('span', '', 'Filtern & sortieren'));
+    if (labels.length)
+      filterSummary.append(el('small', '', labels.join(' · ')));
+  }
   function updateSet(): void {
     for (const option of order.options)
       if (option.value.startsWith('price')) option.disabled = !set.value;
     if (!set.value && order.value.startsWith('price')) order.value = 'number';
+    updateFilterSummary();
     selectedSet.replaceChildren();
     const current = inventory.find((item) => item.id === set.value);
     if (!current) return;
@@ -635,8 +657,13 @@ export function createCatalogBrowser(options: Options) {
             : catalogEntry(result.id, result.language, signal)
         )
           .then((detail) => {
-            if (!closed && !signal.aborted)
+            if (!closed && !signal.aborted) {
+              // A disabled button loses browser focus. Restore the opener before
+              // the modal captures it, including when the request was cached.
+              button.disabled = false;
+              button.focus({ preventScroll: true });
               options.onChoose(detail.card, detail);
+            }
           })
           .catch((error) => {
             if (!signal.aborted && !closed) tell(errorText(error), true);
@@ -710,6 +737,7 @@ export function createCatalogBrowser(options: Options) {
     await syncSetFilters(signal);
     if (signal.aborted || closed || active !== signal) return;
     rarityGuide.update(setFacets, rarity.value);
+    updateFilterSummary();
     options.onStateChange?.(state());
     let found: CatalogResult[];
     let prices: CatalogEntry[] | undefined;

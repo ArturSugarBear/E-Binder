@@ -89,6 +89,7 @@ test('missing provider artwork is a compact catalogue list and an honest rarity 
     .first()
     .boundingBox();
   expect(box!.height).toBeLessThan(130);
+  await main.locator('.w-catalog-filter-panel > summary').click();
   await main.getByLabel('Seltenheit', { exact: true }).selectOption('Häufig');
   await expect(main.locator('.w-rarity-selected')).toContainText(
     'noch kein Beispielbild',

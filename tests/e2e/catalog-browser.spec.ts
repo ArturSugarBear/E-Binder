@@ -295,6 +295,7 @@ test('discovery price links keep their requested sorting after metadata loads', 
   await expect(
     main.locator('.w-search-results .w-card-caption strong'),
   ).toHaveText(['Pinsir', 'Yanma', 'Yanmega-ex']);
+  await main.locator('.w-catalog-filter-panel > summary').click();
   await expect(
     main
       .getByRole('group', { name: 'Katalog sortieren' })

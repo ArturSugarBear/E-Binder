@@ -205,12 +205,8 @@ export function createDiscoverView(ctx: WorkspaceContext) {
         el(
           'div',
           '',
-          el('h3', '', card.name),
-          el(
-            'p',
-            '',
-            `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`,
-          ),
+          el('h3', '', card.setName),
+          el('p', '', `${card.number} · ${card.language.toUpperCase()}`),
           el(
             'p',
             'w-muted',

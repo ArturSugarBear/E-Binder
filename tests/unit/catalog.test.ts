@@ -540,3 +540,43 @@ it('retains only a valid Cardmarket product reference without making card recogn
     expect(result.cardmarketUrl).toBeUndefined();
   }
 });
+
+it('keeps an exact market listing available when the EUR observation is undated or unavailable', async () => {
+  vi.resetModules();
+  const { catalogEntry } = await import('../../src/data/card-catalog');
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      const id = url.split('/').at(-1)!;
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            ...card,
+            id,
+            pricing: {
+              cardmarket: {
+                idProduct: 907758,
+                trend: 31.04,
+                unit: id === 'foreign' ? 'USD' : 'EUR',
+                updated:
+                  id === 'undated'
+                    ? undefined
+                    : id === 'invalid'
+                      ? 'not-a-date'
+                      : '2026-11-09T00:00:00Z',
+              },
+            },
+          }),
+        ),
+      );
+    }),
+  );
+  for (const id of ['undated', 'invalid', 'foreign']) {
+    const result = await catalogEntry(id, 'en');
+    expect(result.price).toBeUndefined();
+    expect(result.cardmarketUrl).toBe(
+      'https://www.cardmarket.com/en/Pokemon/Products?idProduct=907758',
+    );
+    expect(result.card.sourceId).toBe(id);
+  }
+});

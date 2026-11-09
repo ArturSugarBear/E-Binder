@@ -42,6 +42,7 @@ export function icon(name: string): SVGSVGElement {
     check: 'm5 12 4 4L19 6',
     lock: 'M5 10h14v11H5zM8 10V7a4 4 0 0 1 8 0v3',
     arrow: 'M4 12h16m-6-6 6 6-6 6',
+    external: 'M14 3h7v7m0-7L10 14M11 3H3v18h18v-8',
     undo: 'M9 4 4 9l5 5M4 9h10a6 6 0 0 1 0 12',
     spark: 'm12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z',
     swap: 'M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4',

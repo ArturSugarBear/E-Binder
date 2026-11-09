@@ -314,9 +314,9 @@ const apiCardSchema = resumeSchema.extend({
     .object({
       cardmarket: z
         .object({
-          unit: z.string(),
-          updated: z.string(),
-          trend: z.number().nullable().optional(),
+          unit: z.string().optional().catch(undefined),
+          updated: z.string().optional().catch(undefined),
+          trend: z.number().nullable().optional().catch(undefined),
           idProduct: z
             .number()
             .int()
@@ -490,6 +490,7 @@ export async function catalogEntry(
     quote?.unit === 'EUR' &&
     typeof quote.trend === 'number' &&
     quote.trend > 0 &&
+    quote.updated &&
     Number.isFinite(Date.parse(quote.updated))
       ? { amount: quote.trend, updated: quote.updated }
       : undefined;

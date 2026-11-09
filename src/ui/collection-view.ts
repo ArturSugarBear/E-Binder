@@ -228,10 +228,6 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
     () => ctx.openHolding(holding.id),
     'card',
   );
-  button.setAttribute(
-    'aria-label',
-    `${holding.card.name}, ${holding.card.number}, ${holding.quantity} Exemplare. Details öffnen`,
-  );
   button.dataset.focus = `holding-${holding.id}`;
   button.replaceChildren(
     el(
@@ -258,6 +254,8 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
       `${freeCount(ctx.state, holding)} frei${holding.tradeQuantity ? ` · ${holding.tradeQuantity} zum Tausch` : ''}`,
     ),
   );
+  // The visible caption names the button; a separate hint must not replace it.
+  button.setAttribute('aria-description', 'Kartendetails öffnen');
   return button;
 }
 

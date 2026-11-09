@@ -1,5 +1,5 @@
 import type { CatalogEntry } from '../data/card-catalog';
-import { el } from './workspace-dom';
+import { el, icon } from './workspace-dom';
 
 /** Public catalogue observations, never a valuation of the collector's copy. */
 export function cardMarket(entry: CatalogEntry): HTMLElement {
@@ -49,7 +49,8 @@ export function cardMarket(entry: CatalogEntry): HTMLElement {
     const link = el(
       'a',
       'w-button w-button-secondary',
-      'Auf Cardmarket ansehen ↗',
+      el('span', '', 'Auf Cardmarket ansehen'),
+      icon('external'),
     );
     link.href = entry.cardmarketUrl;
     link.target = '_blank';

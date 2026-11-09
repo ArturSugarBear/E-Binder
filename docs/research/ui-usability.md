@@ -12,6 +12,8 @@ Stand: 9. November 2026. Ausgangspunkt: veröffentlichte App, native TypeScript-
 
 Grundlage sind gerenderte Screenshots der Sammlung, Binder, Wunschliste und Kartenvorschau bei 1365 × 900 und 390 × 844 sowie Quellcodeprüfung. Die Demo verwendet redaktionelle Beispielkarten, keine echten Bestandsdaten einer Testperson. Artefakte liegen außerhalb des öffentlichen Repositories unter `/workspace/scratch/ui-baseline-*` und `/workspace/scratch/ui-renewal-*`.
 
+Zusätzlicher Befund aus der gerenderten Zwischenprüfung: Die Entdecken-Ansicht bestand auf dem Handy weiterhin überwiegend aus Formularfeldern oberhalb der Treffer. Dort liegen zusätzliche Filter, Sortierung und Seltenheitserklärungen jetzt unter „Filtern & sortieren“. Aktive Werte bleiben in der Zusammenfassung sichtbar; Suche, Sprache, gewähltes Set und die eigentlichen Karten bleiben direkt erreichbar. Routinemeldungen erhalten ruhigen Hinweistext statt einer prominenten blauen Meldungsfläche. Die Erfassung behält ihre offenen Bestätigungsfelder.
+
 ## Regeln der Umsetzung
 
 - Native `fieldset`/`legend` und Radios, keine nachgebauten ARIA-Tabs für Formwerte. Eine Gruppe ist ein Tabstopp; Pfeiltasten wechseln die Auswahl. Eindeutige Gruppennamen; ausgewählt, Fokus, Hover und deaktiviert verwenden die vorhandenen Farbrollen. Auswahlflächen sind mindestens 44 CSS-Pixel hoch.

@@ -165,6 +165,12 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
     timeout: 15_000,
   });
   await expect(main.locator('.w-search-results')).toContainText('025/182');
+  await expect(main.locator('.w-catalog-filter-panel')).not.toHaveAttribute(
+    'open',
+  );
+  await expect(main.locator('.w-catalog-filter-panel > summary')).toContainText(
+    'GIDORA · Häufig',
+  );
   await main.locator('.w-search-results button').click();
   const preview = page.getByRole('dialog');
   await expect(preview).toContainText('Noch nicht im Bestand');
