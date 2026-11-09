@@ -9,7 +9,6 @@ import {
   saveFile,
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
-import { uid, type PersonalCard } from '../domain/personal';
 
 export function openBackup(ctx: WorkspaceContext): void {
   const sheet = modal('Sichern & wiederherstellen');
@@ -38,16 +37,16 @@ export function openBackup(ctx: WorkspaceContext): void {
     message(
       ctx.state.mode === 'demo'
         ? 'Du sicherst gerade den Beispielbestand. Er wird beim Wiederherstellen als Demo behandelt.'
-        : 'Deine Sammlung liegt auf diesem Gerät. Sichere sie regelmäßig, besonders vor einem Gerätewechsel oder dem Löschen von Browserdaten.',
+        : 'Sichere deine Sammlungsdaten regelmäßig, besonders vor einem Gerätewechsel. Aufnahmefotos sind ausschließlich temporäre Scan-Eingaben.',
     ),
     el(
       'div',
       'w-backup-option',
-      el('h3', '', 'Vollständige JSONL-Sicherung'),
+      el('h3', '', 'JSONL-Sicherung der Sammlungsdaten'),
       el(
         'p',
         'w-muted',
-        'Enthält bestätigte Mengen, Binderplätze, Wünsche, offene Erfassungen und Originalfotos. Keine Weitergabe an einen Server.',
+        'Enthält bestätigte Mengen, Binderplätze, Wünsche und Erkennungsmetadaten. Keine Aufnahmefotos oder Fotodaten.',
       ),
       exportButton,
     ),
@@ -69,17 +68,17 @@ export function openBackup(ctx: WorkspaceContext): void {
   async function download(): Promise<void> {
     exportButton.disabled = true;
     status.replaceChildren(
-      message('Sicherung wird mit den Originalfotos zusammengestellt …'),
+      message('Sammlungsdaten werden ohne Fotos zusammengestellt …'),
     );
     try {
-      const blob = await exportBackup(ctx.state, ctx.store);
+      const blob = await exportBackup(ctx.state);
       saveFile(
         blob,
         `e-binder-${ctx.state.mode}-${new Date().toISOString().slice(0, 10)}.jsonl`,
       );
       status.replaceChildren(
         message(
-          'Die vollständige Sicherung wurde zum Download übergeben. Prüfe die Datei in deinen Downloads.',
+          'Die Metadaten-Sicherung wurde zum Download übergeben. Prüfe die Datei in deinen Downloads.',
         ),
       );
     } catch (error) {
@@ -107,7 +106,7 @@ export function openBackup(ctx: WorkspaceContext): void {
       backup = parsed;
       status.replaceChildren();
       const acknowledgement = input('checkbox');
-      const counts = `${parsed.state.holdings.length} Ausgaben · ${parsed.state.binders.length} Binder · ${parsed.state.wishes.length} Wünsche · ${parsed.photos.size} Originalfotos`;
+      const counts = `${parsed.state.holdings.length} Ausgaben · ${parsed.state.binders.length} Binder · ${parsed.state.wishes.length} Wünsche · keine Fotos`;
       preview.append(
         el('h3', '', 'Sicherung geprüft'),
         el('p', '', counts),
@@ -147,31 +146,7 @@ export function openBackup(ctx: WorkspaceContext): void {
     }
     importButton.disabled = true;
     try {
-      const next = structuredClone(backup.state);
-      // Keep previous originals intact so undo also restores the correct images.
-      const ids = new Map(
-        [...backup.photos.keys()].map((id) => [id, `photo-${uid()}`]),
-      );
-      const remap = (card: PersonalCard) => {
-        if (card.photoId) card.photoId = ids.get(card.photoId)!;
-      };
-      next.holdings.forEach((holding) => remap(holding.card));
-      next.wishes.forEach((wish) => remap(wish.card));
-      next.captures.forEach((capture) => {
-        capture.photoId = ids.get(capture.photoId)!;
-        capture.candidates.forEach(remap);
-      });
-      next.binders.forEach((binder) =>
-        binder.pages.forEach((page) =>
-          page.slots.forEach((slot) => {
-            if (slot?.kind === 'planned') remap(slot.card);
-          }),
-        ),
-      );
-      const photos = new Map(
-        [...backup.photos].map(([id, blob]) => [ids.get(id)!, blob]),
-      );
-      const success = await ctx.restore(next, photos);
+      const success = await ctx.restore(backup.state);
       if (success) {
         ctx.navigate('sammlung');
         sheet.close();

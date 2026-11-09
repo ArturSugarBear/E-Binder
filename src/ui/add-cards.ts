@@ -37,6 +37,8 @@ export function openAddCards(
   ctx: WorkspaceContext,
   options: AddOptions = {},
 ): void {
+  const transientPhotos = new Map<string, Blob>();
+  const previewUrls = new Set<string>();
   const sheet = modal(
     options.correctHoldingId ? 'Ausgabe korrigieren' : 'Karten hinzufügen',
     true,
@@ -95,6 +97,9 @@ export function openAddCards(
   };
   sheet.onClose(() => {
     closed = true;
+    transientPhotos.clear();
+    for (const url of previewUrls) URL.revokeObjectURL(url);
+    previewUrls.clear();
     browser.close();
     searchController?.abort();
     ocrController?.abort();
@@ -146,8 +151,8 @@ export function openAddCards(
   sheet.footer.append(
     message(
       ctx.account && ctx.state.mode !== 'demo'
-        ? 'Texterkennung läuft im Browser. Originalfotos werden privat mit deinem Konto gesichert. Katalogdaten und offizielle Bilder kommen direkt von TCGdex.'
-        : 'Fotos und Texterkennung bleiben in diesem Browser. Beim ersten Start werden die lokalen Erkennungsdaten geladen. Katalogabfragen verwenden TCGdex.',
+        ? 'Texterkennung läuft im Browser. Fotos werden anschließend verworfen. Dein Konto speichert ausschließlich Karten-Metadaten; Katalogbilder kommen direkt von TCGdex.'
+        : 'Fotos werden nur vorübergehend für die Erkennung geöffnet und beim Schließen verworfen. Gespeichert werden Karten-Metadaten. Katalogbilder kommen von TCGdex.',
     ),
   );
 
@@ -157,28 +162,20 @@ export function openAddCards(
     notices.replaceChildren(message(text, error ? 'error' : 'note'));
   const showCapture = () => {
     photoArea.replaceChildren();
+    for (const url of previewUrls) URL.revokeObjectURL(url);
+    previewUrls.clear();
     const shot = capture();
     if (!shot) return;
-    const card: PersonalCard = selected
-      ? { ...selected, photoId: shot.photoId }
-      : {
-          key: `photo:${shot.id}`,
-          name: 'Dein Originalfoto',
-          setName: 'Noch nicht zugeordnet',
-          setId: '',
-          number: 'offen',
-          language: language.value,
-          image: '',
-          source: 'manual',
-          sourceId: '',
-          artist: '',
-          artistSource: 'unknown',
-          evolvesFrom: '',
-          stage: '',
-          finishes: ['normal'],
-          photoId: shot.photoId,
-        };
-    const picture = ctx.images.artwork(card, 'w-original-photo');
+    const temporary = transientPhotos.get(shot.id);
+    const picture = el('span', 'card-art w-original-photo');
+    if (temporary) {
+      const url = URL.createObjectURL(temporary);
+      previewUrls.add(url);
+      const image = el('img');
+      image.src = url;
+      image.alt = 'Temporäre Aufnahme für die Erkennung';
+      picture.append(image);
+    } else picture.append(el('span', 'art-fallback', 'Kein Foto gespeichert'));
     const copy = el(
       'div',
       '',
@@ -188,10 +185,12 @@ export function openAddCards(
         'w-muted',
         shot.status === 'confirmed'
           ? 'Dieses Foto wurde bereits übernommen.'
-          : 'Vergleiche dein Foto mit der ausgewählten Ausgabe. Set, Nummer, Sprache und Variante müssen passen.',
+          : temporary
+            ? 'Vergleiche die Aufnahme mit der Ausgabe. Das Foto wird beim Schließen verworfen.'
+            : 'Nur das Erkennungsergebnis wurde gespeichert. Prüfe die Ausgabe oder fotografiere die Karte erneut.',
       ),
     );
-    if (shot.status !== 'confirmed')
+    if (shot.status !== 'confirmed' && temporary)
       copy.append(
         action(
           'Foto ausrichten und erkennen',
@@ -284,7 +283,7 @@ export function openAddCards(
           throw new Error(
             'Bitte nutze JPG, PNG, WebP oder HEIC/HEIF bis 12 MB pro Karte. Bereits aufgenommene Fotos bleiben erhalten.',
           );
-        tell(`${file.name} wird lokal gesichert …`);
+        tell(`${file.name} wird für die Erkennung geöffnet …`);
         const digest = await crypto.subtle.digest(
           'SHA-256',
           await file.arrayBuffer(),
@@ -294,15 +293,13 @@ export function openAddCards(
         ).join('');
         const existing = ctx.state.captures.find((item) => item.hash === hash);
         if (existing) {
+          transientPhotos.set(existing.id, file);
           first ??= existing.id;
           repeats++;
           continue;
         }
-        const photoId = `photo-${hash}`;
-        await ctx.store.putPhoto(ctx.state.mode, photoId, file);
         const shot: Capture = {
           id: uid(),
-          photoId,
           hash,
           name: file.name.slice(0, 200),
           createdAt: new Date().toISOString(),
@@ -311,6 +308,7 @@ export function openAddCards(
           error: '',
           candidates: [],
         };
+        transientPhotos.set(shot.id, file);
         if (
           !ctx.commit('Foto zur Erfassung hinzugefügt', (state) =>
             changeState(state, (next) => {
@@ -331,7 +329,7 @@ export function openAddCards(
         showCapture();
         photoArea.scrollIntoView({ block: 'start' });
         tell(
-          `${added} neue Fotos gesichert.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
+          `${added} Aufnahmen geöffnet.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
         );
       }
     } catch (error) {
@@ -382,15 +380,17 @@ export function openAddCards(
     );
     notices.replaceChildren(status, progress, stop);
     try {
-      const photo = await ctx.store.photo(ctx.state.mode, shot.photoId);
+      const photo = transientPhotos.get(shot.id);
       if (!photo)
         throw new Error(
-          'Das Originalfoto wurde im lokalen Speicher nicht gefunden.',
+          'Die Aufnahme ist nicht mehr geöffnet. Fotografiere die Karte erneut; Bilder werden nicht gespeichert.',
         );
       const aligned = await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
         if (!closed && ocrController === controller)
-          tell('Ausrichtung abgebrochen. Dein Foto bleibt offen.');
+          tell(
+            'Ausrichtung abgebrochen. Die Aufnahme bleibt bis zum Schließen geöffnet.',
+          );
         return;
       }
       const text = await recognizePhoto(
@@ -446,7 +446,7 @@ export function openAddCards(
       tell(
         candidates.length
           ? `Erkennungsvorschläge, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Online-Abgleich war nicht erreichbar; diese Vorschläge stammen aus dem lokalen Katalog.' : ''}`
-          : 'Keine eindeutige Karte gefunden. Das Foto bleibt erhalten. Suche nach Name oder Nummer oder trage die Ausgabe manuell ein.',
+          : 'Keine eindeutige Karte gefunden. Die Aufnahme bleibt bis zum Schließen geöffnet. Suche nach Name oder Nummer oder trage die Ausgabe manuell ein.',
       );
       const number = recognitionClues(text)[0]?.number;
       if (number && !candidates.length) {
@@ -456,7 +456,9 @@ export function openAddCards(
     } catch (error) {
       if (closed || ocrController !== controller) return;
       if (controller.signal.aborted) {
-        tell('Erkennung abgebrochen. Das Foto bleibt in deiner Sitzung.');
+        tell(
+          'Erkennung abgebrochen. Die Aufnahme bleibt bis zum Schließen geöffnet.',
+        );
         return;
       }
       const text = errorText(error);
@@ -643,8 +645,8 @@ export function openAddCards(
               key: `manual:${normalize(card.setName)}:${normalize(card.number)}:${detailsLanguage.value}`,
             }
           : {}),
-        ...(shot ? { photoId: shot.photoId } : {}),
       };
+      delete adopted.photoId;
       const previous =
         original ??
         ctx.state.holdings.find(
@@ -684,6 +686,7 @@ export function openAddCards(
       );
       if (ok) {
         if (shot) {
+          transientPhotos.delete(shot.id);
           ocrController?.abort();
           ocrController = undefined;
           captureId = ctx.state.captures.find(

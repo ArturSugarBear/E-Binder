@@ -1,9 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
-import { PersonalStore, allPhotoIds } from './personal-store';
+import { PersonalStore } from './personal-store';
 import {
   emptyState,
   validateState,
+  metadataOnlyState,
   type PersonalState,
 } from '../domain/personal';
 
@@ -20,7 +21,6 @@ export class CloudStore extends PersonalStore {
   conflict = false;
   private version = 0;
   private remoteQueue = Promise.resolve();
-  private uploaded = new Set<string>();
   private markerKey: string;
   constructor(
     private client: SupabaseClient,
@@ -81,9 +81,9 @@ export class CloudStore extends PersonalStore {
       return cached;
     }
   }
-  save(state: PersonalState, photos = new Map<string, Blob>()): Promise<void> {
+  save(state: PersonalState): Promise<void> {
     const snapshot = structuredClone(state);
-    const local = super.save(snapshot, photos);
+    const local = super.save(snapshot);
     const operation = this.remoteQueue
       .catch(() => undefined)
       .then(async () => {
@@ -103,47 +103,10 @@ export class CloudStore extends PersonalStore {
     this.remoteQueue = operation;
     return operation;
   }
-  private path(id: string): string {
-    return `${this.userId}/${encodeURIComponent(id)}`;
-  }
-  async photo(
-    mode: PersonalState['mode'],
-    id: string,
-  ): Promise<Blob | undefined> {
-    const local = await super.photo(mode, id);
-    if (local || mode === 'demo') return local;
-    const { data, error } = await this.client.storage
-      .from('originals')
-      .download(this.path(id));
-    if (error)
-      throw new Error(
-        'Das Originalfoto konnte nicht aus deinem Konto geladen werden.',
-      );
-    await super.putPhoto(mode, id, data);
-    this.uploaded.add(id);
-    return data;
-  }
   private async push(state: PersonalState): Promise<void> {
     if (this.conflict) throw new Error('WORKSPACE_CONFLICT');
-    for (const id of allPhotoIds(state)) {
-      if (this.uploaded.has(id)) continue;
-      const photo = await this.photo('personal', id);
-      if (!photo)
-        throw new Error(
-          'Ein Originalfoto fehlt. Der Cloudstand wurde nicht ersetzt.',
-        );
-      const { error } = await this.client.storage
-        .from('originals')
-        .upload(this.path(id), photo, {
-          upsert: false,
-          contentType: photo.type,
-        });
-      if (error && String(error.statusCode) !== '409')
-        throw new Error('Ein Originalfoto konnte nicht gesichert werden.');
-      this.uploaded.add(id);
-    }
     const { data, error } = await this.client.rpc('save_workspace', {
-      p_state: state,
+      p_state: metadataOnlyState(state),
       p_expected_version: this.version,
     });
     if (error) throw new Error(error.message);

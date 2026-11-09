@@ -1,6 +1,6 @@
 import { cloudClient, loginAddress } from '../data/supabase';
 import { CloudStore } from '../data/cloud-store';
-import { PersonalStore, allPhotoIds } from '../data/personal-store';
+import { PersonalStore } from '../data/personal-store';
 import { validateState } from '../domain/personal';
 import type { WorkspaceContext } from './workspace-context';
 import {
@@ -75,7 +75,7 @@ export async function openAccount(
         'Mindestens 12 Zeichen. Keine E-Mail-Adresse erforderlich.',
       ),
       message(
-        'Im Konto werden Sammlung, Binder und eigene Kartenfotos privat mit Supabase gespeichert. Die Erkennung läuft weiterhin im Browser. Dein bisheriger lokaler Bestand bleibt separat erhalten und kann nach der Anmeldung übernommen werden.',
+        'Im Konto werden Sammlung und Binder als reine Metadaten privat mit Supabase gespeichert. Fotos werden nicht gespeichert. Die Erkennung läuft weiterhin im Browser. Dein bisheriger lokaler Bestand bleibt separat erhalten und kann nach der Anmeldung übernommen werden.',
       ),
       message(
         'Ohne E-Mail gibt es keinen automatischen Passwort-Reset. Bei Verlust kann der Betreiber nach Prüfung helfen.',
@@ -180,19 +180,7 @@ export async function openAccount(
             throw new Error(
               'Auf diesem Gerät ist noch kein lokaler Bestand gespeichert.',
             );
-          const photos = new Map<string, Blob>();
-          for (const id of allPhotoIds(state)) {
-            const photo = await local.photo('personal', id);
-            if (!photo)
-              throw new Error(
-                'Ein lokales Original fehlt. Der Kontobestand bleibt unverändert.',
-              );
-            photos.set(id, photo);
-          }
-          await ctx.restore(
-            validateState({ ...state, mode: 'personal' }),
-            photos,
-          );
+          await ctx.restore(validateState({ ...state, mode: 'personal' }));
         } catch (error) {
           fail(error);
         } finally {

@@ -2,18 +2,50 @@ import { z } from 'zod';
 import {
   emptyState,
   validateState,
+  metadataOnlyState,
   type PersonalState,
 } from '../domain/personal';
 
 const DATABASE = 'e-binder-personal';
 const openDatabase = (): Promise<IDBDatabase> =>
   new Promise((resolve, reject) => {
-    const request = indexedDB.open(DATABASE, 1);
+    let blocked = false;
+    const request = indexedDB.open(DATABASE, 2);
     request.onupgradeneeded = () => {
-      request.result.createObjectStore('states');
-      request.result.createObjectStore('photos');
+      const db = request.result;
+      if (!db.objectStoreNames.contains('states'))
+        db.createObjectStore('states');
+      if (db.objectStoreNames.contains('photos'))
+        db.deleteObjectStore('photos');
+      const cursor = request.transaction!.objectStore('states').openCursor();
+      cursor.onsuccess = () => {
+        const item = cursor.result;
+        if (!item) return;
+        try {
+          item.update(metadataOnlyState(item.value as PersonalState));
+        } catch {
+          /* Invalid metadata stays available for recovery; photo storage is still deleted. */
+        }
+        item.continue();
+      };
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onblocked = () => {
+      blocked = true;
+      reject(
+        new Error(
+          'Schließe andere E-Binder-Tabs und lade neu, damit der alte Fotospeicher entfernt werden kann.',
+        ),
+      );
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => db.close();
+      if (blocked) {
+        db.close();
+        return;
+      }
+      resolve(db);
+    };
     request.onerror = () =>
       reject(new Error('Der lokale Speicher konnte nicht geöffnet werden.'));
   });
@@ -51,31 +83,22 @@ export class PersonalStore {
     const raw = await resultOf(
       db.transaction('states').objectStore('states').get(this.key(mode)),
     );
-    const state = raw === undefined ? emptyState(mode) : validateState(raw);
+    const state =
+      raw === undefined
+        ? emptyState(mode)
+        : metadataOnlyState(validateState(raw));
     if (state.mode !== mode)
       throw new Error('Der gespeicherte Bestand hat einen anderen Modus.');
     this.revisions.set(mode, state.revision);
     return state;
   }
-  save(
-    state: PersonalState,
-    photos: Map<string, Blob> = new Map(),
-  ): Promise<void> {
-    const snapshot = structuredClone(state);
+  save(state: PersonalState): Promise<void> {
+    const snapshot = metadataOnlyState(state);
     const operation = this.queue
       .catch(() => undefined)
       .then(async () => {
-        const originals = await Promise.all(
-          [...photos].map(
-            async ([id, photo]) =>
-              [
-                id,
-                { mime: photo.type, data: await photo.arrayBuffer() },
-              ] as const,
-          ),
-        );
         const db = await this.database;
-        const transaction = db.transaction(['states', 'photos'], 'readwrite');
+        const transaction = db.transaction('states', 'readwrite');
         const done = completed(transaction);
         const states = transaction.objectStore('states');
         const current = await resultOf(states.get(this.key(snapshot.mode)));
@@ -88,48 +111,12 @@ export class PersonalStore {
             'Der Bestand wurde in einem anderen Tab geändert. Sichere deine Änderungen als Export und lade die Seite neu.',
           );
         }
-        for (const [id, photo] of originals)
-          transaction
-            .objectStore('photos')
-            .put(photo, `${this.key(snapshot.mode)}:${id}`);
         states.put(snapshot, this.key(snapshot.mode));
         await done;
         this.revisions.set(snapshot.mode, snapshot.revision);
       });
     this.queue = operation;
     return operation;
-  }
-  async putPhoto(
-    mode: PersonalState['mode'],
-    id: string,
-    blob: Blob,
-  ): Promise<void> {
-    // Preserve exact original bytes without WebKit's File-backed Blob handling.
-    const original = { mime: blob.type, data: await blob.arrayBuffer() };
-    const db = await this.database;
-    const transaction = db.transaction('photos', 'readwrite');
-    const done = completed(transaction);
-    transaction.objectStore('photos').put(original, `${this.key(mode)}:${id}`);
-    await done;
-  }
-  async photo(
-    mode: PersonalState['mode'],
-    id: string,
-  ): Promise<Blob | undefined> {
-    const db = await this.database;
-    const original = (await resultOf(
-      db
-        .transaction('photos')
-        .objectStore('photos')
-        .get(`${this.key(mode)}:${id}`),
-    )) as Blob | { mime: string; data: ArrayBuffer } | undefined;
-    if (!original || original instanceof Blob) return original;
-    if (
-      !(original.data instanceof ArrayBuffer) ||
-      typeof original.mime !== 'string'
-    )
-      throw new Error('Das gespeicherte Originalfoto ist beschädigt.');
-    return new Blob([original.data], { type: original.mime });
   }
 }
 
@@ -147,7 +134,9 @@ const photoLine = z
     data: z
       .string()
       .max(32000000)
-      .regex(/^[A-Za-z0-9+/]*={0,2}$/),
+      .regex(
+        /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
+      ),
   })
   .strict();
 const headerLine = z
@@ -161,19 +150,8 @@ const headerLine = z
   })
   .strict();
 
-function base64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
-    reader.onerror = () =>
-      reject(new Error('Ein Foto konnte nicht gesichert werden.'));
-    reader.readAsDataURL(blob);
-  });
-}
-export async function exportBackup(
-  state: PersonalState,
-  store: PersonalStore,
-): Promise<Blob> {
+export async function exportBackup(input: PersonalState): Promise<Blob> {
+  const state = metadataOnlyState(input);
   const lines: string[] = [
     JSON.stringify({
       record: 'manifest',
@@ -198,22 +176,6 @@ export async function exportBackup(
       lastPageId: state.lastPageId,
     }),
   );
-  const ids = allPhotoIds(state);
-  for (const id of ids) {
-    const photo = await store.photo(state.mode, id);
-    if (!photo)
-      throw new Error(
-        'Ein Originalfoto fehlt im lokalen Speicher. Die Sicherung wurde nicht als vollständig ausgegeben.',
-      );
-    lines.push(
-      JSON.stringify({
-        record: 'photo',
-        id,
-        mime: photo.type,
-        data: await base64(photo),
-      }),
-    );
-  }
   const backup = new Blob([lines.join('\n') + '\n'], {
     type: 'application/x-ndjson',
   });
@@ -223,34 +185,8 @@ export async function exportBackup(
     );
   return backup;
 }
-export function allPhotoIds(state: PersonalState): Set<string> {
-  return new Set([
-    ...state.captures.map((capture) => capture.photoId),
-    ...state.captures.flatMap((capture) =>
-      capture.candidates.flatMap((card) =>
-        card.photoId ? [card.photoId] : [],
-      ),
-    ),
-    ...state.holdings.flatMap((holding) =>
-      holding.card.photoId ? [holding.card.photoId] : [],
-    ),
-    ...state.wishes.flatMap((wish) =>
-      wish.card.photoId ? [wish.card.photoId] : [],
-    ),
-    ...state.binders.flatMap((binder) =>
-      binder.pages.flatMap((page) =>
-        page.slots.flatMap((slot) =>
-          slot?.kind === 'planned' && slot.card.photoId
-            ? [slot.card.photoId]
-            : [],
-        ),
-      ),
-    ),
-  ]);
-}
 export interface Backup {
   state: PersonalState;
-  photos: Map<string, Blob>;
 }
 export function parseBackup(content: string): Backup {
   if (content.length > 256000000)
@@ -261,19 +197,18 @@ export function parseBackup(content: string): Backup {
   const header = headerLine.parse(JSON.parse(lines[0]!));
   const raw = emptyState(header.mode);
   raw.revision = header.revision;
-  const photos = new Map<string, Blob>();
+  const legacyPhotoIds = new Set<string>();
   for (const line of lines.slice(1)) {
     const value: unknown = JSON.parse(line);
     const record = z.object({ record: z.string() }).parse(value).record;
     if (record === 'photo') {
       const photo = photoLine.parse(value);
-      if (photos.has(photo.id))
-        throw new Error('Ein Foto ist mehrfach in der Sicherung vorhanden.');
-      const binary = atob(photo.data);
-      const bytes = Uint8Array.from(binary, (character) =>
-        character.charCodeAt(0),
-      );
-      photos.set(photo.id, new Blob([bytes], { type: photo.mime }));
+      if (legacyPhotoIds.has(photo.id))
+        throw new Error(
+          'Ein Foto ist mehrfach in der alten Sicherung vorhanden.',
+        );
+      legacyPhotoIds.add(photo.id);
+      // Legacy bytes are validated above, then discarded without decoding or storage.
     } else if (record === 'context') {
       const context = z
         .object({
@@ -302,11 +237,5 @@ export function parseBackup(content: string): Backup {
       (raw[key[envelope.record]] as unknown[]).push(envelope.data);
     }
   }
-  const state = validateState(raw);
-  for (const id of allPhotoIds(state))
-    if (!photos.has(id))
-      throw new Error(
-        'In dieser Sicherung fehlt ein referenziertes Originalfoto.',
-      );
-  return { state, photos };
+  return { state: metadataOnlyState(validateState(raw)) };
 }

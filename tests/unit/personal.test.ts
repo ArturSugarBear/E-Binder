@@ -19,10 +19,11 @@ import {
   setPageLayout,
   swapSlots,
   validateState,
+  metadataOnlyState,
   type PersonalState,
 } from '../../src/domain/personal';
 import { suggestPages, type Preferences } from '../../src/domain/recommend';
-import { allPhotoIds, parseBackup } from '../../src/data/personal-store';
+import { exportBackup, parseBackup } from '../../src/data/personal-store';
 
 const cards = editorialCards(parseCollection(collection));
 function fixture(): PersonalState {
@@ -217,7 +218,7 @@ describe('recognition and backup boundaries', () => {
     expect(candidates.some((card) => card.name === 'Taubsi')).toBe(true);
     expect(emptyState().holdings).toEqual([]);
   });
-  it('rejects missing photos and impossible allocations before replacing a collection', () => {
+  it('imports legacy card references without requiring or retaining their photos', () => {
     const state = fixture();
     const manifest = {
       record: 'manifest',
@@ -235,7 +236,7 @@ describe('recognition and backup boundaries', () => {
       JSON.stringify(manifest) +
       '\n' +
       JSON.stringify({ record: 'holding', data: bad });
-    expect(() => parseBackup(backup)).toThrow(/Originalfoto/);
+    expect(parseBackup(backup).state.holdings[0]!.card.photoId).toBeUndefined();
     expect(state.holdings).toHaveLength(9);
   });
 });
@@ -322,7 +323,7 @@ describe('regressions at the boundary of inventory and layout', () => {
     });
     expect(findPage(state, pageId).assembled).toBe(false);
   });
-  it('includes originals referenced only by unconfirmed recognition candidates in the backup', () => {
+  it('strips transient references from recognition candidates without mutating the active session', () => {
     const state = changeState(fixture(), (next) => {
       next.captures.push({
         id: 'capture',
@@ -336,8 +337,12 @@ describe('regressions at the boundary of inventory and layout', () => {
         candidates: [{ ...cards[0]!, photoId: 'candidate-original' }],
       });
     });
-    expect(allPhotoIds(state)).toEqual(
-      new Set(['original', 'candidate-original']),
+    const clean = metadataOnlyState(state);
+    expect(clean.captures[0]!.photoId).toBeUndefined();
+    expect(clean.captures[0]!.candidates[0]!.photoId).toBeUndefined();
+    expect(state.captures[0]!.photoId).toBe('original');
+    expect(state.captures[0]!.candidates[0]!.photoId).toBe(
+      'candidate-original',
     );
   });
 });
@@ -346,4 +351,58 @@ it('keeps non-Latin illustrator names and set names distinct during normalizatio
   expect(normalize('江川')).not.toBe(normalize('森山'));
   expect(normalize('が')).not.toBe(normalize('か'));
   expect(normalize('Pokémon Café')).toBe('pokemoncafe');
+});
+
+it('exports metadata only and validates but discards legacy image bytes on import', async () => {
+  const state = changeState(fixture(), (next) => {
+    next.holdings[0]!.card.photoId = 'old-upload';
+    next.wishes.push({
+      id: 'wish-photo',
+      card: { ...cards[0]!, photoId: 'wish-upload' },
+      quantity: 1,
+      priority: 'normal',
+      notes: '',
+    });
+    next.binders[0]!.pages[0]!.slots[0] = {
+      kind: 'planned',
+      card: { ...cards[0]!, photoId: 'planned-upload' },
+      locked: false,
+    };
+    next.captures.push({
+      id: 'capture-photo',
+      photoId: 'old-upload',
+      hash: 'hash',
+      name: 'old.jpg',
+      createdAt: 'today',
+      status: 'pending',
+      text: 'SVI 211/198',
+      error: '',
+      candidates: [{ ...cards[0]!, photoId: 'candidate-upload' }],
+    });
+  });
+  const clean = metadataOnlyState(state);
+  expect(JSON.stringify(clean)).not.toContain('photoId');
+  expect(clean.holdings[0]!.quantity).toBe(state.holdings[0]!.quantity);
+  expect(clean.captures[0]!.text).toBe('SVI 211/198');
+  const exported = await (await exportBackup(state)).text();
+  expect(exported).not.toContain('photoId');
+  expect(exported).not.toContain('"record":"photo"');
+  expect(exported).not.toContain('data:image');
+  const oldPhoto = {
+    record: 'photo',
+    id: 'old-upload',
+    mime: 'image/jpeg',
+    data: 'cHJpdmF0ZS1waG90by1ieXRlcw==',
+  };
+  const legacy = exported + JSON.stringify(oldPhoto) + '\n';
+  const restored = parseBackup(legacy);
+  expect(Object.keys(restored)).toEqual(['state']);
+  expect(JSON.stringify(restored)).not.toContain(oldPhoto.data);
+  expect(JSON.stringify(restored)).not.toContain('photoId');
+  expect(restored.state.captures[0]!.text).toBe('SVI 211/198');
+  expect(() =>
+    parseBackup(
+      exported + JSON.stringify({ ...oldPhoto, data: '!invalid-base64!' }),
+    ),
+  ).toThrow();
 });

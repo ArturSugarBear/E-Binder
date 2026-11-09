@@ -3,28 +3,12 @@ import type { PersonalStore } from './personal-store';
 import { catalogEntry, fillCatalogImages, imageLanguage } from './card-catalog';
 
 export class CardImages {
-  private urls = new Map<string, Promise<string>>();
   private palettes = new Map<string, Promise<Palette | undefined>>();
   constructor(
-    private store: PersonalStore,
+    _store: PersonalStore,
     private mode: () => PersonalState['mode'],
   ) {}
   url(card: PersonalCard): Promise<string> {
-    if (card.photoId) {
-      const key = `${this.mode()}:${card.photoId}`;
-      if (!this.urls.has(key)) {
-        const mode = this.mode();
-        this.urls.set(
-          key,
-          this.store
-            .photo(mode, card.photoId)
-            .then((blob) =>
-              blob ? URL.createObjectURL(blob) : this.remote(card),
-            ),
-        );
-      }
-      return this.urls.get(key)!;
-    }
     return this.remote(card);
   }
   private async remote(card: PersonalCard): Promise<string> {
@@ -114,7 +98,7 @@ export class CardImages {
   }
   palette(card: PersonalCard): Promise<Palette | undefined> {
     if (card.palette) return Promise.resolve(card.palette);
-    const key = `${this.mode()}:${card.photoId ?? card.image}`;
+    const key = `${this.mode()}:${card.image}`;
     if (!this.palettes.has(key)) this.palettes.set(key, this.measure(card));
     return this.palettes.get(key)!;
   }

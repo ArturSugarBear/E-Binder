@@ -144,7 +144,7 @@ export type Wish = z.infer<typeof wishSchema>;
 export const captureSchema = z
   .object({
     id,
-    photoId: id,
+    photoId: id.optional(),
     hash: text,
     name: text,
     createdAt: text,
@@ -185,6 +185,28 @@ export function emptyState(
     captures: [],
   };
 }
+/** Persistence boundary: uploaded photos are transient inputs, never collection data. */
+export function metadataOnlyState(state: PersonalState): PersonalState {
+  const clean = structuredClone(state);
+  const strip = (card: PersonalCard) => {
+    delete card.photoId;
+  };
+  clean.holdings.forEach((holding) => strip(holding.card));
+  clean.wishes.forEach((wish) => strip(wish.card));
+  clean.captures.forEach((capture) => {
+    delete capture.photoId;
+    capture.candidates.forEach(strip);
+  });
+  clean.binders.forEach((binder) =>
+    binder.pages.forEach((page) =>
+      page.slots.forEach((slot) => {
+        if (slot?.kind === 'planned') strip(slot.card);
+      }),
+    ),
+  );
+  return validateState(clean);
+}
+
 export const uid = (): string => crypto.randomUUID();
 export const normalize = (value: string): string =>
   value

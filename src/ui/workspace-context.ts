@@ -33,8 +33,5 @@ export interface WorkspaceContext {
   openHolding: (id: string) => void;
   openBackup: () => void;
   switchMode: (mode: PersonalState['mode']) => Promise<void>;
-  restore: (
-    state: PersonalState,
-    photos: Map<string, Blob>,
-  ) => Promise<boolean>;
+  restore: (state: PersonalState) => Promise<boolean>;
 }

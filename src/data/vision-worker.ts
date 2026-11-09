@@ -30,7 +30,7 @@ scope.onmessage = (event) => {
       scope.postMessage({
         type: 'error',
         message:
-          'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Dein Foto bleibt erhalten. Wähle die Ausgabe manuell oder fotografiere den unteren Rand deutlicher.',
+          'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Die Aufnahme bleibt bis zum Schließen geöffnet. Wähle die Ausgabe manuell oder fotografiere den unteren Rand deutlicher.',
       }),
     )
     .finally(() => scope.close());

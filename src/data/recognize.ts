@@ -23,7 +23,7 @@ export function recognizePhoto(
       () =>
         stop(
           new Error(
-            'Die Erkennung dauert zu lange. Dein Foto bleibt erhalten. Wähle die Ausgabe manuell oder starte die Erkennung erneut.',
+            'Die Erkennung dauert zu lange. Die Aufnahme bleibt bis zum Schließen geöffnet. Wähle die Ausgabe manuell oder starte die Erkennung erneut.',
           ),
         ),
       90000,
@@ -33,7 +33,7 @@ export function recognizePhoto(
       event.preventDefault();
       stop(
         new Error(
-          'Die lokale Erkennung konnte nicht gestartet werden. Dein Foto bleibt erhalten; die manuelle Auswahl ist weiterhin verfügbar.',
+          'Die lokale Erkennung konnte nicht gestartet werden. Die Aufnahme bleibt bis zum Schließen geöffnet; die manuelle Auswahl ist weiterhin verfügbar.',
         ),
       );
     };

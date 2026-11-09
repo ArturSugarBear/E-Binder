@@ -240,7 +240,7 @@ export async function startWorkspace(): Promise<void> {
         ctx.notify(errorText(error), true);
       }
     },
-    restore: async (incoming, photos) => {
+    restore: async (incoming) => {
       await saving;
       blocked = true;
       try {
@@ -252,7 +252,7 @@ export async function startWorkspace(): Promise<void> {
         });
         status.textContent = 'Wiederherstellung läuft …';
         status.dataset.state = 'saving';
-        await store.save(snapshot, photos);
+        await store.save(snapshot);
         history.push({
           state: structuredClone(previous),
           label: 'Sicherung wiederhergestellt',

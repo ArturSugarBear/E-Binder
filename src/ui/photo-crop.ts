@@ -263,7 +263,7 @@ export async function alignPhoto(
     });
   } catch {
     throw new Error(
-      'Dieses Bildformat konnte der Browser nicht öffnen. Nutze ein JPG, PNG oder WebP. Das Originalfoto bleibt erhalten.',
+      'Dieses Bildformat konnte der Browser nicht öffnen. Nutze ein JPG, PNG oder WebP. Die Aufnahme bleibt bis zum Schließen geöffnet.',
     );
   } finally {
     URL.revokeObjectURL(url);
