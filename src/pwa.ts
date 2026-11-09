@@ -41,8 +41,8 @@ function showBanner(
   action?: { text: string; run: () => void },
   rememberDismissal = false,
 ): void {
-  document.querySelector('[data-pwa-banner="' + kind + '"]')?.remove();
-  const box = document.createElement('aside');
+  for (const notice of document.querySelectorAll('.pwa-banner')) notice.remove();
+  const box = document.createElement('div');
   box.className = 'pwa-banner';
   box.dataset.pwaBanner = kind;
   box.setAttribute('role', 'status');
@@ -73,7 +73,9 @@ function showBanner(
     }
   });
   box.append(close);
-  document.body.append(box);
+  const anchor = document.querySelector('.w-workspace-status, .top');
+  if (anchor) anchor.insertAdjacentElement('afterend', box);
+  else document.body.prepend(box);
 }
 
 function dismissedInstall(): boolean {
@@ -108,6 +110,7 @@ export function initPwa(): void {
         });
       },
       onOfflineReady() {
+        if (document.querySelector('[data-pwa-banner="install"]')) return;
         showBanner(
           'offline-ready',
           'E-Binder lässt sich jetzt offline öffnen. Noch nicht geladene Kartenbilder, Online-Katalog und Cloud-Sync benötigen Internet.',
