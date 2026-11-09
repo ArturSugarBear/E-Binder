@@ -44,6 +44,10 @@ async function catalogue(page: Page): Promise<string[]> {
           cardCount: { official: 102, total: 102 },
         },
       ];
+    else if (path === 'series')
+      json = [{ id: 'sv', name: 'Karmesin & Purpur' }];
+    else if (path === 'series/sv') json = { id: 'sv', sets: [set] };
+    else if (path === 'series/tcgp') json = { id: 'tcgp', sets: [] };
     else if (path === 'illustrators') json = ['GIDORA', 'Tomokazu Komiya'];
     else if (path === 'rarities') json = ['Häufig', 'Selten'];
     else if (path === 'sets/sv10') json = { ...set, cards: resumes };

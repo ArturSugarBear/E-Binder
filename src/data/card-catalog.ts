@@ -180,6 +180,41 @@ export async function catalogSets(
       alias: english.find((other) => other.id === set.id)?.name,
     }));
 }
+const seriesSchema = z.object({
+  id: z.string().regex(/^[\w.-]+$/),
+  name: z.string(),
+});
+export async function catalogSeries(
+  language: string,
+  signal?: AbortSignal,
+): Promise<{ id: string; name: string }[]> {
+  catalogLanguage(language);
+  return z
+    .array(seriesSchema)
+    .parse(
+      await cachedJson(`https://api.tcgdex.net/v2/${language}/series`, signal),
+    )
+    .filter((item) => item.id !== 'tcgp');
+}
+export async function catalogSeriesSets(
+  id: string,
+  language: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  catalogLanguage(language);
+  if (!/^[\w.-]+$/.test(id) || id === 'tcgp')
+    throw new Error('Ungültige Kartenreihe.');
+  const data = z
+    .object({ id: z.literal(id), sets: z.array(catalogSetSchema) })
+    .parse(
+      await cachedJson(
+        `https://api.tcgdex.net/v2/${language}/series/${encodeURIComponent(id)}`,
+        signal,
+      ),
+    );
+  return data.sets.map((item) => item.id);
+}
+
 export async function catalogValues(
   language: string,
   field: 'illustrators' | 'rarities',

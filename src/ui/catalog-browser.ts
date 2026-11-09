@@ -3,6 +3,8 @@ import {
   catalogResumeCard,
   catalogSetCards,
   catalogSets,
+  catalogSeries,
+  catalogSeriesSets,
   catalogValues,
   fillCatalogImages,
   searchCatalog,
@@ -23,8 +25,21 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import '../catalog.css';
 
+export interface CatalogBrowserState {
+  setId: string;
+  artist: string;
+  rarity: string;
+  order: string;
+  query: string;
+  page: number;
+  series: string;
+  setQuery: string;
+}
 type Options = {
   ctx: WorkspaceContext;
+  initial?: Partial<CatalogBrowserState>;
+  standalone?: boolean;
+  onStateChange?: (state: CatalogBrowserState) => void;
   search: HTMLInputElement;
   language: HTMLSelectElement;
   results: HTMLElement;
@@ -41,8 +56,10 @@ const euro = new Intl.NumberFormat('de-DE', {
 });
 export function createCatalogBrowser(options: Options) {
   const { ctx, search, language, results, tell } = options;
-  const set = select([['', 'Alle Sets']], options.setId ?? '');
-  const artist = input('search', options.artist ?? '');
+  const initial = options.initial ?? {};
+  if (initial.query !== undefined) search.value = initial.query;
+  const set = select([['', 'Alle Sets']], initial.setId ?? options.setId ?? '');
+  const artist = input('search', initial.artist ?? options.artist ?? '');
   artist.placeholder = 'Illustrator suchen';
   artist.autocomplete = 'off';
   const suggestions = el('datalist');
@@ -56,9 +73,11 @@ export function createCatalogBrowser(options: Options) {
       ['price-asc', 'Preis aufsteigend (EUR)'],
       ['price-desc', 'Preis absteigend (EUR)'],
     ],
-    'number',
+    initial.order ?? 'number',
   );
+  const series = select([['', 'Alle Reihen']], '');
   const setSearch = input('search');
+  setSearch.value = initial.setQuery ?? '';
   setSearch.placeholder = 'z. B. Ewige Rivalen / Destined Rivals';
   const sets = el('div', 'w-set-grid');
   const loadStatus = el('div', 'w-catalog-status');
@@ -67,7 +86,12 @@ export function createCatalogBrowser(options: Options) {
     'details',
     'w-catalog-discovery',
     el('summary', '', 'Sets und Illustratoren entdecken'),
-    field('Set suchen', setSearch),
+    el(
+      'div',
+      'w-set-browse-controls',
+      field('Reihe / Ära', series),
+      field('Set suchen', setSearch),
+    ),
     sets,
     loadStatus,
   );
@@ -94,8 +118,12 @@ export function createCatalogBrowser(options: Options) {
     selectedSet,
     priceNotice,
   );
-  let page = 1;
+  let page = initial.page ?? 1;
+  let setLimit = 24;
+  let seriesMembers: Set<string> | undefined;
+  let seriesRequest: AbortController | undefined;
   let inventory: CatalogSet[] = [];
+  let initialized = false;
   let metadataLanguage = '';
   let metadata: Promise<void> | undefined;
   let active: AbortSignal | undefined;
@@ -103,6 +131,61 @@ export function createCatalogBrowser(options: Options) {
   let debounce: ReturnType<typeof setTimeout>;
   const lifetime = new AbortController();
   const pricing = new Map<string, CatalogEntry[]>();
+  function state(): CatalogBrowserState {
+    return {
+      setId: set.value,
+      artist: artist.value,
+      rarity: rarity.value,
+      order: order.value,
+      query: search.value,
+      page,
+      series: series.value,
+      setQuery: setSearch.value,
+    };
+  }
+  async function loadSeries(): Promise<void> {
+    seriesRequest?.abort();
+    const controller = new AbortController();
+    seriesRequest = controller;
+    setLimit = 24;
+    try {
+      const members = series.value
+        ? new Set(
+            await catalogSeriesSets(
+              series.value,
+              language.value,
+              AbortSignal.any([controller.signal, lifetime.signal]),
+            ),
+          )
+        : undefined;
+      if (closed || controller.signal.aborted) return;
+      seriesMembers = members;
+      renderSets();
+    } catch {
+      if (controller.signal.aborted || closed) return;
+      series.value = '';
+      seriesMembers = undefined;
+      renderSets();
+      loadStatus.replaceChildren(
+        message(
+          'Diese Kartenreihe konnte nicht geladen werden. Alle Sets bleiben erreichbar.',
+        ),
+      );
+    }
+  }
+  function refresh(): void {
+    for (const marker of results.querySelectorAll<HTMLElement>(
+      '[data-catalog-status]',
+    )) {
+      const key = marker.dataset.catalogStatus;
+      const own = ctx.state.holdings
+        .filter((item) => item.card.key === key)
+        .reduce((total, item) => total + item.quantity, 0);
+      const wish = ctx.state.wishes.some((item) => item.card.key === key);
+      marker.textContent = `${own ? `${own}× im ${ctx.state.mode === 'demo' ? 'Demo-' : ''}Bestand` : ''}${own && wish ? ' · ' : ''}${wish ? 'Gemerkt' : ''}`;
+      marker.hidden = !own && !wish;
+    }
+  }
   function updateSet(): void {
     for (const option of order.options)
       if (option.value.startsWith('price')) option.disabled = !set.value;
@@ -127,6 +210,7 @@ export function createCatalogBrowser(options: Options) {
         'Setfilter entfernen',
         () => {
           set.value = '';
+          browse.open = true;
           updateSet();
           options.onSearch();
         },
@@ -162,12 +246,13 @@ export function createCatalogBrowser(options: Options) {
     const query = normalize(setSearch.value);
     const matching = [...inventory]
       .reverse()
+      .filter((item) => !seriesMembers || seriesMembers.has(item.id))
       .filter((item) =>
         normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
           query,
         ),
       );
-    for (const item of matching.slice(0, query ? 80 : 12)) {
+    for (const item of matching.slice(0, setLimit)) {
       const button = action(
         item.name,
         () => {
@@ -201,20 +286,37 @@ export function createCatalogBrowser(options: Options) {
           'Kein passendes Set in dieser Katalogsprache. Versuche den Namen, die Setkennung oder eine andere Sprache.',
         ),
       );
-    else if (!query)
+    else {
+      if (matching.length > setLimit)
+        sets.append(
+          action(
+            `Weitere Sets anzeigen (${matching.length - setLimit})`,
+            () => {
+              setLimit += 24;
+              renderSets();
+            },
+            'secondary',
+          ),
+        );
       sets.append(
         el(
           'p',
           'w-muted',
-          `${inventory.length} Sets verfügbar. Suche auch nach englischen Setnamen.`,
+          `${matching.length} Sets${series.value ? ' in dieser Reihe' : ' verfügbar'}. Suche auch nach englischen Setnamen.`,
         ),
       );
+    }
   }
   async function loadMetadata(): Promise<void> {
     if (metadataLanguage === language.value && metadata) return metadata;
     metadataLanguage = language.value;
     const lang = language.value;
-    const desiredSet = set.value || options.setId || '';
+    const desiredSet = initialized
+      ? set.value
+      : initial.setId || options.setId || '';
+    const desiredRarity = initialized ? rarity.value : initial.rarity || '';
+    const desiredSeries = initialized ? series.value : initial.series || '';
+    initialized = true;
     loadStatus.replaceChildren(
       message('Sets und Katalogfilter werden geladen …'),
     );
@@ -223,9 +325,10 @@ export function createCatalogBrowser(options: Options) {
         catalogSets(lang, lifetime.signal),
         catalogValues(lang, 'illustrators', lifetime.signal),
         catalogValues(lang, 'rarities', lifetime.signal),
+        catalogSeries(lang, lifetime.signal),
       ]);
       if (closed || lang !== language.value) return;
-      const [setResult, artistsResult, raritiesResult] = data;
+      const [setResult, artistsResult, raritiesResult, seriesResult] = data;
       if (setResult!.status === 'fulfilled') {
         inventory = setResult!.value as CatalogSet[];
         set.replaceChildren(el('option', '', 'Alle Sets'));
@@ -251,7 +354,7 @@ export function createCatalogBrowser(options: Options) {
         );
       }
       if (raritiesResult!.status === 'fulfilled') {
-        const selected = rarity.value;
+        const selected = desiredRarity;
         rarity.replaceChildren(el('option', '', 'Alle Seltenheiten'));
         rarity.options[0]!.value = '';
         for (const name of raritiesResult!.value as string[]) {
@@ -264,6 +367,20 @@ export function createCatalogBrowser(options: Options) {
         )
           ? selected
           : '';
+      }
+      if (seriesResult?.status === 'fulfilled') {
+        series.replaceChildren(el('option', '', 'Alle Reihen'));
+        series.options[0]!.value = '';
+        for (const item of seriesResult.value as {
+          id: string;
+          name: string;
+        }[]) {
+          const option = el('option', '', item.name);
+          option.value = item.id;
+          series.append(option);
+        }
+        series.value = desiredSeries;
+        if (series.value) await loadSeries();
       }
       const failed = data.some((item) => item.status === 'rejected');
       loadStatus.replaceChildren(
@@ -397,6 +514,10 @@ export function createCatalogBrowser(options: Options) {
             : 'Preis unbekannt',
         ),
       );
+    button.dataset.focus = `catalog-${card.key}`;
+    const owned = el('small', 'w-catalog-owned');
+    owned.dataset.catalogStatus = card.key;
+    caption.append(owned);
     button.replaceChildren(ctx.images.artwork(card), caption);
     results.append(button);
   }
@@ -419,6 +540,7 @@ export function createCatalogBrowser(options: Options) {
   async function run(signal: AbortSignal, reset = true): Promise<void> {
     active = signal;
     if (reset) page = 1;
+    options.onStateChange?.(state());
     pager.replaceChildren();
     priceNotice.hidden = !order.value.startsWith('price');
     tell('Kartenkatalog wird durchsucht …');
@@ -520,6 +642,7 @@ export function createCatalogBrowser(options: Options) {
     if (closed || signal.aborted || active !== signal) return;
     results.replaceChildren();
     found.forEach((result, i) => renderResult(result, signal, prices?.[i]));
+    refresh();
     previous.disabled = page === 1;
     pager.replaceChildren(
       previous,
@@ -538,34 +661,62 @@ export function createCatalogBrowser(options: Options) {
     clearTimeout(debounce);
     debounce = setTimeout(() => options.onSearch(), 500);
   });
-  setSearch.addEventListener('input', renderSets);
+  setSearch.addEventListener('input', () => {
+    setLimit = 24;
+    renderSets();
+    options.onStateChange?.(state());
+  });
+  series.addEventListener('change', () => {
+    void loadSeries().then(() => {
+      options.onStateChange?.(state());
+    });
+  });
   browse.addEventListener('toggle', () => {
     if (browse.open) void loadMetadata();
   });
-  if (options.artist || options.setId || options.browse) {
+  if (
+    options.artist ||
+    options.setId ||
+    options.browse ||
+    options.standalone ||
+    initial.setId ||
+    initial.artist ||
+    initial.query
+  ) {
     browse.open = true;
-    void loadMetadata().then(() => options.onSearch());
+    void loadMetadata().then(() => {
+      if (!closed) options.onSearch(false);
+    });
   }
-  updateSet();
+  if (!initial.setId && !options.setId) updateSet();
   return {
     element,
     pager,
     run,
+    state,
+    refresh,
     hasFilters: () => Boolean(set.value || artist.value.trim() || rarity.value),
     languageChanged: () => {
+      initialized = true;
+      seriesRequest?.abort();
       metadataLanguage = '';
       metadata = undefined;
       inventory = [];
       set.value = '';
       rarity.value = '';
       suggestions.replaceChildren();
+      series.value = '';
+      seriesMembers = undefined;
       pricing.clear();
-      void loadMetadata().then(() => options.onSearch());
+      void loadMetadata().then(() => {
+        if (!closed) options.onSearch();
+      });
     },
     close: () => {
       closed = true;
       clearTimeout(debounce);
       lifetime.abort();
+      seriesRequest?.abort();
     },
   };
 }

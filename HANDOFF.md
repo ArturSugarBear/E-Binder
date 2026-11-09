@@ -1,52 +1,37 @@
 # Übergabe: E-Binder
 
-Aktueller Zwischenstand: Die Metadaten-Umstellung ist im Code vollständig integriert. IndexedDB v2 und Exporte speichern keine Bilder; Aufnahme-Bytes existieren nur als temporäre Map im Add-Dialog. `metadataOnlyState` entfernt lokale Fotoverweise vor Persistenz. Supabase-Migration `20261109123051_metadata_only_cloud` angewendet: Storagepolicies deaktiviert, Cloudconstraints gegen Fotoverweise/Inlinebilder, tatsächliche Bildobjekte=0. RLS-/Metadaten-Constraints erneut geprüft. PostgreSQL-TOAST-Kompression=pglz. `npm run check` vor letzten reinen Copy-/Dokumentationsänderungen grün; neue Metadaten-Browsertests unter Chromium/Mobile bereits grün, WebKit läuft. Anschließend check + Masterpush/Actions/Live finalisieren. Die nachfolgenden älteren Detailnotizen können inzwischen erledigte Punkte enthalten.
+Stand: 9. November 2026. Repository `/workspace/E-Binder`, GitHub CLI `gh-e-binder` ist autorisiert. Niemals Tokens ausgeben oder Force-Push verwenden. Nutzer wünscht geprüfte fertige Änderungen auf **master und GitHub Pages**, zusätzlich einen aktuellen Arbeitsstand auf `codex/workspace-update`. ChatGPT-Nutzungskontingent kann hier nicht ausgelesen werden; keine Zahl erfinden.
 
-Stand 9. November 2026. Nutzer verlangt einen sofort remote gesicherten Arbeitsstand und die fertige Version auf `master`/GitHub Pages. Repository: https://github.com/ArturSugarBear/E-Binder. Arbeitskopie `/workspace/E-Binder`. GitHub CLI: `gh-e-binder`, bestehende Autorisierung verwenden, keine Login-Schleifen/Force-Pushes.
+## Veröffentlicht vor dieser Änderung
 
-## Veröffentlicht / gesichert
+`caee3ae` auf master und Arbeitszweig. Publish `42618435408` erfolgreich, 56 Unit-Tests und 133 Browserprüfungen bestanden, zwei erwartete Skips. Echter Konto-/Wiederlade-/anonymer Freigabetest auf der ausgelieferten Seite bestanden. Temporäre Testkonten abgemeldet und gelöscht; frühere private Fixturedateien nicht wiederverwenden.
 
-- Zuletzt vollständig veröffentlichte Scan-Reparatur: `7315971` (Master, Live).
-- Supabase, Set-/Artistbrowser, DE/EN/JA, geprüfte EN-Bildfallbacks, Checkboxfehler, Cyan-Palette und Sortierbreite sind auf `master` gesichert: `d2e10dd`, Testselektoren korrigiert in `a050d83`.
-- `npm run check`: 55 Tests + Format/Lint/Build bestanden. Echte Supabase-API-Prüfung mit zwei temporären Konten: Isolation, Schreiben, Freigabe/Widerruf, Versionskonflikte bestanden. Echter UI-Test: Registrierung, Bestand, Binderfreigabe und Laden in zweitem frischen Browser bestanden.
-- Letzter Publish-Lauf `42616043731` wurde wegen der nachfolgenden Nutzeränderung bewusst abgebrochen; Live zeigt ggf. noch `7315971`. Niemals behaupten, der neue Stand sei bereits live, bevor Action und echte Seite geprüft sind.
+## Aktuelle Aufgabe: Karten über Sets entdecken
 
-## Neueste verbindliche Nutzeranforderung
+- Eigenständiger Bereich `#entdecken`: Setlogos, DE/EN/JA, Suchbegriffe einschließlich englischer Setnamen, alle Sets schrittweise erreichbar, Reihenfilter mit tatsächlicher `/series/{id}`-Mitgliedschaft.
+- Wiederverwendeter Katalogbrowser: Set/Illustrator/Seltenheit, Nummer/Name/EUR-Preistrends, Kartenvorschau, Wunschliste und Übergabe an bestehende Besitzbestätigung. URL enthält nur öffentliche Katalogfilter, keine Besitzdaten/Fotos. Zurück/Wiederladen erhält Filter und Trefferseite.
+- Root behält die aktive Entdecken-Ansicht bei Bestands-/Wunschänderungen bei. Mengen und Wunschstatus werden aktualisiert. Keine Framework-/Backendänderung.
+- Neue deterministische Browsertests prüfen vollständige Setnavigation, echte Reihenmitgliedschaft, URL/Paginierung, Wunsch ≠ Besitz, Bestandsbestätigung, Sprachwechsel/320px/axe und Wiederholung nach Katalogausfall.
+- **Noch zu erledigen bei Erstellung dieser Notiz:** `npm run check` läuft; passende Browserprüfungen, Handprüfung der Oberfläche, anschließend master-Push, Actions und Live prüfen. Diese Notiz vor finalem Commit aktualisieren.
 
-**Fotos sind ausschließlich temporäre Eingaben zum schnellen Erfassen physischer Karten. Keine Fotobytes in Supabase, IndexedDB oder Exporten.** Danach Katalogbild verwenden; nur bestätigte Ausgabe, Sprache, Variante, Menge und weitere Textmetadaten speichern. Frühere Wünsche zur Originalfoto-Sicherung sind überholt.
+## Verbindliche Datenregeln
 
-Aktuell laufende Umstellung:
+Fotos sind ausschließlich temporäre Scan-Eingaben. **Keine Foto-Bytes in Supabase, IndexedDB oder Exporten.** Lokale Dialog-Map wird beim Zuordnen/Schließen verworfen. IndexedDB v2 enthält nur Metadatenzustände; alte Fotostores werden gelöscht. `metadataOnlyState` entfernt lokale Fotoverweise, Legacy-Fotozeilen werden ohne Dekodieren verworfen. Supabase-Constraints verbieten lokale Fotoverweise und Inlinebilder. Externe Katalogbilder bleiben externe URLs. TOAST komprimiert JSONB; ein visueller Suchindex ist noch nicht implementiert. Scanning bleibt eine bestätigungspflichtige Hilfe, keine perfekte Erkennung.
 
-- `src/ui/add-cards.ts`: temporäre Map pro Dialog, Bilder über Object-URLs nur während Erkennung, Abbruch/Zuordnung/Schließen verwerfen Bytes. `store.photo`/`putPhoto` aus Erfassung entfernt. Bestehende Erfassungsmetadaten dürfen ohne Bild wieder geöffnet werden; neue Aufnahme ist für erneute OCR nötig.
-- `src/data/cloud-store.ts`: Upload/Download von Bildern entfernt. Soll `metadataOnlyState` aus `domain/personal.ts` nutzen.
-- Parallelbeitrag `catalogue_complete`: `PersonalStore` auf IndexedDB v2 mit ausschließlich `states` (alten `photos`-Store beim Upgrade löschen), Schema/Helper `metadataOnlyState` mit Entfernen aller `photoId`, nur Metadaten-JSONL, Legacy-Fotozeilen ignorieren, Backupdialog/Units anpassen. Prüfen, ob bereits fertig integriert.
-- Root hat `WorkspaceContext.restore(state)`, Accountimport ohne Fotomap, `CardImages` nur Katalogbilder angepasst. Typecheck/Tests nach vollständiger Integration erneut ausführen.
-- Noch offene E2E-Tests erwarten teilweise Originalfoto-Persistenz/Export. Diese auf neues Verhalten ändern: kein Foto im Export/IndexedDB, Erfassungsmetadaten bleiben, Foto nach Schließen/Reload nicht verfügbar, Besitz unverändert.
-- README, docs/backend.md, docs/architecture.md, docs/implementation.md enthalten noch überholte Originalfoto-/Cloudfoto-Aussagen und müssen angepasst werden.
+## Supabase / Hosting
 
-## Supabase
+Projekt `hmgydjfkvehvdwvdftca`, Frankfurt, aktiv. `cloud.config.json` enthält ausschließlich öffentliche URL/Publishable Key. GitHub-App kann Repository-Secrets nicht setzen (403); sichere öffentliche Clientkonfiguration ist der bewusste Fallback. Privilegierte Schlüssel ausschließlich Supabase-Runtime. Keine erneute Login-Schleife starten.
 
-Projekt `hmgydjfkvehvdwvdftca`, Frankfurt, bereits verbunden. URL + öffentlicher Publishable Key in `cloud.config.json`, echte privilegierte Schlüssel ausschließlich Supabase-Runtime. GitHub-Connector darf keine Repository-Secrets setzen (403); öffentlicher Clientconfig-Fallback ist bewusst verwendet. Kein Service-Role-Key im Repo.
+Benutzername/Passwort über synthetischen internen E-Mail-Alias; Edge-Registrierung begrenzt. RLS, privater versionierter JSONB-Workspace, atomare Binderprojektion, Konflikterkennung implementiert. Alte Storage-Policies deaktiviert, letzter tatsächlicher Objektbestand null; keine Bild-Uploads ergänzen. Backendänderungen nur mit Supabase-Skill. Öffentliche Binder nur nach ausdrücklicher Freigabe.
 
-Migrationen erste drei tatsächlich angewendet und Dateinamen mit Serverhistory abgestimmt. Neue `metadata_only_cloud`-Migration deaktiviert die vier alten Storage-Policies und verbietet `photoId` und Inline-Image-Daten im Cloudzustand. Ein erster Versuch, den leeren Bucket per SQL zu löschen, wurde korrekt von Storage abgelehnt und vollständig zurückgerollt; nicht umgehen. Neuer Versuch lässt den leeren Bucket ohne Zugriffsregeln bestehen. Vor wenigen Minuten waren **0 Bilder** im Bucket. Anwendungsseitig niemals wieder Uploadcode ergänzen.
+## Entwicklung / Tests
 
-Nach Migrationen `get_advisors(type:security)` sowie tatsächliche Query/Isolation prüfen. `supabase/tests/isolation.sql` läuft mit Rollback, keine echten Nutzerdaten. Neue Migrationsdateien über `npx -y supabase@3.0.0 migration new NAME`; Tool `apply_migration` erzeugt remote eigene Versionsnummer, Dateinamen anschließend an tatsächlich gelistete History angleichen.
+Native TypeScript-/DOM-App mit Vite; kein Frameworkwechsel. `docs/design.md`: Cyan ist der neueste gewählte Primärakzent (Orange wurde ausdrücklich abgewählt). Bestehende Komponenten wiederverwenden. `npm run check` vor Veröffentlichung. Playwright Chromium und Mobile: `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`; WebKit lokal mit `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1` lauffähig. Das überspringt nur die falsche Host-Preflightprüfung, nicht die Ausführung. CI installiert Browserlibs normal.
 
-Es existiert noch ein temporärer UI-Fixtureaccount. Private Zugangsdaten nur außerhalb Repo: `/workspace/scratch/e-binder-cloud-session.json` (nicht ausgeben/committen). UI-Smoketest zum Wiederverwenden: `CLOUD_TEST_REUSE=... E2E_BASE_URL=... node scripts/smoke-cloud.mjs`. Vor Löschen nur dieses Testkonto global abmelden und dessen exakte ID mit zusätzlich geprüftem `test_ui_...@users.e-binder.invalid`-Alias administrativ entfernen. Zwei frühere API-Fixturekonten und ihr Testfoto bereits entfernt.
+Nicht während laufender Browserprüfungen `dist` neu bauen. Keine parallelen Playwright-Läufe mit demselben Ausgabeordner. CI `.github/workflows/pages.yml` prüft alle Browser vor Pages-Deploy. Nach Push Action und tatsächliche Live-Seite prüfen.
 
-## Tests, Push und Live
+## Collectr / Evidenz
 
-- `npm run check` nach der Umstellung, dann passende Playwright-Tests und vollständige CI.
-- Chromium: `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`.
-- Lokal WebKit vorhanden; bei ausschließlich falscher System-Preflightprüfung `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1` (Browser muss tatsächlich laufen). CI installiert echte Browserlibs normal.
-- Keine konkurrierenden Builds während Browserläufen (kurzzeitig 404), keine konkurrierenden Tests mit derselben `test-results`-Ausgabe. Separate Outputs wenn nötig.
-- Arbeitsstand jetzt zusätzlich `codex/workspace-update`; fertige getestete Änderungen weiterhin nach `master` pushen. Actions und Live prüfen. Kein Force-Push.
-- Nutzer verlangt Restkontingent-Anzeige: ChatGPT-Quota ist hier nicht auslesbar. Keine Zahl schätzen; klar mitteilen, was lokal, auf Master und live ist.
+REA, Ponytail und Impeccable wurden zuvor anhand ihrer Originalquellen angewendet. `docs/research/collectr.md` dokumentiert tatsächlich beobachtete öffentliche Setnavigation; native Scanarchitektur bleibt unbekannt. Nicht aus öffentlich sichtbarer UI auf ein bestimmtes ML-Modell schließen. Diese Erweiterung verwendet die vorhandenen REA-Beobachtungen, keinen behaupteten neuen nativen App-Zugriff.
 
-## Collectr und Scanning
-
-REA und Ponytail Originalskills wurden gelesen/angewendet; Impeccable Original für Palette genutzt. REA fordert bei unabhängigen Fragen explizit parallele Worker. Öffentliche Setnavigation mit REA tatsächlich beobachtet und als Set-/Filterworkflow umgesetzt; siehe docs/research/collectr.md.
-
-Neue Scan-Untersuchung nur in `/workspace/scratch/collectr-rea/scan-findings.md`, keine erfundene native Architektur. Richtige App: iOS 1603892248 / Android com.collectrinc.collectr. Website zeigt Live-Framing → automatisches Matching → Review. Keine Scanbibliothek, kein Modell, kein Anbieter und kein Client-/Server-Split belegt. Ximilar-Vergleich erwähnt Collectr, belegt aber keine Kundenbeziehung.
-
-Unser belegt schwacher Punkt: Recognition-only PP-OCRv4 mit festen Textstreifen nach manuellem Ausrichten; automatische Karten-/Textlokalisierung und visuelle Katalogsuche fehlen. Nicht blind Modell ersetzen oder perfekte Erkennung versprechen. Originalfotos der Fehlversuche fehlen weiterhin. Nutzergerät: iPhone 13 Pro Max, Chrome und Safari. Kleinster Vergleich: dieselben echten Fotos/korrekte Ausgaben mit bestehender Ausrichtung und isoliertem Lokalisierungsprototyp prüfen; neue unbekannte Ausgaben/JA/Reprints einbeziehen. Kompakte Merkmale/Hashes/Embeddings als Metadatenindex sind eine nächste Hypothese, noch kein implementierter Erkennungsnachweis. Keine Bilder in Supabase als vermeintlichen Index hochladen.
+Originalfotos echter Fehlversuche fehlen weiterhin; Gerät des Nutzers: iPhone 13 Pro Max, Safari/Chrome. Automatische Lokalisierung und visueller Merkmalsindex sind offene Hypothesen. Keine erfundenen Erkennungsquoten, Sammlerstudien oder physischen Binderaufbauten. Skilloriginale und Diagnoseartefakte liegen außerhalb Repo unter `/workspace/scratch/`; persönliche Daten niemals veröffentlichen.

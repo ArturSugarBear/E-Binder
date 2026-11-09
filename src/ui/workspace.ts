@@ -17,6 +17,7 @@ import { renderSharedBinder } from './shared-binder';
 import { loadCollection } from '../data/load-collection';
 import { openAddCards } from './add-cards';
 import { renderCollection, renderWishes, openHolding } from './collection-view';
+import { createDiscoverView } from './discover-view';
 import { renderBinders } from './binder-view';
 import { openBackup } from './backup-dialog';
 import { action, el, errorText, message } from './workspace-dom';
@@ -85,6 +86,7 @@ export async function startWorkspace(): Promise<void> {
   let blocked = false;
   let noticeTimer: ReturnType<typeof setTimeout>;
   let catalogLoading = false;
+  let discovery: ReturnType<typeof createDiscoverView> | undefined;
   const ctx: WorkspaceContext = {
     account,
     state: initial,
@@ -159,7 +161,7 @@ export async function startWorkspace(): Promise<void> {
           : undefined;
       const focus =
         active && root.contains(active) ? active.dataset.focus : undefined;
-      const route = location.hash.slice(1).split('/')[0] || 'sammlung';
+      const route = location.hash.slice(1).split(/[/?]/)[0] || 'sammlung';
       for (const link of document.querySelectorAll<HTMLAnchorElement>(
         '[data-workspace-route]',
       ))
@@ -167,16 +169,29 @@ export async function startWorkspace(): Promise<void> {
           'aria-current',
           link.dataset.workspaceRoute === route ? 'page' : 'false',
         );
-      root.replaceChildren(
-        route === 'geteilt'
-          ? renderSharedBinder(location.hash.split('/')[1] ?? '', ctx)
-          : route === 'binder'
-            ? renderBinders(ctx)
-            : route === 'wunschliste'
-              ? renderWishes(ctx)
-              : renderCollection(ctx),
-      );
-      document.title = `${route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
+      if (
+        discovery &&
+        (route !== 'entdecken' || discovery.currentHash !== location.hash)
+      ) {
+        discovery.close();
+        discovery = undefined;
+      }
+      if (route === 'entdecken') {
+        discovery ??= createDiscoverView(ctx);
+        if (root.firstElementChild !== discovery.element)
+          root.replaceChildren(discovery.element);
+        discovery.refresh();
+      } else
+        root.replaceChildren(
+          route === 'geteilt'
+            ? renderSharedBinder(location.hash.split('/')[1] ?? '', ctx)
+            : route === 'binder'
+              ? renderBinders(ctx)
+              : route === 'wunschliste'
+                ? renderWishes(ctx)
+                : renderCollection(ctx),
+        );
+      document.title = `${route === 'entdecken' ? 'Karten entdecken' : route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
       demo.hidden = ctx.state.mode !== 'demo';
       undoButton.hidden = !history.length;
       undoButton.disabled = !history.length;
@@ -440,7 +455,7 @@ export async function startWorkspace(): Promise<void> {
       const remembered = localStorage.getItem('e-binder-route');
       if (
         remembered &&
-        ['sammlung', 'binder', 'wunschliste'].includes(remembered)
+        ['sammlung', 'binder', 'wunschliste', 'entdecken'].includes(remembered)
       )
         route = remembered;
     } catch {

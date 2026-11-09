@@ -120,3 +120,50 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.w-set-browse-controls,
+.w-discover-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 14px;
+  margin-block: 18px;
+}
+.w-discover-search {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+}
+.w-discover > .w-catalog-browser,
+.w-discover > .w-search-results {
+  margin-bottom: 24px;
+}
+.w-discover .w-set-grid {
+  max-height: none;
+  overflow: visible;
+}
+.w-discover-card {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+.w-discover-card .card-art {
+  width: 100%;
+}
+.w-catalog-owned {
+  color: var(--accent) !important;
+}
+@media (max-width: 600px) {
+  .w-set-browse-controls,
+  .w-discover-search {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .w-discover-card {
+    grid-template-columns: minmax(0, 120px) minmax(0, 1fr);
+    gap: 14px;
+  }
+  .w-navigation {
+    justify-content: space-between;
+    justify-self: stretch;
+    gap: 10px;
+    font-size: 12px;
+  }
+}
