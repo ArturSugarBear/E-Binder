@@ -1810,3 +1810,140 @@ textarea.w-input,
 .w-crop-review h4 {
   margin: 0;
 }
+
+
+/* iPhone-first navigation. Other layouts retain the existing desktop header. */
+.w-header-shortcut,
+.w-mobile-nav {
+  display: none;
+}
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .workspace {
+    max-width: 100%;
+    padding: 0 16px calc(118px + env(safe-area-inset-bottom));
+  }
+  .w-header {
+    min-height: 66px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-block: calc(8px + env(safe-area-inset-top)) 8px;
+  }
+  .w-brand {
+    min-width: 0;
+    font-size: 22px;
+  }
+  .w-navigation,
+  .w-header-link,
+  #workspace-account,
+  #workspace-add {
+    display: none;
+  }
+  .w-header-actions {
+    gap: 6px;
+  }
+  .w-header-shortcut {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: var(--ink-2);
+    border-radius: 12px;
+    text-decoration: none;
+  }
+  .w-header-shortcut[aria-current='page'] {
+    color: var(--accent);
+    background: var(--raised);
+  }
+  .w-header-shortcut svg,
+  #workspace-backup svg {
+    width: 21px;
+    height: 21px;
+  }
+  #workspace-backup {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    background: transparent;
+  }
+  #workspace-backup span {
+    display: none;
+  }
+  .w-mobile-nav {
+    position: fixed;
+    z-index: 30;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+    padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgb(8 18 25 / 0.97);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 -12px 28px rgb(0 0 0 / 0.16);
+  }
+  .w-mobile-nav > a,
+  .w-mobile-nav > button {
+    display: flex;
+    min-width: 0;
+    min-height: 57px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 3px 0;
+    border-radius: 12px;
+    color: var(--ink-2);
+    font: 500 10px/1.2 var(--sans);
+    text-decoration: none;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .w-mobile-nav svg {
+    width: 23px;
+    height: 23px;
+  }
+  .w-mobile-nav > a[aria-current='page'] {
+    color: var(--accent);
+    background: rgb(106 208 224 / 0.08);
+  }
+  .w-mobile-nav > :is(a, button):active {
+    background: var(--raised);
+  }
+  .w-mobile-nav > :is(a, button):focus-visible {
+    outline-offset: -2px;
+  }
+  .w-mobile-nav .w-mobile-add {
+    color: var(--ink);
+    gap: 2px;
+  }
+  .w-mobile-add-symbol {
+    display: grid;
+    place-items: center;
+    width: 47px;
+    height: 43px;
+    border-radius: 14px;
+    color: var(--on-accent);
+    background: var(--accent);
+    box-shadow: 0 3px 14px rgb(106 208 224 / 0.13);
+  }
+  .w-mobile-add-symbol svg {
+    width: 25px;
+    height: 25px;
+  }
+  .w-toast {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+  .w-undo {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+  body:has(.w-dialog[open]) .w-mobile-nav,
+  body:has(input:focus, textarea:focus, select:focus, [contenteditable='true']:focus)
+    .w-mobile-nav {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

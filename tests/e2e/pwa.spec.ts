@@ -68,9 +68,53 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   );
   await page.context().setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Offline-Testbinder' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Offline-Testbinder' }),
+  ).toBeVisible();
   await page.goto('archive.html');
   await expect(page.locator('.chapter .grid .pocket')).toHaveCount(9);
+});
+
+test('mobile tabs prioritize collection, add-card action and profile', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  const navigation = page.getByRole('navigation', { name: 'App-Navigation' });
+  test.skip(!(await navigation.isVisible()), 'Mobile navigation only.');
+
+  await expect(navigation.locator(':scope > *')).toHaveCount(5);
+  await expect(navigation.locator(':scope > *').nth(0)).toContainText(
+    'Sammlung',
+  );
+  await expect(navigation.locator(':scope > *').nth(2)).toHaveAttribute(
+    'id',
+    'workspace-mobile-add',
+  );
+  await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
+  await navigation.getByRole('button', { name: 'Karten hinzufügen' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await navigation.getByRole('link', { name: 'Meine Binder' }).click();
+  await expect(
+    navigation.getByRole('link', { name: 'Meine Binder' }),
+  ).toHaveAttribute('aria-current', 'page');
+  await navigation.getByRole('button', { name: 'Profil und Konto' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('link', { name: 'Wunschliste' }).click();
+  await expect(page).toHaveURL(/#wunschliste$/);
+  await expect(
+    navigation.getByRole('link', { name: 'Sammlung' }),
+  ).toBeVisible();
+  expect(
+    await navigation.evaluate((element) => getComputedStyle(element).position),
+  ).toBe('fixed');
 });
 
 test('service worker does not target Supabase credentials', async ({

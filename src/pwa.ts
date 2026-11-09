@@ -24,8 +24,9 @@ function isIOSSafari(): boolean {
 
 /** Prevent reloading over pending saves, failed writes or edit dialogs. */
 export function isUpdateSafe(): boolean {
-  const state = document.querySelector<HTMLElement>('#workspace-save-status')
-    ?.dataset.state;
+  const state = document.querySelector<HTMLElement>(
+    '#workspace-save-status',
+  )?.dataset.state;
   if (state === 'saving' || state === 'error') return false;
   if (document.querySelector('dialog[open]')) return false;
   const active = document.activeElement;

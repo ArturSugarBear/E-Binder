@@ -12,6 +12,10 @@ E-Binder ist eine kostenlose Progressive Web App (PWA). Es wird weder der App St
 
 Bereits im Standalone-Modus erscheint keine Installationshilfe mehr. Ohne Installation bleibt die normale Website funktionsfähig. Browser mit Chromium-Installationsfunktion erhalten einen eigenen Installieren-Button.
 
+## Navigation auf dem iPhone
+
+Die dauerhaft erreichbare untere Leiste nutzt fünf eindeutige Ziele: **Sammlung** links, **Entdecken**, **+ Karte** als hervorgehobene Hauptaktion in der Mitte, **Binder** und **Profil** rechts. Profil öffnet den vorhandenen Konto- und Anmeldedialog; angemeldete Nutzer verwalten dort ihr Konto. Die Wunschliste bleibt über das Herzsymbol im Kopfbereich erreichbar und die Sicherung über das Downloadsymbol. Auf größeren Desktop-Bildschirmen bleibt die bestehende horizontale Navigation erhalten. Auf iPhones berücksichtigt die Leiste den Home-Indikator und wird bei geöffneten Eingabefeldern oder Dialogen ausgeblendet.
+
 ## Offline-Unterstützung
 
 Nach einem erfolgreich abgeschlossenen ersten Online-Aufruf installiert der Browser einen Service Worker. Die App-Oberfläche einschließlich Hauptanwendung, Inspirationsarchiv, Schriftdateien und lokaler Inspirationsdaten wird vorgehalten. Vorher bereits in **diesem Browser und dieser Website-Installation** gespeicherte Binder und Bestände bleiben über IndexedDB zugänglich. Das Cache-System ist **kein Backup**. Unter iOS können Safari- und Home-Screen-Web-Apps getrennte Datenspeicher haben: Bei der ersten Installation sind bestehende Safari-Gastdaten eventuell nicht automatisch verfügbar. Daher vor der Installation/bei Gerätewechsel die Sicherungsfunktion verwenden und die Daten gegebenenfalls bewusst wiederherstellen.

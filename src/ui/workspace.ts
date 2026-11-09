@@ -434,6 +434,12 @@ export async function startWorkspace(): Promise<void> {
     .querySelector('#workspace-add')!
     .addEventListener('click', () => ctx.openAdd());
   document
+    .querySelector('#workspace-mobile-add')!
+    .addEventListener('click', () => ctx.openAdd());
+  document
+    .querySelector('#workspace-mobile-account')!
+    .addEventListener('click', () => accountButton.click());
+  document
     .querySelector('#workspace-backup')!
     .addEventListener('click', ctx.openBackup);
   document
