@@ -95,7 +95,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     'workspace-mobile-add',
   );
   await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
-  await navigation.getByRole('button', { name: 'Karten hinzufügen' }).click();
+  await navigation.getByRole('button', { name: 'Karte hinzufügen' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
 
