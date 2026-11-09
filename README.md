@@ -6,12 +6,13 @@ Ohne Anmeldung bleiben persönliche Daten **in IndexedDB auf diesem Gerät**. Mi
 
 ## Benutzen
 
-1. **Karten hinzufügen:** Eine genaue Ausgabe suchen oder ein eigenes Foto aufnehmen/importieren. Die Suche nach Name oder Sammlernummer verwendet den deutschen, englischen oder japanischen [TCGdex-Katalog](https://tcgdex.dev/); eine manuelle Erfassung ist ebenfalls möglich.
-2. **Bestätigen:** Set, Sammlernummer, Sprache, Druckvariante und die gesamte vorhandene Menge prüfen. Ein wiederholtes Foto oder eine zweite Bestätigung erhöht die Menge nicht automatisch.
-3. **Binder gestalten:** Eigene Binder und Seiten anlegen, Plätze belegen, tauschen, leeren oder festhalten. Vorlagen übernehmen; fehlende Karten bleiben geplant und erzeugen keinen Besitz.
-4. **Seiten vorschlagen:** Höchstens drei Geschmacksfragen zu Zusammenhang, Pflichtkarte und Ausschlüssen. Vorschläge verwenden tatsächliche Bilder und verfügbare Exemplare. Ein Artist-Fokus füllt bei zu wenigen passenden Karten keine anderen Illustratoren auf.
-5. **Konto und Teilen:** Über „Anmelden“ ein Konto anlegen. Ein vorhandener lokaler Bestand bleibt getrennt und lässt sich im Konto bewusst übernehmen. Einzelne Binder über „Binder teilen“ freigeben und wieder privat stellen.
-6. **Sichern:** JSONL herunterladen, mit offenen Erkennungsergebnissen und Binderplätzen, ohne Fotos. Wiederherstellung zuerst prüfen und dann ausdrücklich übernehmen.
+1. **Karten entdecken:** Im eigenen Bereich „Entdecken“ Sets mit Logos durchstöbern, nach Kartenreihen eingrenzen oder nach deutschen und englischen Setnamen suchen. Deutsch, Englisch und Japanisch sind wählbar. Set, Illustrator, Seltenheit, Nummer und Sortierung lassen sich kombinieren; Katalogfilter und Trefferseite bleiben im Link erhalten. Eine Karte kann vorgemerkt oder nach Prüfung in den Bestand übernommen werden.
+2. **Karten hinzufügen:** Eine genaue Ausgabe suchen oder ein eigenes Foto aufnehmen/importieren. Die Suche nach Name oder Sammlernummer verwendet den deutschen, englischen oder japanischen [TCGdex-Katalog](https://tcgdex.dev/); eine manuelle Erfassung ist ebenfalls möglich.
+3. **Bestätigen:** Set, Sammlernummer, Sprache, Druckvariante und die gesamte vorhandene Menge prüfen. Ein wiederholtes Foto oder eine zweite Bestätigung erhöht die Menge nicht automatisch.
+4. **Binder gestalten:** Eigene Binder und Seiten anlegen, Plätze belegen, tauschen, leeren oder festhalten. Vorlagen übernehmen; fehlende Karten bleiben geplant und erzeugen keinen Besitz.
+5. **Seiten vorschlagen:** Höchstens drei Geschmacksfragen zu Zusammenhang, Pflichtkarte und Ausschlüssen. Vorschläge verwenden tatsächliche Bilder und verfügbare Exemplare. Ein Artist-Fokus füllt bei zu wenigen passenden Karten keine anderen Illustratoren auf.
+6. **Konto und Teilen:** Über „Anmelden“ ein Konto anlegen. Ein vorhandener lokaler Bestand bleibt getrennt und lässt sich im Konto bewusst übernehmen. Einzelne Binder über „Binder teilen“ freigeben und wieder privat stellen.
+7. **Sichern:** JSONL herunterladen, mit offenen Erkennungsergebnissen und Binderplätzen, ohne Fotos. Wiederherstellung zuerst prüfen und dann ausdrücklich übernehmen.
 
 Ein Exemplar belegt höchstens einen angenommenen Binderplatz. Ein Entwurf reserviert Exemplare; der tatsächliche Aufbau wird gesondert vom Nutzer markiert. Besitz, Wünsche und explizite Tauschmengen sind unabhängig.
 

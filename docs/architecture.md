@@ -45,3 +45,11 @@ Gemeinsame Farbrollen stehen in `styles.css`, Arbeitsflächen in `workspace.css`
 Das Archiv erhält seine URL-Hashes, Greninja-Edition, Cardmarket-Produkte und Tastatur-/Touch-Navigation. Die neue gemeinsame Farbpalette ist ausdrücklich vom Nutzer gewünscht. Der mehrseitige Vite-Build veröffentlicht beide Einstiege unter `/E-Binder/`.
 
 CI prüft Pull Requests und `master`; nur ein erfolgreicher Build auf `master` kann Pages veröffentlichen. Derselbe geprüfte `dist/`-Ordner wird ausgeliefert. Keine privaten Daten, Zugangsdaten oder generierten Testberichte werden eingecheckt.
+
+## Eigenständiger Katalogbereich
+
+`#entdecken` verwendet denselben `catalog-browser.ts` wie der Hinzufügen-Dialog. `discover-view.ts` ergänzt eine öffentliche, wiederaufrufbare URL mit Katalogsprache, Set, Illustrator, Seltenheit, Suchbegriff, Sortierung und Trefferseite. Auswahl eines Sets erzeugt einen Historyeintrag; Filtereingaben ersetzen den aktuellen Eintrag. Die URL enthält keine persönlichen Mengen, Notizen oder Fotos.
+
+Reihen und deren Sets kommen aus den TCGdex-Endpunkten `/series` und `/series/{id}`. Keine Zuordnung anhand von Namenspräfixen. Alle verfügbaren physischen Sets sind über „Weitere Sets anzeigen“ erreichbar. Ohne Kartenfilter wird zunächst nur der Setkatalog geladen. Ein Sprachwechsel verwirft Set- und Seltenheitsfilter; laufende Abfragen werden abgebrochen. Pocket bleibt ausgeschlossen.
+
+Die Workspace-Ansicht behält den aktiven Katalog bei Besitz-/Wunschänderungen bei und aktualisiert nur Statusangaben. Die Kartenvorschau erzeugt keinen Besitz. „Zum Bestand hinzufügen“ öffnet die vorhandene Ausgabe-/Varianten-/Mengenbestätigung; „Auf die Wunschliste“ ändert ausschließlich Wünsche. Die Vorschau und Listen verwenden externe Katalogbilder.

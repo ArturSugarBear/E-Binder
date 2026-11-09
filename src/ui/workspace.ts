@@ -425,6 +425,11 @@ export async function startWorkspace(): Promise<void> {
       event.preventDefault();
       ctx.navigate(link.dataset.workspaceRoute!);
     });
+  document.querySelector('.skip-link')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    root.focus({ preventScroll: true });
+    root.scrollIntoView({ block: 'start' });
+  });
   document
     .querySelector('#workspace-add')!
     .addEventListener('click', () => ctx.openAdd());

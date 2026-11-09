@@ -164,6 +164,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     }
   }
   function showCard(card: PersonalCard) {
+    status.replaceChildren();
     const view = modal(card.name);
     closePreview = view.close;
     const owned = el('p', 'w-muted');

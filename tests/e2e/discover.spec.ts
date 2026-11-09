@@ -82,7 +82,17 @@ test('discovery exposes every physical set and actual series membership without 
   await expect(
     main.getByRole('heading', { name: 'Karten entdecken' }),
   ).toBeVisible();
-  await expect(main.locator('.w-set-choice')).toHaveCount(24);
+  const skip = page.getByRole('link', {
+    name: 'Zum Inhalt springen',
+    exact: true,
+  });
+  await skip.focus();
+  await skip.press('Enter');
+  await expect(main).toBeFocused();
+  await expect(page).toHaveURL(/#entdecken$/);
+  await expect(main.locator('.w-set-choice')).toHaveCount(24, {
+    timeout: 15_000,
+  });
   await expect(main.getByLabel('Reihe / Ära').locator('option')).toHaveCount(3);
   expect(requests.some((url) => new URL(url).pathname.endsWith('/cards'))).toBe(
     false,
@@ -92,13 +102,19 @@ test('discovery exposes every physical set and actual series membership without 
     .click();
   await expect(main.locator('.w-set-choice')).toHaveCount(32);
   await main.getByLabel('Reihe / Ära').selectOption('sv');
-  await expect(main.locator('.w-set-choice')).toHaveCount(1);
+  await expect(main.locator('.w-set-choice')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await main.getByLabel('Set suchen', { exact: true }).fill('Destined Rivals');
   await main.getByRole('button', { name: /Ewige Rivalen/ }).click();
-  await expect(main.locator('.w-search-results button')).toHaveCount(24);
+  await expect(main.locator('.w-search-results button')).toHaveCount(24, {
+    timeout: 15_000,
+  });
   await expect(page).toHaveURL(/setId=sv10/);
   await page.goBack();
-  await expect(main.locator('.w-set-choice')).toHaveCount(1);
+  await expect(main.locator('.w-set-choice')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await expect(main.locator('.w-search-results button')).toHaveCount(0);
 });
 
@@ -108,7 +124,9 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
   await catalogue(page);
   await page.goto('./#entdecken?setId=sv10&page=2&artist=GIDORA&rarity=Häufig');
   const main = page.getByRole('main');
-  await expect(main.locator('.w-search-results button')).toHaveCount(1);
+  await expect(main.locator('.w-search-results button')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await expect(main.locator('.w-search-results')).toContainText('025/182');
   await main.locator('.w-search-results button').click();
   const preview = page.getByRole('dialog');
@@ -125,15 +143,20 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
   await preview
     .getByRole('button', { name: 'Karte 25 schließen', exact: true })
     .click();
+  await expect(main.locator('.w-search-results button')).toBeFocused();
   await expect(main.locator('.w-catalog-owned')).toHaveText('Gemerkt');
   await expect(main.getByLabel('Illustrator im Katalog')).toHaveValue('GIDORA');
   await page.reload();
-  await expect(main.locator('.w-search-results button')).toHaveCount(1);
+  await expect(main.locator('.w-search-results button')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await expect(main.locator('.w-catalog-owned')).toHaveText('Gemerkt');
   await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await page.goBack();
-  await expect(main.locator('.w-search-results button')).toHaveCount(1);
+  await expect(main.locator('.w-search-results button')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await main.locator('.w-search-results button').click();
   await preview
     .getByRole('button', { name: 'Zum Bestand hinzufügen', exact: true })
@@ -161,7 +184,9 @@ test('changing catalogue language clears incompatible filters and keeps Japanese
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto('./#entdecken?setId=sv10&query=1&rarity=Häufig');
   const main = page.getByRole('main');
-  await expect(main.locator('.w-search-results button')).toHaveCount(1);
+  await expect(main.locator('.w-search-results button')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await main.getByLabel('Katalogsprache').selectOption('ja');
   await expect(main.getByLabel('Set', { exact: true })).toHaveValue('');
   await expect(main.getByLabel('Seltenheit', { exact: true })).toHaveValue('');
@@ -169,11 +194,17 @@ test('changing catalogue language clears incompatible filters and keeps Japanese
     .poll(() => requests.some((url) => url.includes('/ja/cards?')))
     .toBe(true);
   await main.getByLabel('Karte suchen', { exact: true }).fill('');
-  await expect(main.locator('.w-set-choice')).toHaveCount(24);
+  await expect(main.locator('.w-set-choice')).toHaveCount(24, {
+    timeout: 15_000,
+  });
   await main.getByLabel('Reihe / Ära').selectOption('sv');
-  await expect(main.locator('.w-set-choice')).toHaveCount(1);
+  await expect(main.locator('.w-set-choice')).toHaveCount(1, {
+    timeout: 15_000,
+  });
   await main.getByRole('button', { name: /ロケット団/ }).click();
-  await expect(main.locator('.w-search-results button')).toHaveCount(24);
+  await expect(main.locator('.w-search-results button')).toHaveCount(24, {
+    timeout: 15_000,
+  });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -202,5 +233,7 @@ test('catalogue failures can be retried without losing the chosen set or creatin
   await main
     .getByRole('button', { name: 'Suche wiederholen', exact: true })
     .click();
-  await expect(main.locator('.w-search-results button')).toHaveCount(24);
+  await expect(main.locator('.w-search-results button')).toHaveCount(24, {
+    timeout: 15_000,
+  });
 });

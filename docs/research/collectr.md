@@ -38,3 +38,9 @@ Der erste direkte Browserstart scheiterte mit `net::ERR_CONNECTION_REFUSED`. Der
 | Leere Artist-Auswahl                         | Eigene Artists bleiben an bestätigte, freie Exemplare gebunden. Leerer Bestand, reservierte Exemplare und fehlende Credits werden erklärt; ein eigener Einstieg öffnet die globalen Katalog-Illustratoren.                                         |
 
 Aktuelle Providerquellen: https://tcgdex.dev/rest/filtering-sorting-pagination, https://tcgdex.dev/rest/cards, https://tcgdex.dev/rest/other-fields. Live-Proben bestätigten: `de/cards/base1-4` hat kein Bild, `en/cards/base1-4` hat das Bild derselben Katalog-ID. `de/sets/sv10` heißt „Ewige Rivalen“. Die API-Abfrage nach `pricing.cardmarket.trend` sortierte die Treffer in einer Probe nicht nach Preis; E-Binder behauptet deshalb keine globale serverseitige Preissortierung. Preise sind datierte Cardmarket-Katalogtrends, keine zugesicherte Bewertung einer bestimmten Sprache, Druckvariante oder eines Zustands.
+
+## Anwendung der vorhandenen Befunde: Entdecken
+
+Die beobachtete Trennung aus Setübersicht und kartenbezogenen Filtern wird in E-Binder als eigener Bereich `#entdecken` zugänglich. Er bietet echte Katalog-Setlogos, Reihenmitgliedschaft aus TCGdex, alle Sets über schrittweises Nachladen, DE/EN/JA, kombinierte Set-/Illustrator-/Seltenheitsfilter und bestehende Nummern-/Namens-/EUR-Preissortierung. Öffnen, Merken und Besitzbestätigung erhalten den Katalogkontext. Geteilte Kataloglinks enthalten ausschließlich Filter.
+
+Das ist eine Umsetzung der bereits dokumentierten Beobachtungen, keine neue Analyse der nativen Collectr-App. TCGdex-Preistrends sind keine belegte Reproduktion von Collectrs Preisen oder Marktmodell. Verbesserung der Auffindbarkeit wird durch Funktionsprüfungen abgesichert; ein Vergleichstest mit Sammlern steht weiter aus.

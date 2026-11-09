@@ -264,3 +264,19 @@ test('empty artist recommendations explain missing inventory and open the global
     page.getByRole('dialog').locator('.w-catalog-discovery'),
   ).toHaveAttribute('open', '');
 });
+
+test('discovery price links keep their requested sorting after metadata loads', async ({
+  page,
+}) => {
+  await catalogue(page);
+  await page.goto('./#entdecken?setId=sv10&order=price-desc');
+  const main = page.getByRole('main');
+  await expect(
+    main.locator('.w-search-results .w-card-caption strong'),
+  ).toHaveText(['Pinsir', 'Yanma', 'Yanmega-ex']);
+  await expect(main.getByLabel('Katalog sortieren')).toHaveValue('price-desc');
+  await page.reload();
+  await expect(
+    main.locator('.w-search-results .w-card-caption strong'),
+  ).toHaveText(['Pinsir', 'Yanma', 'Yanmega-ex']);
+});

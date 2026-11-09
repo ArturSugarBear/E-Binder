@@ -12,7 +12,12 @@ import {
   type CatalogResult,
   type CatalogSet,
 } from '../data/card-catalog';
-import { normalize, numberKey, type PersonalCard } from '../domain/personal';
+import {
+  normalize,
+  numberKey,
+  sameCard,
+  type PersonalCard,
+} from '../domain/personal';
 import {
   action,
   el,
@@ -131,6 +136,7 @@ export function createCatalogBrowser(options: Options) {
   let debounce: ReturnType<typeof setTimeout>;
   const lifetime = new AbortController();
   const pricing = new Map<string, CatalogEntry[]>();
+  const visibleCards = new Map<string, PersonalCard>();
   function state(): CatalogBrowserState {
     return {
       setId: set.value,
@@ -177,11 +183,12 @@ export function createCatalogBrowser(options: Options) {
     for (const marker of results.querySelectorAll<HTMLElement>(
       '[data-catalog-status]',
     )) {
-      const key = marker.dataset.catalogStatus;
+      const card = visibleCards.get(marker.dataset.catalogStatus ?? '');
+      if (!card) continue;
       const own = ctx.state.holdings
-        .filter((item) => item.card.key === key)
+        .filter((item) => sameCard(item.card, card))
         .reduce((total, item) => total + item.quantity, 0);
-      const wish = ctx.state.wishes.some((item) => item.card.key === key);
+      const wish = ctx.state.wishes.some((item) => sameCard(item.card, card));
       marker.textContent = `${own ? `${own}× im ${ctx.state.mode === 'demo' ? 'Demo-' : ''}Bestand` : ''}${own && wish ? ' · ' : ''}${wish ? 'Gemerkt' : ''}`;
       marker.hidden = !own && !wish;
     }
@@ -292,8 +299,12 @@ export function createCatalogBrowser(options: Options) {
           action(
             `Weitere Sets anzeigen (${matching.length - setLimit})`,
             () => {
+              const firstNew = setLimit;
               setLimit += 24;
               renderSets();
+              sets
+                .querySelectorAll<HTMLButtonElement>('.w-set-choice')
+                [firstNew]?.focus();
             },
             'secondary',
           ),
@@ -517,6 +528,7 @@ export function createCatalogBrowser(options: Options) {
     button.dataset.focus = `catalog-${card.key}`;
     const owned = el('small', 'w-catalog-owned');
     owned.dataset.catalogStatus = card.key;
+    visibleCards.set(card.key, card);
     caption.append(owned);
     button.replaceChildren(ctx.images.artwork(card), caption);
     results.append(button);
@@ -641,6 +653,7 @@ export function createCatalogBrowser(options: Options) {
     }
     if (closed || signal.aborted || active !== signal) return;
     results.replaceChildren();
+    visibleCards.clear();
     found.forEach((result, i) => renderResult(result, signal, prices?.[i]));
     refresh();
     previous.disabled = page === 1;
@@ -683,7 +696,9 @@ export function createCatalogBrowser(options: Options) {
     initial.artist ||
     initial.query
   ) {
-    browse.open = true;
+    browse.open =
+      !options.standalone ||
+      !(initial.setId || initial.query || initial.artist);
     void loadMetadata().then(() => {
       if (!closed) options.onSearch(false);
     });
