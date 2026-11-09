@@ -1,0 +1,29 @@
+name: Format binder-page-scanner feature
+on:
+  push:
+    branches: [feat/binder-page-scanner]
+permissions:
+  contents: write
+jobs:
+  prettier:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/binder-page-scanner
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/data/vision-worker.ts src/data/recognize.ts src/domain/personal.ts src/ui/photo-crop.ts src/data/page-pockets.ts src/ui/page-scan.ts src/ui/workspace-context.ts src/ui/workspace.ts src/ui/add-cards.ts src/ui/binder-view.ts src/workspace.css README.md docs/scanner.md tests/unit/binder-page-scan.test.ts tests/e2e/binder-page-scan.spec.ts
+      - name: Commit formatting
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/data/vision-worker.ts src/data/recognize.ts src/domain/personal.ts src/ui/photo-crop.ts src/data/page-pockets.ts src/ui/page-scan.ts src/ui/workspace-context.ts src/ui/workspace.ts src/ui/add-cards.ts src/ui/binder-view.ts src/workspace.css README.md docs/scanner.md tests/unit/binder-page-scan.test.ts tests/e2e/binder-page-scan.spec.ts
+            git commit -m "style(scan): format scanner implementation and tests"
+            git push origin HEAD:feat/binder-page-scanner
+          fi
