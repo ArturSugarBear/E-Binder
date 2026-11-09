@@ -21,6 +21,7 @@ import {
 } from '../domain/personal';
 import {
   action,
+  choices,
   el,
   errorText,
   field,
@@ -49,12 +50,12 @@ type Options = {
   standalone?: boolean;
   onStateChange?: (state: CatalogBrowserState) => void;
   search: HTMLInputElement;
-  language: HTMLSelectElement;
+  language: { value: string };
   results: HTMLElement;
   artist?: string;
   browse?: boolean;
   setId?: string;
-  onChoose: (card: PersonalCard) => void;
+  onChoose: (card: PersonalCard, entry: CatalogEntry) => void;
   onSearch: (reset?: boolean) => void;
   tell: (text: string, error?: boolean) => void;
 };
@@ -74,12 +75,13 @@ export function createCatalogBrowser(options: Options) {
   suggestions.id = `catalog-artists-${crypto.randomUUID()}`;
   artist.setAttribute('list', suggestions.id);
   const rarity = select([['', 'Alle Seltenheiten']]);
-  const order = select(
+  const order = choices(
+    'Katalog sortieren',
     [
-      ['number', 'Nach Kartennummer'],
-      ['name', 'Nach Name'],
-      ['price-asc', 'Preis aufsteigend (EUR)'],
-      ['price-desc', 'Preis absteigend (EUR)'],
+      ['number', 'Kartennummer'],
+      ['name', 'Name'],
+      ['price-asc', 'Preis: niedrig zuerst'],
+      ['price-desc', 'Preis: hoch zuerst'],
     ],
     initial.order ?? 'number',
   );
@@ -110,7 +112,7 @@ export function createCatalogBrowser(options: Options) {
     field('Illustrator im Katalog', artist),
     suggestions,
     field('Seltenheit', rarity),
-    field('Katalog sortieren', order),
+    order.element,
   );
   const selectedSet = el('div', 'w-selected-set');
   const scopeStatus = el('div', 'w-set-filter-status');
@@ -120,7 +122,7 @@ export function createCatalogBrowser(options: Options) {
     tell('Genaue Ausgabe wird geladen …');
     void catalogEntry(card.sourceId, card.language, signal)
       .then((detail) => {
-        if (!closed && !signal.aborted) options.onChoose(detail.card);
+        if (!closed && !signal.aborted) options.onChoose(detail.card, detail);
       })
       .catch((error) => {
         if (!closed && !signal.aborted) tell(errorText(error), true);
@@ -131,14 +133,22 @@ export function createCatalogBrowser(options: Options) {
     'Preise sind Cardmarket-Katalogtrends in EUR mit Datenstand, keine Bewertung deiner Sprach-, Zustands- oder Druckvariante. Fehlende Preise stehen am Ende.',
   );
   priceNotice.hidden = true;
+  const filterSummary = el('summary', '', 'Filtern & sortieren');
+  const filterPanel = el(
+    'details',
+    'w-catalog-filter-panel',
+    filterSummary,
+    controls,
+    rarityGuide.element,
+  );
   const element = el(
     'section',
     'w-catalog-browser',
-    browse,
-    controls,
     selectedSet,
+    browse,
+    options.standalone ? filterPanel : controls,
     scopeStatus,
-    rarityGuide.element,
+    options.standalone ? null : rarityGuide.element,
     priceNotice,
   );
   let page = initial.page ?? 1;
@@ -215,10 +225,24 @@ export function createCatalogBrowser(options: Options) {
       marker.hidden = !own && !wish;
     }
   }
+  function updateFilterSummary(): void {
+    const labels = [
+      artist.value.trim(),
+      rarity.value,
+      order.value !== 'number'
+        ? order.options.find((option) => option.checked)?.parentElement
+            ?.textContent
+        : '',
+    ].filter(Boolean);
+    filterSummary.replaceChildren(el('span', '', 'Filtern & sortieren'));
+    if (labels.length)
+      filterSummary.append(el('small', '', labels.join(' · ')));
+  }
   function updateSet(): void {
     for (const option of order.options)
       if (option.value.startsWith('price')) option.disabled = !set.value;
     if (!set.value && order.value.startsWith('price')) order.value = 'number';
+    updateFilterSummary();
     selectedSet.replaceChildren();
     const current = inventory.find((item) => item.id === set.value);
     if (!current) return;
@@ -624,6 +648,8 @@ export function createCatalogBrowser(options: Options) {
     const button = action(
       card.name,
       () => {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
         tell('Genaue Ausgabe wird geladen …');
         void (
           entry
@@ -631,14 +657,25 @@ export function createCatalogBrowser(options: Options) {
             : catalogEntry(result.id, result.language, signal)
         )
           .then((detail) => {
-            if (!closed && !signal.aborted) options.onChoose(detail.card);
+            if (!closed && !signal.aborted) {
+              // A disabled button loses browser focus. Restore the opener before
+              // the modal captures it, including when the request was cached.
+              button.disabled = false;
+              button.focus({ preventScroll: true });
+              options.onChoose(detail.card, detail);
+            }
           })
           .catch((error) => {
             if (!signal.aborted && !closed) tell(errorText(error), true);
+          })
+          .finally(() => {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
           });
       },
       'card',
     );
+    button.setAttribute('aria-haspopup', 'dialog');
     const caption = el(
       'span',
       'w-card-caption',
@@ -700,6 +737,7 @@ export function createCatalogBrowser(options: Options) {
     await syncSetFilters(signal);
     if (signal.aborted || closed || active !== signal) return;
     rarityGuide.update(setFacets, rarity.value);
+    updateFilterSummary();
     options.onStateChange?.(state());
     let found: CatalogResult[];
     let prices: CatalogEntry[] | undefined;

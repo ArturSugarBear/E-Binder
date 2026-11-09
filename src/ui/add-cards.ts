@@ -22,6 +22,7 @@ import {
 } from '../domain/personal';
 import {
   action,
+  choices,
   check,
   el,
   errorText,
@@ -49,7 +50,8 @@ export function openAddCards(
   const details = el('div', 'w-add-details');
   const queue = el('div', 'w-capture-queue');
   const photoArea = el('div', 'w-photo-review');
-  const language = select(
+  const language = choices(
+    'Katalogsprache',
     [
       ['de', 'Deutsch'],
       ['en', 'Englisch'],
@@ -61,12 +63,7 @@ export function openAddCards(
   search.placeholder = 'Kartenname oder Sammlernummer';
   search.autocomplete = 'off';
   const searchBox = field('Karte suchen', search);
-  const searchLine = el(
-    'div',
-    'w-search-line',
-    searchBox,
-    field('Katalogsprache', language),
-  );
+  const searchLine = el('div', 'w-search-line', searchBox, language.element);
   const browser = createCatalogBrowser({
     ctx,
     search,

@@ -42,6 +42,7 @@ export function icon(name: string): SVGSVGElement {
     check: 'm5 12 4 4L19 6',
     lock: 'M5 10h14v11H5zM8 10V7a4 4 0 0 1 8 0v3',
     arrow: 'M4 12h16m-6-6 6 6-6 6',
+    external: 'M14 3h7v7m0-7L10 14M11 3H3v18h18v-8',
     undo: 'M9 4 4 9l5 5M4 9h10a6 6 0 0 1 0 12',
     spark: 'm12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z',
     swap: 'M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4',
@@ -78,6 +79,40 @@ export function select(
   }
   element.value = value;
   return element;
+}
+/** Native radio semantics, including arrow keys; state belongs to the caller. */
+export function choices(
+  label: string,
+  items: [string, string][],
+  initial: string,
+  focusKey?: string,
+) {
+  const name = `w-choice-${++nextField}`;
+  const element = el('fieldset', 'w-choices');
+  const legend = el('legend', 'w-label', label);
+  const list = el('div', 'w-choice-list');
+  const options = items.map(([value, caption]) => {
+    const radio = input('radio');
+    radio.name = name;
+    radio.value = value;
+    radio.checked = value === initial;
+    if (focusKey) radio.dataset.focus = `${focusKey}-${value}`;
+    list.append(el('label', 'w-choice', radio, el('span', '', caption)));
+    return radio;
+  });
+  element.append(legend, list);
+  return {
+    element,
+    options,
+    get value() {
+      return options.find((option) => option.checked)?.value ?? '';
+    },
+    set value(value: string) {
+      for (const option of options) option.checked = option.value === value;
+    },
+    addEventListener: (type: string, listener: () => void) =>
+      element.addEventListener(type, listener),
+  };
 }
 export function field(
   label: string,

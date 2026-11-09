@@ -496,3 +496,87 @@ it('keeps a complete 141-card set without source images image-free instead of in
   expect(result.cards.every((card) => card.image === undefined)).toBe(true);
   expect(fetcher).toHaveBeenCalledTimes(2);
 });
+
+it('retains only a valid Cardmarket product reference without making card recognition depend on price availability', async () => {
+  vi.resetModules();
+  const { catalogEntry } = await import('../../src/data/card-catalog');
+  const references: Record<string, unknown> = {
+    valid: 907758,
+    negative: -1,
+    text: 'javascript:alert(1)',
+    fraction: 1.5,
+    missing: undefined,
+  };
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      const id = url.split('/').at(-1)!;
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            ...card,
+            id,
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-08T23:49:36.795Z',
+                trend: 31.04,
+                idProduct: references[id],
+              },
+            },
+          }),
+        ),
+      );
+    }),
+  );
+  const valid = await catalogEntry('valid', 'en');
+  expect(valid.cardmarketUrl).toBe(
+    'https://www.cardmarket.com/en/Pokemon/Products?idProduct=907758',
+  );
+  expect(valid.price?.amount).toBe(31.04);
+  for (const id of ['negative', 'text', 'fraction', 'missing']) {
+    const result = await catalogEntry(id, 'en');
+    expect(result.card.sourceId).toBe(id);
+    expect(result.cardmarketUrl).toBeUndefined();
+  }
+});
+
+it('keeps an exact market listing available when the EUR observation is undated or unavailable', async () => {
+  vi.resetModules();
+  const { catalogEntry } = await import('../../src/data/card-catalog');
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      const id = url.split('/').at(-1)!;
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            ...card,
+            id,
+            pricing: {
+              cardmarket: {
+                idProduct: 907758,
+                trend: 31.04,
+                unit: id === 'foreign' ? 'USD' : 'EUR',
+                updated:
+                  id === 'undated'
+                    ? undefined
+                    : id === 'invalid'
+                      ? 'not-a-date'
+                      : '2026-11-09T00:00:00Z',
+              },
+            },
+          }),
+        ),
+      );
+    }),
+  );
+  for (const id of ['undated', 'invalid', 'foreign']) {
+    const result = await catalogEntry(id, 'en');
+    expect(result.price).toBeUndefined();
+    expect(result.cardmarketUrl).toBe(
+      'https://www.cardmarket.com/en/Pokemon/Products?idProduct=907758',
+    );
+    expect(result.card.sourceId).toBe(id);
+  }
+});

@@ -53,3 +53,9 @@ Berechnete Kontrastverhältnisse der festen Tokens (sRGB/WCAG):
 Die Tokenmessung ersetzt keine vollständige Prüfung aller gerenderten Zustände oder eine manuelle Bedienprüfung.
 
 Gerenderte Prüfung dieser Farb-/Layoutänderung: Chromium bei 1405, 900, 641, 428 und 320 CSS-Pixeln. Die neuen Tokens und `workspace.css` wurden für diese isolierte Prüfung in den vorhandenen Produktionsbuild eingefügt, ohne parallel zu Backend-Arbeiten den Build zu ersetzen. Bei allen fünf Breiten entspricht die Dokumentbreite der Fensterbreite. „Zuletzt hinzugefügt“ misst mit der tatsächlichen 16-px-Schrift 144,35 px; der freie Textplatz im Sortierfeld beträgt mindestens 214 px. Desktop- und Mobilansicht wurden visuell geprüft; Karten bleiben unverändert. Der einmal ausgeführte Impeccable-Detektor meldete für die zwei geänderten CSS-Dateien keine Befunde (`[]`). Die abschließende Prüfung des integrierten Builds erfolgt zusammen mit den übrigen Änderungen.
+
+## Bedienmuster nach der UI-Prüfung
+
+Kleine Formauswahlen mit zwei bis vier stabilen Alternativen verwenden `choices` aus `workspace-dom.ts`: native Radio-Gruppen mit sichtbaren Auswahlflächen. Keine kopierten Einzelkomponenten und keine ARIA-Tabs für Formwerte. Lange oder wechselnde Listen wie Sets, Karten und Illustratoren bleiben Suchfelder beziehungsweise native Listen. Sortierung darf unter einer klar bezeichneten aufklappbaren Zeile liegen, wenn der aktuelle Wert sichtbar bleibt. Für einen einzigen vorhandenen Binder genügt sein Titel.
+
+Die Sammlung priorisiert ihre Karten statt doppelter Kennzahlkacheln. Offene Erfassungen bleiben handlungsfähig sichtbar. Kartendetails in „Entdecken“ zeigen vorhandene Katalogpreise mit Quelle, Währung und Datum und verlinken ausschließlich auf eine validierte Cardmarket-Produkt-ID. Fehlende Preis-/Bezugsdaten werden benannt. Das ist keine Bestandsbewertung. [Prüfgrundlage und Grenzen](research/ui-usability.md).

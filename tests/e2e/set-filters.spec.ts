@@ -101,6 +101,7 @@ test('set filters exclude impossible rarities and show a genuine example beyond 
     './#entdecken?setId=me01&rarity=Shiny+Rare&artist=Falscher+Artist',
   );
   const main = page.getByRole('main');
+  await main.locator('.w-catalog-filter-panel > summary').click();
   const rarity = main.getByLabel('Seltenheit', { exact: true });
   await expect(rarity).toBeEnabled();
   await expect(rarity.locator('option')).toHaveText([
@@ -136,7 +137,10 @@ test('set filters exclude impossible rarities and show a genuine example beyond 
     .getByRole('button', { name: 'Beispielkarte ansehen', exact: true })
     .click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Mega-Entwicklung · 025/132 · DE');
+  await expect(
+    dialog.getByRole('heading', { name: 'Mega-Entwicklung', exact: true }),
+  ).toBeVisible();
+  await expect(dialog).toContainText('025/132 · DE');
   await expect(dialog).toContainText('Artist B');
   await dialog
     .getByRole('button', { name: 'Testkarte 25 schließen', exact: true })
@@ -160,6 +164,7 @@ test('changing sets replaces rarity and illustrator choices; clearing the set re
   await catalogue(page);
   await page.goto('./#entdecken?setId=me01&rarity=Selten&artist=Artist+A');
   const main = page.getByRole('main');
+  await main.locator('.w-catalog-filter-panel > summary').click();
   const rarity = main.getByLabel('Seltenheit', { exact: true });
   await expect(rarity.locator('option')).toHaveCount(3);
   await main.getByLabel('Set', { exact: true }).selectOption('sv04.5');
@@ -188,6 +193,7 @@ test('failed facet requests preserve a selected filter until retry can verify an
   api.fail(true);
   await page.goto('./#entdecken?setId=me01&rarity=Shiny+Rare');
   const main = page.getByRole('main');
+  await main.locator('.w-catalog-filter-panel > summary').click();
   const rarity = main.getByLabel('Seltenheit', { exact: true });
   await expect(
     main.getByRole('button', { name: 'Setfilter erneut laden', exact: true }),

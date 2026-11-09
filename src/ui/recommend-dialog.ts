@@ -9,6 +9,7 @@ import {
 import { suggestPages, type Preferences } from '../domain/recommend';
 import {
   action,
+  choices,
   check,
   el,
   errorText,
@@ -30,7 +31,8 @@ export function openRecommendations(
     'Wir verwenden nur bestätigte, verfügbare Exemplare. Fixierte Plätze bleiben erhalten. Du entscheidest, welcher Entwurf zu dir passt.',
   );
   const form = el('form', 'w-preference-form');
-  const goal = select(
+  const goal = choices(
+    '1. Was soll diese Seite verbinden?',
     [
       ['story', 'Beziehungen und Entwicklungsreihen'],
       ['artist', 'Ein bestimmter Illustrator'],
@@ -151,7 +153,7 @@ export function openRecommendations(
   generate.type = 'submit';
   generate.disabled = !available.length;
   form.append(
-    field('1. Was soll diese Seite verbinden?', goal),
+    goal.element,
     artistField,
     el(
       'fieldset',

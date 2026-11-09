@@ -11,6 +11,7 @@ import {
 import { matchesCard } from '../data/card-catalog';
 import {
   action,
+  choices,
   check,
   el,
   field,
@@ -114,45 +115,24 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
       root.append(pending(ctx));
     return root;
   }
-  root.append(
-    el(
-      'div',
-      'w-summary-strip',
-      stat(String(quantity), 'Exemplare'),
-      stat(String(ctx.state.holdings.length), 'Ausgaben'),
-      stat(
-        String(
-          ctx.state.binders
-            .flatMap((item) => item.pages)
-            .flatMap((page) => page.slots)
-            .filter((slot) => slot?.kind === 'owned').length,
-        ),
-        'Binderplätze belegt',
-      ),
-      stat(
-        String(
-          ctx.state.captures.filter((item) => item.status === 'pending').length,
-        ),
-        'Fotos noch offen',
-      ),
-    ),
-  );
   if (ctx.state.captures.some((item) => item.status === 'pending'))
     root.append(pending(ctx));
   const search = input('search', ctx.filters.query);
   search.placeholder = 'Name, Set, Nummer oder Illustrator';
   search.dataset.focus = 'collection-search';
-  const filter = select(
+  const filter = choices(
+    'Ansicht',
     [
       ['all', 'Alle Karten'],
-      ['free', 'Frei für eine Seite'],
-      ['favorite', 'Lieblingskarten'],
-      ['trade', 'Zum Tausch markiert'],
+      ['free', 'Freie Karten'],
+      ['favorite', 'Lieblinge'],
+      ['trade', 'Tausch'],
     ],
     ctx.filters.kind,
+    'collection-kind',
   );
-  filter.dataset.focus = 'collection-kind';
-  const sort = select(
+  const sort = choices(
+    'Sortieren',
     [
       ['recent', 'Zuletzt hinzugefügt'],
       ['name', 'Nach Name'],
@@ -160,8 +140,10 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
       ['quantity', 'Nach Menge'],
     ],
     ctx.filters.order,
+    'collection-order',
   );
-  sort.dataset.focus = 'collection-order';
+  const sortSummary = el('summary', '', 'Sortieren');
+  const sortPanel = el('details', 'w-sort-panel', sortSummary, sort.element);
   const result = el('div', 'w-owned-grid');
   const count = el('p', 'w-result-count');
   count.setAttribute('aria-live', 'polite');
@@ -169,6 +151,7 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
     ctx.filters.query = search.value;
     ctx.filters.kind = filter.value;
     ctx.filters.order = sort.value;
+    sortSummary.textContent = `Sortieren: ${sort.options.find((option) => option.checked)?.parentElement?.textContent ?? ''}`;
     const rows = ctx.state.holdings.filter(
       (holding) =>
         matchesCard(holding.card, search.value) &&
@@ -204,17 +187,13 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
       'div',
       'w-filter-bar',
       field('Im eigenen Bestand suchen', search),
-      field('Ansicht', filter),
-      field('Sortieren', sort),
+      filter.element,
     ),
-    count,
+    el('div', 'w-collection-results-bar', count, sortPanel),
     result,
   );
   update();
   return root;
-}
-function stat(value: string, label: string): HTMLElement {
-  return el('div', 'w-stat', el('strong', '', value), el('span', '', label));
 }
 function pending(ctx: WorkspaceContext): HTMLElement {
   return el(
@@ -249,10 +228,6 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
     () => ctx.openHolding(holding.id),
     'card',
   );
-  button.setAttribute(
-    'aria-label',
-    `${holding.card.name}, ${holding.card.number}, ${holding.quantity} Exemplare. Details öffnen`,
-  );
   button.dataset.focus = `holding-${holding.id}`;
   button.replaceChildren(
     el(
@@ -279,6 +254,8 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
       `${freeCount(ctx.state, holding)} frei${holding.tradeQuantity ? ` · ${holding.tradeQuantity} zum Tausch` : ''}`,
     ),
   );
+  // The visible caption names the button; a separate hint must not replace it.
+  button.setAttribute('aria-description', 'Kartendetails öffnen');
   return button;
 }
 

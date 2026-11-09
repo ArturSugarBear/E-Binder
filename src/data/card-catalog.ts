@@ -114,6 +114,7 @@ export interface CatalogEntry {
   card: PersonalCard;
   rarity: string;
   price?: MarketPrice;
+  cardmarketUrl?: string;
 }
 export const catalogSetSchema = z.object({
   id: z.string().regex(/^[\w.+-]+$/),
@@ -313,14 +314,22 @@ const apiCardSchema = resumeSchema.extend({
     .object({
       cardmarket: z
         .object({
-          unit: z.string(),
-          updated: z.string(),
-          trend: z.number().nullable().optional(),
+          unit: z.string().optional().catch(undefined),
+          updated: z.string().optional().catch(undefined),
+          trend: z.number().nullable().optional().catch(undefined),
+          idProduct: z
+            .number()
+            .int()
+            .positive()
+            .max(Number.MAX_SAFE_INTEGER)
+            .optional()
+            .catch(undefined),
         })
         .nullable()
         .optional(),
     })
-    .optional(),
+    .nullish()
+    .catch(undefined),
   set: z.object({
     id: z.string(),
     name: z.string(),
@@ -481,10 +490,14 @@ export async function catalogEntry(
     quote?.unit === 'EUR' &&
     typeof quote.trend === 'number' &&
     quote.trend > 0 &&
+    quote.updated &&
     Number.isFinite(Date.parse(quote.updated))
       ? { amount: quote.trend, updated: quote.updated }
       : undefined;
-  return { card, rarity: raw.rarity ?? '', price };
+  const cardmarketUrl = quote?.idProduct
+    ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
+    : undefined;
+  return { card, rarity: raw.rarity ?? '', price, cardmarketUrl };
 }
 export async function catalogSetCards(
   id: string,

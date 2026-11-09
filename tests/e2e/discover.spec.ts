@@ -85,6 +85,14 @@ async function catalogue(page: Page) {
         illustrator: 'GIDORA',
         variants: { normal: true },
         rarity: 'Häufig',
+        pricing: {
+          cardmarket: {
+            unit: 'EUR',
+            updated: '2026-11-08T23:49:36.795Z',
+            trend: path.endsWith('001') ? 31.04 : 0,
+            idProduct: path.endsWith('001') ? 907758 : undefined,
+          },
+        },
       };
     else if (path === 'cards') {
       const number = url.searchParams.get('localId')?.replace('eq:', '');
@@ -157,6 +165,12 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
     timeout: 15_000,
   });
   await expect(main.locator('.w-search-results')).toContainText('025/182');
+  await expect(main.locator('.w-catalog-filter-panel')).not.toHaveAttribute(
+    'open',
+  );
+  await expect(main.locator('.w-catalog-filter-panel > summary')).toContainText(
+    'GIDORA · Häufig',
+  );
   await main.locator('.w-search-results button').click();
   const preview = page.getByRole('dialog');
   await expect(preview).toContainText('Noch nicht im Bestand');
@@ -216,7 +230,10 @@ test('changing catalogue language clears incompatible filters and keeps Japanese
   await expect(main.locator('.w-search-results button')).toHaveCount(1, {
     timeout: 15_000,
   });
-  await main.getByLabel('Katalogsprache').selectOption('ja');
+  await main
+    .getByRole('group', { name: 'Katalogsprache' })
+    .getByRole('radio', { name: 'Japanisch' })
+    .check();
   await expect(main.getByLabel('Set', { exact: true })).toHaveValue('');
   await expect(main.getByLabel('Seltenheit', { exact: true })).toHaveValue('');
   await expect
@@ -269,4 +286,98 @@ test('catalogue failures can be retried without losing the chosen set or creatin
   await expect(main.locator('.w-search-results button')).toHaveCount(24, {
     timeout: 15_000,
   });
+});
+
+test('card details expose a dated EUR trend and an exact external listing without creating ownership', async ({
+  page,
+}) => {
+  await catalogue(page);
+  await page.goto('./#entdecken?setId=sv10');
+  const main = page.getByRole('main');
+  const card = main.locator('.w-search-results button').first();
+  await expect(card).toBeVisible();
+  await card.click();
+  const dialog = page.getByRole('dialog');
+  const market = dialog.getByRole('region', { name: 'Preis und Bezugsquelle' });
+  await expect(market).toContainText('31,04');
+  await expect(market.locator('time')).toHaveAttribute(
+    'datetime',
+    '2026-11-08T23:49:36.795Z',
+  );
+  await expect(
+    market.getByRole('link', { name: 'Auf Cardmarket ansehen' }),
+  ).toHaveAttribute(
+    'href',
+    'https://www.cardmarket.com/en/Pokemon/Products?idProduct=907758',
+  );
+  await expect(market.getByRole('link')).toHaveAttribute('target', '_blank');
+  await expect(dialog).toContainText('Noch nicht im Bestand');
+  await expect(dialog).toContainText('Zustand und Druckvariante');
+  expect(
+    (await new AxeBuilder({ page }).include('.w-dialog').analyze()).violations,
+  ).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(card).toBeFocused();
+  await main.locator('.w-search-results button').nth(1).click();
+  await expect(dialog).toContainText('kein datierter EUR-Preis');
+  await expect(dialog.locator('a')).toHaveCount(0);
+  await expect(dialog).not.toContainText('0,00');
+  await page.keyboard.press('Escape');
+  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
+
+test('collection choices work directly and by keyboard while keeping cards near the top on mobile', async ({
+  page,
+}) => {
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Mit Demo ausprobieren', exact: true })
+    .click();
+  const main = page.getByRole('main');
+  await expect(main.locator('.w-owned-grid button')).toHaveCount(18);
+  const view = main.getByRole('group', { name: 'Ansicht', exact: true });
+  await view.getByRole('radio', { name: 'Lieblinge', exact: true }).check();
+  await expect(
+    view.getByRole('radio', { name: 'Lieblinge', exact: true }),
+  ).toBeChecked();
+  await view.getByRole('radio', { name: 'Alle Karten', exact: true }).check();
+  await expect(main.locator('.w-owned-grid button')).toHaveCount(18);
+  const all = view.getByRole('radio', { name: 'Alle Karten', exact: true });
+  await all.focus();
+  await all.press('ArrowRight');
+  await expect(view.getByRole('radio', { name: 'Freie Karten' })).toBeChecked();
+  await expect(view.getByRole('radio', { name: 'Freie Karten' })).toBeFocused();
+  await view.getByRole('radio', { name: 'Alle Karten', exact: true }).check();
+  await main
+    .getByText('Sortieren: Zuletzt hinzugefügt', { exact: true })
+    .click();
+  await main.getByRole('radio', { name: 'Nach Name', exact: true }).check();
+  await expect(main.locator('.w-sort-panel summary')).toHaveText(
+    'Sortieren: Nach Name',
+  );
+  await main.locator('.w-sort-panel summary').click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const first = await main
+    .locator('.w-owned-grid button')
+    .first()
+    .boundingBox();
+  expect(first!.y).toBeLessThan(844);
+  await page.setViewportSize({ width: 320, height: 720 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(
+    (await new AxeBuilder({ page }).include('#workspace-main').analyze())
+      .violations,
+  ).toEqual([]);
+  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await expect(
+    main.getByRole('heading', { name: 'Mein Beispielbinder', exact: true }),
+  ).toBeVisible();
+  await expect(
+    main.getByRole('combobox', { name: 'Binder auswählen' }),
+  ).toHaveCount(0);
 });

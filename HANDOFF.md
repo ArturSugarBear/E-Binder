@@ -2,6 +2,14 @@
 
 Stand: 9. November 2026. Repository `/workspace/E-Binder`, GitHub CLI `gh-e-binder` ist autorisiert. Niemals Tokens ausgeben oder Force-Push verwenden. Nutzer wünscht geprüfte fertige Änderungen auf **master und GitHub Pages**, zusätzlich einen aktuellen Arbeitsstand auf `codex/workspace-update`. ChatGPT-Nutzungskontingent kann hier nicht ausgelesen werden; keine Zahl erfinden.
 
+## Aktuelle Umsetzung: UI-Bedienung und Kartendetails
+
+Nutzer möchte eine echte Usability-Überarbeitung, sichtbare kleine Optionsgruppen und Preis/Cardmarket auch in „Entdecken“. Keine Frameworkmigration. Design Mentor `dm-audit` + `dm-components` verwendet; Befunde/Entscheidungen: `docs/research/ui-usability.md`. Neue gemeinsame native Radio-Komponente `choices` in `workspace-dom.ts`; eingesetzt bei Sammlung, Sortierung, DE/EN/JA-Katalogsprache, Seitenziel und Zugang. Langlisten bleiben Such-/Auswahlfelder. Doppelte Sammlungs-Kennzahlen entfernt, Demo kompakter, einzelner Binder ist ein Titel. Preis-Modul `card-market.ts`: positiver datierter EUR-Katalogtrend, ausschließlich validierte konkrete Produkt-ID als Cardmarket-Link. Fehlende Daten bleiben unbekannt. Nur öffentliche Metadaten werden durchgereicht; keine Besitz-/Fotospeicherung geändert.
+
+Zwischenstand: `npm run check` mit **64 Unit-Tests** bestanden. Im ersten Browserdurchlauf gefundene Fokus-Rückgabe und unvollständige zugängliche Kartenlabels korrigiert. Entdecken verwendet nun einen Filter-/Sortierbereich mit sichtbarer Zusammenfassung aktiver Werte; die Seltenheitshilfe liegt dort statt vor den Treffern. **Vollständige 174 Browserprüfungen laufen** (`/workspace/scratch/ui-renewal-browser.log`, Session 10270). Neuer Build `main-Dte6tfGf.js`. Echter UI-Smoke mit Feelinara-ex und Screenshots läuft unter `/workspace/scratch/ui-renewal-smoke.mjs`/`.log` (Session 11956). Vor Master-Veröffentlichung Ergebnis prüfen, gerenderte Screenshots ansehen und vollständige erforderliche Checks abschließen. Dieser Abschnitt beschreibt einen Arbeitsstand, noch keine live geprüfte UI-Version. Keine vorhandenen Konten zum Testen benutzen.
+
+Der vorherige Bilderfix **0434df0 ist vollständig live**: Pages-Lauf `42690796729` und CodeQL erfolgreich. Echte Live-Prüfung: Asset `main-DuCK-lI9.js`, me06 ohne Bilder als kompakte Liste, keine erfundenen Bildadressen oder Detailanfragen zum Rendern; me01-Seltenheiten ohne Shiny und Feelinara-ex 153/128 korrekt. Logs außerhalb Repo: `catalog-images-live-smoke.log`, `catalog-images-positive-live.log`.
+
 ## Aktuelle Korrektur: TCGdex-Bildabdeckung
 
 Basis ist der live geprüfte Release `1d96e7b` (60 Unit-/160 Browserprüfungen; Publish `42671631945`, nach GitHub-Serverfehler erfolgreich in Versuch 2). Aktuelle Nutzerbeanstandung: fehlende Bilder bei „Delta-Herrschaft“.

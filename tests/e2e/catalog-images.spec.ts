@@ -89,6 +89,7 @@ test('missing provider artwork is a compact catalogue list and an honest rarity 
     .first()
     .boundingBox();
   expect(box!.height).toBeLessThan(130);
+  await main.locator('.w-catalog-filter-panel > summary').click();
   await main.getByLabel('Seltenheit', { exact: true }).selectOption('Häufig');
   await expect(main.locator('.w-rarity-selected')).toContainText(
     'noch kein Beispielbild',
@@ -137,7 +138,11 @@ test('paired English set artwork appears in both results and rarity examples wit
   await expect(main.locator('.w-rarity-selected .w-art-language')).toHaveText(
     'Bild: EN',
   );
-  await expect(main.getByLabel('Katalogsprache')).toHaveValue('de');
+  await expect(
+    main
+      .getByRole('group', { name: 'Katalogsprache' })
+      .getByRole('radio', { name: 'Deutsch' }),
+  ).toBeChecked();
   await expect(main.locator('.w-search-results')).not.toHaveClass(
     /w-text-results/,
   );

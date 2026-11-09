@@ -117,7 +117,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .w-catalog-filters {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -269,4 +269,85 @@
   .w-search-results.w-text-results {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Sorting is a small, visible choice; set and illustrator remain searchable. */
+.w-catalog-filters > .w-choices {
+  grid-column: 1 / -1;
+}
+.w-catalog-filters > .w-choices .w-choice-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.w-card-detail-dialog {
+  width: min(700px, calc(100% - 32px));
+}
+.w-card-market {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--w-border);
+  padding-top: 20px;
+}
+.w-market-quote {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.w-market-quote strong {
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
+.w-card-market .w-button {
+  justify-self: start;
+}
+.w-card-rarity {
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 8px !important;
+}
+@media (max-width: 600px) {
+  .w-catalog-filters > .w-choices .w-choice-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .w-card-detail-dialog .w-discover-card {
+    grid-template-columns: minmax(0, 135px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .w-preference-form > .w-choices .w-choice-list {
+    flex-direction: column;
+  }
+}
+
+.w-catalog-filter-panel {
+  border-block: 1px solid var(--w-border);
+  padding-block: 12px;
+}
+.w-catalog-filter-panel > summary {
+  cursor: pointer;
+  min-height: 24px;
+  font-weight: 600;
+}
+.w-catalog-filter-panel > summary small {
+  display: block;
+  font-weight: 400;
+  color: var(--accent);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.w-catalog-filter-panel[open] > .w-catalog-filters {
+  margin-top: 18px;
+}
+.w-catalog-filter-panel > .w-rarity-help {
+  margin-top: 18px;
+}
+.w-discover .w-set-filter-status .w-message-note,
+.w-discover > [role='status'] .w-message-note {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ink-2);
+  font-size: 12px;
 }
