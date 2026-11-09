@@ -18,7 +18,7 @@ Die Sammlung ist eine Arbeitsfläche (Impeccable-Modus **Operate**): Kartenbilde
 
 - Gemeinsame Farbrollen in `src/styles.css`, persönliche Arbeitsflächen in `src/workspace.css`. Keine separaten Themes je Funktion. Beide HTML-Einstiege verwenden das dunkle Farbschema.
 - Lokale Bricolage-Grotesque- und JetBrains-Mono-Schriften bleiben erhalten. Sichtbare Typografie, Buttons, Icons und Felder folgen gemeinsamen Regeln.
-- Karten bleiben vollständig sichtbar, im Raster 3 × 3 und Verhältnis 63 : 88. Kein Beschnitt, keine Farbfilter und keine generierten Ersatzkarten in der Sammlungsansicht. Bildvorverarbeitung ist ausschließlich Teil der OCR; das Original bleibt erhalten.
+- Karten bleiben vollständig sichtbar, im Raster 3 × 3 und Verhältnis 63 : 88. Kein Beschnitt, keine Farbfilter und keine generierten Ersatzkarten in der Sammlungsansicht. Bildvorverarbeitung ist ausschließlich Teil der OCR. Das Original bleibt nur im geöffneten Erfassungsdialog für weitere Zuschnitte verfügbar; Fotos werden nicht dauerhaft gespeichert.
 - Die dunklen Hüllen mit gestanztem Rand sind das Produktmotiv. Die neue Palette betrifft Arbeitsfläche und Bedienelemente. Greninja behält Wasser-Shuriken und seine blaue Sonderedition.
 - Der Sammlungsauftakt verwendet eine ruhige Fläche. Keine dekorativen Lichtverläufe hinter Karten oder Arbeitsformularen, kein Glühen der Buttons. Die materiellen Hüllen bleiben erkennbar.
 - Neutrale Textrollen dürfen nicht als Fehlermeldungen dienen. Erfolg und Fehler haben sichtbaren Text. Destruktive Aktionen verwenden separate Rot-/Rosa-Rollen und eine ausdrückliche Bezeichnung.

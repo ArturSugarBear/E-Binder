@@ -17,7 +17,7 @@ async function catalogue(page: Page) {
   const cards = Array.from({ length: 25 }, (_, index) => ({
     id: `me01-${String(index + 1).padStart(3, '0')}`,
     localId: String(index + 1).padStart(3, '0'),
-    name: `Testkarte ${index + 1}`,
+    name: index === 1 ? 'Porygon2' : `Testkarte ${index + 1}`,
     image: `https://assets.tcgdex.net/de/me/me01/${index + 1}`,
     rarity: index === 24 ? 'Selten' : 'Häufig',
     illustrator: index === 24 ? 'Artist B' : 'Artist A',
@@ -46,7 +46,14 @@ async function catalogue(page: Page) {
         json: {
           data: {
             set: { ...chosen, cards: entries.map(({ id }) => ({ id })) },
-            cards: entries,
+            cards: [
+              ...entries,
+              {
+                ...special,
+                id: 'me01-classic-001',
+                set: { id: 'me01-classic' },
+              },
+            ],
           },
         },
       });
@@ -114,6 +121,10 @@ test('set filters exclude impossible rarities and show a genuine example beyond 
     ),
   ).toBe(true);
   await expect(page).not.toHaveURL(/rarity=|artist=/);
+  await main.getByLabel('Karte suchen', { exact: true }).fill('Porygon2');
+  await expect(main.locator('.w-search-results button')).toHaveCount(1);
+  await expect(main.locator('.w-search-results')).toContainText('Porygon2');
+  await main.getByLabel('Karte suchen', { exact: true }).fill('');
   await rarity.selectOption('Selten');
   await expect(main.locator('.w-search-results button')).toHaveCount(1);
   await expect(main.locator('.w-rarity-selected')).toContainText(

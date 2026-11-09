@@ -590,18 +590,23 @@ export function createCatalogBrowser(options: Options) {
     if (!signal.aborted) pricing.set(key, entries);
     return entries;
   }
-  function matches(entry: CatalogEntry): boolean {
+  function matchesFields(
+    name: string,
+    printedNumber: string,
+    illustrator: string,
+    entryRarity: string,
+  ): boolean {
     const number = search.value
       .trim()
-      .match(/^([A-Za-z]*\d+)(?:\s*\/\s*[A-Za-z]*\d+)?$/)?.[1];
+      .match(/^([A-Za-z]{0,4}\d+)(?:\s*\/\s*[A-Za-z]*\d+)?$/)?.[1];
     return (
       (!search.value.trim() ||
         (number
-          ? numberKey(entry.card.number.split('/')[0]!) === numberKey(number)
-          : normalize(entry.card.name).includes(normalize(search.value)))) &&
+          ? numberKey(printedNumber.split('/')[0]!) === numberKey(number)
+          : normalize(name).includes(normalize(search.value)))) &&
       (!artist.value.trim() ||
-        normalize(entry.card.artist) === normalize(artist.value)) &&
-      (!rarity.value || entry.rarity === rarity.value)
+        normalize(illustrator) === normalize(artist.value)) &&
+      (!rarity.value || entryRarity === rarity.value)
     );
   }
   function renderResult(
@@ -694,7 +699,14 @@ export function createCatalogBrowser(options: Options) {
         return;
       }
       const entries = (await loadPrices(signal))
-        .filter(matches)
+        .filter((entry) =>
+          matchesFields(
+            entry.card.name,
+            entry.card.number,
+            entry.card.artist,
+            entry.rarity,
+          ),
+        )
         .sort((a, b) => {
           if (!a.price)
             return b.price
@@ -728,6 +740,32 @@ export function createCatalogBrowser(options: Options) {
       next.disabled = page * 24 >= entries.length;
       tell(
         `${entries.length} Ausgaben im gewählten Set. Seite ${page}. ${entries.filter((entry) => !entry.price).length} ohne passenden EUR-Trend.`,
+      );
+    } else if (set.value && setFacets) {
+      const matching = setFacets.cards
+        .filter((card) =>
+          matchesFields(
+            card.name,
+            card.number ?? card.localId,
+            card.artist,
+            card.rarity,
+          ),
+        )
+        .sort((a, b) =>
+          order.value === 'name'
+            ? a.name.localeCompare(b.name, language.value) ||
+              a.id.localeCompare(b.id)
+            : a.localId.localeCompare(b.localId, undefined, { numeric: true }),
+        );
+      found = await fillCatalogImages(
+        matching.slice((page - 1) * 24, page * 24),
+        signal,
+      );
+      next.disabled = page * 24 >= matching.length;
+      tell(
+        matching.length
+          ? `${matching.length} Ausgaben im gewählten Set. Seite ${page}. Öffne eine Karte, um Ausgabe und Menge zu prüfen.`
+          : 'Keine passende Ausgabe im gewählten Set. Ändere Name, Nummer oder Filter.',
       );
     } else {
       const query = search.value;

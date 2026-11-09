@@ -252,6 +252,10 @@ test('catalogue failures can be retried without losing the chosen set or creatin
     if (fail) return route.fulfill({ status: 503, body: 'Unavailable' });
     await route.fallback();
   });
+  await page.route('https://api.tcgdex.net/v2/graphql', async (route) => {
+    if (fail) return route.fulfill({ status: 503, body: 'Unavailable' });
+    await route.fallback();
+  });
   await page.goto('./#entdecken?setId=sv10');
   const main = page.getByRole('main');
   await expect(main).toContainText(

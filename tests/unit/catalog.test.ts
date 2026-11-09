@@ -321,7 +321,15 @@ it('loads complete set-scoped rarity and illustrator metadata in one request, wi
             cardCount: { official: 132 },
             cards: cards.map(({ id }) => ({ id })),
           },
-          cards,
+          cards: [
+            ...cards,
+            {
+              ...cards[0],
+              id: 'me01-classic-1',
+              rarity: 'Shiny rare',
+              set: { id: 'me01-classic' },
+            },
+          ],
         },
       }),
     ),

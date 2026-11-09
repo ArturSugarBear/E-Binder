@@ -704,7 +704,7 @@ export async function catalogSetFacets(
             image: z.string().nullish(),
             rarity: z.string().nullish(),
             illustrator: z.string().nullish(),
-            set: z.object({ id: z.literal(id) }),
+            set: z.object({ id: resumeSchema.shape.id }),
           }),
         ),
       }),
@@ -715,11 +715,13 @@ export async function catalogSetFacets(
       'Die Filter dieses Sets konnten nicht vollständig geprüft werden. Versuche es erneut.',
     );
   const data = result.data.data;
+  // Prefixes such as 30th-* also return 30th-c-*; exact set membership is authoritative.
+  const cards = data.cards.filter((card) => card.set.id === id);
   const expected = new Set(data.set.cards.map((card) => card.id));
-  const actual = new Set(data.cards.map((card) => card.id));
+  const actual = new Set(cards.map((card) => card.id));
   if (
     expected.size !== data.set.cards.length ||
-    actual.size !== data.cards.length ||
+    actual.size !== cards.length ||
     expected.size !== actual.size ||
     [...expected].some((card) => !actual.has(card))
   )
@@ -731,7 +733,7 @@ export async function catalogSetFacets(
     publicCache.delete(publicCache.keys().next().value!);
   publicCache.set(key, { until: Date.now() + 300000, data: json });
   return {
-    cards: data.cards.map((card) => ({
+    cards: cards.map((card) => ({
       id: card.id,
       localId: card.localId,
       name: card.name,

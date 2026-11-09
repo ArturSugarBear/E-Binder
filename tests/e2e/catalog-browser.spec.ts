@@ -192,15 +192,15 @@ test('set discovery accepts English aliases, resolves printed leading zeros, and
   await expect(dialog.locator('.w-search-results')).toContainText('001/182');
   await dialog.getByLabel('Illustrator im Katalog').fill('GIDORA');
   await dialog.getByLabel('Seltenheit', { exact: true }).selectOption('Häufig');
-  await expect
-    .poll(() =>
-      requests.some(
-        (url) =>
-          url.includes('illustrator=eq%3AGIDORA') &&
-          url.includes('rarity=eq%3AH'),
-      ),
-    )
-    .toBe(true);
+  await expect(dialog.locator('.w-search-results button')).toHaveCount(1);
+  await expect(dialog.locator('.w-search-results')).toContainText('001/182');
+  expect(
+    requests.some(
+      (url) =>
+        new URL(url).pathname.endsWith('/cards') &&
+        new URL(url).searchParams.has('illustrator'),
+    ),
+  ).toBe(false);
 });
 
 test('price sorting considers the complete selected set and places unavailable prices last', async ({
