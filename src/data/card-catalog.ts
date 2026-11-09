@@ -131,8 +131,10 @@ export async function searchCatalog(
   language: string,
   signal?: AbortSignal,
 ): Promise<CatalogResult[]> {
-  if (!['de', 'en'].includes(language))
-    throw new Error('Die Online-Suche unterstützt hier Deutsch und Englisch.');
+  if (!['de', 'en', 'ja'].includes(language))
+    throw new Error(
+      'Die Online-Suche unterstützt Deutsch, Englisch und Japanisch.',
+    );
   const params = new URLSearchParams({
     'pagination:page': '1',
     'pagination:itemsPerPage': '48',
@@ -156,7 +158,7 @@ export async function fetchCatalogCard(
   language: string,
   signal?: AbortSignal,
 ): Promise<PersonalCard> {
-  if (!/^[\w.-]+$/.test(id) || !['de', 'en'].includes(language))
+  if (!/^[\w.-]+$/.test(id) || !['de', 'en', 'ja'].includes(language))
     throw new Error('Ungültige Katalogreferenz.');
   const raw = apiCardSchema.parse(
     await getJson(
@@ -283,26 +285,72 @@ export function recognitionClues(text: string): RecognitionClue[] {
       observations,
     }));
 }
+const setResume = z.object({
+  id: z.string(),
+  cardCount: z.object({ official: z.number() }),
+});
+const setDetails = z.object({ cards: z.array(resumeSchema) });
+const setCache = new Map<
+  string,
+  { until: number; sets: z.infer<typeof setResume>[] }
+>();
+async function setsFor(language: string, signal?: AbortSignal) {
+  const cached = setCache.get(language);
+  if (cached && cached.until > Date.now()) return cached.sets;
+  const sets = z
+    .array(setResume)
+    .parse(await getJson(`https://api.tcgdex.net/v2/${language}/sets`, signal));
+  setCache.set(language, { sets, until: Date.now() + 300000 });
+  return sets;
+}
 export async function fetchRecognizedCards(
   text: string,
   fallbackLanguage: string,
   signal?: AbortSignal,
 ): Promise<PersonalCard[]> {
+  signal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(25000)])
+    : AbortSignal.timeout(25000);
+  if (!['de', 'en', 'ja'].includes(fallbackLanguage))
+    throw new Error('Ungültige Katalogsprache.');
   const results = await Promise.allSettled(
     recognitionClues(text).map(async (clue) => {
-      if (!clue.setId) return undefined;
-      const number = clue.number.split('/')[0]!;
-      if (!/^\d+$/.test(number)) return undefined;
-      const card = await fetchCatalogCard(
-        `${clue.setId}-${number}`,
-        clue.language ?? fallbackLanguage,
-        signal,
+      const language = clue.language ?? fallbackLanguage;
+      const [number, total] = clue.number.split('/');
+      if (clue.setId && language !== 'ja') {
+        const card = await fetchCatalogCard(
+          `${clue.setId}-${number}`,
+          language,
+          signal,
+        );
+        return numberKey(card.number) === clue.number ? [card] : [];
+      }
+      // Old frames and Japanese prints have different set codes. Match actual set counts and local IDs.
+      const sets = (await setsFor(language, signal)).filter(
+        (set) => String(set.cardCount.official) === total,
       );
-      return numberKey(card.number) === clue.number ? card : undefined;
+      const matches: PersonalCard[] = [];
+      // shortcut: cap ambiguous denominators at eight sets, use manual search for broader matches.
+      for (const set of sets.slice(0, 8)) {
+        const detail = setDetails.parse(
+          await getJson(
+            `https://api.tcgdex.net/v2/${language}/sets/${encodeURIComponent(set.id)}`,
+            signal,
+          ),
+        );
+        const resume = detail.cards.find(
+          (card) => numberKey(card.localId) === number,
+        );
+        if (resume) {
+          const card = await fetchCatalogCard(resume.id, language, signal);
+          if (numberKey(card.number) === clue.number) matches.push(card);
+        }
+      }
+      return matches;
     }),
   );
   const candidates = results.flatMap((result) =>
-    result.status === 'fulfilled' && result.value ? [result.value] : [],
+    result.status === 'fulfilled' ? result.value : [],
   );
   const failure = results.find((result) => result.status === 'rejected');
   if (!candidates.length && failure?.status === 'rejected')

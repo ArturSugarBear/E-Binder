@@ -8,6 +8,7 @@ import {
   type CatalogResult,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import { alignPhoto } from './photo-crop';
 import {
   changeState,
   confirmHolding,
@@ -52,6 +53,7 @@ export function openAddCards(
     [
       ['de', 'Deutsch'],
       ['en', 'Englisch'],
+      ['ja', 'Japanisch'],
     ],
     options.card?.language ?? 'de',
   );
@@ -73,6 +75,13 @@ export function openAddCards(
   let detailRequest = 0;
   let closed = false;
   let queueLimit = 30;
+  const interrupt = () => {
+    ocrController?.abort();
+    ocrController = undefined;
+    searchController?.abort();
+    clearTimeout(debounce);
+    detailRequest++;
+  };
   sheet.onClose(() => {
     closed = true;
     searchController?.abort();
@@ -169,7 +178,7 @@ export function openAddCards(
     if (shot.status !== 'confirmed')
       copy.append(
         action(
-          'Text auf dem Foto erkennen',
+          'Foto ausrichten und erkennen',
           () => {
             void runOcr();
           },
@@ -211,7 +220,7 @@ export function openAddCards(
             ctx.openHolding(shot.holdingId);
             return;
           }
-          ocrController?.abort();
+          interrupt();
           captureId = shot.id;
           selected = undefined;
           details.replaceChildren();
@@ -239,8 +248,12 @@ export function openAddCards(
       );
   };
 
-  async function addFiles(files: FileList | null): Promise<void> {
+  async function addFiles(
+    files: FileList | null,
+    fromCamera = false,
+  ): Promise<void> {
     if (!files?.length) return;
+    interrupt();
     upload.disabled = true;
     takePhoto.disabled = true;
     let first: string | undefined;
@@ -300,32 +313,47 @@ export function openAddCards(
         results.replaceChildren();
         showQueue();
         showCapture();
+        photoArea.scrollIntoView({ block: 'start' });
         tell(
-          `${added} neue Fotos gesichert.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Wähle die Ausgabe für jedes offene Foto.`,
+          `${added} neue Fotos gesichert.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
         );
       }
     } catch (error) {
-      if (!closed) tell(errorText(error), true);
+      if (!closed) {
+        if (first) {
+          captureId = first;
+          selected = undefined;
+          details.replaceChildren();
+          results.replaceChildren();
+          showQueue();
+          showCapture();
+        }
+        tell(errorText(error), true);
+      }
     } finally {
       upload.disabled = false;
       takePhoto.disabled = false;
       gallery.value = '';
       camera.value = '';
     }
+    if (fromCamera && first && !closed) await runOcr();
   }
   gallery.addEventListener('change', () => {
     void addFiles(gallery.files);
   });
   camera.addEventListener('change', () => {
-    void addFiles(camera.files);
+    void addFiles(camera.files, true);
   });
 
   async function runOcr(): Promise<void> {
     const shot = capture();
     if (!shot || shot.status === 'confirmed') return;
-    ocrController?.abort();
+    interrupt();
     const controller = new AbortController();
     ocrController = controller;
+    selected = undefined;
+    details.replaceChildren();
+    results.replaceChildren();
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
     const progress = el('progress', 'w-progress');
@@ -343,8 +371,14 @@ export function openAddCards(
         throw new Error(
           'Das Originalfoto wurde im lokalen Speicher nicht gefunden.',
         );
+      const aligned = await alignPhoto(photo, controller.signal);
+      if (!aligned || closed || controller.signal.aborted) {
+        if (!closed && ocrController === controller)
+          tell('Ausrichtung abgebrochen. Dein Foto bleibt offen.');
+        return;
+      }
       const text = await recognizePhoto(
-        photo,
+        aligned,
         controller.signal,
         (label, fraction) => {
           if (!closed && ocrController === controller) {
@@ -361,6 +395,7 @@ export function openAddCards(
         ...ctx.state.holdings.map((item) => item.card),
       ];
       const local = candidatesFromText(text, known);
+      status.textContent = 'Kartenausgaben werden im Katalog abgeglichen …';
       let online: PersonalCard[] = [];
       let catalogUnavailable = false;
       try {
@@ -372,7 +407,8 @@ export function openAddCards(
       } catch {
         catalogUnavailable = true;
       }
-      if (controller.signal.aborted || closed) return;
+      if (controller.signal.aborted || closed || ocrController !== controller)
+        return;
       const candidates = [
         ...new Map(
           [...online, ...local].map((card) => [card.key, card]),
@@ -390,6 +426,7 @@ export function openAddCards(
       );
       showCapture();
       renderChoices(candidates);
+      if (candidates.length) results.scrollIntoView({ block: 'start' });
       tell(
         candidates.length
           ? `Erkennungsvorschläge, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Online-Abgleich war nicht erreichbar; diese Vorschläge stammen aus dem lokalen Katalog.' : ''}`
@@ -398,6 +435,7 @@ export function openAddCards(
       const number = recognitionClues(text)[0]?.number;
       if (number && !candidates.length) {
         search.value = number;
+        void onlineSearch();
       }
     } catch (error) {
       if (closed || ocrController !== controller) return;
@@ -436,6 +474,7 @@ export function openAddCards(
     }
   }
   function choose(card: PersonalCard): void {
+    interrupt();
     selected = card;
     details.replaceChildren();
     notices.replaceChildren();
@@ -623,21 +662,29 @@ export function openAddCards(
         if (shot) {
           ocrController?.abort();
           ocrController = undefined;
-          captureId = undefined;
+          captureId = ctx.state.captures.find(
+            (item) => item.status === 'pending',
+          )?.id;
           selected = undefined;
           details.replaceChildren();
-          photoArea.replaceChildren();
+          results.replaceChildren();
           showQueue();
-          tell('Foto übernommen. Prüfe jetzt das nächste offene Foto.');
+          showCapture();
+          tell(
+            captureId
+              ? 'Foto übernommen. Das nächste offene Foto ist ausgewählt.'
+              : 'Foto übernommen. Du kannst die nächste Karte fotografieren oder weitere Fotos auswählen.',
+          );
         } else sheet.close();
       }
     });
     details.replaceChildren(form);
     showCapture();
-    if (!shot) details.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    details.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
   function manualForm(): void {
+    interrupt();
     selected = undefined;
     results.replaceChildren();
     details.replaceChildren();
@@ -762,6 +809,7 @@ export function openAddCards(
     }
   }
   async function loadResult(result: CatalogResult): Promise<void> {
+    interrupt();
     const request = ++detailRequest;
     tell('Genaue Ausgabe wird geladen …');
     try {
@@ -772,7 +820,7 @@ export function openAddCards(
     }
   }
   search.addEventListener('input', () => {
-    searchController?.abort();
+    interrupt();
     clearTimeout(debounce);
     renderChoices(
       ctx.catalog
@@ -785,6 +833,7 @@ export function openAddCards(
       }, 650);
   });
   language.addEventListener('change', () => {
+    interrupt();
     void onlineSearch();
   });
   showQueue();

@@ -1697,3 +1697,28 @@ body:has(.w-dialog[open]) {
 .w-button-danger:hover {
   background: #aa3652;
 }
+
+/* Text entry at 16px prevents automatic iPhone focus zoom without disabling pinch zoom. */
+input.w-input,
+select.w-input,
+textarea.w-input,
+.w-wish-copy .w-input {
+  font-size: 16px;
+}
+.w-crop-canvas {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(36dvh, 300px);
+  margin: 20px auto;
+  touch-action: none;
+  border: 1px solid var(--ink-tertiary);
+}
+
+.w-crop-dialog .w-dialog-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  background: var(--paper);
+}

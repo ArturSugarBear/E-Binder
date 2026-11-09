@@ -1,7 +1,9 @@
 /** Optional real OCR check. Start `npm run preview` first; external models need network. */
 import { chromium } from '@playwright/test';
 import { resolve } from 'node:path';
-const files = process.argv.slice(2);
+import { readFile } from 'node:fs/promises';
+const framed = process.argv.includes('--framed');
+const files = process.argv.slice(2).filter((value) => value !== '--framed');
 const samples = files.length
   ? files
   : [
@@ -33,12 +35,64 @@ try {
     .click();
   for (const file of samples) {
     const started = Date.now();
+    const original = await readFile(resolve(file));
+    const payload = framed
+      ? {
+          name: 'synthetic-camera.png',
+          mimeType: 'image/png',
+          buffer: Buffer.from(
+            await page.evaluate(async (encoded) => {
+              const image = new Image();
+              image.src = `data:image/webp;base64,${encoded}`;
+              await image.decode();
+              const canvas = document.createElement('canvas');
+              canvas.width = image.naturalHeight * 2;
+              canvas.height = image.naturalWidth * 2;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#334455';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              ctx.translate(canvas.width / 2, canvas.height / 2);
+              ctx.rotate(Math.PI / 2);
+              ctx.drawImage(
+                image,
+                -image.naturalWidth / 2,
+                -image.naturalHeight / 2,
+              );
+              return canvas.toDataURL('image/png').split(',')[1];
+            }, original.toString('base64')),
+            'base64',
+          ),
+        }
+      : resolve(file);
     await page
       .getByRole('dialog')
       .locator('input[type=file][multiple]')
-      .setInputFiles(resolve(file));
+      .setInputFiles(payload);
     await page
-      .getByRole('button', { name: 'Text auf dem Foto erkennen', exact: true })
+      .getByRole('button', {
+        name: 'Foto ausrichten und erkennen',
+        exact: true,
+      })
+      .click();
+    if (framed) {
+      const editor = page.getByRole('dialog', {
+        name: 'Karte ausrichten',
+        exact: true,
+      });
+      await editor.getByLabel('Ausrichtung', { exact: true }).selectOption('3');
+      for (const [i, [x, y]] of [
+        [250, 250],
+        [750, 250],
+        [750, 750],
+        [250, 750],
+      ].entries()) {
+        await editor.getByLabel('Ecke auswählen').selectOption(String(i));
+        await editor.getByLabel('Position waagerecht').fill(String(x));
+        await editor.getByLabel('Position senkrecht').fill(String(y));
+      }
+    }
+    await page
+      .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
       .click();
     await page.waitForFunction(
       () =>
@@ -51,6 +105,9 @@ try {
     console.log(
       JSON.stringify({
         file,
+        input: framed
+          ? 'synthetic table border and 90-degree rotation; not a real photo'
+          : 'digital card image',
         seconds: (Date.now() - started) / 1000,
         text: await page.locator('.w-ocr-text').allTextContents(),
         candidates: await page.locator('.w-search-results').innerText(),

@@ -112,3 +112,47 @@ it('keeps a valid candidate when another uncertain OCR number is absent from the
   );
   expect(found.map((item) => item.sourceId)).toEqual(['sv01-211']);
 });
+
+it('resolves Japanese leading-zero IDs through the actual set inventory instead of guessing an English set', async () => {
+  const { fetchRecognizedCards } = await import('../../src/data/card-catalog');
+  const japanese = {
+    ...card,
+    id: 'SV2a-001',
+    localId: '001',
+    name: 'フシギダネ',
+    illustrator: 'Yuu Nishida',
+    image: 'https://assets.tcgdex.net/ja/sv/SV2a/001',
+    set: {
+      id: 'SV2a',
+      name: 'ポケモンカード151',
+      cardCount: { official: 165 },
+    },
+  };
+  const fetcher = vi
+    .fn()
+    .mockImplementation((url: string) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify(
+            url.endsWith('/sets')
+              ? [{ id: 'SV2a', cardCount: { official: 165 } }]
+              : url.endsWith('/sets/SV2a')
+                ? { cards: [japanese] }
+                : japanese,
+          ),
+        ),
+      ),
+    );
+  vi.stubGlobal('fetch', fetcher);
+  const found = await fetchRecognizedCards('001/165', 'ja');
+  expect(found).toHaveLength(1);
+  expect(found[0]).toMatchObject({
+    sourceId: 'SV2a-001',
+    language: 'ja',
+    artist: 'Yuu Nishida',
+    number: '001/165',
+  });
+  expect(
+    fetcher.mock.calls.every(([url]) => String(url).includes('/ja/')),
+  ).toBe(true);
+});

@@ -494,8 +494,14 @@ test('OCR cancellation during initialization keeps the original and leaves inven
     .locator('input[type=file][multiple]')
     .setInputFiles('public/assets/cards/svi-211.webp');
   await page
-    .getByRole('button', { name: 'Text auf dem Foto erkennen', exact: true })
+    .getByRole('button', { name: 'Foto ausrichten und erkennen', exact: true })
     .click();
+  await page
+    .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
+    .click();
+  await expect(page.locator('.w-form-notices')).toContainText(
+    'Erkennungsmodell wird geladen',
+  );
   await page
     .getByRole('button', { name: 'Erkennung abbrechen', exact: true })
     .click();
@@ -544,7 +550,10 @@ test('local vision model reads a printed identifier while the original remains u
     .locator('input[type=file][multiple]')
     .setInputFiles('public/assets/cards/svi-211.webp');
   await page
-    .getByRole('button', { name: 'Text auf dem Foto erkennen', exact: true })
+    .getByRole('button', { name: 'Foto ausrichten und erkennen', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
     .click();
   await expect(page.locator('.w-form-notices')).toContainText(
     'Erkennungsvorschläge',
