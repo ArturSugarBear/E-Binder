@@ -11,6 +11,7 @@
     "dev": "vite --host 0.0.0.0",
     "prebuild": "node scripts/generate-pwa-icons.mjs",
     "build": "npm run validate:data && tsc --noEmit && vite build",
+    "postbuild": "node scripts/validate-pwa.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
