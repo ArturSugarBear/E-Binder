@@ -60,7 +60,9 @@ test('camera photo offers alignment, rotation and recoverable cancellation witho
     );
   expect(fonts.every((size) => size >= 16)).toBe(true);
   await add.getByLabel('Kartenname', { exact: true }).fill('Mein Test');
-  await add.getByLabel('Set', { exact: true }).fill('Ungeklärt');
+  await add
+    .getByRole('textbox', { name: 'Set', exact: true })
+    .fill('Ungeklärt');
   await add.getByLabel('Sammlernummer', { exact: true }).fill('1/1');
   await add.getByRole('button', { name: 'Angaben und Menge prüfen' }).click();
   await expect(

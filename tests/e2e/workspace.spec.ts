@@ -339,7 +339,9 @@ test('catalog failures and unknown credits remain recoverable without inventing 
   await dialog
     .getByLabel('Kartenname', { exact: true })
     .fill('Meine unbekannte Karte');
-  await dialog.getByLabel('Set', { exact: true }).fill('Mein Set');
+  await dialog
+    .getByRole('textbox', { name: 'Set', exact: true })
+    .fill('Mein Set');
   await dialog.getByLabel('Sammlernummer', { exact: true }).fill('1/10');
   await dialog
     .getByRole('button', { name: 'Angaben und Menge prüfen' })
@@ -385,7 +387,7 @@ test('concurrent tabs preserve the saved collection and expose a conflict instea
     .fill('Tab zwei');
   await other
     .getByRole('dialog')
-    .getByLabel('Set', { exact: true })
+    .getByRole('textbox', { name: 'Set', exact: true })
     .fill('Unabhängiges Set');
   await other
     .getByRole('dialog')
