@@ -12,7 +12,7 @@ Stand: 9. November 2026. Repository `/workspace/E-Binder`, GitHub CLI `gh-e-bind
 - Wiederverwendeter Katalogbrowser: Set/Illustrator/Seltenheit, Nummer/Name/EUR-Preistrends, Kartenvorschau, Wunschliste und Übergabe an bestehende Besitzbestätigung. URL enthält nur öffentliche Katalogfilter, keine Besitzdaten/Fotos. Zurück/Wiederladen erhält Filter und Trefferseite.
 - Root behält die aktive Entdecken-Ansicht bei Bestands-/Wunschänderungen bei. Mengen und Wunschstatus werden aktualisiert. Keine Framework-/Backendänderung.
 - Neue deterministische Browsertests prüfen vollständige Setnavigation, echte Reihenmitgliedschaft, URL/Paginierung, Wunsch ≠ Besitz, Bestandsbestätigung, Sprachwechsel/320px/axe und Wiederholung nach Katalogausfall.
-- **Noch zu erledigen bei Erstellung dieser Notiz:** `npm run check` läuft; passende Browserprüfungen, Handprüfung der Oberfläche, anschließend master-Push, Actions und Live prüfen. Diese Notiz vor finalem Commit aktualisieren.
+- **Lokale Abnahme bestanden:** `npm run check` einschließlich 56 Unit-Tests; 27 gezielte Browserprüfungen in Chromium, mobilem Chromium und WebKit. Echter API-/UI-Test mit Ewige Rivalen: 24 Kartenbilder, genaue Ausgabe/Illustrator, keine Seitenfehler; 320px ohne horizontales Überlaufen. Reihenmitgliedschaft zusätzlich gegen echte DE/EN/JA-Endpunkte geprüft (18/19/30 SV-Sets). Kein Nutzertest behauptet. Der neue Stand wird über master veröffentlicht; vor Fortsetzung aktuellen Actions-/Live-Status prüfen, nicht vom alten Lauf ausgehen.
 
 ## Verbindliche Datenregeln
 

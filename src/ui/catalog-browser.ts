@@ -304,7 +304,8 @@ export function createCatalogBrowser(options: Options) {
               renderSets();
               sets
                 .querySelectorAll<HTMLButtonElement>('.w-set-choice')
-                [firstNew]?.focus();
+                .item(firstNew)
+                ?.focus();
             },
             'secondary',
           ),
