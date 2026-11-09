@@ -1,5 +1,7 @@
 import { test, expect } from './fixtures';
 
+test.use({ serviceWorkers: 'allow' });
+
 test('manifest and icons are scoped to GitHub Pages', async ({ page }) => {
   const response = await page.request.get('manifest.webmanifest');
   expect(response.ok()).toBe(true);
@@ -66,7 +68,7 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   );
   await page.context().setOffline(true);
   await page.reload();
-  await expect(page.getByText('Offline-Testbinder')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Offline-Testbinder' })).toBeVisible();
   await page.goto('archive.html');
   await expect(page.locator('.chapter .grid .pocket')).toHaveCount(9);
 });
