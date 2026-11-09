@@ -11,8 +11,7 @@ export function initMobileKeyboard(): void {
       active.matches(
         'input:not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]',
       );
-    const visibleHeight =
-      window.visualViewport?.height ?? window.innerHeight;
+    const visibleHeight = window.visualViewport?.height ?? window.innerHeight;
     const keyboardVisible = editing && window.innerHeight - visibleHeight > 130;
     document.documentElement.classList.toggle(
       'w-soft-keyboard',
