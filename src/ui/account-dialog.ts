@@ -5,6 +5,7 @@ import { validateState } from '../domain/personal';
 import type { WorkspaceContext } from './workspace-context';
 import {
   action,
+  choices,
   check,
   el,
   errorText,
@@ -12,7 +13,6 @@ import {
   input,
   message,
   modal,
-  select,
 } from './workspace-dom';
 
 export async function openAccount(
@@ -37,7 +37,8 @@ export async function openAccount(
     status.hidden = false;
   };
   if (!ctx.account) {
-    const mode = select(
+    const mode = choices(
+      'Zugang',
       [
         ['login', 'Anmelden'],
         ['register', 'Konto anlegen'],
@@ -67,7 +68,7 @@ export async function openAccount(
     const form = el(
       'form',
       'w-confirm-form',
-      field('Zugang', mode),
+      mode.element,
       field('Nutzername', username),
       field(
         'Passwort',

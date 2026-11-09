@@ -138,7 +138,9 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
   const sidebar = el(
     'aside',
     'w-binder-sidebar',
-    field('Binder auswählen', binderSelect),
+    ctx.state.binders.length > 1
+      ? field('Binder auswählen', binderSelect)
+      : el('h2', 'w-single-binder-name', binder.name),
   );
   const pages = el('nav', 'w-page-list');
   pages.setAttribute('aria-label', 'Deine Binderseiten');

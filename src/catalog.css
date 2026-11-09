@@ -117,7 +117,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .w-catalog-filters {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -268,5 +268,55 @@
 @media (max-width: 600px) {
   .w-search-results.w-text-results {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Sorting is a small, visible choice; set and illustrator remain searchable. */
+.w-catalog-filters > .w-choices {
+  grid-column: 1 / -1;
+}
+.w-catalog-filters > .w-choices .w-choice-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.w-card-detail-dialog {
+  width: min(700px, calc(100% - 32px));
+}
+.w-card-market {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--w-border);
+  padding-top: 20px;
+}
+.w-market-quote {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.w-market-quote strong {
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
+.w-card-market .w-button {
+  justify-self: start;
+}
+.w-card-rarity {
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 8px !important;
+}
+@media (max-width: 600px) {
+  .w-catalog-filters > .w-choices .w-choice-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .w-card-detail-dialog .w-discover-card {
+    grid-template-columns: minmax(0, 135px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .w-preference-form > .w-choices .w-choice-list {
+    flex-direction: column;
   }
 }

@@ -1,3 +1,5 @@
+import type { CatalogEntry } from '../data/card-catalog';
+import { cardMarket } from './card-market';
 import { addWish, sameCard, type PersonalCard } from '../domain/personal';
 import {
   createCatalogBrowser,
@@ -6,19 +8,20 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import {
   action,
+  choices,
   el,
   errorText,
   field,
   input,
   message,
   modal,
-  select,
 } from './workspace-dom';
 
 /** Public catalogue state only: never serialise ownership, notes or photos into a URL. */
 export function createDiscoverView(ctx: WorkspaceContext) {
   const parameters = new URLSearchParams(location.hash.split('?')[1]);
-  const language = select(
+  const language = choices(
+    'Katalogsprache',
     [
       ['de', 'Deutsch'],
       ['en', 'Englisch'],
@@ -116,7 +119,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       'div',
       'w-discover-search',
       field('Karte suchen', search),
-      field('Katalogsprache', language),
+      language.element,
     ),
     browser.element,
     status,
@@ -163,9 +166,10 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       );
     }
   }
-  function showCard(card: PersonalCard) {
+  function showCard(card: PersonalCard, entry: CatalogEntry) {
     status.replaceChildren();
     const view = modal(card.name);
+    view.dialog.classList.add('w-card-detail-dialog');
     closePreview = view.close;
     const owned = el('p', 'w-muted');
     const wish = action(
@@ -214,9 +218,11 @@ export function createDiscoverView(ctx: WorkspaceContext) {
               ? `Illustration: ${card.artist} · ${card.artistSource === 'publisher' ? 'Verlagsangabe' : 'Katalogangabe'}`
               : 'Illustration nicht bekannt',
           ),
+          entry.rarity ? el('p', 'w-card-rarity', entry.rarity) : null,
           owned,
         ),
       ),
+      cardMarket(entry),
     );
     view.footer.append(
       action(

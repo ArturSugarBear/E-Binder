@@ -217,7 +217,10 @@ test('price sorting considers the complete selected set and places unavailable p
   ).toHaveCount(3);
   await dialog.getByLabel('Set', { exact: true }).selectOption('sv10');
   await expect(dialog.locator('.w-search-results button')).toHaveCount(3);
-  await dialog.getByLabel('Katalog sortieren').selectOption('price-asc');
+  await dialog
+    .getByRole('group', { name: 'Katalog sortieren' })
+    .getByRole('radio', { name: 'Preis: niedrig zuerst' })
+    .check();
   await expect(
     dialog.locator('.w-search-results .w-card-caption strong'),
   ).toHaveText(['Yanma', 'Pinsir', 'Yanmega-ex']);
@@ -255,8 +258,9 @@ test('empty artist recommendations explain missing inventory and open the global
     .click();
   const dialog = page.getByRole('dialog');
   await dialog
-    .getByLabel('1. Was soll diese Seite verbinden?')
-    .selectOption('artist');
+    .getByRole('group', { name: '1. Was soll diese Seite verbinden?' })
+    .getByRole('radio', { name: 'Ein bestimmter Illustrator' })
+    .check();
   await expect(
     dialog.getByLabel('Illustrator aus deinem Bestand'),
   ).toBeDisabled();
@@ -291,7 +295,11 @@ test('discovery price links keep their requested sorting after metadata loads', 
   await expect(
     main.locator('.w-search-results .w-card-caption strong'),
   ).toHaveText(['Pinsir', 'Yanma', 'Yanmega-ex']);
-  await expect(main.getByLabel('Katalog sortieren')).toHaveValue('price-desc');
+  await expect(
+    main
+      .getByRole('group', { name: 'Katalog sortieren' })
+      .getByRole('radio', { name: 'Preis: hoch zuerst' }),
+  ).toBeChecked();
   await page.reload();
   await expect(
     main.locator('.w-search-results .w-card-caption strong'),

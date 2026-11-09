@@ -21,6 +21,7 @@ import {
 } from '../domain/personal';
 import {
   action,
+  choices,
   el,
   errorText,
   field,
@@ -49,12 +50,12 @@ type Options = {
   standalone?: boolean;
   onStateChange?: (state: CatalogBrowserState) => void;
   search: HTMLInputElement;
-  language: HTMLSelectElement;
+  language: { value: string };
   results: HTMLElement;
   artist?: string;
   browse?: boolean;
   setId?: string;
-  onChoose: (card: PersonalCard) => void;
+  onChoose: (card: PersonalCard, entry: CatalogEntry) => void;
   onSearch: (reset?: boolean) => void;
   tell: (text: string, error?: boolean) => void;
 };
@@ -74,12 +75,13 @@ export function createCatalogBrowser(options: Options) {
   suggestions.id = `catalog-artists-${crypto.randomUUID()}`;
   artist.setAttribute('list', suggestions.id);
   const rarity = select([['', 'Alle Seltenheiten']]);
-  const order = select(
+  const order = choices(
+    'Katalog sortieren',
     [
-      ['number', 'Nach Kartennummer'],
-      ['name', 'Nach Name'],
-      ['price-asc', 'Preis aufsteigend (EUR)'],
-      ['price-desc', 'Preis absteigend (EUR)'],
+      ['number', 'Kartennummer'],
+      ['name', 'Name'],
+      ['price-asc', 'Preis: niedrig zuerst'],
+      ['price-desc', 'Preis: hoch zuerst'],
     ],
     initial.order ?? 'number',
   );
@@ -110,7 +112,7 @@ export function createCatalogBrowser(options: Options) {
     field('Illustrator im Katalog', artist),
     suggestions,
     field('Seltenheit', rarity),
-    field('Katalog sortieren', order),
+    order.element,
   );
   const selectedSet = el('div', 'w-selected-set');
   const scopeStatus = el('div', 'w-set-filter-status');
@@ -120,7 +122,7 @@ export function createCatalogBrowser(options: Options) {
     tell('Genaue Ausgabe wird geladen …');
     void catalogEntry(card.sourceId, card.language, signal)
       .then((detail) => {
-        if (!closed && !signal.aborted) options.onChoose(detail.card);
+        if (!closed && !signal.aborted) options.onChoose(detail.card, detail);
       })
       .catch((error) => {
         if (!closed && !signal.aborted) tell(errorText(error), true);
@@ -135,8 +137,8 @@ export function createCatalogBrowser(options: Options) {
     'section',
     'w-catalog-browser',
     browse,
-    controls,
     selectedSet,
+    controls,
     scopeStatus,
     rarityGuide.element,
     priceNotice,
@@ -624,6 +626,8 @@ export function createCatalogBrowser(options: Options) {
     const button = action(
       card.name,
       () => {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
         tell('Genaue Ausgabe wird geladen …');
         void (
           entry
@@ -631,14 +635,20 @@ export function createCatalogBrowser(options: Options) {
             : catalogEntry(result.id, result.language, signal)
         )
           .then((detail) => {
-            if (!closed && !signal.aborted) options.onChoose(detail.card);
+            if (!closed && !signal.aborted)
+              options.onChoose(detail.card, detail);
           })
           .catch((error) => {
             if (!signal.aborted && !closed) tell(errorText(error), true);
+          })
+          .finally(() => {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
           });
       },
       'card',
     );
+    button.setAttribute('aria-haspopup', 'dialog');
     const caption = el(
       'span',
       'w-card-caption',

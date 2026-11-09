@@ -137,7 +137,11 @@ test('paired English set artwork appears in both results and rarity examples wit
   await expect(main.locator('.w-rarity-selected .w-art-language')).toHaveText(
     'Bild: EN',
   );
-  await expect(main.getByLabel('Katalogsprache')).toHaveValue('de');
+  await expect(
+    main
+      .getByRole('group', { name: 'Katalogsprache' })
+      .getByRole('radio', { name: 'Deutsch' }),
+  ).toBeChecked();
   await expect(main.locator('.w-search-results')).not.toHaveClass(
     /w-text-results/,
   );

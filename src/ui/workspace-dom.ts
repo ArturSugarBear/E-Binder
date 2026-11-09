@@ -79,6 +79,40 @@ export function select(
   element.value = value;
   return element;
 }
+/** Native radio semantics, including arrow keys; state belongs to the caller. */
+export function choices(
+  label: string,
+  items: [string, string][],
+  initial: string,
+  focusKey?: string,
+) {
+  const name = `w-choice-${++nextField}`;
+  const element = el('fieldset', 'w-choices');
+  const legend = el('legend', 'w-label', label);
+  const list = el('div', 'w-choice-list');
+  const options = items.map(([value, caption]) => {
+    const radio = input('radio');
+    radio.name = name;
+    radio.value = value;
+    radio.checked = value === initial;
+    if (focusKey) radio.dataset.focus = `${focusKey}-${value}`;
+    list.append(el('label', 'w-choice', radio, el('span', '', caption)));
+    return radio;
+  });
+  element.append(legend, list);
+  return {
+    element,
+    options,
+    get value() {
+      return options.find((option) => option.checked)?.value ?? '';
+    },
+    set value(value: string) {
+      for (const option of options) option.checked = option.value === value;
+    },
+    addEventListener: (type: string, listener: () => void) =>
+      element.addEventListener(type, listener),
+  };
+}
 export function field(
   label: string,
   control: HTMLElement,

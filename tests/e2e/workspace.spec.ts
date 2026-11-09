@@ -182,8 +182,9 @@ test('artist shortage, fixed anchor and independent demo survive proposal adopti
     .click();
   let dialog = page.getByRole('dialog');
   await dialog
-    .getByLabel('1. Was soll diese Seite verbinden?')
-    .selectOption('artist');
+    .getByRole('group', { name: '1. Was soll diese Seite verbinden?' })
+    .getByRole('radio', { name: 'Ein bestimmter Illustrator' })
+    .check();
   await dialog
     .getByLabel('Illustrator aus deinem Bestand')
     .selectOption('Jiro Sasumo');
