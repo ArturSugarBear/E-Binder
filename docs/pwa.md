@@ -14,7 +14,7 @@ Bereits im Standalone-Modus erscheint keine Installationshilfe mehr. Ohne Instal
 
 ## Navigation auf dem iPhone
 
-Die dauerhaft erreichbare untere Leiste nutzt fünf eindeutige Ziele: **Sammlung** links, **Entdecken**, **+ Karte** als hervorgehobene Hauptaktion in der Mitte, **Binder** und **Profil** rechts. Profil öffnet den vorhandenen Konto- und Anmeldedialog; angemeldete Nutzer verwalten dort ihr Konto. Die Wunschliste bleibt über das Herzsymbol im Kopfbereich erreichbar und die Sicherung über das Downloadsymbol. Auf größeren Desktop-Bildschirmen bleibt die bestehende horizontale Navigation erhalten. Auf iPhones berücksichtigt die Leiste den Home-Indikator und wird bei geöffneten Eingabefeldern oder Dialogen ausgeblendet.
+Die dauerhaft erreichbare untere Leiste nutzt fünf eindeutige Ziele: **Sammlung** links, **Entdecken**, **+ Karte** als hervorgehobene Hauptaktion in der Mitte, **Binder** und **Profil** rechts. Profil öffnet den vorhandenen Konto- und Anmeldedialog; angemeldete Nutzer verwalten dort ihr Konto. Die Wunschliste bleibt über das Herzsymbol im Kopfbereich erreichbar und die Sicherung über das Downloadsymbol. Auf größeren Desktop-Bildschirmen bleibt die bestehende horizontale Navigation erhalten. Auf iPhones berücksichtigt die Leiste den Home-Indikator und blendet sich bei Dialogen oder tatsächlich geöffneter Bildschirmtastatur aus. Aktive Tabs scrollen zum Seitenanfang, ohne bereits gewählte Katalogfilter zurückzusetzen.
 
 ## Offline-Unterstützung
 

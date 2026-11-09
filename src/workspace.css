@@ -1817,9 +1817,15 @@ textarea.w-input,
   display: none;
 }
 @media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  html {
+    scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
   .workspace {
     max-width: 100%;
     padding: 0 16px calc(118px + env(safe-area-inset-bottom));
+  }
+  .w-set-choice {
+    scroll-margin-bottom: calc(110px + env(safe-area-inset-bottom));
   }
   .w-header {
     min-height: 66px;
@@ -1940,13 +1946,7 @@ textarea.w-input,
     bottom: calc(88px + env(safe-area-inset-bottom));
   }
   body:has(.w-dialog[open]) .w-mobile-nav,
-  body:has(
-      input:focus,
-      textarea:focus,
-      select:focus,
-      [contenteditable='true']:focus
-    )
-    .w-mobile-nav {
+  .w-soft-keyboard .w-mobile-nav {
     visibility: hidden;
     pointer-events: none;
   }
