@@ -156,3 +156,85 @@ it('resolves Japanese leading-zero IDs through the actual set inventory instead 
     fetcher.mock.calls.every(([url]) => String(url).includes('/ja/')),
   ).toBe(true);
 });
+
+it('fills German missing images in one request and only uses the same exact printing ID and number', async () => {
+  const { fillCatalogImages } = await import('../../src/data/card-catalog');
+  const fetcher = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify([
+        {
+          id: 'base1-4',
+          localId: '4',
+          name: 'Charizard',
+          image: 'https://assets.tcgdex.net/en/base/base1/4',
+        },
+        {
+          id: 'base1-2',
+          localId: '9',
+          name: 'Wrong number',
+          image: 'https://assets.tcgdex.net/en/base/base1/2',
+        },
+      ]),
+    ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const found = await fillCatalogImages([
+    { id: 'base1-4', localId: '4', name: 'Glurak', language: 'de' },
+    { id: 'base1-2', localId: '2', name: 'Turtok', language: 'de' },
+    { id: 'SV2a-001', localId: '001', name: 'フシギダネ', language: 'ja' },
+  ]);
+  expect(found[0]).toMatchObject({
+    name: 'Glurak',
+    language: 'de',
+    image: 'https://assets.tcgdex.net/en/base/base1/4',
+  });
+  expect(found[1]?.image).toBeUndefined();
+  expect(found[2]?.image).toBeUndefined();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+it('keeps zero and missing price observations unknown, and retains positive dated EUR observations', async () => {
+  const { catalogEntry } = await import('../../src/data/card-catalog');
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      const id = url.split('/').at(-1)!;
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            ...card,
+            id,
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-09T00:00:00Z',
+                trend: id.endsWith('zero') ? 0 : 1.25,
+              },
+            },
+          }),
+        ),
+      );
+    }),
+  );
+  expect((await catalogEntry('test-zero', 'en')).price).toBeUndefined();
+  expect((await catalogEntry('test-positive', 'en')).price).toEqual({
+    amount: 1.25,
+    updated: '2026-11-09T00:00:00Z',
+  });
+});
+it('passes exact set, illustrator, rarity and pagination filters instead of sorting only the first response locally', async () => {
+  const fetcher = vi.fn().mockResolvedValue(new Response('[]'));
+  vi.stubGlobal('fetch', fetcher);
+  await searchCatalog('', 'ja', undefined, {
+    setId: 'SV2a',
+    artist: 'Yuu Nishida',
+    rarity: 'Rare',
+    page: 3,
+    order: 'name',
+  });
+  const url = new URL(fetcher.mock.calls[0]![0]);
+  expect(url.searchParams.get('set.id')).toBe('eq:SV2a');
+  expect(url.searchParams.get('illustrator')).toBe('eq:Yuu Nishida');
+  expect(url.searchParams.get('rarity')).toBe('eq:Rare');
+  expect(url.searchParams.get('pagination:page')).toBe('3');
+  expect(url.searchParams.get('sort:field')).toBe('name');
+});

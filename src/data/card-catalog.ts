@@ -88,17 +88,197 @@ export function editorialCards(collection: Collection): PersonalCard[] {
   );
 }
 
-const resumeSchema = z.object({
+export const resumeSchema = z.object({
   id: z.string().regex(/^[\w.-]+$/),
   localId: z.string(),
   name: z.string(),
   image: z.string().optional(),
 });
-export type CatalogResult = z.infer<typeof resumeSchema> & { language: string };
+export type CatalogResult = z.infer<typeof resumeSchema> & {
+  language: string;
+  setName?: string;
+  number?: string;
+};
+export interface CatalogFilters {
+  setId?: string;
+  artist?: string;
+  rarity?: string;
+  page?: number;
+  order?: 'number' | 'name';
+}
+export interface MarketPrice {
+  amount: number;
+  updated: string;
+}
+export interface CatalogEntry {
+  card: PersonalCard;
+  rarity: string;
+  price?: MarketPrice;
+}
+export const catalogSetSchema = z.object({
+  id: z.string().regex(/^[\w.-]+$/),
+  name: z.string(),
+  logo: z.string().optional(),
+  symbol: z.string().optional(),
+  cardCount: z.object({ official: z.number(), total: z.number().optional() }),
+});
+export type CatalogSet = z.infer<typeof catalogSetSchema> & { alias?: string };
+const digitalSets = new Map<string, Set<string>>();
+const publicCache = new Map<string, { until: number; data: unknown }>();
+async function cachedJson(url: string, signal?: AbortSignal): Promise<unknown> {
+  const cached = publicCache.get(url);
+  if (cached && cached.until > Date.now()) return cached.data;
+  const data = await getJson(url, signal);
+  if (publicCache.size > 1500)
+    publicCache.delete(publicCache.keys().next().value!);
+  publicCache.set(url, { until: Date.now() + 300000, data });
+  return data;
+}
+function catalogLanguage(language: string): void {
+  if (!['de', 'en', 'ja'].includes(language))
+    throw new Error(
+      'Die Online-Suche unterstützt Deutsch, Englisch und Japanisch.',
+    );
+}
+export async function catalogSets(
+  language: string,
+  signal?: AbortSignal,
+): Promise<CatalogSet[]> {
+  catalogLanguage(language);
+  const own = z
+    .array(catalogSetSchema)
+    .parse(
+      await cachedJson(`https://api.tcgdex.net/v2/${language}/sets`, signal),
+    );
+  try {
+    const digital = z
+      .object({ id: z.literal('tcgp'), sets: z.array(catalogSetSchema) })
+      .parse(
+        await cachedJson(
+          `https://api.tcgdex.net/v2/${language}/series/tcgp`,
+          signal,
+        ),
+      );
+    digitalSets.set(language, new Set(digital.sets.map((set) => set.id)));
+  } catch {
+    if (signal?.aborted) throw new DOMException('Abgebrochen', 'AbortError');
+  }
+  let english: z.infer<typeof catalogSetSchema>[] = [];
+  if (language === 'de') {
+    try {
+      english = z
+        .array(catalogSetSchema)
+        .parse(await cachedJson('https://api.tcgdex.net/v2/en/sets', signal));
+    } catch {
+      if (signal?.aborted) throw new DOMException('Abgebrochen', 'AbortError');
+    }
+  }
+  return own
+    .filter((set) => !digitalSets.get(language)?.has(set.id))
+    .map((set) => ({
+      ...set,
+      alias: english.find((other) => other.id === set.id)?.name,
+    }));
+}
+export async function catalogValues(
+  language: string,
+  field: 'illustrators' | 'rarities',
+  signal?: AbortSignal,
+): Promise<string[]> {
+  catalogLanguage(language);
+  return z
+    .array(z.string())
+    .parse(
+      await cachedJson(
+        `https://api.tcgdex.net/v2/${language}/${field}`,
+        signal,
+      ),
+    );
+}
+export function catalogResumeCard(result: CatalogResult): PersonalCard {
+  const split = result.id.lastIndexOf('-');
+  const setId = result.id.slice(0, split);
+  return personalCardSchema.parse({
+    key: `tcgdex:${result.language}:${result.id}`,
+    name: result.name,
+    setName: result.setName ?? 'Set wird geladen',
+    setId,
+    number: result.number ?? result.localId,
+    language: result.language,
+    image: result.image ? `${result.image}/high.webp` : '',
+    source: 'tcgdex',
+    sourceId: result.id,
+    artist: '',
+    artistSource: 'unknown',
+    evolvesFrom: '',
+    stage: '',
+    finishes: ['normal', 'holo', 'reverse', 'other'],
+  });
+}
+/** English previews are only paired by the exact provider printing ID and collector number. */
+export async function fillCatalogImages(
+  cards: CatalogResult[],
+  signal?: AbortSignal,
+): Promise<CatalogResult[]> {
+  const missing = cards.filter((card) => !card.image && card.language === 'de');
+  if (!missing.length) return cards;
+  const params = new URLSearchParams({
+    id: `eq:${missing.map((card) => card.id).join('|')}`,
+    'pagination:page': '1',
+    'pagination:itemsPerPage': String(missing.length),
+  });
+  try {
+    const alternatives = z
+      .array(resumeSchema)
+      .parse(
+        await cachedJson(
+          `https://api.tcgdex.net/v2/en/cards?${params}`,
+          signal,
+        ),
+      );
+    return cards.map((card) => {
+      const match = alternatives.find(
+        (other) =>
+          other.id === card.id &&
+          numberKey(other.localId) === numberKey(card.localId),
+      );
+      return !card.image && match?.image
+        ? { ...card, image: match.image }
+        : card;
+    });
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return cards;
+  }
+}
+export function imageLanguage(image: string): string | undefined {
+  try {
+    const url = new URL(image);
+    return url.hostname === 'assets.tcgdex.net'
+      ? url.pathname.split('/')[1]
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 const apiCardSchema = resumeSchema.extend({
   illustrator: z.string().optional(),
   evolveFrom: z.string().optional(),
   stage: z.string().optional(),
+  rarity: z.string().optional(),
+  pricing: z
+    .object({
+      cardmarket: z
+        .object({
+          unit: z.string(),
+          updated: z.string(),
+          trend: z.number().nullable().optional(),
+        })
+        .nullable()
+        .optional(),
+    })
+    .optional(),
   set: z.object({
     id: z.string(),
     name: z.string(),
@@ -130,27 +310,40 @@ export async function searchCatalog(
   query: string,
   language: string,
   signal?: AbortSignal,
+  filters: CatalogFilters = {},
 ): Promise<CatalogResult[]> {
   if (!['de', 'en', 'ja'].includes(language))
     throw new Error(
       'Die Online-Suche unterstützt Deutsch, Englisch und Japanisch.',
     );
   const params = new URLSearchParams({
-    'pagination:page': '1',
-    'pagination:itemsPerPage': '48',
+    'pagination:page': String(filters.page ?? 1),
+    'pagination:itemsPerPage': '24',
+    'sort:field': filters.order === 'name' ? 'name' : 'localId',
+    'sort:order': 'ASC',
   });
   const numeric = query.trim().match(/^(\d{1,3})(?:\s*\/\s*\d{1,3})?$/);
-  params.set(
-    numeric ? 'localId' : 'name',
-    numeric ? `eq:${numeric[1]}` : query.trim().slice(0, 100),
-  );
-  const raw = await getJson(
+  if (query.trim())
+    params.set(
+      numeric ? 'localId' : 'name',
+      numeric ? `eq:${numeric[1]}` : query.trim().slice(0, 100),
+    );
+  if (filters.setId) params.set('set.id', `eq:${filters.setId}`);
+  if (filters.artist) params.set('illustrator', `eq:${filters.artist}`);
+  if (filters.rarity) params.set('rarity', `eq:${filters.rarity}`);
+  const raw = await cachedJson(
     `https://api.tcgdex.net/v2/${language}/cards?${params}`,
     signal,
   );
   return z
     .array(resumeSchema)
     .parse(raw)
+    .filter(
+      (card) =>
+        !digitalSets
+          .get(language)
+          ?.has(card.id.slice(0, card.id.lastIndexOf('-'))),
+    )
     .map((card) => ({ ...card, language }));
 }
 export async function fetchCatalogCard(
@@ -170,6 +363,12 @@ export async function fetchCatalogCard(
     throw new Error(
       'Die Katalogantwort passt nicht zur angefragten Ausgabe. Bitte wähle die Karte erneut.',
     );
+  return personalFromApi(raw, language);
+}
+function personalFromApi(
+  raw: z.infer<typeof apiCardSchema>,
+  language: string,
+): PersonalCard {
   const finishes = (['normal', 'holo', 'reverse'] as const).filter(
     (finish) => raw.variants?.[finish],
   );
@@ -211,6 +410,67 @@ export async function fetchCatalogCard(
       : ['normal', 'holo', 'reverse', 'other'],
   });
 }
+export async function catalogEntry(
+  id: string,
+  language: string,
+  signal?: AbortSignal,
+  imageFallback = true,
+): Promise<CatalogEntry> {
+  catalogLanguage(language);
+  if (!/^[\w.-]+$/.test(id)) throw new Error('Ungültige Katalogreferenz.');
+  const raw = apiCardSchema.parse(
+    await cachedJson(
+      `https://api.tcgdex.net/v2/${language}/cards/${encodeURIComponent(id)}`,
+      signal,
+    ),
+  );
+  if (raw.id !== id)
+    throw new Error('Die Katalogantwort passt nicht zur angefragten Ausgabe.');
+  const card = personalFromApi(raw, language);
+  if (imageFallback && !card.image && language === 'de') {
+    const paired = await fillCatalogImages(
+      [{ id: raw.id, localId: raw.localId, name: raw.name, language }],
+      signal,
+    );
+    if (paired[0]?.image) card.image = `${paired[0].image}/high.webp`;
+  }
+  const quote = raw.pricing?.cardmarket;
+  const price =
+    quote?.unit === 'EUR' &&
+    typeof quote.trend === 'number' &&
+    quote.trend > 0 &&
+    Number.isFinite(Date.parse(quote.updated))
+      ? { amount: quote.trend, updated: quote.updated }
+      : undefined;
+  return { card, rarity: raw.rarity ?? '', price };
+}
+export async function catalogSetCards(
+  id: string,
+  language: string,
+  signal?: AbortSignal,
+): Promise<CatalogResult[]> {
+  catalogLanguage(language);
+  if (!/^[\w.-]+$/.test(id)) throw new Error('Ungültiges Set.');
+  const detail = catalogSetSchema
+    .extend({ cards: z.array(resumeSchema) })
+    .parse(
+      await cachedJson(
+        `https://api.tcgdex.net/v2/${language}/sets/${encodeURIComponent(id)}`,
+        signal,
+      ),
+    );
+  if (detail.id !== id)
+    throw new Error('Die Setantwort passt nicht zur Anfrage.');
+  return detail.cards.map((card) => ({
+    ...card,
+    language,
+    setName: detail.name,
+    number: detail.cardCount.official
+      ? `${card.localId}/${detail.cardCount.official}`
+      : card.localId,
+  }));
+}
+
 export function matchesCard(card: PersonalCard, query: string): boolean {
   const value = normalize(query);
   return (

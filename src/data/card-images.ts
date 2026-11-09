@@ -1,5 +1,6 @@
 import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
 import type { PersonalStore } from './personal-store';
+import { catalogEntry, fillCatalogImages, imageLanguage } from './card-catalog';
 
 export class CardImages {
   private urls = new Map<string, Promise<string>>();
@@ -24,9 +25,16 @@ export class CardImages {
       }
       return this.urls.get(key)!;
     }
-    return Promise.resolve(this.remote(card));
+    return this.remote(card);
   }
-  private remote(card: PersonalCard): string {
+  private async remote(card: PersonalCard): Promise<string> {
+    if (!card.image && card.source === 'tcgdex' && card.sourceId) {
+      try {
+        return (await catalogEntry(card.sourceId, card.language)).card.image;
+      } catch {
+        return '';
+      }
+    }
     return card.image.startsWith('assets/')
       ? `${import.meta.env.BASE_URL}${card.image}`
       : card.image;
@@ -36,28 +44,72 @@ export class CardImages {
     frame.className = `card-art ${className}`;
     const fallback = document.createElement('span');
     fallback.className = 'art-fallback';
-    fallback.textContent = card.name;
+    fallback.textContent = 'Bild wird geladen …';
+    const language = document.createElement('span');
+    language.className = 'w-art-language';
+    language.hidden = true;
+    const labelLanguage = (url: string) => {
+      const displayed = imageLanguage(url);
+      language.hidden = !displayed || displayed === card.language;
+      if (displayed) language.textContent = `Bild: ${displayed.toUpperCase()}`;
+    };
+    const missing = () => {
+      image.hidden = true;
+      fallback.hidden = false;
+      fallback.textContent = 'Kein Katalogbild verfügbar';
+      frame.dataset.imageState = 'unavailable';
+    };
+    let retried = false;
     const image = document.createElement('img');
     image.alt = `${card.name}, ${card.setName} ${card.number}`;
     image.width = 63;
     image.height = 88;
     image.loading = 'lazy';
     image.decoding = 'async';
-    image.addEventListener('error', () => {
-      image.hidden = true;
-      fallback.hidden = false;
+    image.addEventListener('load', () => {
+      fallback.hidden = true;
+      frame.dataset.imageState = 'loaded';
     });
-    frame.append(fallback, image);
+    image.addEventListener('error', () => {
+      if (
+        retried ||
+        card.language !== 'de' ||
+        card.source !== 'tcgdex' ||
+        imageLanguage(image.src) === 'en'
+      ) {
+        missing();
+        return;
+      }
+      retried = true;
+      void fillCatalogImages([
+        {
+          id: card.sourceId,
+          localId: card.number.split('/')[0]!,
+          name: card.name,
+          language: card.language,
+        },
+      ])
+        .then((cards) => {
+          const url = cards[0]?.image;
+          if (!url) {
+            missing();
+            return;
+          }
+          image.src = `${url}/high.webp`;
+          labelLanguage(image.src);
+        })
+        .catch(missing);
+    });
+    frame.append(fallback, image, language);
+    frame.dataset.imageState = 'loading';
     void this.url(card)
       .then((url) => {
         if (url) {
           image.src = url;
-          fallback.hidden = true;
-        } else image.hidden = true;
+          labelLanguage(url);
+        } else missing();
       })
-      .catch(() => {
-        image.hidden = true;
-      });
+      .catch(missing);
     return frame;
   }
   palette(card: PersonalCard): Promise<Palette | undefined> {

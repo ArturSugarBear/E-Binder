@@ -17,6 +17,7 @@ import {
 } from '../domain/personal';
 import {
   action,
+  check,
   el,
   field,
   input,
@@ -26,6 +27,7 @@ import {
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { openRecommendations } from './recommend-dialog';
+import { cloudClient } from '../data/supabase';
 
 export function newBinder(ctx: WorkspaceContext): void {
   textPrompt(
@@ -201,6 +203,90 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
       'text',
     ),
   );
+  if (ctx.account && ctx.state.mode !== 'demo')
+    controls.append(
+      action(
+        'Binder teilen',
+        () => {
+          const sheet = modal('Binder teilen');
+          const shared = check(
+            'Diesen Binder über einen Link öffentlich ansehen lassen.',
+            binder.isPublic,
+          );
+          const status = message(
+            'Freigegeben werden Kartenmotive und ihre Plätze. Bestandsmengen, eigene Originalfotos und private Notizen bleiben privat.',
+          );
+          const save = action(
+            'Freigabe speichern',
+            () => {
+              if (
+                ctx.commit('Binderfreigabe geändert', (state) =>
+                  changeState(state, (next) => {
+                    next.binders.find(
+                      (item) => item.id === binder.id,
+                    )!.isPublic = shared.input.checked;
+                  }),
+                )
+              ) {
+                save.disabled = true;
+                void ctx.store
+                  .save(ctx.state)
+                  .then(async () => {
+                    const { data, error } = await cloudClient!
+                      .from('binders')
+                      .select('id,is_public')
+                      .eq('client_id', binder.id)
+                      .eq(
+                        'user_id',
+                        (await cloudClient!.auth.getSession()).data.session!
+                          .user.id,
+                      )
+                      .single();
+                    if (
+                      error ||
+                      !data ||
+                      data.is_public !== shared.input.checked
+                    )
+                      throw new Error(
+                        'Die Freigabe ist noch nicht synchronisiert. Öffne die Kontoeinstellungen.',
+                      );
+                    status.replaceChildren();
+                    if (data.is_public) {
+                      const link = el(
+                        'a',
+                        'w-text-link',
+                        'Öffentlichen Binder öffnen',
+                      );
+                      link.href = `${location.origin}${location.pathname}#geteilt/${data.id}`;
+                      link.target = '_blank';
+                      link.rel = 'noopener';
+                      const address = input('text', link.href);
+                      address.readOnly = true;
+                      status.append(
+                        field('Link zum Weitergeben', address),
+                        link,
+                      );
+                    } else
+                      status.textContent =
+                        'Dieser Binder ist privat. Bisherige Links geben keinen Zugriff mehr.';
+                  })
+                  .catch(() => {
+                    status.textContent =
+                      'Die Freigabe konnte nicht bestätigt werden. Prüfe deine Cloud-Verbindung.';
+                  })
+                  .finally(() => {
+                    save.disabled = false;
+                  });
+              }
+            },
+            'primary',
+          );
+          sheet.body.append(status, shared.row);
+          sheet.footer.append(save);
+        },
+        'text',
+      ),
+    );
   sidebar.append(controls);
   const owned = page.slots.filter((slot) => slot?.kind === 'owned').length;
   const planned = page.slots.filter((slot) => slot?.kind === 'planned').length;

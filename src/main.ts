@@ -1,3 +1,4 @@
+import './cloud.css';
 import './workspace.css';
 import { startWorkspace } from './ui/workspace';
 

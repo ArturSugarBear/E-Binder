@@ -4,12 +4,17 @@ import type { CardImages } from '../data/card-images';
 import type { PersonalStore } from '../data/personal-store';
 
 export interface AddOptions {
+  browse?: boolean;
+  artist?: string;
+  setId?: string;
+  language?: string;
   card?: PersonalCard;
   captureId?: string;
   photos?: boolean;
   correctHoldingId?: string;
 }
 export interface WorkspaceContext {
+  account?: { username: string };
   state: PersonalState;
   catalog: PersonalCard[];
   chapters: Collection;

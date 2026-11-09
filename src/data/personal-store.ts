@@ -38,6 +38,10 @@ const completed = (transaction: IDBTransaction): Promise<void> =>
       );
   });
 export class PersonalStore {
+  constructor(private scope = '') {}
+  private key(mode: PersonalState['mode']): string {
+    return this.scope && mode !== 'demo' ? `${this.scope}:${mode}` : mode;
+  }
   private database = openDatabase();
   private queue: Promise<void> = Promise.resolve();
   private revisions = new Map<string, number>();
@@ -45,7 +49,7 @@ export class PersonalStore {
   async load(mode: PersonalState['mode']): Promise<PersonalState> {
     const db = await this.database;
     const raw = await resultOf(
-      db.transaction('states').objectStore('states').get(mode),
+      db.transaction('states').objectStore('states').get(this.key(mode)),
     );
     const state = raw === undefined ? emptyState(mode) : validateState(raw);
     if (state.mode !== mode)
@@ -74,7 +78,7 @@ export class PersonalStore {
         const transaction = db.transaction(['states', 'photos'], 'readwrite');
         const done = completed(transaction);
         const states = transaction.objectStore('states');
-        const current = await resultOf(states.get(snapshot.mode));
+        const current = await resultOf(states.get(this.key(snapshot.mode)));
         if (
           (current?.revision ?? 0) !== (this.revisions.get(snapshot.mode) ?? 0)
         ) {
@@ -87,8 +91,8 @@ export class PersonalStore {
         for (const [id, photo] of originals)
           transaction
             .objectStore('photos')
-            .put(photo, `${snapshot.mode}:${id}`);
-        states.put(snapshot, snapshot.mode);
+            .put(photo, `${this.key(snapshot.mode)}:${id}`);
+        states.put(snapshot, this.key(snapshot.mode));
         await done;
         this.revisions.set(snapshot.mode, snapshot.revision);
       });
@@ -105,7 +109,7 @@ export class PersonalStore {
     const db = await this.database;
     const transaction = db.transaction('photos', 'readwrite');
     const done = completed(transaction);
-    transaction.objectStore('photos').put(original, `${mode}:${id}`);
+    transaction.objectStore('photos').put(original, `${this.key(mode)}:${id}`);
     await done;
   }
   async photo(
@@ -114,7 +118,10 @@ export class PersonalStore {
   ): Promise<Blob | undefined> {
     const db = await this.database;
     const original = (await resultOf(
-      db.transaction('photos').objectStore('photos').get(`${mode}:${id}`),
+      db
+        .transaction('photos')
+        .objectStore('photos')
+        .get(`${this.key(mode)}:${id}`),
     )) as Blob | { mime: string; data: ArrayBuffer } | undefined;
     if (!original || original instanceof Blob) return original;
     if (

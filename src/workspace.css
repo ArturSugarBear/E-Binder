@@ -1,8 +1,8 @@
 :root {
   --w-radius: 12px;
   --w-field-radius: 8px;
-  --w-border: #243949;
-  --w-success: #8bd8b3;
+  --w-border: var(--line);
+  --w-success: var(--success);
 }
 [hidden] {
   display: none !important;
@@ -136,7 +136,7 @@
   color: var(--w-success);
 }
 #workspace-save-status[data-state='error'] {
-  color: var(--accent);
+  color: var(--error);
   font-weight: 600;
 }
 #workspace-save-status[data-state='saving'] {
@@ -298,7 +298,7 @@ textarea.w-input {
   resize: vertical;
 }
 select.w-input {
-  padding-right: 24px;
+  padding-right: 32px;
 }
 .w-input:disabled {
   background: var(--desk);
@@ -332,7 +332,7 @@ select.w-input {
 }
 .w-message {
   background: #101e2a;
-  border-left: 2px solid var(--electric-blue);
+  border-left: 1px solid var(--electric-blue);
   border-radius: 0 6px 6px 0;
   color: var(--ink-2);
   font-size: 13px;
@@ -340,9 +340,9 @@ select.w-input {
   padding: 12px 14px;
 }
 .w-message-error {
-  background: #30191e;
-  border-color: var(--accent);
-  color: #ffc1ca;
+  background: var(--error-surface);
+  border-color: var(--error);
+  color: var(--error);
 }
 .w-storage-error {
   margin-top: 18px;
@@ -409,7 +409,7 @@ select.w-input {
 .w-welcome-art > .card-art {
   width: 36%;
   flex: none;
-  box-shadow: 0 14px 25px rgb(31 27 22 / 0.18);
+  box-shadow: 0 14px 25px rgb(0 0 0 / 0.18);
   border-radius: 8px;
   background: var(--paper);
 }
@@ -478,7 +478,10 @@ select.w-input {
 }
 .w-filter-bar {
   display: grid;
-  grid-template-columns: minmax(200px, 1fr) 190px 190px;
+  grid-template-columns: minmax(200px, 1fr) minmax(180px, 210px) minmax(
+      240px,
+      260px
+    );
   gap: 16px;
   align-items: end;
 }
@@ -514,7 +517,7 @@ select.w-input {
   background: #0a1620;
 }
 .w-card-visual .card-art {
-  filter: drop-shadow(0 3px 4px rgb(31 27 22 / 0.14));
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.14));
 }
 .w-card-caption {
   display: flex;
@@ -619,9 +622,10 @@ select.w-input {
   gap: 5px;
 }
 .w-button-page[aria-current='page'] {
-  background: var(--paper);
-  border-color: var(--w-border);
-  box-shadow: inset 2px 0 var(--accent);
+  color: var(--selection-ink);
+  background: var(--selection);
+  border-color: var(--field-border);
+  box-shadow: inset 2px 0 var(--electric-blue);
 }
 .w-button-page small {
   color: var(--ink-2);
@@ -660,7 +664,7 @@ select.w-input {
   border-radius: 14px;
   background: var(--binder);
   box-shadow:
-    0 8px 20px rgb(31 27 22 / 0.12),
+    0 8px 20px rgb(0 0 0 / 0.12),
     inset 1px 0 0 #526e82;
 }
 .w-binder-paper::before {
@@ -878,9 +882,9 @@ body:has(.w-dialog[open]) {
 }
 .w-dialog-alerts {
   margin: 18px 24px 0;
-  background: #30191e;
-  color: #ffc1ca;
-  border-left: 2px solid var(--accent);
+  background: var(--error-surface);
+  color: var(--error);
+  border-left: 1px solid var(--error);
   border-radius: 4px;
   padding: 12px;
   font-size: 13px;
@@ -1260,14 +1264,14 @@ body:has(.w-dialog[open]) {
   border-color: #526e82;
 }
 .w-toast[data-kind='error'] {
-  background: #30191e;
+  background: var(--error-surface);
 }
 .w-undo {
   position: fixed;
   bottom: max(24px, env(safe-area-inset-bottom));
   right: 24px;
   z-index: 9;
-  box-shadow: 0 4px 15px rgb(31 27 22 / 0.12);
+  box-shadow: 0 4px 15px rgb(0 0 0 / 0.12);
 }
 .w-loading {
   padding: 60px 0;
@@ -1445,6 +1449,7 @@ body:has(.w-dialog[open]) {
     font-size: 10px;
   }
   .w-filter-bar {
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
   .w-inline-banner {
@@ -1670,16 +1675,9 @@ body:has(.w-dialog[open]) {
   justify-content: flex-start;
 }
 
-/* Midnight / electric / cantaloupe: one accent per role. */
+/* Keep color on actions and state; the cards provide the page's imagery. */
 .w-welcome {
-  background:
-    radial-gradient(ellipse at 82% 46%, rgb(2 151 222 / 0.2), transparent 55%),
-    radial-gradient(
-      ellipse at 95% 100%,
-      rgb(252 115 77 / 0.12),
-      transparent 44%
-    ),
-    var(--paper);
+  background: var(--paper);
 }
 .w-welcome-art .card-art {
   box-shadow: 0 16px 30px rgb(0 0 0 / 0.5);
@@ -1692,7 +1690,7 @@ body:has(.w-dialog[open]) {
 }
 .w-message-error,
 .w-dialog-alerts {
-  border-left-color: #ff9ead;
+  border-left-color: var(--error);
 }
 .w-button-danger:hover {
   background: #aa3652;
@@ -1721,4 +1719,9 @@ textarea.w-input,
   bottom: 0;
   z-index: 4;
   background: var(--paper);
+}
+
+.w-page-heading .w-eyebrow,
+.w-welcome-copy > .w-eyebrow {
+  display: none;
 }

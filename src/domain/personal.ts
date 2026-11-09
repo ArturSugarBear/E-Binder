@@ -122,7 +122,12 @@ export const pageSchema = z
   .strict();
 export type PersonalPage = z.infer<typeof pageSchema>;
 export const binderSchema = z
-  .object({ id, name: text, pages: z.array(pageSchema).min(1).max(200) })
+  .object({
+    id,
+    name: text,
+    isPublic: z.boolean().default(false),
+    pages: z.array(pageSchema).min(1).max(200),
+  })
   .strict();
 export type PersonalBinder = z.infer<typeof binderSchema>;
 
@@ -469,7 +474,12 @@ export function createBinder(
       slots: emptySlots(),
       assembled: false,
     };
-    const binder = { id: uid(), name: name.trim(), pages: [page] };
+    const binder = {
+      id: uid(),
+      name: name.trim(),
+      isPublic: false,
+      pages: [page],
+    };
     next.binders.push(binder);
     next.lastBinderId = binder.id;
     next.lastPageId = page.id;

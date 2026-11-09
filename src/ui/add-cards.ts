@@ -2,13 +2,11 @@ import {
   candidatesFromText,
   fetchRecognizedCards,
   recognitionClues,
-  fetchCatalogCard,
   matchesCard,
-  searchCatalog,
-  type CatalogResult,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
 import { alignPhoto } from './photo-crop';
+import { createCatalogBrowser } from './catalog-browser';
 import {
   changeState,
   confirmHolding,
@@ -55,7 +53,7 @@ export function openAddCards(
       ['en', 'Englisch'],
       ['ja', 'Japanisch'],
     ],
-    options.card?.language ?? 'de',
+    options.language ?? options.card?.language ?? 'de',
   );
   const search = input('search');
   search.placeholder = 'Kartenname oder Sammlernummer';
@@ -67,12 +65,26 @@ export function openAddCards(
     searchBox,
     field('Katalogsprache', language),
   );
+  const browser = createCatalogBrowser({
+    ctx,
+    search,
+    language,
+    results,
+    artist: options.artist,
+    browse: options.browse,
+    setId: options.setId,
+    onChoose: (card) => choose(card),
+    onSearch: (reset) => {
+      void onlineSearch(reset);
+    },
+    tell: (text, error = false) =>
+      notices.replaceChildren(message(text, error ? 'error' : 'note')),
+  });
   let selected = options.card;
   let captureId = options.captureId;
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
-  let detailRequest = 0;
   let closed = false;
   let queueLimit = 30;
   const interrupt = () => {
@@ -80,10 +92,10 @@ export function openAddCards(
     ocrController = undefined;
     searchController?.abort();
     clearTimeout(debounce);
-    detailRequest++;
   };
   sheet.onClose(() => {
     closed = true;
+    browser.close();
     searchController?.abort();
     ocrController?.abort();
     clearTimeout(debounce);
@@ -124,14 +136,18 @@ export function openAddCards(
     camera,
     queue,
     searchLine,
+    browser.element,
     notices,
     photoArea,
     results,
+    browser.pager,
     details,
   );
   sheet.footer.append(
     message(
-      'Fotos und Texterkennung bleiben in diesem Browser. Beim ersten Start werden die lokalen Erkennungsdaten geladen. Katalogabfragen verwenden TCGdex.',
+      ctx.account && ctx.state.mode !== 'demo'
+        ? 'Texterkennung läuft im Browser. Originalfotos werden privat mit deinem Konto gesichert. Katalogdaten und offizielle Bilder kommen direkt von TCGdex.'
+        : 'Fotos und Texterkennung bleiben in diesem Browser. Beim ersten Start werden die lokalen Erkennungsdaten geladen. Katalogabfragen verwenden TCGdex.',
     ),
   );
 
@@ -455,6 +471,7 @@ export function openAddCards(
   }
 
   function renderChoices(cards: PersonalCard[]): void {
+    browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [
       ...new Map(cards.map((card) => [card.key, card])).values(),
@@ -605,10 +622,17 @@ export function openAddCards(
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       error.hidden = true;
-      if (!confirm.input.checked || !finish.value) {
-        error.textContent =
-          'Bestätige die Ausgabe und wähle die Druckvariante.';
+      if (!finish.value) {
+        error.textContent = 'Wähle die Druckvariante dieser Karte.';
         error.hidden = false;
+        finish.focus();
+        return;
+      }
+      if (!confirm.input.checked) {
+        error.textContent =
+          'Die Druckvariante ist ausgewählt. Bestätige noch das Kontrollkästchen für Ausgabe, Sprache und Gesamtmenge.';
+        error.hidden = false;
+        confirm.input.focus();
         return;
       }
       const adopted: PersonalCard = {
@@ -746,77 +770,20 @@ export function openAddCards(
     name.focus();
   }
 
-  async function onlineSearch(): Promise<void> {
+  async function onlineSearch(reset = true): Promise<void> {
     const value = search.value.trim();
-    if (value.length < 2) {
+    if (value.length < 2 && !browser.hasFilters()) {
       renderChoices(ctx.catalog.slice(0, 12));
+      browser.pager.replaceChildren();
       return;
     }
-    searchController?.abort();
+    interrupt();
     const controller = new AbortController();
     searchController = controller;
-    tell('Gesamter Kartenkatalog wird durchsucht …');
     try {
-      const found = await searchCatalog(
-        value,
-        language.value,
-        controller.signal,
-      );
-      if (closed || controller.signal.aborted) return;
-      results.replaceChildren();
-      for (const result of found) {
-        const card: PersonalCard = {
-          key: `tcgdex:${result.language}:${result.id}`,
-          name: result.name,
-          setName: result.id.split('-')[0]!,
-          setId: '',
-          number: result.localId,
-          language: result.language,
-          image: result.image ? `${result.image}/high.webp` : '',
-          source: 'tcgdex',
-          sourceId: result.id,
-          artist: '',
-          artistSource: 'unknown',
-          evolvesFrom: '',
-          stage: '',
-          finishes: ['normal', 'holo', 'reverse', 'other'],
-        };
-        const button = action(
-          result.name,
-          () => {
-            void loadResult(result);
-          },
-          'card',
-        );
-        button.replaceChildren(
-          ctx.images.artwork(card),
-          el(
-            'span',
-            'w-card-caption',
-            el('strong', '', card.name),
-            el('small', '', result.id),
-          ),
-        );
-        results.append(button);
-      }
-      tell(
-        found.length
-          ? `${found.length} Ausgaben. Öffne eine Karte für die vollständigen Angaben.`
-          : 'Keine passende Ausgabe gefunden. Versuche den Namen, die Nummer oder die manuelle Erfassung.',
-      );
+      await browser.run(controller.signal, reset);
     } catch (error) {
       if (!controller.signal.aborted && !closed) tell(errorText(error), true);
-    }
-  }
-  async function loadResult(result: CatalogResult): Promise<void> {
-    interrupt();
-    const request = ++detailRequest;
-    tell('Genaue Ausgabe wird geladen …');
-    try {
-      const card = await fetchCatalogCard(result.id, result.language);
-      if (!closed && request === detailRequest) choose(card);
-    } catch (error) {
-      if (!closed) tell(errorText(error), true);
     }
   }
   search.addEventListener('input', () => {
@@ -827,14 +794,14 @@ export function openAddCards(
         .filter((card) => matchesCard(card, search.value))
         .slice(0, 18),
     );
-    if (search.value.trim().length >= 2)
+    if (search.value.trim().length >= 2 || browser.hasFilters())
       debounce = setTimeout(() => {
         void onlineSearch();
       }, 650);
   });
   language.addEventListener('change', () => {
     interrupt();
-    void onlineSearch();
+    browser.languageChanged();
   });
   showQueue();
   showCapture();

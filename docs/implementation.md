@@ -1,5 +1,7 @@
 # Persönlicher E-Binder: Implementierung und Prüfstand
 
+Aktueller Ergänzungsstand vom 9. November 2026: Supabase-Konten, Cloudspeicher und Freigaben sind implementiert; Set-/Artistbrowser, DE/EN/JA und geprüfte Bildfallbacks sowie die Cyan-Palette ergänzen den lokalen Kern. [Backend und echte Integrationsprüfungen](backend.md), [Collectr/REA](research/collectr.md), [aktuelle Farbrollen](design.md). Die folgenden früheren Modellmessungen bleiben historische Prüfaufzeichnungen; sie belegen weiterhin keine fehlerfreie Erkennung echter Fotos.
+
 Diese Lieferung macht den lokalen Kern aus der Produktreview benutzbar. Sie belegt technische Abläufe; eine bestätigte Collector-Präferenz oder fehlerfreie Kartenerkennung folgt daraus nicht. Die ursprüngliche Review und die Untersuchung unter `research/one-page/` bleiben als Hypothesen und offener Testplan erhalten.
 
 ## Umgesetzt

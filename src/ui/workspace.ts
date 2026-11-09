@@ -10,6 +10,10 @@ import {
 import { CardImages } from '../data/card-images';
 import { editorialCards } from '../data/card-catalog';
 import { PersonalStore } from '../data/personal-store';
+import { CloudStore } from '../data/cloud-store';
+import { cloudClient } from '../data/supabase';
+import { openAccount } from './account-dialog';
+import { renderSharedBinder } from './shared-binder';
 import { loadCollection } from '../data/load-collection';
 import { openAddCards } from './add-cards';
 import { renderCollection, renderWishes, openHolding } from './collection-view';
@@ -31,7 +35,23 @@ export async function startWorkspace(): Promise<void> {
   const catalogError = document.querySelector<HTMLElement>(
     '#workspace-catalog-error',
   )!;
-  const store = new PersonalStore();
+  const { data: sessionData } = cloudClient
+    ? await cloudClient.auth.getSession()
+    : { data: { session: null } };
+  const session = sessionData.session;
+  const account = session
+    ? { username: session.user.email?.split('@')[0] ?? 'Konto' }
+    : undefined;
+  const store =
+    session && cloudClient
+      ? new CloudStore(cloudClient, session.user.id)
+      : new PersonalStore();
+  const accountButton =
+    document.querySelector<HTMLButtonElement>('#workspace-account')!;
+  accountButton.textContent = account ? 'Konto' : 'Anmelden';
+  document.querySelector('.w-local-label')!.textContent = account
+    ? `Konto · ${account.username}`
+    : 'Persönlicher Bestand · nur auf diesem Gerät';
   let storedMode: PersonalState['mode'] = 'personal';
   try {
     if (localStorage.getItem('e-binder-mode') === 'demo') storedMode = 'demo';
@@ -66,6 +86,7 @@ export async function startWorkspace(): Promise<void> {
   let noticeTimer: ReturnType<typeof setTimeout>;
   let catalogLoading = false;
   const ctx: WorkspaceContext = {
+    account,
     state: initial,
     catalog: [],
     chapters: [],
@@ -147,11 +168,13 @@ export async function startWorkspace(): Promise<void> {
           link.dataset.workspaceRoute === route ? 'page' : 'false',
         );
       root.replaceChildren(
-        route === 'binder'
-          ? renderBinders(ctx)
-          : route === 'wunschliste'
-            ? renderWishes(ctx)
-            : renderCollection(ctx),
+        route === 'geteilt'
+          ? renderSharedBinder(location.hash.split('/')[1] ?? '', ctx)
+          : route === 'binder'
+            ? renderBinders(ctx)
+            : route === 'wunschliste'
+              ? renderWishes(ctx)
+              : renderCollection(ctx),
       );
       document.title = `${route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
       demo.hidden = ctx.state.mode !== 'demo';
@@ -253,8 +276,27 @@ export async function startWorkspace(): Promise<void> {
     status.textContent =
       ctx.state.mode === 'demo'
         ? 'Demo gespeichert'
-        : 'Auf diesem Gerät gespeichert';
-    status.dataset.state = 'saved';
+        : store instanceof CloudStore
+          ? store.syncError
+            ? 'Lokal gesichert · Cloud ausstehend'
+            : 'Im Konto gespeichert'
+          : 'Auf diesem Gerät gespeichert';
+    status.dataset.state =
+      store instanceof CloudStore && store.syncError ? 'error' : 'saved';
+    if (store instanceof CloudStore && store.syncError) {
+      storageError.hidden = false;
+      storageError.replaceChildren(
+        message(store.syncError, 'error'),
+        action(
+          'Konto und Synchronisierung',
+          () => {
+            void openAccount(ctx, () => saving);
+          },
+          'secondary',
+        ),
+        action('Sicherung herunterladen', ctx.openBackup, 'secondary'),
+      );
+    }
   }
   function persist(snapshot: PersonalState): void {
     status.textContent = 'Wird gespeichert …';
@@ -327,6 +369,40 @@ export async function startWorkspace(): Promise<void> {
       catalogLoading = false;
     }
   }
+  accountButton.addEventListener('click', () => {
+    if (ctx.state.mode === 'demo') {
+      void ctx.switchMode('personal').then(() => {
+        if (ctx.state.mode === 'personal') void openAccount(ctx, () => saving);
+      });
+      return;
+    }
+    void openAccount(ctx, async () => {
+      await saving;
+      if (saveFailed)
+        throw new Error(
+          'Sichere deine lokalen Änderungen vor dem Kontowechsel.',
+        );
+    });
+  });
+  cloudClient?.auth.onAuthStateChange((_event, next) => {
+    if ((next?.user.id ?? null) !== (session?.user.id ?? null)) {
+      blocked = true;
+      for (const dialog of document.querySelectorAll<HTMLDialogElement>(
+        '.w-dialog[open]',
+      ))
+        dialog.close();
+      root.replaceChildren(el('h1', '', 'Anmeldung geändert'));
+      history.length = 0;
+      undoButton.hidden = true;
+      storageError.hidden = false;
+      storageError.replaceChildren(
+        message(
+          'Die Anmeldung wurde geändert. Lade die Seite neu, um den passenden Bestand zu öffnen.',
+        ),
+        action('Seite neu laden', () => location.reload(), 'primary'),
+      );
+    }
+  });
   for (const link of document.querySelectorAll<HTMLAnchorElement>(
     '[data-workspace-route]',
   ))

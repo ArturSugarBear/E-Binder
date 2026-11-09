@@ -1,0 +1,30 @@
+.w-shared-binder {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-block: 32px;
+}
+.w-shared-page {
+  display: grid;
+  gap: 20px;
+  margin-top: 24px;
+}
+.w-shared-page .w-pocket-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.w-shared-page .w-pocket {
+  min-height: 120px;
+  aspect-ratio: 63 / 88;
+}
+.w-shared-page .w-pocket .card-art {
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .w-header-actions {
+    flex-wrap: wrap;
+  }
+  #workspace-account {
+    min-height: 44px;
+  }
+}

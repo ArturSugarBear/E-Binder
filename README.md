@@ -2,27 +2,28 @@
 
 Deine Pokémon-Karten, dein Bestand und deine eigenen Neun-Pocket-Seiten. Mit Fotoerfassung, lokaler Texterkennung, Artist- und Seitenideen, Wunschkarten und exportierbaren Sicherungen.
 
-Die Anwendung speichert persönliche Daten **in IndexedDB auf diesem Gerät**. Sie überträgt keine Sammlungen oder Fotos an einen Server. Die Demo hat einen getrennten Bestand. Die bisherigen 198 Karten und 22 Themenkapitel bleiben als Inspirationsarchiv erhalten.
+Ohne Anmeldung bleiben persönliche Daten **in IndexedDB auf diesem Gerät**. Mit Nutzername und Passwort sichert Supabase Sammlung, Binder und eigene Originalfotos privat und stellt sie auf anderen Geräten bereit. OCR läuft immer lokal. Offizielle Kartenbilder werden nicht in Supabase Storage kopiert. Die Demo hat einen getrennten Bestand. Die bisherigen 198 Karten und 22 Themenkapitel bleiben als Inspirationsarchiv erhalten.
 
 ## Benutzen
 
-1. **Karten hinzufügen:** Eine genaue Ausgabe suchen oder ein eigenes Foto aufnehmen/importieren. Die Suche nach Name oder Sammlernummer verwendet den deutschen oder englischen [TCGdex-Katalog](https://tcgdex.dev/); eine manuelle Erfassung ist ebenfalls möglich.
+1. **Karten hinzufügen:** Eine genaue Ausgabe suchen oder ein eigenes Foto aufnehmen/importieren. Die Suche nach Name oder Sammlernummer verwendet den deutschen, englischen oder japanischen [TCGdex-Katalog](https://tcgdex.dev/); eine manuelle Erfassung ist ebenfalls möglich.
 2. **Bestätigen:** Set, Sammlernummer, Sprache, Druckvariante und die gesamte vorhandene Menge prüfen. Ein wiederholtes Foto oder eine zweite Bestätigung erhöht die Menge nicht automatisch.
 3. **Binder gestalten:** Eigene Binder und Seiten anlegen, Plätze belegen, tauschen, leeren oder festhalten. Vorlagen übernehmen; fehlende Karten bleiben geplant und erzeugen keinen Besitz.
 4. **Seiten vorschlagen:** Höchstens drei Geschmacksfragen zu Zusammenhang, Pflichtkarte und Ausschlüssen. Vorschläge verwenden tatsächliche Bilder und verfügbare Exemplare. Ein Artist-Fokus füllt bei zu wenigen passenden Karten keine anderen Illustratoren auf.
-5. **Sichern:** JSONL herunterladen, einschließlich Originalfotos, offener Erfassungen und Binderplätzen. Wiederherstellung zuerst prüfen und dann ausdrücklich übernehmen.
+5. **Konto und Teilen:** Über „Anmelden“ ein Konto anlegen. Ein vorhandener lokaler Bestand bleibt getrennt und lässt sich im Konto bewusst übernehmen. Einzelne Binder über „Binder teilen“ freigeben und wieder privat stellen.
+6. **Sichern:** JSONL herunterladen, einschließlich Originalfotos, offener Erfassungen und Binderplätzen. Wiederherstellung zuerst prüfen und dann ausdrücklich übernehmen.
 
 Ein Exemplar belegt höchstens einen angenommenen Binderplatz. Ein Entwurf reserviert Exemplare; der tatsächliche Aufbau wird gesondert vom Nutzer markiert. Besitz, Wünsche und explizite Tauschmengen sind unabhängig.
 
 ## Fotoerkennung
 
-Die Erkennung verwendet das Open-Source-Modell **PaddleOCR PP-OCRv4** mit **ONNX Runtime Web 1.31.1** lokal in einem beendbaren Worker. Der kleine Stack benötigt ein Erkennungsmodell und gezielte Canvas-Ausschnitte; ein zusätzliches Objekterkennungsmodell und OpenCV werden nicht geladen. Nummer und Setcode werden zuerst im Original gelesen. Bei Unklarheit folgen Graustufen/Kontrast, Inversion und Schwarzweiß sowie ein weiterer Nummernbereich. Der Kartenname dient zur Gegenprüfung. Gelesene Kennungen werden mit TCGdex abgeglichen. Sprache, Druckvariante und Gesamtmenge bleiben ausdrücklich zu bestätigen.
+Die Erkennung verwendet das Open-Source-Modell **PaddleOCR PP-OCRv4** mit **ONNX Runtime Web 1.31.1** lokal in einem beendbaren Worker. Der kleine Stack benötigt ein Erkennungsmodell und gezielte Canvas-Ausschnitte; ein zusätzliches Objekterkennungsmodell und OpenCV werden nicht geladen. Nach der Aufnahme die vier Kartenecken ausrichten und bei Bedarf drehen. Eine temporär entzerrte Kopie liefert Nummer und Setcode. Bei Unklarheit folgen Graustufen/Kontrast, Inversion und Schwarzweiß sowie ein weiterer Nummernbereich. Der Kartenname dient zur Gegenprüfung. Gelesene Kennungen werden mit TCGdex abgeglichen. Sprache, Druckvariante und Gesamtmenge bleiben ausdrücklich zu bestätigen.
 
 Das Modell und Wörterbuch stammen aus `@gutenye/ocr-models@1.4.2` und stehen unter Apache-2.0. [Herkunft, Dateigrößen und SHA-256](public/assets/ocr/model-source.json) und [Lizenz](public/assets/ocr/LICENSE-PaddleOCR.txt) liegen neben den Dateien. Das Modell umfasst rund 11 MB; beim ersten Start wird zusätzlich die WebAssembly-Laufzeit geladen. Diese Dateien sind kein Bestandteil der privaten Sammlungsdaten.
 
-Fotografiere eine Karte aufrecht und möglichst bildfüllend, mit scharfem unteren Rand. Erstmalig werden Worker, Wasm und das Erkennungsmodell geladen. Fotos werden dafür nicht hochgeladen. Originale bleiben unverändert. Die Sitzung lässt sich unterbrechen und später fortsetzen.
+Fotografiere eine Karte aufrecht und möglichst bildfüllend, mit scharfem unteren Rand. Erstmalig werden Worker, Wasm und das Erkennungsmodell geladen. Die OCR lädt keine Fotos hoch; angemeldete Konten sichern die Originale anschließend privat. Originale bleiben unverändert. Die Sitzung lässt sich unterbrechen und später fortsetzen.
 
-Das ist eine überprüfbare Erkennungshilfe mit Bestätigung, keine Zusage fehlerfreier Identifikation. Alte Sets mit Symbolen, verdeckte Ränder, spiegelnde Hüllen, Perspektive und Druckvarianten können zusätzliche Klärung verlangen. Unklare Fotos bleiben erhalten. Ergebnisse kleiner Prüfungen mit Katalogbildern ersetzen keine Prüfung mit realen Sammlerfotos. Die Online-Suche zeigt bis zu 48 Treffer je Abfrage; engere Namen oder genaue Nummern helfen bei großen Treffermengen.
+Das ist eine überprüfbare Erkennungshilfe mit Bestätigung, keine Zusage fehlerfreier Identifikation. Alte Sets mit Symbolen, verdeckte Ränder, spiegelnde Hüllen, Perspektive und Druckvarianten können zusätzliche Klärung verlangen. Unklare Fotos bleiben erhalten. Ergebnisse kleiner Prüfungen mit Katalogbildern ersetzen keine Prüfung mit realen Sammlerfotos. Der Katalog hat Setlogos, Set-/Illustrator-/Seltenheitsfilter und weitere Trefferseiten. EUR-Preisvergleich ist innerhalb eines gewählten Sets möglich, soweit Preisbeobachtungen vorliegen. Geprüfte EN-Bildfallbacks für bildlose DE-Ausgaben sind mit „Bild: EN“ gekennzeichnet; fehlende Bilder bleiben ausdrücklich erkennbar. Digitale Pokémon-TCG-Pocket-Sets gehören nicht zum physischen Binder-Katalog.
 
 ## Entwickeln
 
@@ -33,7 +34,7 @@ npm ci
 npm run dev
 ```
 
-Den ausgegebenen Link mit `/E-Binder/` öffnen. `/E-Binder/archive.html` enthält das Inspirationsarchiv. Alte `#kapitel-N`- und `#greninja`-Links werden dorthin weitergeleitet. Die App benötigt keine API-Schlüssel.
+Den ausgegebenen Link mit `/E-Binder/` öffnen. `/E-Binder/archive.html` enthält das Inspirationsarchiv. Alte `#kapitel-N`- und `#greninja`-Links werden dorthin weitergeleitet. Für den öffentlichen Katalog ist kein API-Schlüssel erforderlich. `cloud.config.json` enthält ausschließlich die öffentliche Supabase-Clientkonfiguration dieses Deployments. Für einen eigenen Fork `.env.example` übernehmen und ein eigenes Projekt konfigurieren; niemals einen Secret-/Service-Role-Key im Frontend verwenden. Einrichtung: [Supabase](docs/backend.md).
 
 ```sh
 npm run check
@@ -68,11 +69,11 @@ Diese Prüfung lädt echte OCR-Modelle und nutzt den externen Katalog. Ihre Erge
 | `public/collection.json`, `public/assets/`  | öffentliche Vorlagen, Kartenbilder und lokale Schriften                    |
 | `.github/workflows/pages.yml`               | Prüfungen und Veröffentlichung nach bestandenem Build                      |
 
-[Implementierung und Prüfgrenzen](docs/implementation.md) · [Architektur](docs/architecture.md) · [Designvertrag](docs/design.md) · [Deployment](docs/deployment.md) · [Untersuchung des einzelnen Seitenworkflows](docs/research/one-page/README.md)
+[Backend, Anmeldung und RLS](docs/backend.md) · [Implementierung und Prüfgrenzen](docs/implementation.md) · [Architektur](docs/architecture.md) · [Designvertrag](docs/design.md) · [Deployment](docs/deployment.md) · [Untersuchung des einzelnen Seitenworkflows](docs/research/one-page/README.md)
 
 ## Speicherung und Grenzen
 
-Browserdaten können gelöscht werden. Exportiere vor Gerätewechsel oder Browserbereinigung eine Sicherung. Andere Geräte erhalten den Bestand ausschließlich durch eine bewusst importierte Sicherung; Konten und Synchronisation sind nicht implementiert. Konkurrierende Tabs werden anhand der gespeicherten Revision erkannt, statt Änderungen stillschweigend zu überschreiben. Rückgängig steht für die letzten 20 Bearbeitungen der geöffneten Sitzung zur Verfügung.
+Browserdaten können gelöscht werden. Exportiere vor Gerätewechsel oder Browserbereinigung eine Sicherung. Konten synchronisieren über Supabase. Gastbestand und Kontencaches sind getrennt. Bei konkurrierenden Geräten verhindert eine serverseitige Versionsprüfung das stille Überschreiben. Nicht synchronisierte Änderungen bleiben lokal exportierbar; ein neuer Cloudstand wird erst nach bewusster Auswahl geladen. Konkurrierende Tabs werden anhand der gespeicherten Revision erkannt, statt Änderungen stillschweigend zu überschreiben. Rückgängig steht für die letzten 20 Bearbeitungen der geöffneten Sitzung zur Verfügung.
 
 Der Online-Katalog ist ein externer Dienst. Fehlende Metadaten bleiben unbekannt. Neun geprüfte Illustrator-Credits sind im Forschungsbericht mit Publisher-Quellen belegt; weitere Artist-Angaben tragen ihre Katalog- oder manuelle Provenienz. Eine gemeinsame Illustration oder Farbe ist kein Beleg dafür, dass einem Sammler eine Seite gefällt.
 

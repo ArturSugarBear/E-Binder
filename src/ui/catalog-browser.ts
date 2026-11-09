@@ -1,0 +1,571 @@
+import {
+  catalogEntry,
+  catalogResumeCard,
+  catalogSetCards,
+  catalogSets,
+  catalogValues,
+  fillCatalogImages,
+  searchCatalog,
+  type CatalogEntry,
+  type CatalogResult,
+  type CatalogSet,
+} from '../data/card-catalog';
+import { normalize, numberKey, type PersonalCard } from '../domain/personal';
+import {
+  action,
+  el,
+  errorText,
+  field,
+  input,
+  message,
+  select,
+} from './workspace-dom';
+import type { WorkspaceContext } from './workspace-context';
+import '../catalog.css';
+
+type Options = {
+  ctx: WorkspaceContext;
+  search: HTMLInputElement;
+  language: HTMLSelectElement;
+  results: HTMLElement;
+  artist?: string;
+  browse?: boolean;
+  setId?: string;
+  onChoose: (card: PersonalCard) => void;
+  onSearch: (reset?: boolean) => void;
+  tell: (text: string, error?: boolean) => void;
+};
+const euro = new Intl.NumberFormat('de-DE', {
+  style: 'currency',
+  currency: 'EUR',
+});
+export function createCatalogBrowser(options: Options) {
+  const { ctx, search, language, results, tell } = options;
+  const set = select([['', 'Alle Sets']], options.setId ?? '');
+  const artist = input('search', options.artist ?? '');
+  artist.placeholder = 'Illustrator suchen';
+  artist.autocomplete = 'off';
+  const suggestions = el('datalist');
+  suggestions.id = `catalog-artists-${crypto.randomUUID()}`;
+  artist.setAttribute('list', suggestions.id);
+  const rarity = select([['', 'Alle Seltenheiten']]);
+  const order = select(
+    [
+      ['number', 'Nach Kartennummer'],
+      ['name', 'Nach Name'],
+      ['price-asc', 'Preis aufsteigend (EUR)'],
+      ['price-desc', 'Preis absteigend (EUR)'],
+    ],
+    'number',
+  );
+  const setSearch = input('search');
+  setSearch.placeholder = 'z. B. Ewige Rivalen / Destined Rivals';
+  const sets = el('div', 'w-set-grid');
+  const loadStatus = el('div', 'w-catalog-status');
+  loadStatus.setAttribute('aria-live', 'polite');
+  const browse = el(
+    'details',
+    'w-catalog-discovery',
+    el('summary', '', 'Sets und Illustratoren entdecken'),
+    field('Set suchen', setSearch),
+    sets,
+    loadStatus,
+  );
+  const controls = el(
+    'div',
+    'w-catalog-filters',
+    field('Set', set),
+    field('Illustrator im Katalog', artist),
+    suggestions,
+    field('Seltenheit', rarity),
+    field('Katalog sortieren', order),
+  );
+  const selectedSet = el('div', 'w-selected-set');
+  const pager = el('div', 'w-catalog-pager');
+  const priceNotice = message(
+    'Preise sind Cardmarket-Katalogtrends in EUR mit Datenstand, keine Bewertung deiner Sprach-, Zustands- oder Druckvariante. Fehlende Preise stehen am Ende.',
+  );
+  priceNotice.hidden = true;
+  const element = el(
+    'section',
+    'w-catalog-browser',
+    browse,
+    controls,
+    selectedSet,
+    priceNotice,
+  );
+  let page = 1;
+  let inventory: CatalogSet[] = [];
+  let metadataLanguage = '';
+  let metadata: Promise<void> | undefined;
+  let active: AbortSignal | undefined;
+  let closed = false;
+  let debounce: ReturnType<typeof setTimeout>;
+  const lifetime = new AbortController();
+  const pricing = new Map<string, CatalogEntry[]>();
+  function updateSet(): void {
+    for (const option of order.options)
+      if (option.value.startsWith('price')) option.disabled = !set.value;
+    if (!set.value && order.value.startsWith('price')) order.value = 'number';
+    selectedSet.replaceChildren();
+    const current = inventory.find((item) => item.id === set.value);
+    if (!current) return;
+    const icon = setIcon(current);
+    selectedSet.append(
+      icon,
+      el(
+        'span',
+        '',
+        el('strong', '', current.name),
+        el(
+          'small',
+          'w-muted',
+          `${current.alias && current.alias !== current.name ? `${current.alias} · ` : ''}${current.cardCount.total ?? current.cardCount.official} Karten · ${language.value.toUpperCase()}`,
+        ),
+      ),
+      action(
+        'Setfilter entfernen',
+        () => {
+          set.value = '';
+          updateSet();
+          options.onSearch();
+        },
+        'text',
+      ),
+    );
+  }
+  function setIcon(item: CatalogSet): HTMLElement {
+    const icon = el('span', 'w-set-symbol', item.id.toUpperCase());
+    const base = item.logo || item.symbol;
+    if (base) {
+      try {
+        const url = new URL(base);
+        if (url.protocol === 'https:' && url.hostname === 'assets.tcgdex.net') {
+          const image = el('img');
+          image.alt = '';
+          image.loading = 'lazy';
+          image.src = `${base}.webp`;
+          image.addEventListener('error', () => {
+            image.remove();
+            icon.textContent = item.id.toUpperCase();
+          });
+          icon.replaceChildren(image);
+        }
+      } catch {
+        /* A missing set symbol keeps the readable abbreviation. */
+      }
+    }
+    return icon;
+  }
+  function renderSets(): void {
+    sets.replaceChildren();
+    const query = normalize(setSearch.value);
+    const matching = [...inventory]
+      .reverse()
+      .filter((item) =>
+        normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
+          query,
+        ),
+      );
+    for (const item of matching.slice(0, query ? 80 : 12)) {
+      const button = action(
+        item.name,
+        () => {
+          set.value = item.id;
+          search.value = '';
+          updateSet();
+          browse.open = false;
+          options.onSearch();
+        },
+        'secondary',
+      );
+      button.classList.add('w-set-choice');
+      button.replaceChildren(
+        setIcon(item),
+        el(
+          'span',
+          '',
+          el('strong', '', item.name),
+          el(
+            'small',
+            'w-muted',
+            `${item.id.toUpperCase()} · ${item.cardCount.total ?? item.cardCount.official} Karten`,
+          ),
+        ),
+      );
+      sets.append(button);
+    }
+    if (!matching.length)
+      sets.append(
+        message(
+          'Kein passendes Set in dieser Katalogsprache. Versuche den Namen, die Setkennung oder eine andere Sprache.',
+        ),
+      );
+    else if (!query)
+      sets.append(
+        el(
+          'p',
+          'w-muted',
+          `${inventory.length} Sets verfügbar. Suche auch nach englischen Setnamen.`,
+        ),
+      );
+  }
+  async function loadMetadata(): Promise<void> {
+    if (metadataLanguage === language.value && metadata) return metadata;
+    metadataLanguage = language.value;
+    const lang = language.value;
+    const desiredSet = set.value || options.setId || '';
+    loadStatus.replaceChildren(
+      message('Sets und Katalogfilter werden geladen …'),
+    );
+    metadata = (async () => {
+      const data = await Promise.allSettled([
+        catalogSets(lang, lifetime.signal),
+        catalogValues(lang, 'illustrators', lifetime.signal),
+        catalogValues(lang, 'rarities', lifetime.signal),
+      ]);
+      if (closed || lang !== language.value) return;
+      const [setResult, artistsResult, raritiesResult] = data;
+      if (setResult!.status === 'fulfilled') {
+        inventory = setResult!.value as CatalogSet[];
+        set.replaceChildren(el('option', '', 'Alle Sets'));
+        set.options[0]!.value = '';
+        for (const item of [...inventory].reverse()) {
+          const option = el('option', '', item.name);
+          option.value = item.id;
+          set.append(option);
+        }
+        set.value = inventory.some((item) => item.id === desiredSet)
+          ? desiredSet
+          : '';
+        renderSets();
+        updateSet();
+      }
+      if (artistsResult!.status === 'fulfilled') {
+        suggestions.replaceChildren(
+          ...(artistsResult!.value as string[]).map((name) => {
+            const option = el('option');
+            option.value = name;
+            return option;
+          }),
+        );
+      }
+      if (raritiesResult!.status === 'fulfilled') {
+        const selected = rarity.value;
+        rarity.replaceChildren(el('option', '', 'Alle Seltenheiten'));
+        rarity.options[0]!.value = '';
+        for (const name of raritiesResult!.value as string[]) {
+          const option = el('option', '', name);
+          option.value = name;
+          rarity.append(option);
+        }
+        rarity.value = [...rarity.options].some(
+          (item) => item.value === selected,
+        )
+          ? selected
+          : '';
+      }
+      const failed = data.some((item) => item.status === 'rejected');
+      loadStatus.replaceChildren(
+        ...(failed
+          ? [
+              message(
+                'Einige Katalogfilter sind nicht erreichbar. Suche und manuelle Erfassung bleiben verfügbar.',
+              ),
+              action(
+                'Filter erneut laden',
+                () => {
+                  metadataLanguage = '';
+                  void loadMetadata();
+                },
+                'text',
+              ),
+            ]
+          : []),
+      );
+    })();
+    return metadata;
+  }
+  async function loadPrices(signal: AbortSignal): Promise<CatalogEntry[]> {
+    const key = `${language.value}:${set.value}`;
+    const cached = pricing.get(key);
+    if (cached) return cached;
+    const resumes = await catalogSetCards(set.value, language.value, signal);
+    if (resumes.length > 600)
+      throw new Error(
+        'Dieses Set ist zu groß für einen vollständigen Preisvergleich im Browser. Nutze die Nummern- oder Namenssortierung.',
+      );
+    const entries: CatalogEntry[] = [];
+    const group = new AbortController();
+    const requestSignal = AbortSignal.any([signal, group.signal]);
+    let next = 0,
+      done = 0;
+    const stop = action(
+      'Preisvergleich abbrechen',
+      () => {
+        order.value = 'number';
+        options.onSearch();
+      },
+      'text',
+    );
+    const progress = el(
+      'p',
+      'w-muted',
+      `Preise werden geladen: 0 von ${resumes.length}`,
+    );
+    pager.replaceChildren(progress, stop);
+    const workers = Array.from(
+      { length: Math.min(4, resumes.length) },
+      async () => {
+        while (next < resumes.length) {
+          if (signal.aborted)
+            throw new DOMException('Abgebrochen', 'AbortError');
+          const resume = resumes[next++]!;
+          entries.push(
+            await catalogEntry(
+              resume.id,
+              resume.language,
+              requestSignal,
+              false,
+            ),
+          );
+          progress.textContent = `Preise werden geladen: ${++done} von ${resumes.length}`;
+        }
+      },
+    );
+    try {
+      await Promise.all(workers);
+    } catch (error) {
+      group.abort();
+      throw error;
+    }
+    if (!signal.aborted) pricing.set(key, entries);
+    return entries;
+  }
+  function matches(entry: CatalogEntry): boolean {
+    const number = search.value
+      .trim()
+      .match(/^([A-Za-z]*\d+)(?:\s*\/\s*[A-Za-z]*\d+)?$/)?.[1];
+    return (
+      (!search.value.trim() ||
+        (number
+          ? numberKey(entry.card.number.split('/')[0]!) === numberKey(number)
+          : normalize(entry.card.name).includes(normalize(search.value)))) &&
+      (!artist.value.trim() ||
+        normalize(entry.card.artist) === normalize(artist.value)) &&
+      (!rarity.value || entry.rarity === rarity.value)
+    );
+  }
+  function renderResult(
+    result: CatalogResult,
+    signal: AbortSignal,
+    entry?: CatalogEntry,
+  ): void {
+    const card = entry?.card ?? catalogResumeCard(result);
+    const button = action(
+      card.name,
+      () => {
+        tell('Genaue Ausgabe wird geladen …');
+        void (
+          entry
+            ? Promise.resolve(entry)
+            : catalogEntry(result.id, result.language, signal)
+        )
+          .then((detail) => {
+            if (!closed && !signal.aborted) options.onChoose(detail.card);
+          })
+          .catch((error) => {
+            if (!signal.aborted && !closed) tell(errorText(error), true);
+          });
+      },
+      'card',
+    );
+    const caption = el(
+      'span',
+      'w-card-caption',
+      el('strong', '', card.name),
+      el('small', '', `${card.setName} · ${card.number}`),
+    );
+    if (entry?.rarity) caption.append(el('small', 'w-muted', entry.rarity));
+    if (priceNotice.hidden === false)
+      caption.append(
+        el(
+          'small',
+          'w-catalog-price',
+          entry?.price
+            ? `${euro.format(entry.price.amount)} · ${new Date(entry.price.updated).toLocaleDateString('de-DE')}`
+            : 'Preis unbekannt',
+        ),
+      );
+    button.replaceChildren(ctx.images.artwork(card), caption);
+    results.append(button);
+  }
+  const previous = action(
+    'Vorherige Karten',
+    () => {
+      page--;
+      options.onSearch(false);
+    },
+    'secondary',
+  );
+  const next = action(
+    'Weitere Karten',
+    () => {
+      page++;
+      options.onSearch(false);
+    },
+    'secondary',
+  );
+  async function run(signal: AbortSignal, reset = true): Promise<void> {
+    active = signal;
+    if (reset) page = 1;
+    pager.replaceChildren();
+    priceNotice.hidden = !order.value.startsWith('price');
+    tell('Kartenkatalog wird durchsucht …');
+    await loadMetadata();
+    if (signal.aborted || closed || active !== signal) return;
+    updateSet();
+    let found: CatalogResult[];
+    let prices: CatalogEntry[] | undefined;
+    if (order.value.startsWith('price')) {
+      if (!set.value) {
+        tell(
+          'Wähle zuerst ein Set für den vollständigen Preisvergleich.',
+          true,
+        );
+        return;
+      }
+      const entries = (await loadPrices(signal))
+        .filter(matches)
+        .sort((a, b) => {
+          if (!a.price)
+            return b.price
+              ? 1
+              : a.card.number.localeCompare(b.card.number, undefined, {
+                  numeric: true,
+                });
+          if (!b.price) return -1;
+          return (
+            (a.price.amount - b.price.amount) *
+            (order.value === 'price-asc' ? 1 : -1)
+          );
+        });
+      prices = entries.slice((page - 1) * 24, page * 24);
+      found = await fillCatalogImages(
+        prices.map((entry) => ({
+          id: entry.card.sourceId,
+          localId: entry.card.number.split('/')[0]!,
+          name: entry.card.name,
+          language: entry.card.language,
+          image: entry.card.image
+            ? entry.card.image.replace(/\/high\.webp$/, '')
+            : undefined,
+        })),
+        signal,
+      );
+      prices.forEach((entry, index) => {
+        if (!entry.card.image && found[index]?.image)
+          entry.card.image = `${found[index]!.image}/high.webp`;
+      });
+      next.disabled = page * 24 >= entries.length;
+      tell(
+        `${entries.length} Ausgaben im gewählten Set. Seite ${page}. ${entries.filter((entry) => !entry.price).length} ohne passenden EUR-Trend.`,
+      );
+    } else {
+      const query = search.value;
+      const number = query
+        .trim()
+        .match(/^([A-Za-z]*\d+)(?:\s*\/\s*[A-Za-z]*\d+)?$/)?.[1];
+      if (set.value && number) {
+        const cards = await catalogSetCards(set.value, language.value, signal);
+        const exact = cards.find(
+          (card) => numberKey(card.localId) === numberKey(number),
+        );
+        if (!exact) found = [];
+        else
+          found = await searchCatalog(exact.localId, language.value, signal, {
+            setId: set.value,
+            artist: artist.value.trim(),
+            rarity: rarity.value,
+            page,
+            order: order.value as 'number' | 'name',
+          });
+      } else
+        found = await searchCatalog(query, language.value, signal, {
+          setId: set.value,
+          artist: artist.value.trim(),
+          rarity: rarity.value,
+          page,
+          order: order.value as 'number' | 'name',
+        });
+      next.disabled = found.length === 0;
+      const info = new Map(inventory.map((item) => [item.id, item]));
+      found = found.map((card) => {
+        const item = info.get(card.id.slice(0, card.id.lastIndexOf('-')));
+        return {
+          ...card,
+          setName: item?.name ?? 'Setangabe nicht verfügbar',
+          number: item?.cardCount.official
+            ? `${card.localId}/${item.cardCount.official}`
+            : card.localId,
+        };
+      });
+      found = await fillCatalogImages(found, signal);
+      tell(
+        found.length
+          ? `Seite ${page} · ${found.length} Ausgaben. Öffne eine Karte, um Ausgabe und Menge zu prüfen.`
+          : 'Keine passende Ausgabe. Ändere Name, Nummer, Set oder Filter.',
+      );
+    }
+    if (closed || signal.aborted || active !== signal) return;
+    results.replaceChildren();
+    found.forEach((result, i) => renderResult(result, signal, prices?.[i]));
+    previous.disabled = page === 1;
+    pager.replaceChildren(
+      previous,
+      el('span', 'w-muted', `Seite ${page}`),
+      next,
+    );
+    if (page > 1) results.scrollIntoView({ block: 'start' });
+  }
+  set.addEventListener('change', () => {
+    updateSet();
+    options.onSearch();
+  });
+  for (const control of [rarity, order])
+    control.addEventListener('change', () => options.onSearch());
+  artist.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => options.onSearch(), 500);
+  });
+  setSearch.addEventListener('input', renderSets);
+  browse.addEventListener('toggle', () => {
+    if (browse.open) void loadMetadata();
+  });
+  if (options.artist || options.setId || options.browse) {
+    browse.open = true;
+    void loadMetadata().then(() => options.onSearch());
+  }
+  updateSet();
+  return {
+    element,
+    pager,
+    run,
+    hasFilters: () => Boolean(set.value || artist.value.trim() || rarity.value),
+    languageChanged: () => {
+      metadataLanguage = '';
+      metadata = undefined;
+      inventory = [];
+      set.value = '';
+      rarity.value = '';
+      suggestions.replaceChildren();
+      pricing.clear();
+      void loadMetadata().then(() => options.onSearch());
+    },
+    close: () => {
+      closed = true;
+      clearTimeout(debounce);
+      lifetime.abort();
+    },
+  };
+}

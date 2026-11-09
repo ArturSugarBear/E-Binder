@@ -1,0 +1,31 @@
+name: Check Supabase availability
+on:
+  schedule:
+    - cron: '17 7 */5 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load public client configuration when repository secrets are unset
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "SUPABASE_URL=$(node -p "require('./cloud.config.json').url")" >> "$GITHUB_ENV"
+          fi
+          if [ -z "$SUPABASE_KEY" ]; then
+            echo "SUPABASE_KEY=$(node -p "require('./cloud.config.json').publishableKey")" >> "$GITHUB_ENV"
+          fi
+      - name: Read one public profile ID
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_KEY"
+          curl --fail --silent --show-error --retry 2 --max-time 30 \
+            --header "apikey: $SUPABASE_KEY" \
+            --output /dev/null \
+            "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1"

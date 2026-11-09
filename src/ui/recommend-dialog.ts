@@ -44,7 +44,7 @@ export function openRecommendations(
   );
   const artists = [
     ...new Set(
-      available
+      ctx.state.holdings
         .filter(
           (holding) =>
             holding.card.artist && holding.card.artistSource !== 'unknown',
@@ -58,11 +58,42 @@ export function openRecommendations(
       (name) =>
         [
           name,
-          `${name} · ${available.filter((holding) => normalize(holding.card.artist) === normalize(name)).length} Ausgaben`,
+          `${name} · ${available.filter((holding) => normalize(holding.card.artist) === normalize(name)).length} freie Ausgaben`,
         ] as [string, string],
     ),
   ]);
-  const artistField = field('Illustrator aus deinem Bestand', artist);
+  for (const option of artist.options) {
+    if (option.value)
+      option.disabled = !available.some(
+        (holding) => normalize(holding.card.artist) === normalize(option.value),
+      );
+  }
+  artist.disabled = !available.some(
+    (holding) => holding.card.artist && holding.card.artistSource !== 'unknown',
+  );
+  const artistHint = message(
+    !ctx.state.holdings.length
+      ? 'Dein bestätigter Bestand ist noch leer. Entdecke Illustratoren im Katalog und füge eigene Karten hinzu.'
+      : !available.length
+        ? 'Deine Exemplare sind bereits für Binderseiten reserviert. Gib dort einen Platz frei oder bestätige weitere eigene Exemplare. Der Katalog bleibt zum Stöbern verfügbar.'
+        : artist.disabled
+          ? 'Bei deinen freien Karten fehlen noch Illustrator-Credits. Ergänze sie in den Kartendetails oder wähle die genaue Katalogausgabe.'
+          : 'Hier erscheinen die Illustratoren deiner eigenen Karten. Reservierte Ausgaben sind nicht erneut verfügbar.',
+  );
+  const artistField = el(
+    'div',
+    'w-artist-empty',
+    field('Illustrator aus deinem Bestand', artist),
+    artistHint,
+    action(
+      'Illustratoren im Katalog entdecken',
+      () => {
+        sheet.close();
+        ctx.openAdd({ browse: true });
+      },
+      'secondary',
+    ),
+  );
   artistField.hidden = true;
   goal.addEventListener('change', () => {
     artistField.hidden = goal.value !== 'artist';
@@ -118,6 +149,7 @@ export function openRecommendations(
     'spark',
   );
   generate.type = 'submit';
+  generate.disabled = !available.length;
   form.append(
     field('1. Was soll diese Seite verbinden?', goal),
     artistField,
@@ -157,9 +189,18 @@ export function openRecommendations(
         .map(([id]) => id),
       allowRepeats: repeat.input.checked,
     };
-    if (preferences.goal === 'artist' && !preferences.artist) {
+    if (
+      preferences.goal === 'artist' &&
+      (artist.disabled || !preferences.artist)
+    ) {
       status.replaceChildren(
-        message('Wähle einen Illustrator aus deinem Bestand.', 'error'),
+        message(
+          artist.disabled
+            ? (artistHint.textContent ??
+                'Keine freien Karten mit Illustrator verfügbar.')
+            : 'Wähle einen Illustrator mit freien Karten aus deinem Bestand.',
+          'error',
+        ),
       );
       return;
     }

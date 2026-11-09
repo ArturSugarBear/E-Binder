@@ -25,6 +25,9 @@ export async function alignPhoto(
       const sheet = modal('Karte ausrichten');
       sheet.dialog.classList.add('w-crop-dialog');
       const canvas = el('canvas', 'w-crop-canvas');
+      const accent = getComputedStyle(document.documentElement)
+        .getPropertyValue('--accent')
+        .trim();
       const context = canvas.getContext('2d', { willReadFrequently: true })!;
       const orientation = select(
         [
@@ -59,7 +62,7 @@ export async function alignPhoto(
       const source = el('canvas');
       function draw(): void {
         context.drawImage(source, 0, 0, canvas.width, canvas.height);
-        context.strokeStyle = '#fc734d';
+        context.strokeStyle = accent;
         context.lineWidth = 3;
         context.beginPath();
         points.forEach((p, i) => {
@@ -77,8 +80,7 @@ export async function alignPhoto(
             0,
             Math.PI * 2,
           );
-          context.fillStyle =
-            i === Number(corner.value) ? '#fc734d' : '#02070a';
+          context.fillStyle = i === Number(corner.value) ? accent : '#02070a';
           context.fill();
           context.stroke();
           context.fillStyle =
