@@ -14,6 +14,7 @@ import {
 export async function alignPhoto(
   photo: Blob,
   signal: AbortSignal,
+  mode: 'card' | 'page' = 'card',
 ): Promise<Blob | undefined> {
   const image = new Image();
   const url = URL.createObjectURL(photo);
@@ -22,7 +23,7 @@ export async function alignPhoto(
     await image.decode();
     if (signal.aborted) return;
     return await new Promise((resolve) => {
-      const sheet = modal('Karte ausrichten');
+      const sheet = modal(mode === 'page' ? 'Binderseite ausrichten' : 'Karte ausrichten');
       sheet.dialog.classList.add('w-crop-dialog');
       const canvas = el('canvas', 'w-crop-canvas');
       const accent = getComputedStyle(document.documentElement)
@@ -199,8 +200,8 @@ export async function alignPhoto(
               .getContext('2d')!
               .getImageData(0, 0, source.width, source.height);
             const output = el('canvas');
-            output.width = 630;
-            output.height = 880;
+            output.width = mode === 'page' ? 1260 : 630;
+            output.height = mode === 'page' ? 1760 : 880;
             const out = output.getContext('2d')!;
             const aligned = out.createImageData(output.width, output.height);
             for (let row = 0; row < output.height; row++)

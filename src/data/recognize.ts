@@ -1,69 +1,102 @@
-/** Local PP-OCRv4 model in a disposable worker. No photo upload. */
-export function recognizePhoto(
+/** Reusable local PaddleOCR worker. All photos stay on the device. */
+export function createRecognitionSession(
+  signal: AbortSignal,
+  progress: (status: string, fraction?: number) => void,
+) {
+  const worker = new Worker(new URL('./vision-worker.ts', import.meta.url), {
+    type: 'module',
+  });
+  let disposed = false;
+  let sequence = 0;
+  let pending:
+    | {
+        id: number;
+        resolve: (text: string) => void;
+        reject: (reason: Error) => void;
+        timer: ReturnType<typeof setTimeout>;
+      }
+    | undefined;
+  const finish = (error?: Error, text = '') => {
+    if (!pending) return;
+    const current = pending;
+    pending = undefined;
+    clearTimeout(current.timer);
+    if (error) current.reject(error);
+    else current.resolve(text);
+  };
+  const close = () => {
+    if (disposed) return;
+    disposed = true;
+    worker.terminate();
+    signal.removeEventListener('abort', close);
+    finish(new DOMException('Abgebrochen', 'AbortError'));
+  };
+  signal.addEventListener('abort', close, { once: true });
+  worker.onerror = (event) => {
+    event.preventDefault();
+    finish(new Error('Die lokale Erkennung konnte nicht gestartet werden.'));
+    close();
+  };
+  worker.onmessage = (
+    event: MessageEvent<{
+      type: string;
+      id?: number;
+      status?: string;
+      text?: string;
+      message?: string;
+    }>,
+  ) => {
+    if (disposed || !pending || event.data.id !== pending.id) return;
+    if (event.data.type === 'progress') {
+      progress(event.data.status ?? 'Erkennung läuft …');
+    } else if (event.data.type === 'done') {
+      finish(undefined, event.data.text ?? '');
+    } else if (event.data.type === 'error') {
+      finish(new Error(event.data.message ?? 'Das Foto konnte nicht gelesen werden.'));
+    }
+  };
+  const recognize = (photo: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      if (disposed || signal.aborted) {
+        reject(new DOMException('Abgebrochen', 'AbortError'));
+        return;
+      }
+      if (pending) {
+        reject(new Error('Es läuft bereits eine Texterkennung.'));
+        return;
+      }
+      const id = ++sequence;
+      const timer = setTimeout(() => {
+        finish(new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'));
+        close();
+      }, 90000);
+      pending = { id, timer, resolve, reject };
+      progress('Lokale Erkennung wird vorbereitet …');
+      try {
+        worker.postMessage({
+          id,
+          photo,
+          modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
+          dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
+        });
+      } catch {
+        finish(new Error('Das Bild konnte nicht zur Erkennung übergeben werden.'));
+      }
+    });
+  if (signal.aborted) close();
+  return { recognize, close };
+}
+
+/** Compatible with the original single-card flow; worker is disposed after use. */
+export async function recognizePhoto(
   photo: Blob,
   signal: AbortSignal,
   progress: (status: string, fraction?: number) => void,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(new URL('./vision-worker.ts', import.meta.url), {
-      type: 'module',
-    });
-    let finished = false;
-    const stop = (error?: Error, text = '') => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(timeout);
-      signal.removeEventListener('abort', abort);
-      worker.terminate();
-      if (error) reject(error);
-      else resolve(text);
-    };
-    const abort = () => stop(new DOMException('Abgebrochen', 'AbortError'));
-    const timeout = setTimeout(
-      () =>
-        stop(
-          new Error(
-            'Die Erkennung dauert zu lange. Die Aufnahme bleibt bis zum Schließen geöffnet. Wähle die Ausgabe manuell oder starte die Erkennung erneut.',
-          ),
-        ),
-      90000,
-    );
-    signal.addEventListener('abort', abort, { once: true });
-    worker.onerror = (event) => {
-      event.preventDefault();
-      stop(
-        new Error(
-          'Die lokale Erkennung konnte nicht gestartet werden. Die Aufnahme bleibt bis zum Schließen geöffnet; die manuelle Auswahl ist weiterhin verfügbar.',
-        ),
-      );
-    };
-    worker.onmessage = (
-      event: MessageEvent<{
-        type: string;
-        status?: string;
-        text?: string;
-        message?: string;
-      }>,
-    ) => {
-      if (finished) return;
-      const message = event.data;
-      if (message.type === 'progress')
-        progress(message.status ?? 'Erkennung läuft …');
-      else if (message.type === 'done') stop(undefined, message.text ?? '');
-      else if (message.type === 'error')
-        stop(
-          new Error(message.message ?? 'Das Foto konnte nicht gelesen werden.'),
-        );
-    };
-    if (signal.aborted) {
-      abort();
-      return;
-    }
-    progress('Lokale Erkennung wird vorbereitet …');
-    worker.postMessage({
-      photo,
-      modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
-      dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
-    });
-  });
+  const session = createRecognitionSession(signal, progress);
+  try {
+    return await session.recognize(photo);
+  } finally {
+    session.close();
+  }
 }

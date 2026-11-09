@@ -10,55 +10,80 @@ const scope = self as unknown as {
           photo: Blob;
           modelUrl: string;
           dictionaryUrl: string;
+          id?: number;
         }>,
       ) => void)
     | null;
   postMessage: (value: unknown) => void;
   close: () => void;
 };
-const report = (status: string) =>
-  scope.postMessage({ type: 'progress', status });
+const report = (status: string, id?: number) =>
+  scope.postMessage({ type: 'progress', status, id });
+let prepared:
+  | Promise<{ session: InferenceSession; dictionary: string[] }>
+  | undefined;
+async function modelResources(modelUrl: string, dictionaryUrl: string) {
+  if (!prepared) {
+    prepared = (async () => {
+      report('Erkennungsmodell wird geladen …');
+      env.wasm.numThreads = 1;
+      env.wasm.proxy = false;
+      env.wasm.wasmPaths = { wasm: wasmUrl, mjs: runtimeUrl };
+      const [model, dictionaryText] = await Promise.all([
+        resource(modelUrl).then((response) => response.arrayBuffer()),
+        resource(dictionaryUrl).then((response) => response.text()),
+      ]);
+      const session = await InferenceSession.create(model, {
+        executionProviders: ['wasm'],
+      });
+      return {
+        session,
+        dictionary: ['', ...dictionaryText.trimEnd().split('\n'), ' '],
+      };
+    })().catch((error: unknown) => {
+      prepared = undefined;
+      throw error;
+    });
+  }
+  return prepared;
+}
+
 async function resource(url: string): Promise<Response> {
   const result = await fetch(url);
   if (!result.ok)
     throw new Error('Das lokale Erkennungsmodell konnte nicht geladen werden.');
   return result;
 }
+// A single worker can recognize a full binder page without loading ONNX nine times.
+let queue = Promise.resolve();
 scope.onmessage = (event) => {
-  void recognize(event.data)
-    .catch(() =>
-      scope.postMessage({
-        type: 'error',
-        message:
-          'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Die Aufnahme bleibt bis zum Schließen geöffnet. Wähle die Ausgabe manuell oder fotografiere den unteren Rand deutlicher.',
-      }),
-    )
-    .finally(() => scope.close());
+  const data = event.data;
+  queue = queue.then(() => recognize(data)).catch(() => {
+    scope.postMessage({
+      type: 'error',
+      id: data.id,
+      message:
+        'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Wähle die Karte manuell oder fotografiere sie deutlicher.',
+    });
+  });
 };
 async function recognize({
   photo,
   modelUrl,
   dictionaryUrl,
+  id,
 }: {
   photo: Blob;
   modelUrl: string;
   dictionaryUrl: string;
+  id?: number;
 }): Promise<void> {
   if (typeof OffscreenCanvas === 'undefined')
     throw new Error('Bildverarbeitung im Hintergrund wird nicht unterstützt.');
-  report('Erkennungsmodell wird geladen …');
-  env.wasm.numThreads = 1;
-  env.wasm.proxy = false;
-  env.wasm.wasmPaths = { wasm: wasmUrl, mjs: runtimeUrl };
-  const [model, dictionaryText, bitmap] = await Promise.all([
-    resource(modelUrl).then((r) => r.arrayBuffer()),
-    resource(dictionaryUrl).then((r) => r.text()),
+  const [{ session, dictionary }, bitmap] = await Promise.all([
+    modelResources(modelUrl, dictionaryUrl),
     createImageBitmap(photo),
   ]);
-  const dictionary = ['', ...dictionaryText.trimEnd().split('\n'), ' '];
-  const session = await InferenceSession.create(model, {
-    executionProviders: ['wasm'],
-  });
   try {
     const read = async (
       region: [number, number, number, number],
@@ -123,24 +148,23 @@ async function recognize({
         input.dispose();
       }
     };
-    report('Set und Sammlernummer werden gelesen …');
+    report('Set und Sammlernummer werden gelesen …', id);
     const number = await read([0.155, 0.94, 0.13, 0.032]);
     const identifier = await read([0.07, 0.94, 0.38, 0.032]);
     const texts = [number, identifier];
     const fraction = /\d{1,3}\s*\/\s*\d{1,3}/;
     if (!fraction.test(number) || !fraction.test(identifier)) {
-      report('Unterer Rand wird mit höherem Kontrast gegengeprüft …');
+      report('Unterer Rand wird mit höherem Kontrast gegengeprüft …', id);
       for (const variant of ['gray', 'inverted', 'binary'] as const) {
         texts.push(await read([0.155, 0.94, 0.13, 0.032], variant));
         texts.push(await read([0.07, 0.94, 0.38, 0.032], variant));
       }
       texts.push(await read([0.7, 0.9, 0.27, 0.045]));
     }
-    report('Kartenname wird gegengeprüft …');
+    report('Kartenname wird gegengeprüft …', id);
     texts.push(await read([0.18, 0.025, 0.56, 0.055]));
-    scope.postMessage({ type: 'done', text: texts.join('\n') });
+    scope.postMessage({ type: 'done', id, text: texts.join('\n') });
   } finally {
     bitmap.close();
-    await session.release();
   }
 }
