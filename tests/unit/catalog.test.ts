@@ -238,3 +238,63 @@ it('passes exact set, illustrator, rarity and pagination filters instead of sort
   expect(url.searchParams.get('pagination:page')).toBe('3');
   expect(url.searchParams.get('sort:field')).toBe('name');
 });
+
+it('retains real Japanese plus-sign sets through catalogue listing, card search and exact detail lookup', async () => {
+  vi.resetModules();
+  const api = await import('../../src/data/card-catalog');
+  const set = { id: 'SM1+', name: 'サン＆ムーン', cardCount: { official: 51 } };
+  const resume = { id: 'SM1+-001', localId: '001', name: 'チュリネ' };
+  const fetcher = vi.fn().mockImplementation((address: string) => {
+    const url = new URL(address);
+    const result = url.pathname.endsWith('/series/tcgp')
+      ? { id: 'tcgp', sets: [] }
+      : url.pathname.endsWith('/sets')
+        ? [set]
+        : url.pathname.endsWith('/sets/SM1%2B')
+          ? { ...set, cards: [resume] }
+          : url.pathname.endsWith('/cards')
+            ? [resume]
+            : {
+                ...resume,
+                set,
+                illustrator: 'Example artist',
+                variants: { normal: true },
+              };
+    return Promise.resolve(new Response(JSON.stringify(result)));
+  });
+  vi.stubGlobal('fetch', fetcher);
+  expect(await api.catalogSets('ja')).toEqual([{ ...set, alias: undefined }]);
+  expect(await api.catalogSetCards('SM1+', 'ja')).toMatchObject([
+    { id: 'SM1+-001', number: '001/51' },
+  ]);
+  expect(
+    await api.searchCatalog('', 'ja', undefined, { setId: 'SM1+' }),
+  ).toMatchObject([{ id: 'SM1+-001' }]);
+  expect((await api.catalogEntry('SM1+-001', 'ja')).card).toMatchObject({
+    key: 'tcgdex:ja:SM1+-001',
+    language: 'ja',
+    setId: 'SM1+',
+    number: '001/51',
+  });
+  expect((await api.fetchCatalogCard('SM1+-001', 'ja')).sourceId).toBe(
+    'SM1+-001',
+  );
+  const addresses = fetcher.mock.calls.map(([address]) => String(address));
+  expect(addresses.some((address) => address.includes('/sets/SM1%2B'))).toBe(
+    true,
+  );
+  expect(
+    addresses.some((address) => address.includes('/cards/SM1%2B-001')),
+  ).toBe(true);
+});
+
+it('rejects catalogue path separators while allowing literal plus signs in provider identities', async () => {
+  const { catalogEntry, catalogSetCards } =
+    await import('../../src/data/card-catalog');
+  await expect(catalogEntry('../cards', 'ja')).rejects.toThrow(
+    'Ungültige Katalogreferenz',
+  );
+  await expect(catalogSetCards('SM1+/other', 'ja')).rejects.toThrow(
+    'Ungültiges Set',
+  );
+});

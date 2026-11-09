@@ -9,6 +9,7 @@ async function catalogue(page: Page) {
     requests.push(url.toString());
     const lang = url.pathname.split('/')[2];
     const path = url.pathname.split('/').slice(3).join('/');
+    const seriesId = lang === 'ja' ? 'SV' : 'sv';
     const chosen = {
       id: 'sv10',
       name:
@@ -29,6 +30,12 @@ async function catalogue(page: Page) {
         cardCount: { official: 1 },
       })),
     ];
+    if (lang === 'ja')
+      sets.push({
+        id: 'SM1+',
+        name: 'サン＆ムーン',
+        cardCount: { official: 51 },
+      });
     const cards = Array.from({ length: 25 }, (_, index) => ({
       id: `sv10-${String(index + 1).padStart(3, '0')}`,
       localId: String(index + 1).padStart(3, '0'),
@@ -40,10 +47,15 @@ async function catalogue(page: Page) {
     else if (path === 'series')
       json = [
         { id: 'base', name: 'Grund' },
-        { id: 'sv', name: 'Karmesin & Purpur' },
+        {
+          id: seriesId,
+          name:
+            lang === 'ja' ? 'スカーレット&バイオレット' : 'Karmesin & Purpur',
+        },
         { id: 'tcgp', name: 'Pocket' },
       ];
-    else if (path === 'series/sv') json = { id: 'sv', sets: [chosen] };
+    else if (path === 'series/sv' || path === 'series/SV')
+      json = { id: seriesId, sets: [chosen] };
     else if (path === 'series/base') json = { id: 'base', sets: [old] };
     else if (path === 'series/tcgp') json = { id: 'tcgp', sets: [] };
     else if (path === 'illustrators') json = ['GIDORA'];
@@ -197,7 +209,7 @@ test('changing catalogue language clears incompatible filters and keeps Japanese
   await expect(main.locator('.w-set-choice')).toHaveCount(24, {
     timeout: 15_000,
   });
-  await main.getByLabel('Reihe / Ära').selectOption('sv');
+  await main.getByLabel('Reihe / Ära').selectOption('SV');
   await expect(main.locator('.w-set-choice')).toHaveCount(1, {
     timeout: 15_000,
   });

@@ -89,7 +89,7 @@ export function editorialCards(collection: Collection): PersonalCard[] {
 }
 
 export const resumeSchema = z.object({
-  id: z.string().regex(/^[\w.-]+$/),
+  id: z.string().regex(/^[\w.+-]+$/),
   localId: z.string(),
   name: z.string(),
   image: z.string().optional(),
@@ -116,7 +116,7 @@ export interface CatalogEntry {
   price?: MarketPrice;
 }
 export const catalogSetSchema = z.object({
-  id: z.string().regex(/^[\w.-]+$/),
+  id: z.string().regex(/^[\w.+-]+$/),
   name: z.string(),
   logo: z.string().optional(),
   symbol: z.string().optional(),
@@ -181,7 +181,7 @@ export async function catalogSets(
     }));
 }
 const seriesSchema = z.object({
-  id: z.string().regex(/^[\w.-]+$/),
+  id: z.string().regex(/^[\w.+-]+$/),
   name: z.string(),
 });
 export async function catalogSeries(
@@ -202,7 +202,7 @@ export async function catalogSeriesSets(
   signal?: AbortSignal,
 ): Promise<string[]> {
   catalogLanguage(language);
-  if (!/^[\w.-]+$/.test(id) || id === 'tcgp')
+  if (!/^[\w.+-]+$/.test(id) || id === 'tcgp')
     throw new Error('Ungültige Kartenreihe.');
   const data = z
     .object({ id: z.literal(id), sets: z.array(catalogSetSchema) })
@@ -386,7 +386,7 @@ export async function fetchCatalogCard(
   language: string,
   signal?: AbortSignal,
 ): Promise<PersonalCard> {
-  if (!/^[\w.-]+$/.test(id) || !['de', 'en', 'ja'].includes(language))
+  if (!/^[\w.+-]+$/.test(id) || !['de', 'en', 'ja'].includes(language))
     throw new Error('Ungültige Katalogreferenz.');
   const raw = apiCardSchema.parse(
     await getJson(
@@ -452,7 +452,7 @@ export async function catalogEntry(
   imageFallback = true,
 ): Promise<CatalogEntry> {
   catalogLanguage(language);
-  if (!/^[\w.-]+$/.test(id)) throw new Error('Ungültige Katalogreferenz.');
+  if (!/^[\w.+-]+$/.test(id)) throw new Error('Ungültige Katalogreferenz.');
   const raw = apiCardSchema.parse(
     await cachedJson(
       `https://api.tcgdex.net/v2/${language}/cards/${encodeURIComponent(id)}`,
@@ -485,7 +485,7 @@ export async function catalogSetCards(
   signal?: AbortSignal,
 ): Promise<CatalogResult[]> {
   catalogLanguage(language);
-  if (!/^[\w.-]+$/.test(id)) throw new Error('Ungültiges Set.');
+  if (!/^[\w.+-]+$/.test(id)) throw new Error('Ungültiges Set.');
   const detail = catalogSetSchema
     .extend({ cards: z.array(resumeSchema) })
     .parse(
