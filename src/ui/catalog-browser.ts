@@ -27,6 +27,7 @@ import {
   input,
   message,
   select,
+  icon,
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { createRarityGuide } from './rarity-guide';
@@ -508,6 +509,11 @@ export function createCatalogBrowser(options: Options) {
           ) ?? '';
       setFacets = facets;
       scopeKey = key;
+      const pictured = facets.cards.filter((card) => card.image).length;
+      const imageCoverage =
+        pictured === 0 && facets.cards.length
+          ? ' TCGdex liefert für diese Ausgaben derzeit keine Kartenbilder. Die Kartendaten werden als Liste angezeigt.'
+          : ` ${pictured} von ${facets.cards.length} Ausgaben mit Katalogbild.`;
       const reset = [
         previousRarity && !rarity.value ? `„${previousRarity}“` : '',
         previousArtist && !artist.value ? `„${previousArtist}“` : '',
@@ -515,7 +521,7 @@ export function createCatalogBrowser(options: Options) {
       scopeStatus.replaceChildren(
         message(
           facets.cards.length
-            ? `${rarities.length} Seltenheiten und ${artists.length} Illustratoren im gewählten Set.${reset.length ? ` ${reset.join(' und ')} kommen hier nicht vor; diese Filter wurden zurückgesetzt.` : ''}`
+            ? `${rarities.length} Seltenheiten und ${artists.length} Illustratoren im gewählten Set.${imageCoverage}${reset.length ? ` ${reset.join(' und ')} kommen hier nicht vor; diese Filter wurden zurückgesetzt.` : ''}`
             : 'Für dieses Set enthält der Katalog noch keine Karteneinträge. Seltenheiten und Illustratoren sind deshalb nicht verfügbar.',
         ),
       );
@@ -655,7 +661,14 @@ export function createCatalogBrowser(options: Options) {
     owned.dataset.catalogStatus = card.key;
     visibleCards.set(card.key, card);
     caption.append(owned);
-    button.replaceChildren(ctx.images.artwork(card), caption);
+    if (card.image) button.replaceChildren(ctx.images.artwork(card), caption);
+    else {
+      button.classList.add('w-card-without-image');
+      const marker = el('span', 'w-no-image-symbol', icon('cards'));
+      marker.setAttribute('aria-hidden', 'true');
+      caption.append(el('small', 'w-muted', 'Katalogbild fehlt'));
+      button.replaceChildren(marker, caption);
+    }
     results.append(button);
   }
   const previous = action(
@@ -757,10 +770,7 @@ export function createCatalogBrowser(options: Options) {
               a.id.localeCompare(b.id)
             : a.localId.localeCompare(b.localId, undefined, { numeric: true }),
         );
-      found = await fillCatalogImages(
-        matching.slice((page - 1) * 24, page * 24),
-        signal,
-      );
+      found = matching.slice((page - 1) * 24, page * 24);
       next.disabled = page * 24 >= matching.length;
       tell(
         matching.length
@@ -816,6 +826,10 @@ export function createCatalogBrowser(options: Options) {
     if (closed || signal.aborted || active !== signal) return;
     results.replaceChildren();
     visibleCards.clear();
+    results.classList.toggle(
+      'w-text-results',
+      found.length > 0 && found.every((card) => !card.image),
+    );
     found.forEach((result, i) => renderResult(result, signal, prices?.[i]));
     refresh();
     previous.disabled = page === 1;

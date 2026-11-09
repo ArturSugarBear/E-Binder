@@ -238,3 +238,35 @@
     gap: 12px;
   }
 }
+
+.w-search-results.w-text-results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.w-search-results .w-card-without-image {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  text-align: left;
+  width: 100%;
+}
+.w-search-results .w-card-without-image .w-card-caption {
+  padding: 0;
+}
+.w-no-image-symbol {
+  color: var(--ink-tertiary);
+  flex-shrink: 0;
+}
+.w-no-image-symbol svg {
+  width: 24px;
+  height: 24px;
+}
+.w-rarity-without-image {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 600px) {
+  .w-search-results.w-text-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

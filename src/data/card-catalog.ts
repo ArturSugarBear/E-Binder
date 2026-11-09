@@ -271,20 +271,27 @@ export async function fillCatalogImages(
           signal,
         ),
       );
-    return cards.map((card) => {
-      const match = alternatives.find(
-        (other) =>
-          other.id === card.id &&
-          numberKey(other.localId) === numberKey(card.localId),
-      );
-      return !card.image && match?.image
-        ? { ...card, image: match.image }
-        : card;
-    });
+    return pairCatalogImages(cards, alternatives);
   } catch (error) {
     if (signal?.aborted) throw error;
     return cards;
   }
+}
+/** Preserve the requested printing/language; only replace artwork for an exact paired ID. */
+function pairCatalogImages<T extends CatalogResult>(
+  cards: T[],
+  alternatives: Pick<CatalogResult, 'id' | 'localId' | 'image'>[],
+): T[] {
+  const byId = new Map(alternatives.map((card) => [card.id, card]));
+  return cards.map((card) => {
+    const match = byId.get(card.id);
+    return card.language === 'de' &&
+      !card.image &&
+      match?.image &&
+      numberKey(match.localId) === numberKey(card.localId)
+      ? { ...card, image: match.image }
+      : card;
+  });
 }
 export function imageLanguage(image: string): string | undefined {
   try {
@@ -732,8 +739,8 @@ export async function catalogSetFacets(
   if (publicCache.size > 1500)
     publicCache.delete(publicCache.keys().next().value!);
   publicCache.set(key, { until: Date.now() + 300000, data: json });
-  return {
-    cards: cards.map((card) => ({
+  let previews: (CatalogResult & { rarity: string; artist: string })[] =
+    cards.map((card) => ({
       id: card.id,
       localId: card.localId,
       name: card.name,
@@ -745,6 +752,15 @@ export async function catalogSetFacets(
         : card.localId,
       rarity: card.rarity ?? '',
       artist: card.illustrator ?? '',
-    })),
-  };
+    }));
+  if (language === 'de' && previews.some((card) => !card.image)) {
+    try {
+      const alternatives = await catalogSetCards(id, 'en', signal);
+      previews = pairCatalogImages(previews, alternatives);
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      // Missing source images never change the requested card edition or language.
+    }
+  }
+  return { cards: previews };
 }

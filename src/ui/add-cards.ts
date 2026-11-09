@@ -481,6 +481,7 @@ export function openAddCards(
   }
 
   function renderChoices(cards: PersonalCard[]): void {
+    results.classList.remove('w-text-results');
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [

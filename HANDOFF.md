@@ -2,6 +2,16 @@
 
 Stand: 9. November 2026. Repository `/workspace/E-Binder`, GitHub CLI `gh-e-binder` ist autorisiert. Niemals Tokens ausgeben oder Force-Push verwenden. Nutzer wünscht geprüfte fertige Änderungen auf **master und GitHub Pages**, zusätzlich einen aktuellen Arbeitsstand auf `codex/workspace-update`. ChatGPT-Nutzungskontingent kann hier nicht ausgelesen werden; keine Zahl erfinden.
 
+## Aktuelle Korrektur: TCGdex-Bildabdeckung
+
+Basis ist der live geprüfte Release `1d96e7b` (60 Unit-/160 Browserprüfungen; Publish `42671631945`, nach GitHub-Serverfehler erfolgreich in Versuch 2). Aktuelle Nutzerbeanstandung: fehlende Bilder bei „Delta-Herrschaft“.
+
+Echtdatenbefund: `me06`, Veröffentlichung laut Anbieter `2026-11-06`, 141 Karteneinträge in DE und EN, **0 Bildadressen in beiden Sprachen**. Einzelkarte `me06-001` hat ebenfalls kein `image`. Die offizielle FAQ erklärt diese Quellengrenze; `/high.webp` entspricht der Asset-Dokumentation. Das SDK ist bisher nicht installiert; die App nutzt REST/GraphQL direkt. `CardResume.getImageURL` setzt nur Qualität/Format an `image` an und ergänzt keine fehlenden Bilder. Quellen: https://tcgdex.dev/assets, https://tcgdex.dev/faq#why-are-some-card-images-missing, https://tcgdex.dev/sdks/typescript. Keine Bild-URL aus Setnamen erraten und keine ähnlich aussehende andere Ausgabe einsetzen.
+
+Korrektur: `catalogSetFacets` gleicht fehlende DE-Bilder einmal gesammelt mit der tatsächlichen englischen Setliste ab; exakte IDs und gedruckte Nummer müssen übereinstimmen, Sprache/Identität bleiben DE. Umfang und Bildabdeckung werden erklärt. Unbebilderte Resultate erscheinen kompakt als Datenzeilen statt blauer Kartenflächen. Die Seltenheitshilfe zeigt bei fehlenden Bildern nur Erklärung/Kartendaten und verspricht kein Beispielbild. Keine Einzelkartenabfragen nur zum Rendern dieser Zeilen; keine Bildpersistenz ergänzt.
+
+`npm run check` mit **62 Unit-Tests** bestanden. 42 gezielte Browserprüfungen laufen/liegen unter `/workspace/scratch/catalog-images-browser.log`; Ergebnis vor Master-Push prüfen. Neue Datei `tests/e2e/catalog-images.spec.ts` deckt Quelle ohne Bilder, begrenzte Requests, Bildfallback mit EN-Badge, unveränderte Sprache, 320px und keinen erfundenen Besitz ab. Danach Arbeitszweig/master pushen und neue Actions/Live prüfen. ChatGPT-Restkontingent ist nicht auslesbar.
+
 ## Aktuelle Ergänzung: Setfilter und Foto-Prüfung
 
 Neueste Anweisung: **zuerst diese Verbesserungen live schalten**, danach einen gesonderten Versuch zur Erfassung ganzer Binderseiten vorbereiten. Kein ungeprüfter Plattformwechsel oder behaupteter Neun-Karten-Scanner. Ein neuer Frame zeigt 3×3 mit Glanz, Randbeschnitt und teils verdecktem Text; Originalvideo und bestätigte Ausgaben fehlen noch. Web-ONNX nutzt bereits Geräte-CPU; native Kamera/Core ML wäre eine zu messende Option. Keine Nutzerfotos speichern.

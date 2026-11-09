@@ -13,13 +13,12 @@ const descriptions: Record<string, string> = {
   'double rare':
     'Bei neueren westlichen Sets häufig Pokémon-ex. Zwei Sterne kennzeichnen diese Kategorie.',
   'illustration rare':
-    'Eine großflächige Illustration zeigt das Pokémon oft in einer Szene. Vergleiche Bildfläche und Kartenrand am Beispiel.',
+    'Eine großflächige Illustration zeigt das Pokémon oft in einer Szene.',
   'special illustration rare':
-    'Eine besondere, großflächige Illustration, häufig bei Pokémon-ex und Unterstützern. Das Beispiel zeigt die Gestaltung in diesem Set.',
+    'Eine besondere, großflächige Illustration, häufig bei Pokémon-ex und Unterstützern.',
   'ultra rare':
-    'Eine besondere Ausgabe. Gestaltung und Kennzeichen hängen vom Set und der Ära ab; das Beispiel stammt aus deinem gewählten Set.',
-  'mega hyper rare':
-    'Eine besondere Seltenheitskategorie für Mega-Pokémon. Vergleiche die Farbgebung und den Hintergrund am Beispiel.',
+    'Eine besondere Ausgabe. Gestaltung und Kennzeichen hängen vom Set und der Ära ab.',
+  'mega hyper rare': 'Eine besondere Seltenheitskategorie für Mega-Pokémon.',
   'shiny rare':
     'Das Pokémon erscheint in seiner schillernden Farbvariante. Diese Kategorie gibt es nur in bestimmten Sets.',
   'shiny ultra rare':
@@ -43,7 +42,7 @@ export function rarityDescription(value: string): string {
   const key = value.toLowerCase();
   return (
     descriptions[aliases[key] ?? key] ??
-    'So ist diese Karte im Katalog eingestuft. Die tatsächliche Gestaltung siehst du am Beispiel aus diesem Set.'
+    'So ist diese Karte im Katalog eingestuft.'
   );
 }
 export function createRarityGuide(
@@ -65,28 +64,41 @@ export function createRarityGuide(
     const matches = data!.cards.filter((card) => card.rarity === rarity);
     const result = matches.find((card) => card.image) ?? matches[0]!;
     const card = catalogResumeCard(result);
-    const button = action(
-      `Beispiel für ${rarity}: ${card.name}`,
-      () => choose(card),
-      'card',
-    );
-    button.classList.add('w-rarity-example-card');
-    button.replaceChildren(ctx.images.artwork(card));
+    const button = card.image
+      ? action(
+          `Beispiel für ${rarity}: ${card.name}`,
+          () => choose(card),
+          'card',
+        )
+      : undefined;
+    button?.classList.add('w-rarity-example-card');
+    button?.replaceChildren(ctx.images.artwork(card));
     return el(
       'div',
-      'w-rarity-example',
+      `w-rarity-example${card.image ? '' : ' w-rarity-without-image'}`,
       button,
       el(
         'div',
         '',
         el('h3', '', rarity),
         el('p', '', rarityDescription(rarity)),
+        !card.image
+          ? el(
+              'p',
+              'w-help',
+              'Für diese Seltenheit ist im Katalog noch kein Beispielbild verfügbar.',
+            )
+          : undefined,
         el(
           'small',
           'w-muted',
-          `${matches.length} ${matches.length === 1 ? 'Karte' : 'Karten'} im Set · Beispiel: ${card.name} ${card.number}`,
+          `${matches.length} ${matches.length === 1 ? 'Karte' : 'Karten'} im Set · ${card.image ? 'Beispiel' : 'Kartendaten'}: ${card.name} ${card.number}`,
         ),
-        action('Beispielkarte ansehen', () => choose(card), 'text'),
+        action(
+          card.image ? 'Beispielkarte ansehen' : 'Kartendaten ansehen',
+          () => choose(card),
+          'text',
+        ),
       ),
     );
   }
@@ -100,6 +112,11 @@ export function createRarityGuide(
     }
     element.hidden = !data?.cards.some((card) => card.rarity);
     if (!data || element.hidden) return;
+    guide.querySelector('summary')!.textContent = data.cards.some(
+      (card) => card.image,
+    )
+      ? 'Seltenheiten verstehen – mit Beispielkarten'
+      : 'Seltenheiten verstehen';
     if (rarity && data.cards.some((card) => card.rarity === rarity))
       selected.append(example(rarity));
   }
@@ -110,7 +127,7 @@ export function createRarityGuide(
     ].sort((a, b) => a.localeCompare(b));
     list.append(
       message(
-        'Echte Beispiele aus diesem Set. Seltenheit und Druckvariante (z. B. Reverse-Holo) werden getrennt erfasst. Eine Seltenheit garantiert keinen bestimmten Wert.',
+        'Kartendaten und verfügbare Beispielbilder stammen aus diesem Set. Seltenheit und Druckvariante (z. B. Reverse-Holo) werden getrennt erfasst. Eine Seltenheit garantiert keinen bestimmten Wert.',
       ),
     );
     for (const rarity of names) list.append(example(rarity));

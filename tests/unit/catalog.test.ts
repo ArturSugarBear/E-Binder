@@ -394,3 +394,105 @@ it('rejects partial, mixed-set and GraphQL error responses instead of presenting
     await expect(catalogSetFacets('facets', 'de')).rejects.toThrow(/Filter/);
   expect(fetcher).toHaveBeenCalledTimes(3);
 });
+
+it('pairs a set with available English artwork once, keeping the German identity and rejecting wrong printed numbers', async () => {
+  vi.resetModules();
+  const { catalogSetFacets } = await import('../../src/data/card-catalog');
+  const cards = [1, 2, 3].map((index) => ({
+    id: `paired-${index}`,
+    localId: String(index),
+    name: `Deutsch ${index}`,
+    image: null,
+    rarity: 'Häufig',
+    illustrator: 'Artist',
+    set: { id: 'paired' },
+  }));
+  const set = { id: 'paired', name: 'Deutsch', cardCount: { official: 3 } };
+  const english = cards.map((card, index) => ({
+    ...card,
+    name: 'English',
+    localId: index === 1 ? '99' : card.localId,
+    image:
+      index === 2
+        ? undefined
+        : `https://assets.tcgdex.net/en/test/paired/${card.localId}`,
+  }));
+  const fetcher = vi.fn().mockImplementation((url: string) =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify(
+          url.endsWith('/graphql')
+            ? {
+                data: {
+                  set: { ...set, cards: cards.map(({ id }) => ({ id })) },
+                  cards,
+                },
+              }
+            : { ...set, cards: english },
+        ),
+      ),
+    ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const result = await catalogSetFacets('paired', 'de');
+  expect(result.cards[0]).toMatchObject({
+    name: 'Deutsch 1',
+    language: 'de',
+    image: 'https://assets.tcgdex.net/en/test/paired/1',
+  });
+  expect(result.cards[1]?.image).toBeUndefined();
+  expect(result.cards[2]?.image).toBeUndefined();
+  await catalogSetFacets('paired', 'de');
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
+    'https://api.tcgdex.net/v2/graphql',
+    'https://api.tcgdex.net/v2/en/sets/paired',
+  ]);
+});
+
+it('keeps a complete 141-card set without source images image-free instead of inventing asset URLs or fetching every card', async () => {
+  vi.resetModules();
+  const { catalogSetFacets } = await import('../../src/data/card-catalog');
+  const cards = Array.from({ length: 141 }, (_, index) => ({
+    id: `missing-${index + 1}`,
+    localId: String(index + 1),
+    name: 'Ohne Bild',
+    image: null,
+    rarity: 'Häufig',
+    illustrator: 'Artist',
+    set: { id: 'missing' },
+  }));
+  const set = {
+    id: 'missing',
+    name: 'Ohne Bild',
+    cardCount: { official: 103 },
+  };
+  const fetcher = vi.fn().mockImplementation((url: string) =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify(
+          url.endsWith('/graphql')
+            ? {
+                data: {
+                  set: { ...set, cards: cards.map(({ id }) => ({ id })) },
+                  cards,
+                },
+              }
+            : {
+                ...set,
+                cards: cards.map(({ id, localId, name }) => ({
+                  id,
+                  localId,
+                  name,
+                })),
+              },
+        ),
+      ),
+    ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const result = await catalogSetFacets('missing', 'de');
+  expect(result.cards).toHaveLength(141);
+  expect(result.cards.every((card) => card.image === undefined)).toBe(true);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
