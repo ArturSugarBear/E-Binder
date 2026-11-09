@@ -29,7 +29,7 @@ export function pocketCrop(
   const cellWidth = imageWidth / 3;
   const cellHeight = imageHeight / 3;
   return {
-    x: (slot % 3 + inset) * cellWidth,
+    x: ((slot % 3) + inset) * cellWidth,
     y: (Math.floor(slot / 3) + inset) * cellHeight,
     width: cellWidth * (1 - 2 * inset),
     height: cellHeight * (1 - 2 * inset),
@@ -70,7 +70,11 @@ export async function extractPagePockets(
           (result) =>
             result
               ? resolve(result)
-              : reject(new Error('Der Kartenausschnitt konnte nicht gespeichert werden.')),
+              : reject(
+                  new Error(
+                    'Der Kartenausschnitt konnte nicht gespeichert werden.',
+                  ),
+                ),
           'image/jpeg',
           0.9,
         );

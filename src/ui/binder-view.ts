@@ -79,7 +79,12 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
       el(
         'div',
         'w-action-row',
-        action('Binderseite scannen', () => ctx.openPageScan(), 'primary', 'camera'),
+        action(
+          'Binderseite scannen',
+          () => ctx.openPageScan(),
+          'primary',
+          'camera',
+        ),
         action('Neuer Binder', () => newBinder(ctx), 'secondary', 'plus'),
       ),
     ),

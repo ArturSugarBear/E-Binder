@@ -52,7 +52,11 @@ export function createRecognitionSession(
     } else if (event.data.type === 'done') {
       finish(undefined, event.data.text ?? '');
     } else if (event.data.type === 'error') {
-      finish(new Error(event.data.message ?? 'Das Foto konnte nicht gelesen werden.'));
+      finish(
+        new Error(
+          event.data.message ?? 'Das Foto konnte nicht gelesen werden.',
+        ),
+      );
     }
   };
   const recognize = (photo: Blob): Promise<string> =>
@@ -67,7 +71,9 @@ export function createRecognitionSession(
       }
       const id = ++sequence;
       const timer = setTimeout(() => {
-        finish(new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'));
+        finish(
+          new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'),
+        );
         close();
       }, 90000);
       pending = { id, timer, resolve, reject };
@@ -80,7 +86,9 @@ export function createRecognitionSession(
           dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
         });
       } catch {
-        finish(new Error('Das Bild konnte nicht zur Erkennung übergeben werden.'));
+        finish(
+          new Error('Das Bild konnte nicht zur Erkennung übergeben werden.'),
+        );
       }
     });
   if (signal.aborted) close();

@@ -57,7 +57,11 @@ export function openPageScanner(
   let queued: File[] = [];
   let pockets: Pocket[] = [];
   let previews: string[] = [];
-  const status = el('p', 'w-message', 'Fotografiere die komplette 3×3-Seite möglichst gerade und mit lesbaren Kartenrändern.');
+  const status = el(
+    'p',
+    'w-message',
+    'Fotografiere die komplette 3×3-Seite möglichst gerade und mit lesbaren Kartenrändern.',
+  );
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
   const queueStatus = el('p', 'w-muted');
@@ -76,7 +80,9 @@ export function openPageScanner(
   const binder = select(
     [
       ['', 'Neuen Binder anlegen'],
-      ...ctx.state.binders.map((item) => [item.id, item.name] as [string, string]),
+      ...ctx.state.binders.map(
+        (item) => [item.id, item.name] as [string, string],
+      ),
     ],
     selectedBinderId ?? '',
   );
@@ -115,18 +121,24 @@ export function openPageScanner(
             }
           : null,
       );
-      if (!ctx.commit('Binderseite aus Foto übernommen', (state) =>
-        importScannedPage(state, {
-          fingerprint,
-          binderId: binder.value || undefined,
-          binderName: binderName.value,
-          slots,
-        }),
-      ))
+      if (
+        !ctx.commit('Binderseite aus Foto übernommen', (state) =>
+          importScannedPage(state, {
+            fingerprint,
+            binderId: binder.value || undefined,
+            binderName: binderName.value,
+            slots,
+          }),
+        )
+      )
         return;
       const id = ctx.state.lastBinderId;
       if (id && ![...binder.options].some((option) => option.value === id)) {
-        const option = el('option', '', ctx.state.binders.find((item) => item.id === id)?.name ?? 'Binder');
+        const option = el(
+          'option',
+          '',
+          ctx.state.binders.find((item) => item.id === id)?.name ?? 'Binder',
+        );
         option.value = id;
         binder.append(option);
       }
@@ -161,7 +173,8 @@ export function openPageScanner(
           (pocket.decision === 'card' &&
             (!pocket.card ||
               !pocket.finish.value ||
-              (pocket.finish.value === 'other' && !pocket.variant.value.trim()))),
+              (pocket.finish.value === 'other' &&
+                !pocket.variant.value.trim()))),
       );
   };
   approved.input.addEventListener('change', updateSave);
@@ -193,8 +206,18 @@ export function openPageScanner(
     el(
       'div',
       'w-action-row',
-      action('Binderseite fotografieren', () => camera.click(), 'primary', 'camera'),
-      action('Mehrere Seiten auswählen', () => gallery.click(), 'secondary', 'upload'),
+      action(
+        'Binderseite fotografieren',
+        () => camera.click(),
+        'primary',
+        'camera',
+      ),
+      action(
+        'Mehrere Seiten auswählen',
+        () => gallery.click(),
+        'secondary',
+        'upload',
+      ),
     ),
     camera,
     gallery,
@@ -279,11 +302,17 @@ export function openPageScanner(
       );
       let online: PersonalCard[] = [];
       if (navigator.onLine) {
-        const found = await searchCatalog(query, language.value, lifetime.signal);
+        const found = await searchCatalog(
+          query,
+          language.value,
+          lifetime.signal,
+        );
         const resolved = await Promise.allSettled(
-          found.slice(0, 6).map((item) =>
-            fetchCatalogCard(item.id, language.value, lifetime.signal),
-          ),
+          found
+            .slice(0, 6)
+            .map((item) =>
+              fetchCatalogCard(item.id, language.value, lifetime.signal),
+            ),
         );
         online = resolved.flatMap((result) =>
           result.status === 'fulfilled' ? [result.value] : [],
@@ -291,9 +320,10 @@ export function openPageScanner(
       }
       if (closed || lifetime.signal.aborted) return;
       displayCandidates(pocket, [...online, ...existing]);
-      pocket.status.textContent = online.length + existing.length
-        ? 'Wähle die genaue Ausgabe und bestätige ihre Variante.'
-        : 'Keine passende Ausgabe. Diese Position kann ungeklärt bleiben.';
+      pocket.status.textContent =
+        online.length + existing.length
+          ? 'Wähle die genaue Ausgabe und bestätige ihre Variante.'
+          : 'Keine passende Ausgabe. Diese Position kann ungeklärt bleiben.';
     } catch {
       if (!closed && !lifetime.signal.aborted)
         pocket.status.textContent =
@@ -309,7 +339,11 @@ export function openPageScanner(
       const photo = el('img', 'w-page-scan-pocket-image');
       photo.src = url;
       photo.alt = `Foto von Binderfach ${index + 1}`;
-      const pick = select([['', 'Karte auswählen / prüfen'], ['empty', 'Fach ist leer'], ['skip', 'Nicht erkannt – leer lassen']]);
+      const pick = select([
+        ['', 'Karte auswählen / prüfen'],
+        ['empty', 'Fach ist leer'],
+        ['skip', 'Nicht erkannt – leer lassen'],
+      ]);
       const finish = select([
         ['', 'Druckvariante bestätigen'],
         ...finishes.map((key) => [key, finishLabels[key]] as [string, string]),
@@ -344,7 +378,10 @@ export function openPageScanner(
         'secondary',
         'search',
       );
-      searchButton.setAttribute('aria-label', `Katalogsuche für Fach ${index + 1}`);
+      searchButton.setAttribute(
+        'aria-label',
+        `Katalogsuche für Fach ${index + 1}`,
+      );
       query.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
           event.preventDefault();
@@ -453,11 +490,16 @@ export function openPageScanner(
           item.pages.some((page) => page.sourceFingerprint === fingerprint),
         )
       )
-        throw new Error('Diese Aufnahme wurde bereits importiert. Die vorhandene Binderseite bleibt unverändert.');
-      status.textContent = 'Richte jetzt die vier äußeren Ecken der Binderseite aus.';
+        throw new Error(
+          'Diese Aufnahme wurde bereits importiert. Die vorhandene Binderseite bleibt unverändert.',
+        );
+      status.textContent =
+        'Richte jetzt die vier äußeren Ecken der Binderseite aus.';
       const aligned = await alignPhoto(file, lifetime.signal, 'page');
       if (!aligned || lifetime.signal.aborted || closed) {
-        if (!closed) status.textContent = 'Seitenausrichtung abgebrochen. Kein Bestand wurde verändert.';
+        if (!closed)
+          status.textContent =
+            'Seitenausrichtung abgebrochen. Kein Bestand wurde verändert.';
         current = undefined;
         reportQueue();
         return;

@@ -11,9 +11,7 @@ test('the scanner opens via the central add action without persisting a photo', 
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
-  await page
-    .getByRole('button', { name: 'Ganze Binderseite scannen' })
-    .click();
+  await page.getByRole('button', { name: 'Ganze Binderseite scannen' }).click();
   const dialog = page.getByRole('dialog', { name: 'Binderseiten scannen' });
   await expect(dialog).toBeVisible();
   await expect(
@@ -26,9 +24,7 @@ test('the scanner opens via the central add action without persisting a photo', 
     name: 'Binderseite ausrichten',
   });
   await expect(crop).toBeVisible();
-  await crop
-    .getByRole('button', { name: 'Zurück zum Foto' })
-    .click();
+  await crop.getByRole('button', { name: 'Zurück zum Foto' }).click();
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })
     .click();
@@ -88,6 +84,7 @@ test('a distorted photo is split into nine reviewable positions without changing
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })
     .click();
-  await expect(page.getByRole('heading', { name: 'Deine erste Seite wartet.' }))
-    .toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Deine erste Seite wartet.' }),
+  ).toBeVisible();
 });

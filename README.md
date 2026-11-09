@@ -84,7 +84,6 @@ Kartenabbildungen und Pokémon-Marken gehören den jeweiligen Rechteinhabern. TC
 
 Das Inspirationsarchiv enthält datierte Preisbeobachtungen aus der ursprünglichen Vorlage und Cardmarket, keine Live-Preise und keinen persönlichen Sammlungswert. Der neue Bestandsworkflow berechnet daraus keinen Wert.
 
-
 ## Binderseitenscanner (9-Pocket)
 
 In **Binder → Binderseite scannen** oder **+ Karte → Ganze Binderseite scannen** können mehrere physische 3×3-Binderseiten nacheinander aufgenommen werden. Die vier Seiten-Ecken werden zuerst ausgerichtet, danach entstehen neun lokale JPEG-Ausschnitte. PaddleOCR wird in einem wiederverwendbaren Worker pro Seite einmal geladen; TCGdex liefert optionale Kartenvorschläge, und jede Position kann separat gesucht, übersprungen oder als leer markiert werden. Druckvarianten und alle neun Positionen müssen ausdrücklich bestätigt werden. Erst danach wird die Seite **mit ihren physikalischen Kartenplätzen atomar** gespeichert. Fotos und OCR-Bilddaten werden nicht persistiert oder an Supabase übertragen.

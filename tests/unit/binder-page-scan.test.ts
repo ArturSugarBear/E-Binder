@@ -89,9 +89,7 @@ describe('atomic binder page import', () => {
     expect(second.holdings[0]!.quantity).toBe(3);
     expect(second.binders[0]!.pages).toHaveLength(2);
     const used = second.binders[0]!.pages.flatMap((page) =>
-      page.slots.flatMap((slot) =>
-        slot?.kind === 'owned' ? [slot.copy] : [],
-      ),
+      page.slots.flatMap((slot) => (slot?.kind === 'owned' ? [slot.copy] : [])),
     );
     expect(used).toEqual([1, 2, 3]);
   });

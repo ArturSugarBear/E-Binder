@@ -23,9 +23,14 @@ Pro physischer Seite eine Ground-Truth-Datei anlegen (lokal, **nicht** in Git ei
   "rights": "own photograph; no release",
   "conditions": ["glare", "perspective", "blur", "low-light"],
   "slots": [
-    {"position": 1, "catalogId": "svi-211", "language": "de", "finish": "holo"},
-    {"position": 2, "catalogId": null},
-    {"position": 3, "catalogId": null}
+    {
+      "position": 1,
+      "catalogId": "svi-211",
+      "language": "de",
+      "finish": "holo"
+    },
+    { "position": 2, "catalogId": null },
+    { "position": 3, "catalogId": null }
   ]
 }
 ```

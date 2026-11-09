@@ -23,7 +23,9 @@ export async function alignPhoto(
     await image.decode();
     if (signal.aborted) return;
     return await new Promise((resolve) => {
-      const sheet = modal(mode === 'page' ? 'Binderseite ausrichten' : 'Karte ausrichten');
+      const sheet = modal(
+        mode === 'page' ? 'Binderseite ausrichten' : 'Karte ausrichten',
+      );
       sheet.dialog.classList.add('w-crop-dialog');
       const canvas = el('canvas', 'w-crop-canvas');
       const accent = getComputedStyle(document.documentElement)
@@ -272,14 +274,26 @@ export async function alignPhoto(
                   'Der ausgerichtete Ausschnitt für die Erkennung',
                 );
                 review.replaceChildren(
-                  el('h3', '', mode === 'page' ? 'So wird deine Binderseite gelesen' : 'So wird deine Karte gelesen'),
+                  el(
+                    'h3',
+                    '',
+                    mode === 'page'
+                      ? 'So wird deine Binderseite gelesen'
+                      : 'So wird deine Karte gelesen',
+                  ),
                   message(
                     mode === 'page'
                       ? 'Der Ausschnitt soll genau die komplette 3×3-Seite umfassen, ohne die Buchringe. Prüfe, ob alle neun Karten vollständig sichtbar sind. Starke Reflexionen und unleserliche Nummern erfordern eine neue Aufnahme.'
                       : 'Siehst du nur die gedruckte Karte? Kunststoffrand, Etikett und Hintergrund gehören außerhalb des Ausschnitts. Prüfe besonders Name und Sammlernummer. Wenn sie verschwommen oder von Reflexionen verdeckt sind, hilft eine neue Aufnahme.',
                   ),
                   output,
-                  ...(mode === 'page' ? [] : [el('h4', '', 'Unterer Kartenrand, vergrößert'), left, right]),
+                  ...(mode === 'page'
+                    ? []
+                    : [
+                        el('h4', '', 'Unterer Kartenrand, vergrößert'),
+                        left,
+                        right,
+                      ]),
                   action(
                     'Ecken nachbessern',
                     () => {

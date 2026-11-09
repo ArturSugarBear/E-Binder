@@ -20,8 +20,7 @@ const scope = self as unknown as {
 const report = (status: string, id?: number) =>
   scope.postMessage({ type: 'progress', status, id });
 let prepared:
-  | Promise<{ session: InferenceSession; dictionary: string[] }>
-  | undefined;
+  Promise<{ session: InferenceSession; dictionary: string[] }> | undefined;
 async function modelResources(modelUrl: string, dictionaryUrl: string) {
   if (!prepared) {
     prepared = (async () => {
@@ -58,14 +57,16 @@ async function resource(url: string): Promise<Response> {
 let queue = Promise.resolve();
 scope.onmessage = (event) => {
   const data = event.data;
-  queue = queue.then(() => recognize(data)).catch(() => {
-    scope.postMessage({
-      type: 'error',
-      id: data.id,
-      message:
-        'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Wähle die Karte manuell oder fotografiere sie deutlicher.',
+  queue = queue
+    .then(() => recognize(data))
+    .catch(() => {
+      scope.postMessage({
+        type: 'error',
+        id: data.id,
+        message:
+          'Die Erkennung konnte dieses Foto nicht zuverlässig lesen oder das Modell nicht laden. Wähle die Karte manuell oder fotografiere sie deutlicher.',
+      });
     });
-  });
 };
 async function recognize({
   photo,

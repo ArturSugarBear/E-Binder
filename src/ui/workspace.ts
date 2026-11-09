@@ -221,7 +221,10 @@ export async function startWorkspace(): Promise<void> {
       void import('./page-scan')
         .then(({ openPageScanner }) => openPageScanner(ctx, binderId))
         .catch(() =>
-          ctx.notify('Der Binderseitenscanner konnte nicht geladen werden.', true),
+          ctx.notify(
+            'Der Binderseitenscanner konnte nicht geladen werden.',
+            true,
+          ),
         );
     },
     openHolding: (id) => openHolding(ctx, id),

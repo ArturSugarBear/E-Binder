@@ -118,7 +118,10 @@ export const pageSchema = z
     slots: z.array(slotSchema).length(9),
     assembled: z.boolean().default(false),
     assembledAt: z.string().optional(),
-    sourceFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+    sourceFingerprint: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
   })
   .strict();
 export type PersonalPage = z.infer<typeof pageSchema>;
@@ -657,8 +660,13 @@ export function importScannedPage(
       }
       const card = personalCardSchema.parse(choice.card);
       const variantNote = choice.variantNote.trim();
-      if (!finishes.includes(choice.finish) || (choice.finish === 'other' && !variantNote))
-        throw new Error('Wähle für jede erkannte Karte die korrekte Druckvariante.');
+      if (
+        !finishes.includes(choice.finish) ||
+        (choice.finish === 'other' && !variantNote)
+      )
+        throw new Error(
+          'Wähle für jede erkannte Karte die korrekte Druckvariante.',
+        );
       let holding = next.holdings.find(
         (item) =>
           sameCard(item.card, card) &&
