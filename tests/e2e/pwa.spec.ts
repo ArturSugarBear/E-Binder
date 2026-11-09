@@ -35,19 +35,35 @@ test('manifest and icons are scoped to GitHub Pages', async ({ page }) => {
 test('installed shell and archive can open offline without replacing IndexedDB', async ({
   page,
 }, info) => {
-  test.skip(info.project.name === 'webkit', 'Desktop WebKit does not simulate installed iOS PWAs.');
+  test.skip(
+    info.project.name === 'webkit',
+    'Desktop WebKit does not simulate installed iOS PWAs.',
+  );
   await page.goto('./');
-  await expect(page.locator('#workspace-main')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
   await page.reload();
-  await expect.poll(async () => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await expect
+    .poll(async () => page.evaluate(() => !!navigator.serviceWorker.controller))
+    .toBe(true);
   await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
-  await page.getByRole('dialog').getByLabel('Name deines Binders').fill('Offline-Testbinder');
-  await page.getByRole('dialog').getByRole('button', { name: 'Speichern', exact: true }).click();
-  await expect(page.locator('#workspace-save-status')).toHaveText('Auf diesem Gerät gespeichert');
+  await page
+    .getByRole('dialog')
+    .getByLabel('Name deines Binders')
+    .fill('Offline-Testbinder');
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Speichern', exact: true })
+    .click();
+  await expect(page.locator('#workspace-save-status')).toHaveText(
+    'Auf diesem Gerät gespeichert',
+  );
   await page.context().setOffline(true);
   await page.reload();
   await expect(page.getByText('Offline-Testbinder')).toBeVisible();
@@ -55,7 +71,9 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   await expect(page.locator('.chapter .grid .pocket')).toHaveCount(9);
 });
 
-test('service worker does not target Supabase credentials', async ({ page }) => {
+test('service worker does not target Supabase credentials', async ({
+  page,
+}) => {
   const response = await page.request.get('sw.js');
   expect(response.ok()).toBe(true);
   const script = await response.text();
@@ -68,7 +86,10 @@ test('iPhone browser viewport is contained and install guidance is dismissible',
   page,
 }, info) => {
   await page.goto('./');
-  await expect(page.locator('#workspace-main')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
   const width = await page.evaluate(() => ({
     screen: document.documentElement.clientWidth,
     content: document.documentElement.scrollWidth,

@@ -23,15 +23,16 @@ const colors = {
 };
 
 function rgb(hex) {
-  return [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16));
+  return [1, 3, 5].map((index) =>
+    Number.parseInt(hex.slice(index, index + 2), 16),
+  );
 }
 
 function crc32(bytes) {
   let crc = 0xffffffff;
   for (const byte of bytes) {
     crc ^= byte;
-    for (let j = 0; j < 8; j++)
-      crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    for (let j = 0; j < 8; j++) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
   }
   return (crc ^ 0xffffffff) >>> 0;
 }
@@ -69,8 +70,16 @@ function drawIcon(size, safeScale = 1) {
     const bottom = transform(y2);
     const r = radius * s * factor;
     const [red, green, blue] = rgb(hex);
-    for (let y = Math.max(0, Math.floor(top)); y < Math.min(size, Math.ceil(bottom)); y++) {
-      for (let x = Math.max(0, Math.floor(left)); x < Math.min(size, Math.ceil(right)); x++) {
+    for (
+      let y = Math.max(0, Math.floor(top));
+      y < Math.min(size, Math.ceil(bottom));
+      y++
+    ) {
+      for (
+        let x = Math.max(0, Math.floor(left));
+        x < Math.min(size, Math.ceil(right));
+        x++
+      ) {
         const px = x + 0.5;
         const py = y + 0.5;
         const cx = Math.max(left + r, Math.min(right - r, px));

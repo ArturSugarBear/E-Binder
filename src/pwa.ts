@@ -15,14 +15,17 @@ export function isStandalone(): boolean {
 
 function isIOSSafari(): boolean {
   const ua = navigator.userAgent;
-  return /iPhone|iPad|iPod/.test(ua) &&
+  return (
+    /iPhone|iPad|iPod/.test(ua) &&
     /Safari/.test(ua) &&
-    !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)
+  );
 }
 
 /** Prevent reloading over pending saves, failed writes or edit dialogs. */
 export function isUpdateSafe(): boolean {
-  const state = document.querySelector<HTMLElement>('#workspace-save-status')?.dataset.state;
+  const state = document.querySelector<HTMLElement>('#workspace-save-status')
+    ?.dataset.state;
   if (state === 'saving' || state === 'error') return false;
   if (document.querySelector('dialog[open]')) return false;
   const active = document.activeElement;
@@ -141,15 +144,23 @@ export function initPwa(): void {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     const prompt = event as InstallPrompt;
-    showBanner('install', 'E-Binder auf diesem Gerät als App installieren.', {
-      text: 'Installieren',
-      run: () => {
-        document.querySelector('[data-pwa-banner="install"]')?.remove();
-        void prompt.prompt().then(() => prompt.userChoice).catch(() => {
-          // Installing is optional; keep the normal website functional.
-        });
+    showBanner(
+      'install',
+      'E-Binder auf diesem Gerät als App installieren.',
+      {
+        text: 'Installieren',
+        run: () => {
+          document.querySelector('[data-pwa-banner="install"]')?.remove();
+          void prompt
+            .prompt()
+            .then(() => prompt.userChoice)
+            .catch(() => {
+              // Installing is optional; keep the normal website functional.
+            });
+        },
       },
-    }, true);
+      true,
+    );
   });
   window.addEventListener('appinstalled', () => {
     document.querySelector('[data-pwa-banner="install"]')?.remove();

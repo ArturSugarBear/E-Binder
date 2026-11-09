@@ -30,4 +30,6 @@ for (const icon of manifest.icons) {
 }
 const apple = await stat(root + 'icons/icon-180.png');
 assert.ok(apple.size > 100);
-console.log('PWA validation passed: manifest, both entry points, icons, worker and base paths.');
+console.log(
+  'PWA validation passed: manifest, both entry points, icons, worker and base paths.',
+);

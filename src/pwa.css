@@ -19,7 +19,11 @@
   background: #132331;
   color: #f2f6fa;
   box-shadow: 0 12px 36px rgb(0 0 0 / 0.4);
-  font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font:
+    14px/1.45 -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   overscroll-behavior: contain;
 }
 .pwa-banner p {

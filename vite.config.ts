@@ -27,9 +27,24 @@ export default defineConfig({
         background_color: '#02070a',
         theme_color: '#02070a',
         icons: [
-          { src: base + 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: base + 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: base + 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          {
+            src: base + 'icons/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: base + 'icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: base + 'icons/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
       workbox: {
@@ -41,7 +56,9 @@ export default defineConfig({
         globIgnores: ['**/assets/cards/**', '**/assets/ocr/**', '**/*.map'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: base + 'index.html',
-        navigateFallbackAllowlist: [new RegExp('^' + basePattern + '(?:index\\.html)?$')],
+        navigateFallbackAllowlist: [
+          new RegExp('^' + basePattern + '(?:index\\.html)?$'),
+        ],
         runtimeCaching: [
           {
             urlPattern: new RegExp(basePattern + 'assets/cards/.*\\.webp$'),
@@ -49,16 +66,25 @@ export default defineConfig({
             options: {
               cacheName: 'e-binder-local-card-images',
               cacheableResponse: { statuses: [200] },
-              expiration: { maxEntries: 160, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true },
+              expiration: {
+                maxEntries: 160,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
             },
           },
           {
-            urlPattern: /^https:\/\/assets\.tcgdex\.net\/.*\.(?:webp|png|jpg|jpeg)(?:\?.*)?$/i,
+            urlPattern:
+              /^https:\/\/assets\.tcgdex\.net\/.*\.(?:webp|png|jpg|jpeg)(?:\?.*)?$/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'e-binder-tcgdex-images',
               cacheableResponse: { statuses: [0, 200] },
-              expiration: { maxEntries: 180, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true },
+              expiration: {
+                maxEntries: 180,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
             },
           },
           {
@@ -69,16 +95,27 @@ export default defineConfig({
               cacheName: 'e-binder-public-catalog',
               networkTimeoutSeconds: 5,
               cacheableResponse: { statuses: [200] },
-              expiration: { maxEntries: 120, maxAgeSeconds: 24 * 60 * 60, purgeOnQuotaError: true },
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
             },
           },
           {
-            urlPattern: new RegExp(basePattern + 'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt)$'),
+            urlPattern: new RegExp(
+              basePattern +
+                'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt)$',
+            ),
             handler: 'CacheFirst',
             options: {
               cacheName: 'e-binder-on-demand-ocr',
               cacheableResponse: { statuses: [200] },
-              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 24 * 60 * 60, purgeOnQuotaError: true },
+              expiration: {
+                maxEntries: 2,
+                maxAgeSeconds: 60 * 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
             },
           },
         ],
