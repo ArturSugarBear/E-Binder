@@ -30,6 +30,7 @@ export interface WorkspaceContext {
   render: () => void;
   navigate: (route: string) => void;
   openAdd: (options?: AddOptions) => void;
+  openPageScan: (binderId?: string) => void;
   openHolding: (id: string) => void;
   openBackup: () => void;
   switchMode: (mode: PersonalState['mode']) => Promise<void>;

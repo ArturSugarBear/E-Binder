@@ -1951,3 +1951,83 @@ textarea.w-input,
     pointer-events: none;
   }
 }
+
+
+/* Binder-page capture: nine reviewed positions, still using the app's dark card UI. */
+.w-page-scan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+.w-page-scan-pocket {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  padding: 12px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.w-page-scan-pocket h3 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink);
+}
+.w-page-scan-pocket-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #09121a;
+}
+.w-page-scan-pocket > .w-input,
+.w-page-scan-search > .w-input {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+.w-page-scan-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.w-page-scan-search .w-input {
+  flex: 1 1 120px;
+}
+.w-page-scan-search .w-button {
+  flex: 1 1 auto;
+}
+.w-page-scan-dialog .w-dialog-body {
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .w-page-scan-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .w-page-scan-pocket {
+    grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
+    gap: 7px 12px;
+  }
+  .w-page-scan-pocket h3 {
+    grid-column: 1 / -1;
+  }
+  .w-page-scan-pocket-image {
+    grid-row: span 6;
+    align-self: start;
+  }
+  .w-page-scan-pocket > .w-input,
+  .w-page-scan-pocket > .w-muted,
+  .w-page-scan-search {
+    grid-column: 2;
+  }
+  .w-page-scan-dialog .w-dialog-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    background: var(--paper);
+  }
+}

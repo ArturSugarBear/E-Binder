@@ -83,3 +83,12 @@ Der Online-Katalog ist ein externer Dienst. Fehlende Metadaten bleiben unbekannt
 Kartenabbildungen und Pokémon-Marken gehören den jeweiligen Rechteinhabern. TCGdex und einzelne Bilder der Pokémon TCG API liefern öffentliche Katalogabbildungen. Die Code-Lizenz überträgt keine Rechte an Bildern oder Marken. Schriftlizenzen liegen bei den lokalen Schriftdateien.
 
 Das Inspirationsarchiv enthält datierte Preisbeobachtungen aus der ursprünglichen Vorlage und Cardmarket, keine Live-Preise und keinen persönlichen Sammlungswert. Der neue Bestandsworkflow berechnet daraus keinen Wert.
+
+
+## Binderseitenscanner (9-Pocket)
+
+In **Binder → Binderseite scannen** oder **+ Karte → Ganze Binderseite scannen** können mehrere physische 3×3-Binderseiten nacheinander aufgenommen werden. Die vier Seiten-Ecken werden zuerst ausgerichtet, danach entstehen neun lokale JPEG-Ausschnitte. PaddleOCR wird in einem wiederverwendbaren Worker pro Seite einmal geladen; TCGdex liefert optionale Kartenvorschläge, und jede Position kann separat gesucht, übersprungen oder als leer markiert werden. Druckvarianten und alle neun Positionen müssen ausdrücklich bestätigt werden. Erst danach wird die Seite **mit ihren physikalischen Kartenplätzen atomar** gespeichert. Fotos und OCR-Bilddaten werden nicht persistiert oder an Supabase übertragen.
+
+Gleiche Fotodateien werden über SHA-256 nicht zweimal übernommen. Eine neu fotografierte Aufnahme derselben physischen Seite kann einen anderen Fingerabdruck haben – bitte vor dem Import prüfen. Bereits vorhandene, nicht platzierte Exemplare werden zuerst verwendet; es wird nur dann eine zusätzliche Menge erfasst, wenn kein freies Exemplar vorhanden ist. Noch nicht erkannte Karten können leer gelassen und später ergänzt werden. Bei einer unleserlichen Seite bleibt die manuelle Kartenauswahl möglich.
+
+**Grenzen:** Die 3×3-Geometrie verlangt eine ausgerichtete Seite; automatisch gefundene Ecken, sichere Holo-Unterscheidung, unkontrollierte Perspektiven und vollständig automatische Zuordnung sind nicht zugesichert. Für echte Foto-Qualitätstests eigene oder nachweislich freigegebene Aufnahmen verwenden; keine fremden Verkaufsbilder ins Repository kopieren. Siehe [Scanner-Qualität und Testprotokoll](docs/scanner.md).

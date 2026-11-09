@@ -76,7 +76,12 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
           'Neun Plätze. Deine Karten. Ein Zusammenhang, der dir gefällt.',
         ),
       ),
-      action('Neuer Binder', () => newBinder(ctx), 'secondary', 'plus'),
+      el(
+        'div',
+        'w-action-row',
+        action('Binderseite scannen', () => ctx.openPageScan(), 'primary', 'camera'),
+        action('Neuer Binder', () => newBinder(ctx), 'secondary', 'plus'),
+      ),
     ),
   );
   if (!ctx.state.binders.length) {

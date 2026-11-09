@@ -133,6 +133,15 @@ export function openAddCards(
       takePhoto,
       upload,
       action('Karte manuell eintragen', () => manualForm(), 'text'),
+      action(
+        'Ganze Binderseite scannen',
+        () => {
+          sheet.close();
+          ctx.openPageScan();
+        },
+        'secondary',
+        'binder',
+      ),
     ),
     gallery,
     camera,
