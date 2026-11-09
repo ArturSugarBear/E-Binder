@@ -77,9 +77,10 @@ test('camera photo offers alignment, rotation and recoverable cancellation witho
     .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
     .click();
   await expect(page.locator('.w-capture-queue')).toContainText('1 offen');
+  await expect(page.locator('.w-photo-review img')).toHaveCount(0);
 });
 
-test('confirming a photo selects the next pending original without counting it as owned', async ({
+test('confirming a photo selects the next temporary capture without counting it as owned', async ({
   page,
 }) => {
   await page.goto('./');

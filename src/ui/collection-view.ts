@@ -95,7 +95,7 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
           el(
             'small',
             'w-help',
-            'Dein Bestand wird auf diesem Gerät gespeichert. Eine exportierte Sicherung enthält auch deine erfassten Fotos.',
+            'Gespeichert werden Karten-Metadaten. Fotos dienen nur der Erkennung und werden anschließend verworfen.',
           ),
         ),
         el(

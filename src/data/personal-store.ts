@@ -134,9 +134,8 @@ const photoLine = z
     data: z
       .string()
       .max(32000000)
-      .regex(
-        /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
-      ),
+      .regex(/^[A-Za-z0-9+/]*={0,2}$/)
+      .refine((value) => value.length % 4 === 0, 'Ungültige Base64-Länge'),
   })
   .strict();
 const headerLine = z

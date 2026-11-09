@@ -231,7 +231,7 @@ test('artist shortage, fixed anchor and independent demo survive proposal adopti
   ).toBeVisible();
 });
 
-test('photo capture resumes without ownership, deduplicates originals and restores a full JSONL backup', async ({
+test('scan metadata resumes without ownership and exports no image bytes', async ({
   page,
 }) => {
   await ready(page);
@@ -263,9 +263,9 @@ test('photo capture resumes without ownership, deduplicates originals and restor
   await page
     .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
     .click();
-  await expect(page.locator('.w-photo-review img')).toHaveAttribute(
-    'src',
-    /^blob:/,
+  await expect(page.locator('.w-photo-review img')).toHaveCount(0);
+  await expect(page.locator('.w-photo-review')).toContainText(
+    'Kein Foto gespeichert',
   );
   const buffer = await (async () => {
     await page.keyboard.press('Escape');
@@ -276,11 +276,23 @@ test('photo capture resumes without ownership, deduplicates originals and restor
     .trim()
     .split('\n')
     .map((line) => JSON.parse(line) as { record: string; data?: string });
-  expect(records.filter((line) => line.record === 'photo')).toHaveLength(1);
-  const originalBytes = records.find((line) => line.record === 'photo')!.data!;
-  expect(Buffer.from(originalBytes, 'base64')).toEqual(
-    await readFile(original),
-  );
+  expect(records.filter((line) => line.record === 'photo')).toHaveLength(0);
+  expect(buffer.toString('utf8')).not.toContain('photoId');
+  expect(buffer.toString('utf8')).not.toContain('data:image/');
+  expect(
+    await page.evaluate(async () => {
+      return await new Promise<string[]>((resolve, reject) => {
+        const open = indexedDB.open('e-binder-personal');
+        open.onsuccess = () => {
+          const db = open.result;
+          const names = [...db.objectStoreNames];
+          db.close();
+          resolve(names);
+        };
+        open.onerror = () => reject(open.error);
+      });
+    }),
+  ).toEqual(['states']);
   expect(records.filter((line) => line.record === 'capture')).toHaveLength(1);
   expect(records.filter((line) => line.record === 'holding')).toHaveLength(0);
   await addFirst(page);
@@ -291,7 +303,7 @@ test('photo capture resumes without ownership, deduplicates originals and restor
     buffer,
   });
   await expect(page.locator('.w-import-preview')).toContainText(
-    '0 Ausgaben · 0 Binder · 0 Wünsche · 1 Originalfotos',
+    '0 Ausgaben · 0 Binder · 0 Wünsche',
   );
   await page
     .getByLabel(
@@ -305,13 +317,7 @@ test('photo capture resumes without ownership, deduplicates originals and restor
   await page
     .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
     .click();
-  await expect
-    .poll(() =>
-      page
-        .locator('.w-photo-review img')
-        .evaluate((image) => (image as HTMLImageElement).naturalWidth),
-    )
-    .toBeGreaterThan(0);
+  await expect(page.locator('.w-photo-review img')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.locator('#workspace-undo').click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
@@ -474,7 +480,7 @@ test('legacy chapter links redirect to the preserved inspiration archive', async
   ).toBeVisible();
 });
 
-test('OCR cancellation during initialization keeps the original and leaves inventory unchanged', async ({
+test('OCR cancellation keeps the temporary preview and leaves inventory unchanged', async ({
   page,
 }) => {
   await ready(page);
@@ -519,7 +525,7 @@ test('OCR cancellation during initialization keeps the original and leaves inven
   expect(failures).toEqual([]);
 });
 
-test('local vision model reads a printed identifier while the original remains unconfirmed', async ({
+test('local vision model reads a printed identifier without saving the photo or confirming ownership', async ({
   page,
 }) => {
   await ready(page);

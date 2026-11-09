@@ -10,7 +10,7 @@ import {
   select,
 } from './workspace-dom';
 
-/** Only this temporary, aligned copy goes to OCR; storage keeps the original. */
+/** Only a temporary aligned copy goes to OCR; no photo is persisted. */
 export async function alignPhoto(
   photo: Blob,
   signal: AbortSignal,

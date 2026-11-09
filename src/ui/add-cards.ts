@@ -281,7 +281,7 @@ export function openAddCards(
           !/^image\/(jpeg|png|webp|heic|heif)$/.test(file.type)
         )
           throw new Error(
-            'Bitte nutze JPG, PNG, WebP oder HEIC/HEIF bis 12 MB pro Karte. Bereits aufgenommene Fotos bleiben erhalten.',
+            'Bitte nutze JPG, PNG, WebP oder HEIC/HEIF bis 12 MB pro Karte. Bereits geöffnete Aufnahmen bleiben bis zum Schließen im Arbeitsspeicher.',
           );
         tell(`${file.name} wird für die Erkennung geöffnet …`);
         const digest = await crypto.subtle.digest(

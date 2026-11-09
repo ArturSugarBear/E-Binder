@@ -1,5 +1,7 @@
 # Übergabe: E-Binder
 
+Aktueller Zwischenstand: Die Metadaten-Umstellung ist im Code vollständig integriert. IndexedDB v2 und Exporte speichern keine Bilder; Aufnahme-Bytes existieren nur als temporäre Map im Add-Dialog. `metadataOnlyState` entfernt lokale Fotoverweise vor Persistenz. Supabase-Migration `20261109123051_metadata_only_cloud` angewendet: Storagepolicies deaktiviert, Cloudconstraints gegen Fotoverweise/Inlinebilder, tatsächliche Bildobjekte=0. RLS-/Metadaten-Constraints erneut geprüft. PostgreSQL-TOAST-Kompression=pglz. `npm run check` vor letzten reinen Copy-/Dokumentationsänderungen grün; neue Metadaten-Browsertests unter Chromium/Mobile bereits grün, WebKit läuft. Anschließend check + Masterpush/Actions/Live finalisieren. Die nachfolgenden älteren Detailnotizen können inzwischen erledigte Punkte enthalten.
+
 Stand 9. November 2026. Nutzer verlangt einen sofort remote gesicherten Arbeitsstand und die fertige Version auf `master`/GitHub Pages. Repository: https://github.com/ArturSugarBear/E-Binder. Arbeitskopie `/workspace/E-Binder`. GitHub CLI: `gh-e-binder`, bestehende Autorisierung verwenden, keine Login-Schleifen/Force-Pushes.
 
 ## Veröffentlicht / gesichert

@@ -10,7 +10,7 @@ select public.save_workspace('{"schemaVersion":1,"mode":"personal","holdings":[]
 insert into public.binders(id,user_id,client_id,title,is_public) values('842d35c3-35fd-41df-9940-733ecb861bb1','842d35c3-35fd-41df-9940-733ecb861aa1','test-binder','Privat',false);
 select set_config('request.jwt.claim.sub','842d35c3-35fd-41df-9940-733ecb861aa2',true);
 do $$ begin
-  if exists(select 1 from public.user_workspaces) or exists(select 1 from public.binders) then raise exception 'Foreign private rows were visible'; end if;
+  if exists(select 1 from public.user_workspaces where user_id='842d35c3-35fd-41df-9940-733ecb861aa1') or exists(select 1 from public.binders where id='842d35c3-35fd-41df-9940-733ecb861bb1') then raise exception 'Foreign private rows were visible'; end if;
   begin
     insert into public.user_workspaces(user_id,state) values('842d35c3-35fd-41df-9940-733ecb861aa1','{"mode":"personal"}');
     raise exception 'Foreign insert was allowed';
@@ -36,5 +36,15 @@ do $$ begin
     perform public.save_workspace('{"schemaVersion":1,"mode":"personal","holdings":[],"binders":[]}',0);
     raise exception 'Stale save allowed';
   exception when raise_exception then if sqlerrm <> 'WORKSPACE_CONFLICT' then raise; end if; end;
+end $$;
+do $$ begin
+  begin
+    perform public.save_workspace('{"schemaVersion":1,"mode":"personal","holdings":[],"binders":[],"photoId":"not-permitted"}',1);
+    raise exception 'Photo reference was accepted';
+  exception when check_violation then null; end;
+  begin
+    perform public.save_workspace('{"schemaVersion":1,"mode":"personal","holdings":[],"binders":[],"notes":"data:image/png;base64,QUFB"}',1);
+    raise exception 'Inline image was accepted';
+  exception when check_violation then null; end;
 end $$;
 rollback;

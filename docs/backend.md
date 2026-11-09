@@ -13,11 +13,13 @@
 
 `profiles`, `binders` und `binder_cards` folgen dem Briefing und haben RLS. Öffentliche Profile enthalten nur Nutzername, optionale Avataradresse und Erstellungsdatum. Binder sind öffentlich lesbar, wenn ihre Freigabe gesetzt ist; schreiben darf ausschließlich ihr Eigentümer. Karten prüfen die Elternzuordnung. Slot-Eindeutigkeit, Rastergrenzen und Zeitstempel werden serverseitig geprüft.
 
-`user_workspaces` enthält zusätzlich den privaten vollständigen Zustand, damit bestätigte Mengen, Varianten, Wünsche, Reservierungen und offene Fotoerfassungen beim Gerätewechsel erhalten bleiben. `save_workspace` prüft die erwartete Serverversion und aktualisiert diesen Zustand zusammen mit den relationalen Binderansichten in einer Transaktion. Der Funktionsaufruf läuft als Benutzer unter RLS, ohne privilegierte Umgehung. Layouts erzeugen keinen Besitz.
+`user_workspaces` enthält zusätzlich den privaten vollständigen Zustand, damit bestätigte Mengen, Varianten, Wünsche, Reservierungen und offene Erkennungsergebnisse beim Gerätewechsel erhalten bleiben. `save_workspace` prüft die erwartete Serverversion und aktualisiert diesen Zustand zusammen mit den relationalen Binderansichten in einer Transaktion. Der Funktionsaufruf läuft als Benutzer unter RLS, ohne privilegierte Umgehung. Layouts erzeugen keinen Besitz.
 
 Die Schema-Vorgabe hat `binders.is_public = true` als SQL-Default. Der App-Import übergibt ausdrücklich `false`, bis der Nutzer einen Binder freigibt; bestehende lokale Binder werden durch die Anmeldung nicht pauschal veröffentlicht.
 
-Originale eigener Fotos liegen im privaten Bucket `originals`, jeweils unter der Konto-ID. Nur der Eigentümer darf sie lesen, schreiben oder ersetzen. Offizielle Kartenbilder bleiben URLs der externen Quelle. Maximal 12 MB je Foto, 10 MB privater JSON-Zustand und die normalen Projektquoten des Free Tiers; bei fehlgeschlagenem Cloudspeichern bleibt der Stand lokal und wird nicht als erfolgreich synchronisiert bezeichnet. Die App führt keine automatische Bildkopie des gesamten Katalogs durch.
+Supabase speichert ausschließlich Textmetadaten. Es werden keine Fotos, Bilddateien oder Base64-Kartenbilder hochgeladen. Der leere frühere `originals`-Bucket ist ohne Benutzer-Policies deaktiviert; es liegen null Bilder darin. Datenbank-Constraints verbieten Fotoverweise und Inline-Image-Daten. Offizielle Motive werden direkt von externen Katalog-URLs dargestellt. Pro privatem JSON-Zustand gelten 10 MB und die normalen Projektquoten. PostgreSQL komprimiert größere JSONB-Werte automatisch über TOAST; im Projekt ist `pglz` konfiguriert. JSONL ist das portable Text-Exportformat, keine separate Binärbilddatenbank.
+
+Aufnahmen existieren nur vorübergehend im geöffneten Erkennungsdialog und werden bei Zuordnung/Schließen freigegeben. IndexedDB v2 enthält nur Zustandsmetadaten und entfernt den alten Foto-Objektspeicher beim Upgrade. Exporte enthalten keine Foto-Records oder lokalen Fotoverweise. Alte Backups können als Metadaten übernommen werden; enthaltene Bildbytes werden ohne Decodierung verworfen. Ein erneuter Scan nach dem Schließen verlangt eine neue Aufnahme, nicht die Wiederherstellung eines alten Fotos.
 
 IndexedDB hält getrennte Kontencaches. Nach Änderungen wird zuerst lokal gespeichert. Nicht synchronisierte Änderungen bleiben exportierbar. Unterschiedliche Serverversionen erzeugen einen sichtbaren Konflikt; ein fremder neuer Stand wird nicht still überschrieben. „Cloudstand laden“ verlangt eine ausdrückliche Auswahl zum Ersetzen der lokalen Kontoänderungen. Es gibt noch kein automatisches Zusammenführen konkurrierender Bearbeitungen. Ein Kontowechsel leert die vorherige Ansicht und startet den Arbeitsbereich neu.
 
@@ -32,10 +34,15 @@ Ohne echte E-Mail gibt es keinen automatischen Mail-Passwortreset. Passwortände
 
 ## Tatsächlich ausgeführte Prüfungen
 
-- Zwei über die bereitgestellte Funktion angelegte Testkonten: Anmeldung, privates Speichern, Unsichtbarkeit fremder Bestände, blockierte Fremdänderung und Eigentümerwechsel, öffentliche Projektion ohne Originalfoto/Privatnotiz, Widerruf, blockierter veralteter Speicherstand und privater Storagezugriff. Ergebnis: bestanden. Diese beiden Fixtures und ihr Testfoto wurden anschließend entfernt.
+- Zwei über die bereitgestellte Funktion angelegte Testkonten: Anmeldung, privates Speichern, Unsichtbarkeit fremder Bestände, blockierte Fremdänderung und Eigentümerwechsel, öffentliche Projektion ohne Originalfoto/Privatnotiz, Widerruf, blockierter veralteter Speicherstand und privater Storagezugriff in der früheren Foto-Sync-Version. Ergebnis: bestanden. Dieser Bildspeicher wurde anschließend auf Nutzerwunsch deaktiviert. Diese beiden Fixtures und ihr Testfoto wurden anschließend entfernt.
 - Durch die gebaute Oberfläche: Registrierung, Karte bestätigen, Binder belegen/freigeben, anonymer Aufruf des Links und derselbe Bestand in einem zweiten frischen Browser. Ergebnis: bestanden. Kein Test mit echten Nutzerdaten.
 - `supabase/tests/isolation.sql`: wiederholbare RLS- und Konfliktprüfung in einer zurückgerollten Transaktion, bestanden.
-- Supabase Security Advisor nach den Migrationen: keine Meldungen.
+- Metadaten-Umstellung: Datenbankprüfung lehnt Fotoverweise/Inline-Bilddaten ab, RLS-/Konflikttest erneut bestanden. Bildobjekte im Bucket: 0.
+- Supabase Security Advisor nach den ersten Migrationen: keine Meldungen.
 - `scripts/smoke-cloud.mjs` ist ein ausdrücklich gestarteter Integrationstest gegen ein echtes Projekt; er erzeugt einen temporären Testaccount. Er läuft nicht automatisch in CI. Sitzungsdateien dürfen nur außerhalb des öffentlichen Repositorys gespeichert werden; nur die dabei erzeugten Fixturekonten anschließend administrativ entfernen.
 
 Nicht belegt: eine Nutzungsstudie, Passwort-Recovery durch Endnutzer, automatisches Konflikt-Merging oder Verfügbarkeit bei ausgeschöpften Projektquoten. Die Kartenerkennung bleibt ein separater, lokal ausgeführter und noch nicht mit den Originalfotos des Inhabers validierter Ablauf.
+
+## Kompakte visuelle Merkmale als nächster Versuch
+
+Ein künftiger gemeinsamer Index könnte Anbieter-ID, Set, Nummer, Sprache, Illustrator und versionierte visuelle Hashes/Vektoren als reine Metadaten enthalten. Ein solches Merkmal ist keine eindeutige Ausgabe-ID: Nachdrucke können dasselbe Motiv haben, und Druckvarianten können visuell ähnlich sein. Automatische Lokalisierung und Merkmalsabgleich müssen mit echten Fehlversuch-Fotos sowie unbekannten Ausgaben geprüft werden, bevor ein Erkennungsindex behauptet wird. Aktuell ist dieser visuelle Index **nicht implementiert**; Bilder werden dafür nicht vorsorglich in Supabase abgelegt.
