@@ -247,7 +247,13 @@ test('changing catalogue language clears incompatible filters and keeps Japanese
   await expect(main.locator('.w-set-choice')).toHaveCount(1, {
     timeout: 15_000,
   });
-  await main.getByRole('button', { name: /ロケット団/ }).click();
+  const selectedSet = main.getByRole('button', { name: /ロケット団/ });
+  // The fixed iPhone tab bar covers the viewport bottom: scroll the chosen
+  // set fully above it, as a touch user would, before tapping.
+  await selectedSet.evaluate((element) =>
+    element.scrollIntoView({ block: 'center' }),
+  );
+  await selectedSet.click();
   await expect(main.locator('.w-search-results button')).toHaveCount(24, {
     timeout: 15_000,
   });

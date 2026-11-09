@@ -1,6 +1,9 @@
 import { mountBinder } from './app';
 import { loadCollection } from './data/load-collection';
 import { query } from './ui/dom';
+import { initPwa } from './pwa';
+
+initPwa();
 
 const main = query('main');
 const status = query('#load-status');

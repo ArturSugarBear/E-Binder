@@ -423,7 +423,12 @@ export async function startWorkspace(): Promise<void> {
   ))
     link.addEventListener('click', (event) => {
       event.preventDefault();
-      ctx.navigate(link.dataset.workspaceRoute!);
+      const route = link.dataset.workspaceRoute!;
+      if (location.hash.slice(1).split(/[/?]/)[0] === route) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+      ctx.navigate(route);
     });
   document.querySelector('.skip-link')?.addEventListener('click', (event) => {
     event.preventDefault();
@@ -433,6 +438,12 @@ export async function startWorkspace(): Promise<void> {
   document
     .querySelector('#workspace-add')!
     .addEventListener('click', () => ctx.openAdd());
+  document
+    .querySelector('#workspace-mobile-add')!
+    .addEventListener('click', () => ctx.openAdd());
+  document
+    .querySelector('#workspace-mobile-account')!
+    .addEventListener('click', () => accountButton.click());
   document
     .querySelector('#workspace-backup')!
     .addEventListener('click', ctx.openBackup);

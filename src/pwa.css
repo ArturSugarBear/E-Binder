@@ -1,0 +1,48 @@
+/* PWA notices use E-Binder's existing Midnight/Cyan palette. */
+.pwa-banner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 540px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  max-width: 540px;
+  margin: 14px auto;
+  padding: 14px 16px;
+  border: 1px solid #38546a;
+  border-radius: 12px;
+  background: #132331;
+  color: #f2f6fa;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.4);
+  font:
+    14px/1.45 -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+.pwa-banner p {
+  flex: 1 1 230px;
+  min-width: 0;
+  margin: 0;
+}
+.pwa-banner button {
+  min-height: 44px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.pwa-banner-primary {
+  padding: 0 14px;
+  background: #6ad0e0;
+  color: #02070a;
+  font-weight: 600;
+}
+.pwa-banner-close {
+  padding: 0 8px;
+  color: #b6c5d1;
+}
+.pwa-banner :focus-visible {
+  outline: 2px solid #6ad0e0;
+  outline-offset: 2px;
+}

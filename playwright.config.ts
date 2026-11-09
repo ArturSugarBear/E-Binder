@@ -19,6 +19,9 @@ export default defineConfig({
     baseURL: externalURL ?? 'http://127.0.0.1:4173/E-Binder/',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // API-mocking tests must not be intercepted by the production service worker.
+    // pwa.spec.ts explicitly enables SWs to verify real offline behavior.
+    serviceWorkers: 'block',
   },
   projects: [
     {
