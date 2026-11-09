@@ -92,7 +92,11 @@ try {
       }
     }
     await page
-      .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
+      .getByRole('button', { name: 'Ausschnitt prüfen', exact: true })
+      .click();
+    await page
+      .getByRole('dialog', { name: 'Karte ausrichten', exact: true })
+      .getByRole('button', { name: 'Texterkennung starten', exact: true })
       .click();
     await page.waitForFunction(
       () =>

@@ -32,10 +32,27 @@ async function catalogue(page: Page): Promise<string[]> {
   await page.route('https://api.tcgdex.net/**', async (route) => {
     const url = new URL(route.request().url());
     requests.push(url.toString());
-    const lang = url.pathname.split('/')[2];
-    const path = url.pathname.split('/').slice(3).join('/');
+    const graphql = url.pathname === '/v2/graphql';
+    const lang = graphql
+      ? route.request().postDataJSON().variables.lang
+      : url.pathname.split('/')[2];
+    const path = graphql
+      ? 'graphql'
+      : url.pathname.split('/').slice(3).join('/');
     let json: unknown;
-    if (path === 'sets')
+    if (graphql)
+      json = {
+        data: {
+          set: { ...set, cards: resumes.map(({ id }) => ({ id })) },
+          cards: resumes.map((card) => ({
+            ...card,
+            rarity: 'Häufig',
+            illustrator: 'GIDORA',
+            set: { id: set.id },
+          })),
+        },
+      };
+    else if (path === 'sets')
       json = [
         { ...set, name: lang === 'en' ? 'Destined Rivals' : set.name },
         {

@@ -2,6 +2,16 @@
 
 Stand: 9. November 2026. Repository `/workspace/E-Binder`, GitHub CLI `gh-e-binder` ist autorisiert. Niemals Tokens ausgeben oder Force-Push verwenden. Nutzer wünscht geprüfte fertige Änderungen auf **master und GitHub Pages**, zusätzlich einen aktuellen Arbeitsstand auf `codex/workspace-update`. ChatGPT-Nutzungskontingent kann hier nicht ausgelesen werden; keine Zahl erfinden.
 
+## Laufende Ergänzung: Setfilter und Foto-Prüfung
+
+Basis: `9b09f88` wurde erfolgreich veröffentlicht (Publish `42625570071`, 58 Unit- und 148 Browserprüfungen). Die folgende neue Ergänzung ist bei Erstellung dieser Notiz noch nicht auf master veröffentlicht:
+
+- `catalogSetFacets` holt pro Set/Sprache Seltenheiten, Illustratoren und Beispielkarten in **einem text-only GraphQL-POST**. Vollständigkeit wird gegen die tatsächlichen Karten-IDs des Sets geprüft; keine Filter aus der ersten Trefferseite oder aus einem anderen Set. Kein neuer Dienst, kein Supabase-Storage und keine Bildbytes. CORS für den statischen Pages-Client tatsächlich geprüft.
+- `catalog-browser.ts` beschränkt beide Filter auf das Set, setzt nachweislich unpassende Werte beim Wechsel mit Erklärung zurück, behandelt Laden/Fehler/Wiederholen und abgebrochene Requests. `rarity-guide.ts` zeigt reale Beispielkarten und kurze Erklärungen einschließlich deutscher Kategorienamen.
+- Nach dem Ausrichten eines Fotos folgt jetzt eine temporäre Vorschau des tatsächlich für OCR verwendeten Ausschnitts mit zwei vergrößerten unteren Rändern. „Texterkennung starten“ beginnt erst danach. „Ecken nachbessern“ und Abbruch verwerfen die vorbereitete Kopie; keine Bildpersistenz ergänzt. Bei erfolgloser Erkennung wird die Fotoaktion wieder in den sichtbaren Fokus gebracht.
+- `npm run check` besteht mit **60 Unit-Tests**. 45 gezielte Browserprüfungen laufen/lagen unter `/workspace/scratch/set-filters-browser.log`; vor master-Push Ergebnis kontrollieren. Echtdaten-Smoketests: `/workspace/scratch/set-facets-smoke.log` und `/workspace/scratch/feelinara-recognition-smoke.log`. Danach letzte Fehler beheben, master/Arbeitszweig pushen, CI und Live prüfen.
+- Konkreter Diagnosekandidat: TCGdex `30th-153`, Feelinara-ex, „30 Jahre“, `153/128`, „Selten, besondere Illustration“, You Iribi. Das öffentliche Katalogbild liegt nur außerhalb Repo unter `/workspace/scratch/feelinara-30th-153.webp`. Ein OCR-Test damit ist ein Entwicklungstest, **kein** Beleg für das fotografierte Exemplar. Das ursprüngliche fehlgeschlagene Foto fehlt weiterhin; vorliegend ist nur eine verkleinerte Vorschau im Browser-Screenshot. Keine perfekte Erkennung behaupten, keine Kartennummer aus dem Screenshot erraten.
+
 ## Veröffentlicht vor dieser Änderung
 
 `caee3ae` auf master und Arbeitszweig. Publish `42618435408` erfolgreich, 56 Unit-Tests und 133 Browserprüfungen bestanden, zwei erwartete Skips. Echter Konto-/Wiederlade-/anonymer Freigabetest auf der ausgelieferten Seite bestanden. Temporäre Testkonten abgemeldet und gelöscht; frühere private Fixturedateien nicht wiederverwenden.

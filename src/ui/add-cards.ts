@@ -186,7 +186,9 @@ export function openAddCards(
         shot.status === 'confirmed'
           ? 'Dieses Foto wurde bereits übernommen.'
           : temporary
-            ? 'Vergleiche die Aufnahme mit der Ausgabe. Das Foto wird beim Schließen verworfen.'
+            ? shot.text && !shot.candidates.length
+              ? 'Kein verlässlicher Treffer. Richte die Ecken auf die gedruckte Karte aus und prüfe die vergrößerte Sammlernummer. Das Foto bleibt nur bis zum Schließen geöffnet.'
+              : 'Vergleiche die Aufnahme mit der Ausgabe. Das Foto wird beim Schließen verworfen.'
             : 'Nur das Erkennungsergebnis wurde gespeichert. Prüfe die Ausgabe oder fotografiere die Karte erneut.',
       ),
     );
@@ -443,6 +445,12 @@ export function openAddCards(
       showCapture();
       renderChoices(candidates);
       if (candidates.length) results.scrollIntoView({ block: 'start' });
+      else {
+        photoArea.scrollIntoView({ block: 'start' });
+        photoArea
+          .querySelector<HTMLButtonElement>('button')
+          ?.focus({ preventScroll: true });
+      }
       tell(
         candidates.length
           ? `Erkennungsvorschläge, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Online-Abgleich war nicht erreichbar; diese Vorschläge stammen aus dem lokalen Katalog.' : ''}`

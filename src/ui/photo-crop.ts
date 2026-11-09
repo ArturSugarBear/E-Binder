@@ -59,6 +59,11 @@ export async function alignPhoto(
       let points: Quad;
       let dragging = -1;
       let result: Blob | undefined;
+      let prepared: Blob | undefined;
+      let revision = 0;
+      const review = el('section', 'w-crop-review');
+      review.hidden = true;
+      review.tabIndex = -1;
       const source = el('canvas');
       function draw(): void {
         context.drawImage(source, 0, 0, canvas.width, canvas.height);
@@ -100,6 +105,15 @@ export async function alignPhoto(
         y.value = String(p.y * 1000);
         draw();
       }
+      function invalidate(): void {
+        revision++;
+        prepared = undefined;
+        review.hidden = true;
+        start.hidden = true;
+        editor.hidden = false;
+        use.hidden = false;
+        use.disabled = false;
+      }
       function reset(): void {
         const rotation = Number(orientation.value);
         const width = rotation % 2 ? image.naturalHeight : image.naturalWidth;
@@ -125,6 +139,7 @@ export async function alignPhoto(
           { x: 1, y: 1 },
           { x: 0, y: 1 },
         ];
+        invalidate();
         controls();
       }
       canvas.setAttribute(
@@ -152,6 +167,7 @@ export async function alignPhoto(
         }
         if (dragging < 0) return;
         points[dragging] = p;
+        invalidate();
         controls();
       }
       canvas.addEventListener('pointerdown', pointer);
@@ -165,6 +181,7 @@ export async function alignPhoto(
       corner.addEventListener('change', controls);
       for (const slider of [x, y])
         slider.addEventListener('input', () => {
+          invalidate();
           points[Number(corner.value)] = {
             x: Number(x.value) / 1000,
             y: Number(y.value) / 1000,
@@ -173,7 +190,7 @@ export async function alignPhoto(
         });
       orientation.addEventListener('change', reset);
       const use = action(
-        'Ausschnitt erkennen',
+        'Ausschnitt prüfen',
         () => {
           error.hidden = true;
           try {
@@ -220,10 +237,62 @@ export async function alignPhoto(
               }
             out.putImageData(aligned, 0, 0);
             use.disabled = true;
+            const version = revision;
             output.toBlob((blob) => {
+              if (version !== revision || !sheet.dialog.open || signal.aborted)
+                return;
               if (blob) {
-                result = blob;
-                sheet.close();
+                prepared = blob;
+                const left = el('canvas', 'w-crop-footer-preview');
+                const right = el('canvas', 'w-crop-footer-preview');
+                for (const strip of [left, right]) {
+                  strip.width = 378;
+                  strip.height = 132;
+                }
+                left.setAttribute(
+                  'aria-label',
+                  'Vergrößerter unterer Kartenrand links',
+                );
+                right.setAttribute(
+                  'aria-label',
+                  'Vergrößerter unterer Kartenrand rechts',
+                );
+                left
+                  .getContext('2d')!
+                  .drawImage(output, 0, 748, 378, 132, 0, 0, 378, 132);
+                right
+                  .getContext('2d')!
+                  .drawImage(output, 252, 748, 378, 132, 0, 0, 378, 132);
+                output.className = 'w-crop-card-preview';
+                output.setAttribute(
+                  'aria-label',
+                  'Der ausgerichtete Ausschnitt für die Erkennung',
+                );
+                review.replaceChildren(
+                  el('h3', '', 'So wird deine Karte gelesen'),
+                  message(
+                    'Siehst du nur die gedruckte Karte? Kunststoffrand, Etikett und Hintergrund gehören außerhalb des Ausschnitts. Prüfe besonders Name und Sammlernummer. Wenn sie verschwommen oder von Reflexionen verdeckt sind, hilft eine neue Aufnahme.',
+                  ),
+                  output,
+                  el('h4', '', 'Unterer Kartenrand, vergrößert'),
+                  left,
+                  right,
+                  action(
+                    'Ecken nachbessern',
+                    () => {
+                      invalidate();
+                      canvas.scrollIntoView({ block: 'center' });
+                      corner.focus({ preventScroll: true });
+                    },
+                    'secondary',
+                  ),
+                );
+                editor.hidden = true;
+                use.hidden = true;
+                start.hidden = false;
+                review.hidden = false;
+                review.focus({ preventScroll: true });
+                review.scrollIntoView({ block: 'start' });
               } else {
                 error.textContent =
                   'Der Ausschnitt konnte nicht erstellt werden.';
@@ -238,9 +307,21 @@ export async function alignPhoto(
         },
         'primary',
       );
-      sheet.body.append(
+      const start = action(
+        'Texterkennung starten',
+        () => {
+          if (!prepared || signal.aborted) return;
+          result = prepared;
+          sheet.close();
+        },
+        'primary',
+      );
+      start.hidden = true;
+      const editor = el(
+        'div',
+        'w-crop-editor',
         message(
-          'Drehe die Karte aufrecht. Ziehe die vier nummerierten Punkte auf ihre Ecken. Der untere Kartenrand muss vollständig im Rahmen liegen.',
+          'Drehe die Karte aufrecht. Ziehe die vier nummerierten Punkte genau auf die Ecken der gedruckten Karte – nicht auf die Schutzhülle. Name und unterer Kartenrand müssen vollständig innerhalb der Punkte liegen.',
         ),
         field('Ausrichtung', orientation),
         canvas,
@@ -249,9 +330,11 @@ export async function alignPhoto(
         field('Position senkrecht', y),
         error,
       );
+      sheet.body.append(editor, review);
       sheet.footer.append(
         action('Zurück zum Foto', sheet.close, 'secondary'),
         use,
+        start,
       );
       const abort = () => sheet.close();
       signal.addEventListener('abort', abort, { once: true });

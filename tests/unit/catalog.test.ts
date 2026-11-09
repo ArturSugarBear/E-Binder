@@ -298,3 +298,91 @@ it('rejects catalogue path separators while allowing literal plus signs in provi
     'Ungültiges Set',
   );
 });
+
+it('loads complete set-scoped rarity and illustrator metadata in one request, without global filter pollution', async () => {
+  vi.resetModules();
+  const { catalogSetFacets } = await import('../../src/data/card-catalog');
+  const cards = Array.from({ length: 25 }, (_, index) => ({
+    id: `me01-${index + 1}`,
+    localId: String(index + 1),
+    name: `Karte ${index + 1}`,
+    image: null,
+    rarity: index === 24 ? 'Special illustration rare' : 'Common',
+    illustrator: index === 24 ? 'Artist B' : 'Artist A',
+    set: { id: 'me01' },
+  }));
+  const fetcher = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        data: {
+          set: {
+            id: 'me01',
+            name: 'Mega Evolution',
+            cardCount: { official: 132 },
+            cards: cards.map(({ id }) => ({ id })),
+          },
+          cards,
+        },
+      }),
+    ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const result = await catalogSetFacets('me01', 'en');
+  expect(result.cards).toHaveLength(25);
+  expect(result.cards.at(-1)).toMatchObject({
+    rarity: 'Special illustration rare',
+    artist: 'Artist B',
+    language: 'en',
+    number: '25/132',
+  });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(fetcher.mock.calls[0]![1].body).variables).toEqual({
+    set: 'me01',
+    prefix: 'like:me01-*',
+    lang: 'en',
+  });
+  await catalogSetFacets('me01', 'en');
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it('rejects partial, mixed-set and GraphQL error responses instead of presenting incomplete rarity choices', async () => {
+  vi.resetModules();
+  const { catalogSetFacets } = await import('../../src/data/card-catalog');
+  const card = {
+    id: 'facets-1',
+    localId: '1',
+    name: 'Test',
+    image: null,
+    rarity: 'Rare',
+    illustrator: null,
+    set: { id: 'facets' },
+  };
+  const data = {
+    set: {
+      id: 'facets',
+      name: 'Test',
+      cardCount: { official: 2 },
+      cards: [{ id: 'facets-1' }, { id: 'facets-2' }],
+    },
+    cards: [card],
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ data })))
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          data: { ...data, cards: [{ ...card, set: { id: 'other' } }] },
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ data, errors: [{ message: 'Partial failure' }] }),
+      ),
+    );
+  vi.stubGlobal('fetch', fetcher);
+  for (let i = 0; i < 3; i++)
+    await expect(catalogSetFacets('facets', 'de')).rejects.toThrow(/Filter/);
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});

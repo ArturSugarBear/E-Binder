@@ -505,7 +505,11 @@ test('OCR cancellation keeps the temporary preview and leaves inventory unchange
     .getByRole('button', { name: 'Foto ausrichten und erkennen', exact: true })
     .click();
   await page
-    .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
+    .getByRole('button', { name: 'Ausschnitt prüfen', exact: true })
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Karte ausrichten', exact: true })
+    .getByRole('button', { name: 'Texterkennung starten', exact: true })
     .click();
   await expect(page.locator('.w-form-notices')).toContainText(
     'Erkennungsmodell wird geladen',
@@ -561,7 +565,11 @@ test('local vision model reads a printed identifier without saving the photo or 
     .getByRole('button', { name: 'Foto ausrichten und erkennen', exact: true })
     .click();
   await page
-    .getByRole('button', { name: 'Ausschnitt erkennen', exact: true })
+    .getByRole('button', { name: 'Ausschnitt prüfen', exact: true })
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Karte ausrichten', exact: true })
+    .getByRole('button', { name: 'Texterkennung starten', exact: true })
     .click();
   await expect(page.locator('.w-form-notices')).toContainText(
     'Erkennungsvorschläge',

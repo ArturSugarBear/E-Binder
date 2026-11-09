@@ -2,6 +2,7 @@ import {
   catalogEntry,
   catalogResumeCard,
   catalogSetCards,
+  catalogSetFacets,
   catalogSets,
   catalogSeries,
   catalogSeriesSets,
@@ -28,6 +29,7 @@ import {
   select,
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
+import { createRarityGuide } from './rarity-guide';
 import '../catalog.css';
 
 export interface CatalogBrowserState {
@@ -110,6 +112,19 @@ export function createCatalogBrowser(options: Options) {
     field('Katalog sortieren', order),
   );
   const selectedSet = el('div', 'w-selected-set');
+  const scopeStatus = el('div', 'w-set-filter-status');
+  scopeStatus.setAttribute('aria-live', 'polite');
+  const rarityGuide = createRarityGuide(ctx, (card) => {
+    const signal = active ?? lifetime.signal;
+    tell('Genaue Ausgabe wird geladen …');
+    void catalogEntry(card.sourceId, card.language, signal)
+      .then((detail) => {
+        if (!closed && !signal.aborted) options.onChoose(detail.card);
+      })
+      .catch((error) => {
+        if (!closed && !signal.aborted) tell(errorText(error), true);
+      });
+  });
   const pager = el('div', 'w-catalog-pager');
   const priceNotice = message(
     'Preise sind Cardmarket-Katalogtrends in EUR mit Datenstand, keine Bewertung deiner Sprach-, Zustands- oder Druckvariante. Fehlende Preise stehen am Ende.',
@@ -121,6 +136,8 @@ export function createCatalogBrowser(options: Options) {
     browse,
     controls,
     selectedSet,
+    scopeStatus,
+    rarityGuide.element,
     priceNotice,
   );
   let page = initial.page ?? 1;
@@ -137,6 +154,10 @@ export function createCatalogBrowser(options: Options) {
   const lifetime = new AbortController();
   const pricing = new Map<string, CatalogEntry[]>();
   const visibleCards = new Map<string, PersonalCard>();
+  let globalArtists: string[] = [];
+  let globalRarities: string[] = [];
+  let scopeKey = '';
+  let setFacets: Awaited<ReturnType<typeof catalogSetFacets>> | undefined;
   function state(): CatalogBrowserState {
     return {
       setId: set.value,
@@ -217,6 +238,11 @@ export function createCatalogBrowser(options: Options) {
         'Setfilter entfernen',
         () => {
           set.value = '';
+          scopeKey = '';
+          setFacets = undefined;
+          rarityGuide.update(undefined, '');
+          applyFilterChoices(globalRarities, globalArtists);
+          scopeStatus.replaceChildren();
           browse.open = true;
           updateSet();
           options.onSearch();
@@ -357,6 +383,7 @@ export function createCatalogBrowser(options: Options) {
         updateSet();
       }
       if (artistsResult!.status === 'fulfilled') {
+        globalArtists = artistsResult!.value as string[];
         suggestions.replaceChildren(
           ...(artistsResult!.value as string[]).map((name) => {
             const option = el('option');
@@ -366,6 +393,7 @@ export function createCatalogBrowser(options: Options) {
         );
       }
       if (raritiesResult!.status === 'fulfilled') {
+        globalRarities = raritiesResult!.value as string[];
         const selected = desiredRarity;
         rarity.replaceChildren(el('option', '', 'Alle Seltenheiten'));
         rarity.options[0]!.value = '';
@@ -414,6 +442,97 @@ export function createCatalogBrowser(options: Options) {
       );
     })();
     return metadata;
+  }
+  function applyFilterChoices(rarities: string[], artists: string[]) {
+    const chosen = rarity.value;
+    rarity.replaceChildren(el('option', '', 'Alle Seltenheiten'));
+    rarity.options[0]!.value = '';
+    for (const name of rarities) {
+      const option = el('option', '', name);
+      option.value = name;
+      rarity.append(option);
+    }
+    rarity.value = rarities.includes(chosen) ? chosen : '';
+    suggestions.replaceChildren(
+      ...artists.map((name) => {
+        const option = el('option');
+        option.value = name;
+        return option;
+      }),
+    );
+    rarity.disabled = false;
+    artist.disabled = false;
+  }
+  async function syncSetFilters(signal: AbortSignal): Promise<void> {
+    const id = set.value;
+    const lang = language.value;
+    const key = `${lang}:${id}`;
+    if (scopeKey === key) return;
+    scopeKey = '';
+    setFacets = undefined;
+    rarityGuide.update(undefined, '');
+    if (!id) {
+      applyFilterChoices(globalRarities, globalArtists);
+      scopeKey = key;
+      scopeStatus.replaceChildren();
+      return;
+    }
+    rarity.disabled = true;
+    artist.disabled = true;
+    scopeStatus.replaceChildren(
+      message('Seltenheiten und Illustratoren dieses Sets werden geladen …'),
+    );
+    try {
+      const facets = await catalogSetFacets(id, lang, signal);
+      if (
+        closed ||
+        signal.aborted ||
+        active !== signal ||
+        language.value !== lang ||
+        set.value !== id
+      )
+        return;
+      const previousRarity = rarity.value;
+      const previousArtist = artist.value.trim();
+      const rarities = [
+        ...new Set(facets.cards.map((card) => card.rarity).filter(Boolean)),
+      ].sort((a, b) => a.localeCompare(b));
+      const artists = [
+        ...new Set(facets.cards.map((card) => card.artist).filter(Boolean)),
+      ].sort((a, b) => a.localeCompare(b));
+      applyFilterChoices(rarities, artists);
+      if (previousArtist)
+        artist.value =
+          artists.find(
+            (name) => normalize(name) === normalize(previousArtist),
+          ) ?? '';
+      setFacets = facets;
+      scopeKey = key;
+      const reset = [
+        previousRarity && !rarity.value ? `„${previousRarity}“` : '',
+        previousArtist && !artist.value ? `„${previousArtist}“` : '',
+      ].filter(Boolean);
+      scopeStatus.replaceChildren(
+        message(
+          facets.cards.length
+            ? `${rarities.length} Seltenheiten und ${artists.length} Illustratoren im gewählten Set.${reset.length ? ` ${reset.join(' und ')} kommen hier nicht vor; diese Filter wurden zurückgesetzt.` : ''}`
+            : 'Für dieses Set enthält der Katalog noch keine Karteneinträge. Seltenheiten und Illustratoren sind deshalb nicht verfügbar.',
+        ),
+      );
+      rarity.disabled = !rarities.length;
+      artist.disabled = !artists.length;
+      rarityGuide.update(setFacets, rarity.value);
+    } catch (error) {
+      if (closed || signal.aborted || active !== signal) return;
+      scopeStatus.replaceChildren(
+        message(
+          'Die Filter dieses Sets sind gerade nicht verfügbar. Deine Eingaben bleiben erhalten.',
+          'error',
+        ),
+        action('Setfilter erneut laden', () => options.onSearch(false), 'text'),
+      );
+      if (rarity.value || artist.value.trim()) throw error;
+    }
   }
   async function loadPrices(signal: AbortSignal): Promise<CatalogEntry[]> {
     const key = `${language.value}:${set.value}`;
@@ -560,6 +679,10 @@ export function createCatalogBrowser(options: Options) {
     await loadMetadata();
     if (signal.aborted || closed || active !== signal) return;
     updateSet();
+    await syncSetFilters(signal);
+    if (signal.aborted || closed || active !== signal) return;
+    rarityGuide.update(setFacets, rarity.value);
+    options.onStateChange?.(state());
     let found: CatalogResult[];
     let prices: CatalogEntry[] | undefined;
     if (order.value.startsWith('price')) {
@@ -666,6 +789,13 @@ export function createCatalogBrowser(options: Options) {
     if (page > 1) results.scrollIntoView({ block: 'start' });
   }
   set.addEventListener('change', () => {
+    if (!set.value) {
+      scopeKey = '';
+      setFacets = undefined;
+      rarityGuide.update(undefined, '');
+      applyFilterChoices(globalRarities, globalArtists);
+      scopeStatus.replaceChildren();
+    }
     updateSet();
     options.onSearch();
   });
@@ -714,6 +844,14 @@ export function createCatalogBrowser(options: Options) {
     hasFilters: () => Boolean(set.value || artist.value.trim() || rarity.value),
     languageChanged: () => {
       initialized = true;
+      scopeKey = '';
+      globalArtists = [];
+      globalRarities = [];
+      setFacets = undefined;
+      rarityGuide.update(undefined, '');
+      scopeStatus.replaceChildren();
+      artist.disabled = false;
+      rarity.disabled = false;
       seriesRequest?.abort();
       metadataLanguage = '';
       metadata = undefined;

@@ -7,8 +7,13 @@ async function catalogue(page: Page) {
   await page.route('https://api.tcgdex.net/**', async (route) => {
     const url = new URL(route.request().url());
     requests.push(url.toString());
-    const lang = url.pathname.split('/')[2];
-    const path = url.pathname.split('/').slice(3).join('/');
+    const graphql = url.pathname === '/v2/graphql';
+    const lang = graphql
+      ? route.request().postDataJSON().variables.lang
+      : url.pathname.split('/')[2];
+    const path = graphql
+      ? 'graphql'
+      : url.pathname.split('/').slice(3).join('/');
     const seriesId = lang === 'ja' ? 'SV' : 'sv';
     const chosen = {
       id: 'sv10',
@@ -43,7 +48,19 @@ async function catalogue(page: Page) {
       image: `https://assets.tcgdex.net/${lang}/sv/sv10/${index + 1}`,
     }));
     let json: unknown;
-    if (path === 'sets') json = sets;
+    if (graphql)
+      json = {
+        data: {
+          set: { ...chosen, cards: cards.map(({ id }) => ({ id })) },
+          cards: cards.map((card) => ({
+            ...card,
+            rarity: 'Häufig',
+            illustrator: 'GIDORA',
+            set: { id: chosen.id },
+          })),
+        },
+      };
+    else if (path === 'sets') json = sets;
     else if (path === 'series')
       json = [
         { id: 'base', name: 'Grund' },

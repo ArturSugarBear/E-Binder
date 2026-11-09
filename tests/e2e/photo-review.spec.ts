@@ -115,3 +115,68 @@ test('confirming a photo selects the next temporary capture without counting it 
   await page.keyboard.press('Escape');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
 });
+
+test('crop review magnifies the actual card footer before OCR and allows correction or cancellation without ownership', async ({
+  page,
+}) => {
+  const workers: string[] = [];
+  page.on('worker', (worker) => workers.push(worker.url()));
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto('./');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    exact: true,
+  });
+  await add
+    .locator('input[capture]')
+    .setInputFiles('public/assets/cards/svi-211.webp');
+  const crop = page.getByRole('dialog', {
+    name: 'Karte ausrichten',
+    exact: true,
+  });
+  await crop
+    .getByRole('button', { name: 'Ausschnitt prüfen', exact: true })
+    .click();
+  await expect(crop.locator('.w-crop-review')).toBeVisible();
+  await expect(crop.locator('.w-crop-review canvas')).toHaveCount(3);
+  expect(workers.filter((url) => url.includes('vision-worker'))).toEqual([]);
+  expect(
+    await crop
+      .locator('.w-crop-footer-preview')
+      .first()
+      .evaluate((node) => {
+        const canvas = node as HTMLCanvasElement;
+        return canvas
+          .getContext('2d')!
+          .getImageData(0, 0, canvas.width, canvas.height)
+          .data.some((value) => value > 0);
+      }),
+  ).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+  ).toBe(false);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await crop
+    .getByRole('button', { name: 'Ecken nachbessern', exact: true })
+    .click();
+  await expect(
+    crop.getByRole('button', { name: 'Texterkennung starten', exact: true }),
+  ).toBeHidden();
+  await crop.getByLabel('Position waagerecht').fill('50');
+  await crop
+    .getByRole('button', { name: 'Ausschnitt prüfen', exact: true })
+    .click();
+  await expect(crop.locator('.w-crop-review')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(add).toBeVisible();
+  expect(workers.filter((url) => url.includes('vision-worker'))).toEqual([]);
+  await add
+    .getByRole('button', { name: 'Karten hinzufügen schließen', exact: true })
+    .click();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});

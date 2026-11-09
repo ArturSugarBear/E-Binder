@@ -652,3 +652,97 @@ export async function fetchRecognizedCards(
     throw failure.reason;
   return candidates;
 }
+
+/** One text-only request for complete set facets, independent of the visible result page. */
+export async function catalogSetFacets(
+  id: string,
+  language: string,
+  signal?: AbortSignal,
+): Promise<{ cards: (CatalogResult & { rarity: string; artist: string })[] }> {
+  catalogLanguage(language);
+  if (!/^[\w.+-]+$/.test(id)) throw new Error('Ungültiges Set.');
+  const key = `set-facets:${language}:${id}`;
+  const cached = publicCache.get(key);
+  let json: unknown;
+  if (cached && cached.until > Date.now()) json = cached.data;
+  else {
+    const response = await fetch('https://api.tcgdex.net/v2/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(15000)])
+        : AbortSignal.timeout(15000),
+      body: JSON.stringify({
+        query: `query SetFacets($set: ID!, $prefix: ID!, $lang: String!) {
+          set(id: $set) @locale(lang: $lang) { id name cardCount { official } cards { id } }
+          cards(filters: { id: $prefix }) @locale(lang: $lang) {
+            id localId name image rarity illustrator set { id }
+          }
+        }`,
+        variables: { set: id, prefix: `like:${id}-*`, lang: language },
+      }),
+    });
+    if (!response.ok)
+      throw new Error('Die Filter dieses Sets konnten nicht geladen werden.');
+    json = await response.json();
+  }
+  const result = z
+    .object({
+      errors: z.array(z.unknown()).optional(),
+      data: z.object({
+        set: z.object({
+          id: z.literal(id),
+          name: z.string(),
+          cardCount: z.object({ official: z.number() }),
+          cards: z.array(z.object({ id: z.string() })),
+        }),
+        cards: z.array(
+          z.object({
+            id: resumeSchema.shape.id,
+            localId: z.string(),
+            name: z.string(),
+            image: z.string().nullish(),
+            rarity: z.string().nullish(),
+            illustrator: z.string().nullish(),
+            set: z.object({ id: z.literal(id) }),
+          }),
+        ),
+      }),
+    })
+    .safeParse(json);
+  if (!result.success || result.data.errors?.length)
+    throw new Error(
+      'Die Filter dieses Sets konnten nicht vollständig geprüft werden. Versuche es erneut.',
+    );
+  const data = result.data.data;
+  const expected = new Set(data.set.cards.map((card) => card.id));
+  const actual = new Set(data.cards.map((card) => card.id));
+  if (
+    expected.size !== data.set.cards.length ||
+    actual.size !== data.cards.length ||
+    expected.size !== actual.size ||
+    [...expected].some((card) => !actual.has(card))
+  )
+    throw new Error(
+      'Die Filter dieses Sets sind noch unvollständig. Versuche es erneut.',
+    );
+  // Only validated, complete metadata enters the bounded public in-memory cache.
+  if (publicCache.size > 1500)
+    publicCache.delete(publicCache.keys().next().value!);
+  publicCache.set(key, { until: Date.now() + 300000, data: json });
+  return {
+    cards: data.cards.map((card) => ({
+      id: card.id,
+      localId: card.localId,
+      name: card.name,
+      image: card.image ?? undefined,
+      language,
+      setName: data.set.name,
+      number: data.set.cardCount.official
+        ? `${card.localId}/${data.set.cardCount.official}`
+        : card.localId,
+      rarity: card.rarity ?? '',
+      artist: card.illustrator ?? '',
+    })),
+  };
+}

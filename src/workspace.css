@@ -1725,3 +1725,24 @@ textarea.w-input,
 .w-welcome-copy > .w-eyebrow {
   display: none;
 }
+
+.w-crop-editor,
+.w-crop-review {
+  display: grid;
+  gap: 16px;
+}
+.w-crop-card-preview {
+  width: 150px;
+  height: auto;
+  justify-self: center;
+}
+.w-crop-footer-preview {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--w-border);
+  border-radius: 6px;
+}
+.w-crop-review h3,
+.w-crop-review h4 {
+  margin: 0;
+}
