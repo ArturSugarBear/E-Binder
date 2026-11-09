@@ -1,18 +1,14 @@
 /* PWA notices use E-Binder's existing Midnight/Cyan palette. */
 .pwa-banner {
-  position: fixed;
-  z-index: 1000;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  left: max(16px, env(safe-area-inset-left));
+  position: relative;
+  z-index: 1;
+  width: min(100%, 540px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 16px;
   max-width: 540px;
-  max-height: min(35dvh, 280px);
-  overflow-y: auto;
-  margin-inline: auto;
+  margin: 14px auto;
   padding: 14px 16px;
   border: 1px solid #38546a;
   border-radius: 12px;
@@ -24,7 +20,6 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  overscroll-behavior: contain;
 }
 .pwa-banner p {
   flex: 1 1 230px;
@@ -50,9 +45,4 @@
 .pwa-banner :focus-visible {
   outline: 2px solid #6ad0e0;
   outline-offset: 2px;
-}
-@media (max-width: 640px) {
-  .pwa-banner {
-    bottom: calc(16px + env(safe-area-inset-bottom));
-  }
 }
