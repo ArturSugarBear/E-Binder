@@ -24,9 +24,8 @@ function isIOSSafari(): boolean {
 
 /** Prevent reloading over pending saves, failed writes or edit dialogs. */
 export function isUpdateSafe(): boolean {
-  const state = document.querySelector<HTMLElement>(
-    '#workspace-save-status',
-  )?.dataset.state;
+  const state = document.querySelector<HTMLElement>('#workspace-save-status')
+    ?.dataset.state;
   if (state === 'saving' || state === 'error') return false;
   if (document.querySelector('dialog[open]')) return false;
   const active = document.activeElement;
@@ -42,7 +41,8 @@ function showBanner(
   action?: { text: string; run: () => void },
   rememberDismissal = false,
 ): void {
-  for (const notice of document.querySelectorAll('.pwa-banner')) notice.remove();
+  for (const notice of document.querySelectorAll('.pwa-banner'))
+    notice.remove();
   const box = document.createElement('div');
   box.className = 'pwa-banner';
   box.dataset.pwaBanner = kind;

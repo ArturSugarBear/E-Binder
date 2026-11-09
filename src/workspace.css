@@ -1811,7 +1811,6 @@ textarea.w-input,
   margin: 0;
 }
 
-
 /* iPhone-first navigation. Other layouts retain the existing desktop header. */
 .w-header-shortcut,
 .w-mobile-nav {
@@ -1941,7 +1940,12 @@ textarea.w-input,
     bottom: calc(88px + env(safe-area-inset-bottom));
   }
   body:has(.w-dialog[open]) .w-mobile-nav,
-  body:has(input:focus, textarea:focus, select:focus, [contenteditable='true']:focus)
+  body:has(
+      input:focus,
+      textarea:focus,
+      select:focus,
+      [contenteditable='true']:focus
+    )
     .w-mobile-nav {
     visibility: hidden;
     pointer-events: none;
