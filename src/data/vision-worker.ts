@@ -21,7 +21,11 @@ const report = (status: string, id?: number) =>
   scope.postMessage({ type: 'progress', status, id });
 let prepared:
   Promise<{ session: InferenceSession; dictionary: string[] }> | undefined;
-async function modelResources(modelUrl: string, dictionaryUrl: string, id?: number) {
+async function modelResources(
+  modelUrl: string,
+  dictionaryUrl: string,
+  id?: number,
+) {
   if (!prepared) {
     prepared = (async () => {
       report('Erkennungsmodell wird geladen …', id);
