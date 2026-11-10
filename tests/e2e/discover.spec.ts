@@ -294,7 +294,6 @@ test('catalogue failures can be retried without losing the chosen set or creatin
   });
 });
 
-
 test('Discover card opens centered with a hero-sized card, including on narrow iPhones', async ({
   page,
 }) => {
@@ -308,28 +307,42 @@ test('Discover card opens centered with a hero-sized card, including on narrow i
   const artwork = dialog.locator('.w-discover-stage .card-art');
   await expect(dialog).toBeVisible();
   await expect(artwork).toBeVisible();
-  await expect(dialog.locator('.w-discover-info')).toContainText('Ewige Rivalen');
-  await expect(dialog.getByRole('region', { name: 'Preis und Bezugsquelle' })).toBeVisible();
+  await expect(dialog.locator('.w-discover-info')).toContainText(
+    'Ewige Rivalen',
+  );
+  await expect(
+    dialog.getByRole('region', { name: 'Preis und Bezugsquelle' }),
+  ).toBeVisible();
 
   const desktop = await dialog.boundingBox();
   expect(desktop).not.toBeNull();
-  expect(Math.abs(desktop!.x + desktop!.width / 2 - 640)).toBeLessThanOrEqual(3);
-  expect(Math.abs(desktop!.y + desktop!.height / 2 - 410)).toBeLessThanOrEqual(3);
+  expect(Math.abs(desktop!.x + desktop!.width / 2 - 640)).toBeLessThanOrEqual(
+    3,
+  );
+  expect(Math.abs(desktop!.y + desktop!.height / 2 - 410)).toBeLessThanOrEqual(
+    3,
+  );
   expect((await artwork.boundingBox())!.width).toBeGreaterThan(200);
 
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileArt = await artwork.boundingBox();
   expect(mobileArt).not.toBeNull();
-  expect(Math.abs(mobileArt!.x + mobileArt!.width / 2 - 195)).toBeLessThanOrEqual(3);
+  expect(
+    Math.abs(mobileArt!.x + mobileArt!.width / 2 - 195),
+  ).toBeLessThanOrEqual(3);
   expect(mobileArt!.width).toBeGreaterThan(165);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(391);
   const isBottomSheet = await page.evaluate(
     () => matchMedia('(max-width: 720px) and (pointer: coarse)').matches,
   );
   if (isBottomSheet) {
     const mobileSheet = await dialog.boundingBox();
     expect(mobileSheet).not.toBeNull();
-    expect(Math.abs(mobileSheet!.y + mobileSheet!.height - 844)).toBeLessThanOrEqual(3);
+    expect(
+      Math.abs(mobileSheet!.y + mobileSheet!.height - 844),
+    ).toBeLessThanOrEqual(3);
   }
 
   await page.keyboard.press('Escape');
