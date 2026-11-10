@@ -65,6 +65,59 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
   }
   root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
 
+  const firstPending = ctx.state.captures.find(
+    (capture) => capture.status === 'pending',
+  );
+  root.append(
+    el(
+      'section',
+      'w-home-quick',
+      el(
+        'div',
+        'w-home-section-heading',
+        el(
+          'h2',
+          '',
+          copies ? 'Dein nächster Schritt' : 'Starte, wie du sammelst',
+        ),
+      ),
+      el(
+        'div',
+        'w-home-quick-grid',
+        quickAction(
+          'Binderseite scannen',
+          'Neun Karten auf einmal erfassen und einzeln prüfen',
+          () => ctx.openPageScan(),
+        ),
+        quickAction(
+          firstPending ? 'Offene Scans prüfen' : 'Sets entdecken',
+          firstPending
+            ? `${pending} Aufnahmen warten auf deine Bestätigung`
+            : 'Neue Karten und passende Ausgaben finden',
+          () =>
+            firstPending
+              ? ctx.openAdd({ captureId: firstPending.id })
+              : ctx.navigate('entdecken'),
+        ),
+        quickAction(
+          copies ? 'Binder öffnen' : 'Demo-Binder testen',
+          copies
+            ? `${pages} Seiten weitergestalten`
+            : 'Erst ausprobieren, ohne eigene Karten zu speichern',
+          () => {
+            if (copies) {
+              ctx.navigate('binder');
+              return;
+            }
+            void ctx.switchMode('demo').then(() => {
+              if (ctx.state.mode === 'demo') ctx.navigate('binder');
+            });
+          },
+        ),
+      ),
+    ),
+  );
+
   if (!copies) {
     root.append(
       el(
@@ -214,6 +267,21 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
   );
   root.append(shortcut);
   return root;
+}
+
+function quickAction(
+  title: string,
+  description: string,
+  onClick: () => void,
+): HTMLElement {
+  const button = action(title, onClick, 'secondary');
+  button.classList.add('w-home-quick-tile');
+  button.replaceChildren(
+    el('strong', '', title),
+    el('small', '', description),
+    el('span', 'w-home-quick-arrow', '↗'),
+  );
+  return button;
 }
 
 function step(index: string, title: string, explanation: string): HTMLElement {

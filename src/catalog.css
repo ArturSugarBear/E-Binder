@@ -639,3 +639,73 @@
 .w-text-results .w-unpictured-card {
   display: none;
 }
+
+/* Rare Room: discover is a two-stage collector journey, not a long filter form. */
+.w-discover-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 17px;
+  background: var(--glass-background);
+}
+.w-discover-mode .w-button {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.w-discover-mode .w-button[aria-pressed='true'] {
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.08);
+}
+.w-discover .w-catalog-discovery {
+  padding: 18px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 19px;
+  background: var(--glass-background);
+}
+.w-discover .w-catalog-discovery > summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.w-discover .w-selected-set:not(:empty) {
+  padding: 14px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 16px;
+  background: var(--glass-background);
+}
+.w-set-owned-note {
+  color: var(--accent);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.w-set-progress {
+  display: block;
+  width: 100%;
+  height: 5px;
+  accent-color: var(--accent);
+}
+.w-discover .w-set-choice .w-set-progress {
+  margin-top: 3px;
+}
+@media (max-width: 700px) {
+  .w-discover-mode .w-button {
+    min-height: 46px;
+    font-size: 12px;
+  }
+  .w-discover .w-catalog-discovery {
+    padding: 10px;
+    border-radius: 15px;
+  }
+  .w-discover .w-selected-set:not(:empty) {
+    padding: 10px;
+  }
+}

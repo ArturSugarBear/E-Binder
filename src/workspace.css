@@ -3472,3 +3472,130 @@ textarea.w-input,
     padding-bottom: 0;
   }
 }
+
+/* Home and Vault: actionable, measurable collector journeys. */
+.w-home-quick {
+  display: grid;
+  gap: 13px;
+}
+.w-home-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.w-home-quick-tile.w-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
+  align-content: start;
+  min-width: 0;
+  min-height: 104px;
+  padding: 17px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 16px;
+  text-align: left;
+  background: var(--glass-background);
+}
+.w-home-quick-tile strong {
+  font-size: 15px;
+  line-height: 1.35;
+}
+.w-home-quick-tile small {
+  grid-column: 1;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.w-home-quick-arrow {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: start;
+  color: var(--accent);
+  font-size: 20px;
+}
+.w-vault-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.w-vault-overview-stat {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 13px;
+  background: var(--glass-background);
+}
+.w-vault-overview-stat small {
+  color: var(--ink-2);
+  font-size: 11px;
+}
+.w-vault-overview-stat strong {
+  font: 600 23px/1.2 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+.w-vault-overview > .w-button {
+  align-self: stretch;
+  min-height: 44px;
+}
+.w-scan-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0 0 14px;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 14px;
+  background: var(--glass-background);
+}
+.w-scan-flow li {
+  display: grid;
+  place-items: center;
+  padding: 9px 5px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+}
+.w-scan-flow li[aria-current='step'] {
+  color: var(--ink);
+  background: var(--raised);
+  font-weight: 700;
+}
+.w-scan-flow li.is-complete {
+  color: var(--accent);
+}
+@media (max-width: 800px) {
+  .w-home-quick-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .w-home-quick-tile.w-button {
+    min-height: 76px;
+    padding: 13px 15px;
+  }
+  .w-vault-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .w-vault-overview > .w-button {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 390px) {
+  .w-vault-overview-stat {
+    padding: 9px;
+  }
+  .w-vault-overview-stat small {
+    font-size: 10px;
+  }
+  .w-vault-overview-stat strong {
+    font-size: 20px;
+  }
+  .w-scan-flow li {
+    font-size: 10px;
+  }
+}
