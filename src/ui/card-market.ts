@@ -5,7 +5,18 @@ import { el, icon } from './workspace-dom';
 export function cardMarket(entry: CatalogEntry): HTMLElement {
   const section = el('section', 'w-card-market');
   section.setAttribute('aria-label', 'Preis und Bezugsquelle');
-  const heading = el('p', 'w-label', 'Cardmarket · Katalogtrend');
+  const basis = entry.price?.basis;
+  const priceKind = {
+    trend: 'Katalogtrend',
+    avg7: '7-Tage-Verkaufsdurchschnitt',
+    avg30: '30-Tage-Verkaufsdurchschnitt',
+    avg: 'Verkaufsdurchschnitt',
+  };
+  const heading = el(
+    'p',
+    'w-label',
+    `Cardmarket · ${basis ? priceKind[basis] : 'Katalogtrend'}`,
+  );
   section.append(heading);
   if (entry.price) {
     const date = new Date(entry.price.updated);

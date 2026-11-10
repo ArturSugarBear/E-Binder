@@ -149,6 +149,10 @@ export function openAddCards(
         () => camera.click(),
         () =>
           ctx.state.captures.filter((shot) => shot.status === 'pending').length,
+        () => {
+          sheet.close();
+          ctx.openPageScan();
+        },
       ),
     'primary',
     'camera',
@@ -802,6 +806,21 @@ export function openAddCards(
     };
     detailsLanguage.addEventListener('change', refreshWish);
     refreshWish();
+    const clearConfirmationError = () => {
+      if (error.hidden) return;
+      error.hidden = true;
+      error.textContent = '';
+    };
+    for (const control of [
+      confirm.input,
+      finish,
+      quantity,
+      detailsLanguage,
+      variant,
+    ]) {
+      control.addEventListener('change', clearConfirmationError);
+      control.addEventListener('input', clearConfirmationError);
+    }
     form.append(
       el(
         'div',
@@ -849,7 +868,7 @@ export function openAddCards(
       }
       if (!confirm.input.checked) {
         error.textContent =
-          'Die Druckvariante ist ausgewählt. Bestätige noch das Kontrollkästchen für Ausgabe, Sprache und Gesamtmenge.';
+          'Bitte prüfe die Angaben und bestätige das Kontrollkästchen.';
         error.hidden = false;
         confirm.input.focus();
         return;

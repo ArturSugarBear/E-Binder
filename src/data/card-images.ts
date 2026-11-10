@@ -46,7 +46,17 @@ export class CardImages {
     const missing = () => {
       image.hidden = true;
       fallback.hidden = false;
-      fallback.textContent = 'Kein Katalogbild verfügbar';
+      fallback.replaceChildren();
+      const message = document.createElement('span');
+      message.className = 'w-art-fallback-title';
+      message.textContent = 'Bild noch nicht verfügbar';
+      const identity = document.createElement('strong');
+      identity.className = 'w-art-fallback-card';
+      identity.textContent = card.name;
+      const edition = document.createElement('small');
+      edition.className = 'w-art-fallback-edition';
+      edition.textContent = `${card.setName} · ${card.number}`;
+      fallback.append(message, identity, edition);
       frame.dataset.imageState = 'unavailable';
     };
     let retried = false;
