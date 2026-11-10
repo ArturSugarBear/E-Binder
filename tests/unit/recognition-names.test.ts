@@ -11,9 +11,20 @@ describe('OCR card-title fallback', () => {
     ]);
   });
 
-  it('offers only a generic search for energy cards, never a printing', () => {
-    expect(recognizedNameHints('BASIS-ENERGIE')).toEqual(['Energie']);
-    expect(recognizedNameHints('001/182\nBasis Energie')).toEqual(['Energie']);
+  it('never suggests unrelated energy types from an unreadable generic title', () => {
+    expect(recognizedNameHints('BASIS-ENERGIE')).toEqual([]);
+    expect(recognizedNameHints('001/182\nBasis Energie')).toEqual([]);
+    expect(recognizedNameHints('Energie')).toEqual([]);
+  });
+
+  it('retains the actual typed energy name when OCR has read the type', () => {
+    expect(recognizedNameHints('001/024\nBasis-Metall-Energie')).toEqual([
+      'Metall-Energie',
+    ]);
+    expect(recognizedNameHints('Basic Metal Energy')).toEqual(['Metal Energy']);
+    expect(recognizedNameHints('Basis-Pflanze-Energie')).toEqual([
+      'Pflanze-Energie',
+    ]);
   });
 
   it('accepts Japanese card names but never converts them into German printings', () => {

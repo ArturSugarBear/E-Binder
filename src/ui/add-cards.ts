@@ -488,13 +488,14 @@ export function openAddCards(
       tell(
         candidates.length
           ? `${titleHint ? `Kartenname „${titleHint}“ gelesen. ` : ''}Mögliche Ausgaben, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Nummernabgleich war nicht erreichbar.' : ''}`
-          : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
+          : /\b(?:Energie|Energy)\b/i.test(text)
+            ? 'Energiekarte gelesen, aber Typ oder genaue Ausgabe sind nicht sicher erkannt. Prüfe den Energietyp und die Sammlernummer auf dem Foto und suche die Karte gezielt. Es wurde nichts übernommen.'
+            : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
       );
       const number = recognitionClues(text)[0]?.number;
-      if (number && !candidates.length) {
-        search.value = number;
-        void onlineSearch();
-      }
+      // Prefill the read number, but require an explicit manual search:
+      // an OCR fragment alone must not generate unrelated editions.
+      if (number && !candidates.length) search.value = number;
     } catch (error) {
       if (closed || ocrController !== controller) return;
       if (controller.signal.aborted) {

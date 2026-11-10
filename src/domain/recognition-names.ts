@@ -21,13 +21,19 @@ export function recognizedNameHints(text: string): string[] {
       !/\p{L}{3}/u.test(cleaned)
     )
       continue;
-    if (/\b(?:BASIS|BASIC|GRUND|ENERGY|ENERGIE)\b/i.test(cleaned)) {
-      if (/ENERGIE|ENERGY/i.test(cleaned)) {
-        hints.push('Energie');
-        break;
-      }
-      continue;
+    if (/\b(?:ENERGIE|ENERGY)\b/i.test(cleaned)) {
+      // Generic "Energie" is not enough to select a card printing. Only
+      // search the catalogue when OCR actually read a specific energy type.
+      const typed = cleaned.match(
+        /(?:^|[\s/-])(Pflanzen?|Feuer|Wasser|Elektro|Psycho|Kampf|Finsternis|Metall|Fee|Farblos|Grass|Fire|Water|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Colorless)[\s/-]*(Energie|Energy)\b/i,
+      );
+      if (typed)
+        hints.push(
+          `${typed[1]}${/^energy$/i.test(typed[2]!) ? ' ' : '-'}${typed[2]}`,
+        );
+      break;
     }
+    if (/\b(?:BASIS|BASIC|GRUND)\b/i.test(cleaned)) continue;
     if (/\b(?:POKEMON|POKÉMON|GAMEFREAK|SAMMLERNUMMER)\b/i.test(cleaned))
       continue;
     hints.push(cleaned);
