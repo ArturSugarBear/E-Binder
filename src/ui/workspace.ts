@@ -21,6 +21,7 @@ import { renderCollection, renderWishes, openHolding } from './collection-view';
 import { createDiscoverView } from './discover-view';
 import { renderBinders } from './binder-view';
 import { createPortfolioView } from './portfolio-view';
+import { revealCollectorRoute } from './collector-polish';
 import { renderHome } from './home-view';
 import { renderProfile } from './profile-view';
 import { vaultTabs } from './vault-tabs';
@@ -93,6 +94,7 @@ export async function startWorkspace(): Promise<void> {
   let catalogLoading = false;
   let discovery: ReturnType<typeof createDiscoverView> | undefined;
   let portfolio: ReturnType<typeof createPortfolioView> | undefined;
+  let animatedRoute = '';
   const ctx: WorkspaceContext = {
     account,
     state: initial,
@@ -233,6 +235,10 @@ export async function startWorkspace(): Promise<void> {
           .querySelector<HTMLElement>(`[data-focus="${CSS.escape(focus)}"]`)
           ?.focus({ preventScroll: true });
       root.dataset.ready = 'true';
+      if (route !== animatedRoute) {
+        animatedRoute = route;
+        requestAnimationFrame(() => revealCollectorRoute(root));
+      }
       try {
         localStorage.setItem('e-binder-route', route);
       } catch {

@@ -39,6 +39,7 @@ import {
 } from './workspace-dom';
 import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
+import { animateResolvedPocket } from './collector-polish';
 import type { WorkspaceContext } from './workspace-context';
 
 type Decision = 'pending' | 'card' | 'empty' | 'skip';
@@ -313,6 +314,10 @@ export function openPageScanner(
           openLivePageScanner(
             (file) => enqueue([file]),
             () => camera.click(),
+            () => {
+              sheet.close();
+              ctx.openAdd({ live: true });
+            },
           ),
         'primary',
         'camera',
@@ -683,6 +688,7 @@ export function openPageScanner(
             if (closed || abort.signal.aborted) break;
             pocket.select.value = 'empty';
             updatePocket(pocket);
+            animateResolvedPocket(pocket.container, 'empty');
             pocket.container?.classList.add('is-processed');
             progress.value = index + 1;
             status.textContent = `${index + 1} von 9 Fächern geprüft.`;
@@ -843,8 +849,13 @@ export function openPageScanner(
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
-          if (!closed && !abort.signal.aborted)
+          if (!closed && !abort.signal.aborted) {
             pocket.container?.classList.add('is-processed');
+            animateResolvedPocket(
+              pocket.container,
+              pocket.decision === 'card' ? 'card' : 'unknown',
+            );
+          }
         }
         progress.value = index + 1;
         status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;

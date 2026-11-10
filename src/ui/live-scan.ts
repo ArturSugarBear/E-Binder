@@ -113,6 +113,7 @@ export function openLiveScanner(
   onCapture: CaptureHandler,
   onFileCamera: () => void,
   pendingCaptures: () => number,
+  onSwitchToPage?: () => void,
 ): void {
   const sheet = modal('Karte live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog');
@@ -193,7 +194,24 @@ export function openLiveScanner(
     'secondary',
     'camera',
   );
-  sheet.body.append(stage, progress, help);
+  const mode = el(
+    'div',
+    'w-scan-mode-toggle',
+    action('Einzelkarte', () => undefined, 'secondary'),
+    action(
+      'Binderseite',
+      () => {
+        sheet.close();
+        onSwitchToPage?.();
+      },
+      'secondary',
+    ),
+  );
+  mode.setAttribute('role', 'group');
+  mode.setAttribute('aria-label', 'Scanmodus wählen');
+  mode.firstElementChild!.setAttribute('aria-pressed', 'true');
+  mode.lastElementChild!.setAttribute('aria-pressed', 'false');
+  sheet.body.append(mode, stage, progress, help);
   sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races

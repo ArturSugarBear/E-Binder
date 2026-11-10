@@ -7,6 +7,7 @@ import { action, el, errorText, modal } from './workspace-dom';
 export function openLivePageScanner(
   onCapture: (file: File) => void,
   onFallback: () => void,
+  onSwitchToCard?: () => void,
 ): void {
   const sheet = modal('Binderseite live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog w-live-page-dialog');
@@ -73,7 +74,24 @@ export function openLivePageScanner(
     'secondary',
     'upload',
   );
-  sheet.body.append(stage, progress, help);
+  const mode = el(
+    'div',
+    'w-scan-mode-toggle',
+    action(
+      'Einzelkarte',
+      () => {
+        sheet.close();
+        onSwitchToCard?.();
+      },
+      'secondary',
+    ),
+    action('Binderseite', () => undefined, 'secondary'),
+  );
+  mode.setAttribute('role', 'group');
+  mode.setAttribute('aria-label', 'Scanmodus wählen');
+  mode.firstElementChild!.setAttribute('aria-pressed', 'false');
+  mode.lastElementChild!.setAttribute('aria-pressed', 'true');
+  sheet.body.append(mode, stage, progress, help);
   sheet.footer.append(status, shutter, retry, fallback);
 
   let closed = false;

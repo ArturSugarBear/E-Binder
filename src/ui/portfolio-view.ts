@@ -5,6 +5,7 @@ import {
   type PortfolioQuote,
 } from '../domain/portfolio';
 import { changeState, finishLabels, type Holding } from '../domain/personal';
+import { revealPortfolioBars } from './collector-polish';
 import { action, el, message } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 
@@ -43,6 +44,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
   let loading = false;
   let limit = 40;
   let connectionError = false;
+  let chartRevealed = false;
 
   function openBinder(binderId: string, pageId?: string) {
     const chosen = ctx.state.binders.find((item) => item.id === binderId);
@@ -484,6 +486,12 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       book,
       foot,
     );
+    if (!chartRevealed && count) {
+      chartRevealed = true;
+      queueMicrotask(() => {
+        if (!closed) revealPortfolioBars(content);
+      });
+    }
   }
 
   function stat(title: string, value: string, caption: string): HTMLElement {
