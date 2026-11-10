@@ -633,3 +633,9 @@
     justify-content: center;
   }
 }
+
+/* Text-only search results already expose name, edition and missing-art status.
+   Keep their compact rows instead of duplicating that text in a card silhouette. */
+.w-text-results .w-unpictured-card {
+  display: none;
+}
