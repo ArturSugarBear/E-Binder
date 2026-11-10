@@ -1,0 +1,36 @@
+name: Collector UX smoke
+on:
+  pull_request:
+    paths:
+      - 'src/ui/**'
+      - 'src/data/**'
+      - 'src/domain/**'
+      - 'src/workspace.css'
+      - 'tests/e2e/**'
+      - 'tests/unit/**'
+      - 'package*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Exercise portfolio and scanner across browser engines
+        run: npx playwright test tests/e2e/liquid-collector.spec.ts tests/e2e/portfolio.spec.ts tests/e2e/real-collector-flows.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: collector-smoke-failures
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 5
