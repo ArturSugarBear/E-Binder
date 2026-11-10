@@ -6,18 +6,23 @@ afterEach(() => vi.unstubAllGlobals());
 function mockCard(id: string, cardmarket: Record<string, unknown>) {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          id,
-          localId: id.split('-').at(-1),
-          name: 'Testkarte',
-          set: { id: 'sv01', name: 'Karmesin & Purpur', cardCount: { official: 198 } },
-          variants: { normal: true, holo: true, reverse: true },
-          pricing: { cardmarket },
-        }),
-        { status: 200, headers: { 'content-type': 'application/json' } },
-      ),
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id,
+            localId: id.split('-').at(-1),
+            name: 'Testkarte',
+            set: {
+              id: 'sv01',
+              name: 'Karmesin & Purpur',
+              cardCount: { official: 198 },
+            },
+            variants: { normal: true, holo: true, reverse: true },
+            pricing: { cardmarket },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
     ),
   );
 }
