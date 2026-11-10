@@ -1,0 +1,30 @@
+name: One-shot PR56 formatting repair
+on:
+  push:
+    branches:
+      - fix/binder-portfolio-pricing-ux-20261110
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.event.head_commit.message == 'Enable one-shot prettier repair'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/ui/portfolio-view.ts
+      - name: Commit formatting only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/ui/portfolio-view.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "Apply Prettier formatting to portfolio-view"
+            git push origin HEAD:fix/binder-portfolio-pricing-ux-20261110
+          fi
