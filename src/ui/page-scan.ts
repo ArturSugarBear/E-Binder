@@ -57,7 +57,8 @@ export function openPageScanner(
   const lifetime = new AbortController();
   let recognitionAbort: AbortController | undefined;
   let sharedRecognitionAbort: AbortController | undefined;
-  let sharedRecognition: ReturnType<typeof createRecognitionSession> | undefined;
+  let sharedRecognition:
+    ReturnType<typeof createRecognitionSession> | undefined;
   let closed = false;
   let processing = false;
   let reAligning = false;
@@ -663,7 +664,8 @@ export function openPageScanner(
       if (abort.signal.aborted || closed) {
         session.close();
         if (sharedRecognition === session) sharedRecognition = undefined;
-        if (sharedRecognitionAbort === abort) sharedRecognitionAbort = undefined;
+        if (sharedRecognitionAbort === abort)
+          sharedRecognitionAbort = undefined;
       }
       if (recognitionAbort === abort) recognitionAbort = undefined;
       processing = false;
