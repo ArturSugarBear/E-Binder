@@ -11,6 +11,8 @@ import { autoAlignPage } from '../data/auto-page-align';
 import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
+import { createVisualSearchSession } from '../data/visual-search';
+import { reviewVisualCandidates, type VisualHit } from '../domain/visual-retrieval';
 import {
   finishLabels,
   finishes,
@@ -60,6 +62,7 @@ export function openPageScanner(
   let sharedRecognitionAbort: AbortController | undefined;
   let sharedRecognition:
     ReturnType<typeof createRecognitionSession> | undefined;
+  let sharedVisualPromise: ReturnType<typeof createVisualSearchSession> | undefined;
   let closed = false;
   let processing = false;
   let reAligning = false;
@@ -558,6 +561,7 @@ export function openPageScanner(
       lifetime.signal.addEventListener('abort', () => controller.abort(), {
         once: true,
       });
+      sharedVisualPromise = undefined;
       sharedRecognition = createRecognitionSession(
         controller.signal,
         (label) => {
@@ -574,6 +578,12 @@ export function openPageScanner(
     stop.hidden = false;
     updateSave();
     try {
+      // Optional visual search is local and prepared once per binder scan.
+      // Until a versioned licensed model/corpus is installed, the OCR path remains.
+      const visual = await (sharedVisualPromise ??=
+        createVisualSearchSession(abort.signal));
+      if (closed || abort.signal.aborted) return;
+      let visualFailure = false;
       // Small, sequential decodes keep peak RAM bounded on older iPhones.
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
       for (let index = 0; index < tiles.length; index++) {
@@ -620,9 +630,66 @@ export function openPageScanner(
         pocket.container?.classList.remove('is-processed');
         pocket.container?.classList.add('is-scanning');
         try {
-          const text = await session.recognize(tiles[index]!);
+          let visualHits: VisualHit[] = [];
+          if (visual && !visualFailure) {
+            try {
+              pocket.status.textContent = 'Kartenmotiv wird lokal verglichen …';
+              visualHits = await visual.match(tiles[index]!);
+              if (closed || abort.signal.aborted) break;
+            } catch {
+              visualFailure = true;
+              visual.close();
+              // Never make an optional embedding model block OCR or ownership review.
+            }
+          }
+          const text = await session.recognize(
+            tiles[index]!,
+            visualHits.length > 0,
+          );
           if (closed || abort.signal.aborted) break;
           pocket.ocrText = text;
+          const visualReview = reviewVisualCandidates(
+            visualHits,
+            recognitionClues(text),
+          );
+          const existingCards = [
+            ...ctx.catalog,
+            ...ctx.state.holdings.map((holding) => holding.card),
+          ];
+          const localVisual = visualReview.choices.flatMap((hit) => {
+            const sourceId = hit.reference.id.split(':').at(-1)!;
+            return existingCards.filter(
+              (card) =>
+                card.sourceId === sourceId &&
+                card.language === hit.reference.language &&
+                card.setId === hit.reference.setId,
+            );
+          });
+          let resolvedVisual = [...localVisual];
+          if (visualReview.choices.length && navigator.onLine) {
+            // Fetch only the three best image candidates, never a full catalog.
+            const candidateSignal = AbortSignal.any([
+              abort.signal,
+              AbortSignal.timeout(10000),
+            ]);
+            const found = await Promise.allSettled(
+              visualReview.choices.map((hit) => {
+                const sourceId = hit.reference.id.split(':').at(-1)!;
+                return fetchCatalogCard(
+                  sourceId,
+                  hit.reference.language,
+                  candidateSignal,
+                );
+              }),
+            );
+            if (closed || abort.signal.aborted) break;
+            resolvedVisual = [
+              ...found.flatMap((item) =>
+                item.status === 'fulfilled' ? [item.value] : [],
+              ),
+              ...localVisual,
+            ];
+          }
           const local = candidatesFromText(text, [
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
@@ -634,7 +701,7 @@ export function openPageScanner(
             abort.signal,
             AbortSignal.timeout(11000),
           ]);
-          if (navigator.onLine && text.trim()) {
+          if (navigator.onLine && text.trim() && !resolvedVisual.length) {
             try {
               online = await fetchRecognizedCards(
                 text,
@@ -648,7 +715,7 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           let titleHint = '';
-          if (navigator.onLine && text.trim() && !online.length) {
+          if (navigator.onLine && text.trim() && !online.length && !resolvedVisual.length) {
             try {
               pocket.status.textContent =
                 'Kartenname wird im Katalog gesucht …';
@@ -665,12 +732,14 @@ export function openPageScanner(
             }
           }
           if (closed || abort.signal.aborted) break;
-          displayCandidates(pocket, [...online, ...local]);
+          displayCandidates(pocket, [...resolvedVisual, ...online, ...local]);
           if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
-            : pocket.candidates.length && titleHint
+            : resolvedVisual.length
+              ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
+              : pocket.candidates.length && titleHint
               ? `„${titleHint}“ erkannt · Ausgabe wählen`
               : pocket.candidates.length
                 ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
