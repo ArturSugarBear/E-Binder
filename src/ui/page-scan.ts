@@ -1,10 +1,13 @@
 import {
   candidatesFromText,
+  recognitionClues,
   fetchCatalogCard,
   fetchRecognizedCards,
   searchCatalog,
 } from '../data/card-catalog';
 import { extractPagePockets } from '../data/page-pockets';
+import { autoAlignPage } from '../data/auto-page-align';
+import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
 import {
@@ -18,7 +21,6 @@ import {
 } from '../domain/personal';
 import {
   action,
-  check,
   el,
   errorText,
   field,
@@ -42,6 +44,7 @@ type Pocket = {
   status: HTMLElement;
   quality: HTMLElement;
   container?: HTMLElement;
+  ocrText?: string;
 };
 
 /** Import a physical binder as repeated, explicitly reviewed 3x3 page captures. */
@@ -69,6 +72,7 @@ export function openPageScanner(
   status.setAttribute('aria-live', 'polite');
   const queueStatus = el('p', 'w-muted');
   const grid = el('div', 'w-page-scan-grid');
+  const reviewSummary = el('p', 'w-muted w-page-scan-summary');
   const progress = el('progress', 'w-progress');
   progress.max = 9;
   progress.hidden = true;
@@ -97,13 +101,17 @@ export function openPageScanner(
     binderNameField.hidden = Boolean(binder.value);
   });
   const language = select([
+    ['auto', 'Automatisch (DE/EN/JA)'],
     ['de', 'Deutsch'],
     ['en', 'Englisch'],
     ['ja', 'Japanisch'],
   ]);
-  language.value = 'de';
-  const approved = check(
-    'Ich habe alle neun Positionen und die Druckvarianten geprüft. Fehlende Karten werden nicht automatisch ergänzt.',
+  language.value = 'auto';
+  const scanOptions = el(
+    'details',
+    'w-page-scan-options',
+    el('summary', '', 'Erweiterte Scanoptionen'),
+    field('Sprache der Karten (optional)', language),
   );
   const stop = action(
     'Erkennung stoppen',
@@ -114,7 +122,7 @@ export function openPageScanner(
   const save = action(
     'Geprüfte Binderseite übernehmen',
     () => {
-      if (!current || processing || !approved.input.checked) return;
+      if (!current || processing) return;
       const slots: (ScannedCardChoice | null)[] = pockets.map((pocket) =>
         pocket.decision === 'card' && pocket.card
           ? {
@@ -151,7 +159,6 @@ export function openPageScanner(
       current = undefined;
       pockets = [];
       grid.replaceChildren();
-      approved.input.checked = false;
       if (queued.length) {
         void nextPage();
       } else {
@@ -167,20 +174,22 @@ export function openPageScanner(
     save.disabled =
       !current ||
       processing ||
-      !approved.input.checked ||
       pockets.length !== 9 ||
       !pockets.some((pocket) => pocket.decision === 'card') ||
       pockets.some(
         (pocket) =>
-          pocket.decision === 'pending' ||
-          (pocket.decision === 'card' &&
-            (!pocket.card ||
-              !pocket.finish.value ||
-              (pocket.finish.value === 'other' &&
-                !pocket.variant.value.trim()))),
+          pocket.decision === 'card' &&
+          (!pocket.card ||
+            (pocket.finish.value === 'other' &&
+              !pocket.variant.value.trim())),
       );
+    const matches = pockets.filter((pocket) => pocket.decision === 'card').length;
+    const empty = pockets.filter((pocket) => pocket.decision === 'empty').length;
+    const open = pockets.filter((pocket) => pocket.decision === 'pending' || pocket.decision === 'skip').length;
+    reviewSummary.textContent = pockets.length
+      ? `${matches} ausgewählt · ${empty} vermutlich leer · ${open} offen. Du kannst nur die ausgewählten Karten übernehmen.`
+      : 'Noch keine Binderseite eingelesen.';
   };
-  approved.input.addEventListener('change', updateSave);
   const reportQueue = () => {
     queueStatus.textContent = `${current ? 'Eine Seite in Prüfung. ' : ''}${queued.length} weitere Seiten vorgemerkt.`;
   };
@@ -228,9 +237,8 @@ export function openPageScanner(
     status,
     progress,
     grid,
-    approved.row,
+    reviewSummary,
   );
-  approved.row.hidden = true;
   sheet.footer.append(stop, save);
   reportQueue();
 
@@ -352,9 +360,11 @@ export function openPageScanner(
         ['skip', 'Nicht erkannt – leer lassen'],
       ]);
       const finish = select([
-        ['', 'Druckvariante bestätigen'],
-        ...finishes.map((key) => [key, finishLabels[key]] as [string, string]),
-      ]);
+        ['unverified', 'Nicht bestimmt (später ändern)'],
+        ...finishes
+          .filter((key) => key !== 'unverified')
+          .map((key) => [key, finishLabels[key]] as [string, string]),
+      ], 'unverified');
       finish.hidden = true;
       const variant = input('text');
       variant.placeholder = 'Auflage / Stempel beschreiben';
@@ -412,10 +422,15 @@ export function openPageScanner(
         el('div', 'w-page-scan-photo-frame', photo),
         info,
         quality,
-        pick,
-        finish,
-        variant,
-        el('div', 'w-page-scan-search', query, searchButton),
+        el(
+          'details',
+          'w-page-scan-editor',
+          el('summary', '', 'Prüfen / ändern'),
+          pick,
+          finish,
+          variant,
+          el('div', 'w-page-scan-search', query, searchButton),
+        ),
       );
       pocket.container = container;
       grid.append(container);
