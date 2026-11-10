@@ -24,10 +24,14 @@ test('stale captures can be removed individually or together without changing ow
     'svi-211.webp',
   );
   page.once('dialog', (dialog) => dialog.accept());
-  await add.getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ }).click();
+  await add
+    .getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ })
+    .click();
   await expect(add.locator('.w-capture-queue')).not.toContainText('1 offen');
   await expect(add.locator('.w-photo-review')).toBeEmpty();
-  await add.getByRole('button', { name: 'Karten hinzufügen schließen' }).click();
+  await add
+    .getByRole('button', { name: 'Karten hinzufügen schließen' })
+    .click();
   await page.reload();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
