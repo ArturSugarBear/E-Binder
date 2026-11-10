@@ -2931,6 +2931,13 @@ textarea.w-input,
     ),
     linear-gradient(135deg, rgb(36 40 42 / 0.94), rgb(18 19 24 / 0.95));
 }
+.w-home-hero-copy {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 6px;
+  min-width: 0;
+}
 .w-home-hero h1 {
   max-width: 14ch;
   font-size: clamp(36px, 5.4vw, 62px);
