@@ -73,11 +73,13 @@ test('a distorted photo is split into nine reviewable positions without changing
   const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
   await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
   await expect(crop.locator('.w-crop-review')).toBeVisible();
+  await expect(crop.locator('.w-page-crop-guides span')).toHaveCount(9);
   await crop.getByRole('button', { name: 'Neun Fächer auswerten' }).click();
   await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
     timeout: 20_000,
   });
   await expect(dialog.locator('.w-page-scan-pocket img')).toHaveCount(9);
+  await expect(dialog.locator('.w-page-scan-quality')).toHaveCount(9);
   await expect(
     dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
   ).toBeDisabled();

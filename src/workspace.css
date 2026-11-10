@@ -2030,3 +2030,33 @@ textarea.w-input,
     background: var(--paper);
   }
 }
+
+/* Visual correspondence between the physical nine pockets and their digital slots. */
+.w-page-crop-preview {
+  width: min(100%, 430px);
+  position: relative;
+  margin-inline: auto;
+}
+.w-page-crop-preview .w-crop-card-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.w-page-crop-guides {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  pointer-events: none;
+}
+.w-page-crop-guides span {
+  border: 1px solid rgb(106 208 224 / 0.78);
+  padding: 5px;
+  color: var(--ink);
+  background: linear-gradient(135deg, rgb(2 7 10 / 0.6) 0, rgb(2 7 10 / 0) 45%);
+  font: 500 10px/1 var(--mono);
+}
+.w-page-scan-quality[data-warning='true'] {
+  color: #f3cf93;
+}

@@ -91,3 +91,7 @@ In **Binder → Binderseite scannen** oder **+ Karte → Ganze Binderseite scann
 Gleiche Fotodateien werden über SHA-256 nicht zweimal übernommen. Eine neu fotografierte Aufnahme derselben physischen Seite kann einen anderen Fingerabdruck haben – bitte vor dem Import prüfen. Bereits vorhandene, nicht platzierte Exemplare werden zuerst verwendet; es wird nur dann eine zusätzliche Menge erfasst, wenn kein freies Exemplar vorhanden ist. Noch nicht erkannte Karten können leer gelassen und später ergänzt werden. Bei einer unleserlichen Seite bleibt die manuelle Kartenauswahl möglich.
 
 **Grenzen:** Die 3×3-Geometrie verlangt eine ausgerichtete Seite; automatisch gefundene Ecken, sichere Holo-Unterscheidung, unkontrollierte Perspektiven und vollständig automatische Zuordnung sind nicht zugesichert. Für echte Foto-Qualitätstests eigene oder nachweislich freigegebene Aufnahmen verwenden; keine fremden Verkaufsbilder ins Repository kopieren. Siehe [Scanner-Qualität und Testprotokoll](docs/scanner.md).
+
+### Fotoqualität und realistische Tests
+
+Der Seitenscanner zeigt jetzt neun nummerierte Taschen schon in der Ausrichtungsvorschau und danach **lokale Hinweise zu möglichen Foto-Problemen** (Dunkelheit, helle Reflexionen, niedriger Kontrast und geringe Bilddetails). Sie sind keine OCR-Wahrscheinlichkeiten und überschreiben keine Bestandsdaten. Für reproduzierbare Messungen mit **eigenen oder ausdrücklich nutzbaren realen Fotos** siehe [Scanner-Fotoqualität und Benchmark](docs/scanner-quality.md). Hierfür wird kein externer AI-Dienst benötigt.
