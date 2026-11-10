@@ -15,8 +15,8 @@ export class CardImages {
   private async remote(card: PersonalCard): Promise<string> {
     if (!card.image && card.source === 'tcgdex' && card.sourceId) {
       try {
-        const apiImage = (await catalogEntry(card.sourceId, card.language))
-          .card.image;
+        const apiImage = (await catalogEntry(card.sourceId, card.language)).card
+          .image;
         if (apiImage) return apiImage;
       } catch {
         // Known, licensed-in-project local artwork still works offline.
