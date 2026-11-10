@@ -14,6 +14,8 @@ export function looksLikeEmptyPocket(
   let brightness = 0;
   let bright = 0;
   let count = 0;
+  let gradients = 0;
+  let gradientSamples = 0;
   // Ignore plastic sleeve edges: inspect the centre 70% of each crop.
   const x0 = Math.floor(width * 0.15);
   const x1 = Math.ceil(width * 0.85);
@@ -27,13 +29,27 @@ export function looksLikeEmptyPocket(
       saturation += hi ? ((hi - lo) / hi) * 255 : 0;
       brightness += hi;
       if (hi > 170) bright++;
+      if (x > x0 + 1 && y > y0 + 1 && x < x1 - 2 && y < y1 - 2) {
+        const gray = (offset: number) =>
+          0.299 * rgba[offset]! +
+          0.587 * rgba[offset + 1]! +
+          0.114 * rgba[offset + 2]!;
+        const left = i - 8;
+        const right = i + 8;
+        const up = i - width * 8;
+        const down = i + width * 8;
+        gradients += Math.abs(gray(right) - gray(left));
+        gradients += Math.abs(gray(down) - gray(up));
+        gradientSamples++;
+      }
       count++;
     }
   return (
     count > 0 &&
     saturation / count < 38 &&
     brightness / count < 115 &&
-    bright / count < 0.02
+    bright / count < 0.02 &&
+    gradients / Math.max(1, gradientSamples) < 12
   );
 }
 
