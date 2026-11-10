@@ -583,6 +583,13 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       'w-portfolio-footnote',
       'Wichtig: Werte zeigen datierte EUR-Referenzen zum exakt passenden Cardmarket-Druck (Trend, sonst 7-/30-Tage- oder allgemeiner Verkaufsdurchschnitt). Durchschnitt ist kein Trend. Unbestimmte Varianten, Reverse-Holo und Grading bleiben ohne eindeutige Zuordnung unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine Verkaufserlöse oder historischen Depotkurse.',
     );
+    if (!count) {
+      leaders.querySelector('.w-portfolio-section-head')?.remove();
+      content.replaceChildren(hero, leaders, book);
+      content.classList.add('is-empty');
+      return;
+    }
+    content.classList.remove('is-empty');
     content.replaceChildren(
       hero,
       overviewStats,

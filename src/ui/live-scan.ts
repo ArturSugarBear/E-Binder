@@ -1,3 +1,4 @@
+import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestPageCorners } from '../domain/page-outline';
@@ -140,6 +141,7 @@ export function openLiveScanner(
   polygon.setAttribute('vector-effect', 'non-scaling-stroke');
   outline.append(polygon);
   const stage = el('div', 'w-live-stage', video, frame, outline);
+  const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
   const progress = el('progress', 'w-progress w-live-progress');
@@ -212,7 +214,7 @@ export function openLiveScanner(
   mode.setAttribute('aria-label', 'Scanmodus wählen');
   mode.firstElementChild!.setAttribute('aria-pressed', 'true');
   mode.lastElementChild!.setAttribute('aria-pressed', 'false');
-  sheet.body.append(mode, stage, progress, help);
+  sheet.body.append(mode, stage, journey.element, progress, help);
   sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races
@@ -250,6 +252,8 @@ export function openLiveScanner(
     if (!running || busy || !video.videoWidth || !video.videoHeight) return;
     busy = true;
     trigger.disabled = true;
+    journey.update('capture', 'Aufnahme wird ausgerichtet …', 0);
+    stage.dataset.scanPhase = 'capture';
     const aligned = reliable !== null;
     const chosen = reliable;
     status.textContent = aligned
@@ -262,6 +266,11 @@ export function openLiveScanner(
       status.textContent =
         'Aufnahme gesichert · OCR und Katalogabgleich laufen …';
       progress.value = 3;
+      journey.update(
+        'recognize',
+        'Karte wird erkannt · noch nicht gespeichert',
+      );
+      stage.dataset.scanPhase = 'recognize';
       await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
           type: 'image/jpeg',
@@ -271,6 +280,8 @@ export function openLiveScanner(
       if (!closed) {
         status.textContent =
           'Aufnahme verarbeitet. Prüfe die Kartenausgabe oder scanne die nächste Karte.';
+        journey.update('review', 'Aufnahme bereit · Ausgabe jetzt prüfen', 1);
+        stage.dataset.scanPhase = 'review';
         next.hidden = false;
         refreshReview();
         trigger.hidden = true;
@@ -285,6 +296,8 @@ export function openLiveScanner(
           'camera_capture_failed',
           'error',
         );
+        journey.update('error', 'Scan nicht abgeschlossen · erneut versuchen');
+        stage.dataset.scanPhase = 'error';
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
         refreshReview();
@@ -362,6 +375,8 @@ export function openLiveScanner(
     sampled = 0;
     stage.classList.remove('has-card-outline');
     polygon.removeAttribute('points');
+    journey.update('ready', 'Karte in den Rahmen halten', 0);
+    stage.dataset.scanPhase = 'ready';
     status.textContent = 'Kamera wird gestartet …';
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
