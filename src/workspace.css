@@ -2419,3 +2419,81 @@ textarea.w-input,
     grid-column: 1 / -1;
   }
 }
+
+/* Rare Room live scan: a truthful frame lock, not a simulated scan overlay. */
+.w-live-scan-dialog .w-dialog-body {
+  gap: 13px;
+  padding-block: 16px;
+}
+.w-live-stage {
+  position: relative;
+  width: min(100%, 400px, 45dvh);
+  aspect-ratio: 3 / 4;
+  max-height: min(60dvh, 560px);
+  margin-inline: auto;
+  background: var(--desk);
+  border: 1px solid var(--w-border);
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.w-live-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.w-live-frame-guide {
+  position: absolute;
+  inset: 9% 16%;
+  border: 2px dashed rgb(246 244 238 / 0.7);
+  border-radius: 11px;
+  pointer-events: none;
+  transition: border-color 180ms ease;
+}
+.w-live-stage.has-card-outline .w-live-frame-guide {
+  border-color: transparent;
+}
+.w-live-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+.w-live-stage.has-card-outline .w-live-outline polygon {
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.w-live-status {
+  min-height: 2.6em;
+  text-align: center;
+  font-weight: 600;
+  color: var(--ink);
+}
+.w-live-progress {
+  display: block;
+  width: min(100%, 400px);
+  margin-inline: auto;
+}
+.w-live-help {
+  max-width: 42ch;
+  margin-inline: auto;
+  font-size: 12px;
+  text-align: center;
+}
+.w-live-scan-dialog .w-dialog-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--paper);
+  z-index: 3;
+}
+@media (max-width: 640px) {
+  .w-live-scan-dialog .w-dialog-body {
+    padding: 14px 16px;
+  }
+  .w-live-scan-dialog .w-dialog-footer .w-button {
+    flex: 1 1 100%;
+  }
+}
