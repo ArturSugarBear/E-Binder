@@ -17,7 +17,7 @@ Ein Kartenname bezeichnet oft viele Ausgaben. Artwork-Ähnlichkeit reduziert das
 
 ## Modell- und Index-Vertrag
 
-Das Manifest verwendet das Format `e-binder-visual-v1` mit `modelId`, `dimensions`, `count`, `size=224`, `preprocessing=rgb-0-1-chw-stretch`, `pooling=cls`, den drei lokalen Dateinamen sowie SHA-256 für ONNX und `index.i8`. Dateinamen ohne Unterverzeichnisse verhindern fremde Origins und Pfadwechsel.
+Das Manifest verwendet das Format `e-binder-visual-v1` mit `modelId`, `dimensions`, `count`, `size=224`, `preprocessing=rgb-0-1-chw-stretch`, `pooling=cls`, den drei lokalen Dateinamen sowie SHA-256 für ONNX und `index.i8`. Die Dateinamen enthalten die Modellversion (z. B. \`index-approved-model-v1.i8\`), damit ein alter PWA-Cache keine inkompatiblen Modell-/Indexdateien vermischt. Dateinamen ohne Unterverzeichnisse verhindern fremde Origins und Pfadwechsel.
 
 Der Index ist eine feste `count × dimensions`-Matrix im vorzeichenbehafteten `int8`-Format. Referenz-IDs sind einmalig und sprachgebunden, z. B. `de:sv01-211` oder `ja:SV2a-001`. Die dazugehörige `references.json` verwendet identische Reihenfolge und enthält `id`, `language`, `setId` und `number`.
 
