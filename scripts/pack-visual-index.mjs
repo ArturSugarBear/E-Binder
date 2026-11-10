@@ -23,7 +23,9 @@ import { createHash } from 'node:crypto';
 
 const [sourceFile, modelFile, outputDirectory] = process.argv.slice(2);
 if (!sourceFile || !modelFile || !outputDirectory) {
-  console.error('Usage: node scripts/pack-visual-index.mjs <embeddings.json> <model.onnx> <output-dir>');
+  console.error(
+    'Usage: node scripts/pack-visual-index.mjs <embeddings.json> <model.onnx> <output-dir>',
+  );
   process.exit(2);
 }
 const parsed = JSON.parse(await readFile(resolve(sourceFile), 'utf8'));
@@ -33,7 +35,8 @@ if (
   !Array.isArray(entries) ||
   !entries.length ||
   entries.length > 200000
-) throw new Error('Invalid visual embedding source.');
+)
+  throw new Error('Invalid visual embedding source.');
 const dimensions = entries[0].vector?.length;
 if (!Number.isInteger(dimensions) || dimensions < 64 || dimensions > 2048)
   throw new Error('Invalid embedding dimensions.');
@@ -49,15 +52,24 @@ for (const [row, entry] of entries.entries()) {
     !Array.isArray(entry.vector) ||
     entry.vector.length !== dimensions ||
     seen.has(entry.id)
-  ) throw new Error('Invalid, duplicate or inconsistent reference at row ' + row);
+  )
+    throw new Error(
+      'Invalid, duplicate or inconsistent reference at row ' + row,
+    );
   seen.add(entry.id);
-  const maxAbs = Math.max(...entry.vector.map((v) => {
-    if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error('Non-finite embedding.');
-    return Math.abs(v);
-  }));
+  const maxAbs = Math.max(
+    ...entry.vector.map((v) => {
+      if (typeof v !== 'number' || !Number.isFinite(v))
+        throw new Error('Non-finite embedding.');
+      return Math.abs(v);
+    }),
+  );
   if (maxAbs <= 0) throw new Error('Empty vector at row ' + row);
   for (let i = 0; i < dimensions; i++) {
-    const quantized = Math.max(-127, Math.min(127, Math.round(entry.vector[i] * 127 / maxAbs)));
+    const quantized = Math.max(
+      -127,
+      Math.min(127, Math.round((entry.vector[i] * 127) / maxAbs)),
+    );
     packed.writeInt8(quantized, row * dimensions + i);
   }
   references.push({
@@ -68,7 +80,8 @@ for (const [row, entry] of entries.entries()) {
   });
 }
 const model = await readFile(resolve(modelFile));
-if (model.length < 1024) throw new Error('Model file too small; use a real licensed ONNX model.');
+if (model.length < 1024)
+  throw new Error('Model file too small; use a real licensed ONNX model.');
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const directory = resolve(outputDirectory);
 await mkdir(directory, { recursive: true });
@@ -77,19 +90,28 @@ await copyFile(resolve(modelFile), join(directory, modelName));
 await writeFile(join(directory, 'index.i8'), packed);
 const referencesBytes = Buffer.from(JSON.stringify(references));
 await writeFile(join(directory, 'references.json'), referencesBytes);
-await writeFile(join(directory, 'manifest.json'), JSON.stringify({
-  format: 'e-binder-visual-v1',
-  modelId: parsed.modelId,
-  dimensions,
-  size: 224,
-  preprocessing: 'rgb-0-1-chw-stretch',
-  pooling: 'cls',
-  modelFile: modelName,
-  modelSha256: sha256(model),
-  indexFile: 'index.i8',
-  indexSha256: sha256(packed),
-  referencesFile: 'references.json',
-  referencesSha256: sha256(referencesBytes),
-  count: entries.length,
-}, null, 2) + '\n');
-console.log(`Prepared ${entries.length} model-bound references (${dimensions} dims, ${packed.length} packed bytes).`);
+await writeFile(
+  join(directory, 'manifest.json'),
+  JSON.stringify(
+    {
+      format: 'e-binder-visual-v1',
+      modelId: parsed.modelId,
+      dimensions,
+      size: 224,
+      preprocessing: 'rgb-0-1-chw-stretch',
+      pooling: 'cls',
+      modelFile: modelName,
+      modelSha256: sha256(model),
+      indexFile: 'index.i8',
+      indexSha256: sha256(packed),
+      referencesFile: 'references.json',
+      referencesSha256: sha256(referencesBytes),
+      count: entries.length,
+    },
+    null,
+    2,
+  ) + '\n',
+);
+console.log(
+  `Prepared ${entries.length} model-bound references (${dimensions} dims, ${packed.length} packed bytes).`,
+);

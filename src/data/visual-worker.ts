@@ -75,7 +75,10 @@ async function localResource(url: string): Promise<ArrayBuffer> {
   return response.arrayBuffer();
 }
 
-async function checkedResource(url: string, checksum: string): Promise<ArrayBuffer> {
+async function checkedResource(
+  url: string,
+  checksum: string,
+): Promise<ArrayBuffer> {
   const bytes = await localResource(url);
   const hash = Array.from(
     new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
@@ -126,7 +129,8 @@ function load(manifestUrl: string) {
       )
         throw new Error('Externes Bildmodell ist nicht zugelassen.');
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Visuelle Suche ist nicht installiert.');
+      if (!response.ok)
+        throw new Error('Visuelle Suche ist nicht installiert.');
       const manifest = parseManifest(await response.json());
       const file = (name: string) => new URL(name, url).href;
       env.wasm.numThreads = 1;
@@ -135,7 +139,10 @@ function load(manifestUrl: string) {
       const [modelBytes, indexBytes, referenceBytes] = await Promise.all([
         checkedResource(file(manifest.modelFile), manifest.modelSha256),
         checkedResource(file(manifest.indexFile), manifest.indexSha256),
-        checkedResource(file(manifest.referencesFile), manifest.referencesSha256),
+        checkedResource(
+          file(manifest.referencesFile),
+          manifest.referencesSha256,
+        ),
       ]);
       const references = parseReferences(
         JSON.parse(new TextDecoder().decode(referenceBytes)) as unknown,
@@ -191,8 +198,15 @@ async function match({ id, photo, manifestUrl }: MatchRequest): Promise<void> {
         throw new Error('Bildmodell liefert inkompatible Embeddings.');
       const data = embedding.data as Float32Array;
       // CLS token: token zero of [1, tokens, dimensions] or [1, dimensions].
-      const query = { modelId: index.modelId, values: data.slice(0, index.dimensions) };
-      scope.postMessage({ id, type: 'done', hits: searchVisualIndex(query, index, 5) });
+      const query = {
+        modelId: index.modelId,
+        values: data.slice(0, index.dimensions),
+      };
+      scope.postMessage({
+        id,
+        type: 'done',
+        hits: searchVisualIndex(query, index, 5),
+      });
     } finally {
       for (const output of Object.values(outputs)) output.dispose();
     }
@@ -205,11 +219,14 @@ async function match({ id, photo, manifestUrl }: MatchRequest): Promise<void> {
 let sequence = Promise.resolve();
 scope.onmessage = (event) => {
   const request = event.data;
-  sequence = sequence.then(() => match(request)).catch((error: unknown) => {
-    scope.postMessage({
-      id: request.id,
-      type: 'error',
-      message: error instanceof Error ? error.message : 'Bildsuche fehlgeschlagen.',
+  sequence = sequence
+    .then(() => match(request))
+    .catch((error: unknown) => {
+      scope.postMessage({
+        id: request.id,
+        type: 'error',
+        message:
+          error instanceof Error ? error.message : 'Bildsuche fehlgeschlagen.',
+      });
     });
-  });
 };

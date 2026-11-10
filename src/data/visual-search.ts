@@ -84,7 +84,11 @@ export async function createVisualSearchSession(
       }
       const id = ++nextId;
       const timer = setTimeout(() => {
-        finish(new Error('Die Bildsuche wurde wegen Zeitüberschreitung abgebrochen.'));
+        finish(
+          new Error(
+            'Die Bildsuche wurde wegen Zeitüberschreitung abgebrochen.',
+          ),
+        );
         close();
       }, 45000);
       current = { id, resolve, reject, timer };

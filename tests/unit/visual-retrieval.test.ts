@@ -17,9 +17,10 @@ const refs: VisualReference[] = [
 ];
 function fixture(): VisualIndex {
   // Same artwork may produce identical vectors for different printings.
-  const vectors = new Int8Array(
-    [100, 1, 0, 0, 100, 1, 0, 0, 100, 1, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 90, 20],
-  );
+  const vectors = new Int8Array([
+    100, 1, 0, 0, 100, 1, 0, 0, 100, 1, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0,
+    90, 20,
+  ]);
   return { modelId: 'fixture-v1', dimensions: 4, references: refs, vectors };
 }
 describe('visual-first card retrieval', () => {
@@ -42,11 +43,30 @@ describe('visual-first card retrieval', () => {
   it('rejects wrong model versions, malformed vectors, zeros and invalid rank counts', () => {
     const index = fixture();
     const vector = new Float32Array([1, 0, 0, 0]);
-    expect(() => searchVisualIndex({ modelId: 'other', values: vector }, index)).toThrow();
-    expect(() => searchVisualIndex({ modelId: index.modelId, values: new Float32Array(3) }, index)).toThrow();
-    expect(() => searchVisualIndex({ modelId: index.modelId, values: new Float32Array(4) }, index)).toThrow();
-    expect(() => searchVisualIndex({ modelId: index.modelId, values: vector }, { ...index, vectors: new Int8Array(5) })).toThrow();
-    expect(() => searchVisualIndex({ modelId: index.modelId, values: vector }, index, 100)).toThrow();
+    expect(() =>
+      searchVisualIndex({ modelId: 'other', values: vector }, index),
+    ).toThrow();
+    expect(() =>
+      searchVisualIndex(
+        { modelId: index.modelId, values: new Float32Array(3) },
+        index,
+      ),
+    ).toThrow();
+    expect(() =>
+      searchVisualIndex(
+        { modelId: index.modelId, values: new Float32Array(4) },
+        index,
+      ),
+    ).toThrow();
+    expect(() =>
+      searchVisualIndex(
+        { modelId: index.modelId, values: vector },
+        { ...index, vectors: new Int8Array(5) },
+      ),
+    ).toThrow();
+    expect(() =>
+      searchVisualIndex({ modelId: index.modelId, values: vector }, index, 100),
+    ).toThrow();
   });
   it('uses the full OCR fraction to separate identical artwork without guessing the language', () => {
     const hits = searchVisualIndex(
@@ -68,9 +88,12 @@ describe('visual-first card retrieval', () => {
       { modelId: 'fixture-v1', values: new Float32Array([0, 0, 0, 1]) },
       fixture(),
     );
-    expect(reviewVisualCandidates(hits, [{ number: '07' }]).kind).toBe('review');
+    expect(reviewVisualCandidates(hits, [{ number: '07' }]).kind).toBe(
+      'review',
+    );
     expect(
-      reviewVisualCandidates(hits, [{ number: '077/167', setId: 'different' }]).kind,
+      reviewVisualCandidates(hits, [{ number: '077/167', setId: 'different' }])
+        .kind,
     ).toBe('review');
   });
   it('only counts independent consecutive frame candidates toward stability', () => {

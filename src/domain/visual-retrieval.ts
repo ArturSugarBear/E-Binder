@@ -69,8 +69,7 @@ export function searchVisualIndex(
       throw new Error('Das Bild-Embedding enthält ungültige Werte.');
     queryNormSquared += value * value;
   }
-  if (queryNormSquared <= 0)
-    throw new Error('Das Bild-Embedding ist leer.');
+  if (queryNormSquared <= 0) throw new Error('Das Bild-Embedding ist leer.');
   const queryNorm = Math.sqrt(queryNormSquared);
   const ranked: { reference: VisualReference; similarity: number }[] = [];
   for (let row = 0; row < index.references.length; row++) {
@@ -132,7 +131,7 @@ export function reviewVisualCandidates(
     });
   const ranked = [...hits].sort((a, b) => {
     const score = (hit: VisualHit) =>
-      (exactFor(hit) ? 2 : partialFor(hit) ? 1 : 0);
+      exactFor(hit) ? 2 : partialFor(hit) ? 1 : 0;
     return (
       score(b) - score(a) ||
       b.similarity - a.similarity ||

@@ -2340,7 +2340,6 @@ textarea.w-input,
   }
 }
 
-
 /* Image-first scan: only the best three alternatives are immediately tappable. */
 .w-page-scan-candidates {
   display: grid;

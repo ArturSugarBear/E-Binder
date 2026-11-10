@@ -13,7 +13,10 @@ import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
 import { createVisualSearchSession } from '../data/visual-search';
-import { reviewVisualCandidates, type VisualHit } from '../domain/visual-retrieval';
+import {
+  reviewVisualCandidates,
+  type VisualHit,
+} from '../domain/visual-retrieval';
 import {
   finishLabels,
   finishes,
@@ -64,7 +67,8 @@ export function openPageScanner(
   let sharedRecognitionAbort: AbortController | undefined;
   let sharedRecognition:
     ReturnType<typeof createRecognitionSession> | undefined;
-  let sharedVisualPromise: ReturnType<typeof createVisualSearchSession> | undefined;
+  let sharedVisualPromise:
+    ReturnType<typeof createVisualSearchSession> | undefined;
   let closed = false;
   let processing = false;
   let reAligning = false;
@@ -345,7 +349,10 @@ export function openPageScanner(
       .forEach((button, index) =>
         button.setAttribute(
           'aria-pressed',
-          String(pocket.decision === 'card' && pocket.select.value === `card:${index}`),
+          String(
+            pocket.decision === 'card' &&
+              pocket.select.value === `card:${index}`,
+          ),
         ),
       );
     pocket.finish.hidden = pocket.decision !== 'card';
@@ -403,13 +410,17 @@ export function openPageScanner(
       choice.classList.add('w-page-scan-candidate');
       choice.replaceChildren(
         ctx.images.artwork(card),
-        el('span', 'w-page-scan-candidate-caption',
+        el(
+          'span',
+          'w-page-scan-candidate-caption',
           el('strong', '', card.name),
           el('small', '', `${card.setName} · ${card.number}`),
         ),
       );
-      choice.setAttribute('aria-label',
-        `${card.name}, ${card.setName}, ${card.number} für Fach auswählen`);
+      choice.setAttribute(
+        'aria-label',
+        `${card.name}, ${card.setName}, ${card.number} für Fach auswählen`,
+      );
       pocket.quickChoices?.append(choice);
     }
     updatePocket(pocket);
@@ -615,8 +626,9 @@ export function openPageScanner(
     try {
       // Optional visual search is local and prepared once per binder scan.
       // Until a versioned licensed model/corpus is installed, the OCR path remains.
-      const visual = await (sharedVisualPromise ??=
-        createVisualSearchSession(abort.signal));
+      const visual = await (sharedVisualPromise ??= createVisualSearchSession(
+        abort.signal,
+      ));
       if (closed || abort.signal.aborted) return;
       let visualFailure = false;
       // Small, sequential decodes keep peak RAM bounded on older iPhones.
@@ -754,7 +766,12 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           let titleHint = '';
-          if (navigator.onLine && text.trim() && !online.length && !resolvedVisual.length) {
+          if (
+            navigator.onLine &&
+            text.trim() &&
+            !online.length &&
+            !resolvedVisual.length
+          ) {
             try {
               pocket.status.textContent =
                 'Kartenname wird im Katalog gesucht …';
@@ -779,16 +796,16 @@ export function openPageScanner(
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
               : pocket.candidates.length && titleHint
-              ? `„${titleHint}“ erkannt · Ausgabe wählen`
-              : pocket.candidates.length
-                ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
-                : !navigator.onLine
-                  ? 'Offline · Katalogabgleich benötigt Internet'
-                  : catalogFailed
-                    ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
-                    : text.trim()
-                      ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
-                      : 'Kein lesbarer Kartenname · Foto prüfen';
+                ? `„${titleHint}“ erkannt · Ausgabe wählen`
+                : pocket.candidates.length
+                  ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
+                  : !navigator.onLine
+                    ? 'Offline · Katalogabgleich benötigt Internet'
+                    : catalogFailed
+                      ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
+                      : text.trim()
+                        ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                        : 'Kein lesbarer Kartenname · Foto prüfen';
         } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
