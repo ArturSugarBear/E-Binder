@@ -95,7 +95,11 @@ export function createCatalogBrowser(options: Options) {
   const browse = el(
     'details',
     'w-catalog-discovery',
-    el('summary', '', 'Sets und Illustratoren entdecken'),
+    el(
+      'summary',
+      '',
+      options.standalone ? 'Alle Sets und Reihen' : 'Sets und Illustratoren entdecken',
+    ),
     el(
       'div',
       'w-set-browse-controls',
@@ -247,18 +251,35 @@ export function createCatalogBrowser(options: Options) {
     const current = inventory.find((item) => item.id === set.value);
     if (!current) return;
     const icon = setIcon(current);
-    selectedSet.append(
-      icon,
+    const ownedEditions = editionsInSet(current.id);
+    const info = el(
+      'span',
+      '',
+      el('strong', '', current.name),
       el(
-        'span',
-        '',
-        el('strong', '', current.name),
+        'small',
+        'w-muted',
+        `${current.alias && current.alias !== current.name ? `${current.alias} · ` : ''}${current.cardCount.total ?? current.cardCount.official} Karten · ${language.value.toUpperCase()}`,
+      ),
+    );
+    if (ownedEditions)
+      info.append(
         el(
           'small',
-          'w-muted',
-          `${current.alias && current.alias !== current.name ? `${current.alias} · ` : ''}${current.cardCount.total ?? current.cardCount.official} Karten · ${language.value.toUpperCase()}`,
+          'w-set-owned-note',
+          `${ownedEditions} verschiedene Ausgaben im ${ctx.state.mode === 'demo' ? 'Demo-' : ''}Bestand`,
         ),
-      ),
+      );
+    if (ownedEditions && current.cardCount.official) {
+      const meter = el('progress', 'w-set-progress') as HTMLProgressElement;
+      meter.max = current.cardCount.official;
+      meter.value = Math.min(ownedEditions, meter.max);
+      meter.setAttribute('aria-label', `${ownedEditions} von ${meter.max} Setpositionen`);
+      info.append(meter);
+    }
+    selectedSet.append(
+      icon,
+      info,
       ...(current.id === 'me06'
         ? [
             el(
@@ -329,6 +350,17 @@ export function createCatalogBrowser(options: Options) {
     next();
     return icon;
   }
+  function editionsInSet(setId: string): number {
+    return new Set(
+      ctx.state.holdings
+        .filter(
+          (holding) =>
+            holding.card.setId === setId &&
+            holding.card.language === language.value,
+        )
+        .map((holding) => holding.card.sourceId || holding.card.key),
+    ).size;
+  }
   function renderSets(): void {
     sets.replaceChildren();
     const query = normalize(setSearch.value);
@@ -353,19 +385,32 @@ export function createCatalogBrowser(options: Options) {
         'secondary',
       );
       button.classList.add('w-set-choice');
-      button.replaceChildren(
-        setIcon(item),
+      const label = el(
+        'span',
+        '',
+        el('strong', '', item.name),
         el(
-          'span',
-          '',
-          el('strong', '', item.name),
-          el(
-            'small',
-            'w-muted',
-            `${item.id.toUpperCase()} · ${item.cardCount.total ?? item.cardCount.official} Karten`,
-          ),
+          'small',
+          'w-muted',
+          `${item.id.toUpperCase()} · ${item.cardCount.total ?? item.cardCount.official} Karten`,
         ),
       );
+      if (options.standalone) {
+        const ownedEditions = editionsInSet(item.id);
+        if (ownedEditions) {
+          label.append(
+            el('small', 'w-set-owned-note', `${ownedEditions} Ausgaben gesammelt`),
+          );
+          if (item.cardCount.official) {
+            const meter = el('progress', 'w-set-progress') as HTMLProgressElement;
+            meter.max = item.cardCount.official;
+            meter.value = Math.min(ownedEditions, meter.max);
+            meter.setAttribute('aria-label', `${ownedEditions} von ${meter.max} Setpositionen`);
+            label.append(meter);
+          }
+        }
+      }
+      button.replaceChildren(setIcon(item), label);
       sets.append(button);
     }
     if (!matching.length)

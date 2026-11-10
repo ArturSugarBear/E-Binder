@@ -98,6 +98,37 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       }
     },
   });
+  const setGallery = browser.element.querySelector<HTMLDetailsElement>(
+    '.w-catalog-discovery',
+  )!;
+  const setsMode = action(
+    'Sets entdecken',
+    () => {
+      setGallery.open = true;
+      setGallery.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    },
+    'secondary',
+  );
+  const cardsMode = action(
+    'Karten suchen',
+    () => {
+      setGallery.open = false;
+      status.replaceChildren(
+        message('Suche eine Karte oder wähle oben ein Set. Erst nach deiner Bestätigung wird sie deinem Bestand hinzugefügt.'),
+      );
+      search.focus({ preventScroll: true });
+    },
+    'secondary',
+  );
+  const modeBar = el('div', 'w-discover-mode', setsMode, cardsMode);
+  modeBar.setAttribute('role', 'group');
+  modeBar.setAttribute('aria-label', 'Katalog erkunden');
+  const syncMode = () => {
+    setsMode.setAttribute('aria-pressed', String(setGallery.open));
+    cardsMode.setAttribute('aria-pressed', String(!setGallery.open));
+  };
+  setGallery.addEventListener('toggle', syncMode);
+  syncMode();
   const element = el(
     'section',
     'w-discover',
@@ -116,6 +147,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
         ),
       ),
     ),
+    modeBar,
     el(
       'div',
       'w-discover-search',
@@ -251,6 +283,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     previewRefresh?.();
   }
   search.addEventListener('input', () => {
+    if (search.value.trim()) setGallery.open = false;
     request?.abort();
     clearTimeout(debounce);
     debounce = setTimeout(() => {

@@ -48,6 +48,23 @@ export function openAddCards(
     options.correctHoldingId ? 'Ausgabe korrigieren' : 'Karten hinzufügen',
     true,
   );
+  const flow = el(
+    'ol',
+    'w-scan-flow',
+    el('li', '', '1 · Erfassen'),
+    el('li', '', '2 · Ausgabe prüfen'),
+    el('li', '', '3 · Bestand bestätigen'),
+  );
+  flow.setAttribute('aria-label', 'Schritte der Kartenerfassung');
+  const flowSteps = Array.from(flow.querySelectorAll('li'));
+  const setFlowStage = (index: 0 | 1 | 2) => {
+    flowSteps.forEach((item, position) => {
+      if (position === index) item.setAttribute('aria-current', 'step');
+      else item.removeAttribute('aria-current');
+      item.classList.toggle('is-complete', position < index);
+    });
+  };
+  setFlowStage(options.card || options.correctHoldingId ? 2 : 0);
   const notices = el('div', 'w-form-notices');
   notices.setAttribute('aria-live', 'polite');
   const results = el('div', 'w-search-results');
@@ -163,6 +180,7 @@ export function openAddCards(
     options.browse || options.setId || options.artist,
   );
   sheet.body.append(
+    flow,
     captureStart,
     el(
       'p',
@@ -268,6 +286,7 @@ export function openAddCards(
       alignedCaptures.delete(id);
     }
     if (captureId && removed.has(captureId)) {
+      setFlowStage(0);
       captureId = ctx.state.captures.find(
         (shot) => shot.status === 'pending',
       )?.id;
@@ -485,6 +504,7 @@ export function openAddCards(
   });
 
   async function runOcr(): Promise<void> {
+    setFlowStage(0);
     const shot = capture();
     if (!shot || shot.status === 'confirmed') return;
     interrupt();
@@ -643,6 +663,7 @@ export function openAddCards(
   }
 
   function renderChoices(cards: PersonalCard[]): void {
+    setFlowStage(1);
     results.classList.remove('w-text-results');
     browser.pager.replaceChildren();
     results.replaceChildren();
@@ -674,6 +695,7 @@ export function openAddCards(
   }
   function renderConfirmation(): void {
     if (!selected) return;
+    setFlowStage(2);
     const card = selected;
     const original = options.correctHoldingId
       ? ctx.state.holdings.find((item) => item.id === options.correctHoldingId)
@@ -898,6 +920,7 @@ export function openAddCards(
   }
 
   function manualForm(): void {
+    setFlowStage(1);
     interrupt();
     selected = undefined;
     results.replaceChildren();

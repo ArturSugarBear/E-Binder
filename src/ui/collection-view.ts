@@ -59,6 +59,46 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
     ),
   );
   root.append(head);
+  if (quantity) {
+    const unplaced = ctx.state.holdings.reduce(
+      (sum, holding) => sum + freeCount(ctx.state, holding),
+      0,
+    );
+    const binderPages = ctx.state.binders.reduce(
+      (sum, binder) => sum + binder.pages.length,
+      0,
+    );
+    root.append(
+      el(
+        'div',
+        'w-vault-overview',
+        el(
+          'div',
+          'w-vault-overview-stat',
+          el('small', '', 'Verschiedene Ausgaben'),
+          el('strong', '', String(ctx.state.holdings.length)),
+        ),
+        el(
+          'div',
+          'w-vault-overview-stat',
+          el('small', '', 'Noch nicht zugeordnet'),
+          el('strong', '', String(unplaced)),
+        ),
+        el(
+          'div',
+          'w-vault-overview-stat',
+          el('small', '', 'Binderseiten'),
+          el('strong', '', String(binderPages)),
+        ),
+        action(
+          'Im Binder anordnen',
+          () => ctx.navigate('binder'),
+          'secondary',
+          'binder',
+        ),
+      ),
+    );
+  }
   if (!quantity) {
     const display = el('div', 'w-welcome-art');
     for (const card of ctx.catalog.slice(9, 12))
