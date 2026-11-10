@@ -476,14 +476,13 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         .filter((item) => item.unitValue === null)
         .slice(0, 12)) {
         const card = row.holding.card;
-        const reason =
-          !row.quoteKey
-            ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
-            : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
-              ? 'Druckvariante noch nicht eindeutig bepreist'
-              : row.holding.variantNote
-                ? 'Sonderauflage ohne gesicherten Vergleichspreis'
-                : 'Für diese Ausgabe noch keine Preisreferenz';
+        const reason = !row.quoteKey
+          ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
+          : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
+            ? 'Druckvariante noch nicht eindeutig bepreist'
+            : row.holding.variantNote
+              ? 'Sonderauflage ohne gesicherten Vergleichspreis'
+              : 'Für diese Ausgabe noch keine Preisreferenz';
         const button = action(
           `${card.name} ansehen`,
           () => ctx.openHolding(row.holding.id),
