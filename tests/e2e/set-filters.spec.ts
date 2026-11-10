@@ -228,9 +228,7 @@ test('iPhone Discover gives set logos and card imagery enough visual space', asy
   expect(tileSize!.width).toBeGreaterThan(150);
   expect(tileSize!.height).toBeGreaterThan(130);
   await setTile.click();
-  const art = page
-    .locator('.w-discover .w-search-results .card-art')
-    .first();
+  const art = page.locator('.w-discover .w-search-results .card-art').first();
   await expect(art).toBeVisible();
   expect((await art.boundingBox())!.width).toBeGreaterThan(125);
   expect(
