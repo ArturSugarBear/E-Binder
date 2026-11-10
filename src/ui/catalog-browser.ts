@@ -292,10 +292,7 @@ export function createCatalogBrowser(options: Options) {
         const base = sources[index++]!;
         try {
           const url = new URL(base);
-          if (
-            url.protocol !== 'https:' ||
-            url.hostname !== 'assets.tcgdex.net'
-          )
+          if (url.protocol !== 'https:' || url.hostname !== 'assets.tcgdex.net')
             continue;
           image.src = `${base}.webp`;
           icon.replaceChildren(image);
