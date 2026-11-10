@@ -60,10 +60,14 @@ it('accepts adjoining printed set, language and number fields from the vision mo
 it('accepts a complete collector fraction in either OCR crop', () => {
   expect(hasPrintedCollectorFraction(['TEFDE163/162★', ''])).toBe(true);
   expect(hasPrintedCollectorFraction(['', '211 / 198'])).toBe(true);
+  expect(hasPrintedCollectorFraction(['', '211|198'])).toBe(true);
 });
 it('does not treat a partial number or a Pokémon name as a recognized fraction', () => {
   expect(hasPrintedCollectorFraction(['163/', 'Greninja'])).toBe(false);
   expect(hasPrintedCollectorFraction(['', 'SVI 211'])).toBe(false);
+  expect(hasPrintedCollectorFraction(['2024/2025'])).toBe(false);
+  expect(hasPrintedCollectorFraction(['1234/198'])).toBe(false);
+  expect(hasPrintedCollectorFraction(['211/1984'])).toBe(false);
 });
 it('searches a bounded lower band and right edge without leaving the photo', () => {
   expect(collectorNumberFallbackRegions.length).toBe(5);
