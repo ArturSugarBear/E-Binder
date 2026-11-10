@@ -95,7 +95,7 @@ async function recognize({
   ]);
   try {
     const read = async (
-      region: [number, number, number, number],
+      region: readonly [number, number, number, number],
       variant: 'colour' | 'gray' | 'inverted' | 'binary' = 'colour',
     ): Promise<string> => {
       const [x, y, w, h] = region;
