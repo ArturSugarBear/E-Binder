@@ -32,6 +32,7 @@ import {
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { createRarityGuide } from './rarity-guide';
+import { verifiedLocalArt } from '../data/verified-images';
 import '../catalog.css';
 
 export interface CatalogBrowserState {
@@ -259,6 +260,15 @@ export function createCatalogBrowser(options: Options) {
           `${current.alias && current.alias !== current.name ? `${current.alias} · ` : ''}${current.cardCount.total ?? current.cardCount.official} Karten · ${language.value.toUpperCase()}`,
         ),
       ),
+      ...(current.id === 'me06'
+        ? [
+            el(
+              'a',
+              'w-set-official-link',
+              'Delta-Herrschaft: Karten beim Herausgeber ansehen',
+            ),
+          ]
+        : []),
       action(
         'Setfilter entfernen',
         () => {
@@ -275,28 +285,49 @@ export function createCatalogBrowser(options: Options) {
         'text',
       ),
     );
+    if (current.id === 'me06') {
+      const reference = selectedSet.querySelector<HTMLAnchorElement>(
+        '.w-set-official-link',
+      );
+      if (reference) {
+        reference.href =
+          'https://www.pokemon.com/de/news/die-erweiterung-mega-entwicklung-delta-herrschaft-des-pokemon-sammelkartenspiels-ist-jetzt-erhaeltlich';
+        reference.target = '_blank';
+        reference.rel = 'noopener noreferrer';
+        reference.title =
+          'Externe Pokémon-Seite. E-Binder speichert keine fremden Bilder.';
+      }
+    }
   }
   function setIcon(item: CatalogSet): HTMLElement {
     const icon = el('span', 'w-set-symbol', item.id.toUpperCase());
-    const base = item.logo || item.symbol;
-    if (base) {
-      try {
-        const url = new URL(base);
-        if (url.protocol === 'https:' && url.hostname === 'assets.tcgdex.net') {
-          const image = el('img');
-          image.alt = '';
-          image.loading = 'lazy';
+    const sources = [item.logo, item.symbol].filter((value): value is string =>
+      Boolean(value),
+    );
+    const image = el('img');
+    image.alt = '';
+    image.loading = 'lazy';
+    let index = 0;
+    const next = () => {
+      while (index < sources.length) {
+        const base = sources[index++]!;
+        try {
+          const url = new URL(base);
+          if (url.protocol !== 'https:' || url.hostname !== 'assets.tcgdex.net')
+            continue;
           image.src = `${base}.webp`;
-          image.addEventListener('error', () => {
-            image.remove();
-            icon.textContent = item.id.toUpperCase();
-          });
           icon.replaceChildren(image);
+          return;
+        } catch {
+          // Ignore invalid provider URLs; never load an arbitrary host.
         }
-      } catch {
-        /* A missing set symbol keeps the readable abbreviation. */
       }
-    }
+      image.remove();
+      icon.textContent = item.id.toUpperCase();
+      if (item.id === 'me06') icon.classList.add('w-set-me06-identity');
+    };
+    image.addEventListener('error', next);
+    next();
     return icon;
   }
   function renderSets(): void {
@@ -698,13 +729,23 @@ export function createCatalogBrowser(options: Options) {
     owned.dataset.catalogStatus = card.key;
     visibleCards.set(card.key, card);
     caption.append(owned);
-    if (card.image) button.replaceChildren(ctx.images.artwork(card), caption);
+    if (card.image || verifiedLocalArt(card))
+      button.replaceChildren(ctx.images.artwork(card), caption);
     else {
       button.classList.add('w-card-without-image');
-      const marker = el('span', 'w-no-image-symbol', icon('cards'));
-      marker.setAttribute('aria-hidden', 'true');
-      caption.append(el('small', 'w-muted', 'Katalogbild fehlt'));
-      button.replaceChildren(marker, caption);
+      const placeholder = el(
+        'span',
+        'w-unpictured-card',
+        el('small', '', `${card.setName} / ${card.number}`),
+        el('strong', '', card.name),
+        el('span', '', 'Abbildung noch nicht verfügbar'),
+      );
+      placeholder.setAttribute(
+        'aria-label',
+        `Für ${card.name} ist noch kein geprüftes Katalogbild verfügbar.`,
+      );
+      caption.append(el('small', 'w-muted', 'Ohne geprüftes Katalogbild'));
+      button.replaceChildren(placeholder, caption);
     }
     results.append(button);
   }
