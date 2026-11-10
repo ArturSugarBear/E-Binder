@@ -32,7 +32,10 @@ it('never substitutes wrong set, number, language, source or an existing catalog
   expect(verifiedLocalArt({ ...card, language: 'en' })).toBe('');
   expect(verifiedLocalArt({ ...card, source: 'manual' })).toBe('');
   expect(
-    verifiedLocalArt({ ...card, image: 'https://assets.tcgdex.net/de/sv/sv01/211/high.webp' }),
+    verifiedLocalArt({
+      ...card,
+      image: 'https://assets.tcgdex.net/de/sv/sv01/211/high.webp',
+    }),
   ).toBe('');
   expect(verifiedLocalArt({ ...card, sourceId: 'sv01-999' })).toBe('');
 });
