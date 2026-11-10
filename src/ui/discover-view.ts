@@ -206,8 +206,12 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       'w-discover-info',
       el('p', 'w-discover-overline', card.language.toUpperCase()),
       el('h3', '', card.name),
-      el('p', 'w-discover-set-name', card.setName),
-      el('p', 'w-discover-collector', card.number),
+      el('h4', 'w-discover-set-name', card.setName),
+      el(
+        'p',
+        'w-discover-collector',
+        `${card.number} · ${card.language.toUpperCase()}`,
+      ),
       el(
         'p',
         'w-muted',
