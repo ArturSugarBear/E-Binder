@@ -27,6 +27,7 @@ test('confirming the review checkbox clears stale errors before saving', async (
     .getByLabel('Ausgabe, Sprache, Druckvariante und Gesamtmenge sind geprüft.')
     .check();
   await expect(warning).toBeHidden();
+  await expect(dialog.locator('.w-confirm-form')).toBeVisible();
   await dialog
     .getByRole('button', { name: 'Bestand bestätigen', exact: true })
     .click();
