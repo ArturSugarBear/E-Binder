@@ -109,14 +109,16 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         el(
           'p',
           'w-portfolio-hero-label',
-          'Erfasste Cardmarket-Preisreferenzen',
+          count && priced < count
+            ? 'Erfasster Teilwert · nicht vollständig bewertet'
+            : 'Erfasste Cardmarket-Preisreferenzen',
         ),
         el('p', 'w-portfolio-balance', value),
         el(
           'p',
           'w-portfolio-caption',
           priced
-            ? `${priced} von ${count} Exemplaren mit Preisreferenz · EUR`
+            ? `${priced} von ${count} Exemplaren bepreist · ${count - priced} ohne Marktwert`
             : count
               ? 'Noch keine geeigneten Preisdaten für diese Ausgaben.'
               : 'Die besten Sammlungen beginnen mit einer Karte.',
@@ -131,6 +133,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'div',
         'w-portfolio-hero-art',
         ...top
+          .filter((row) => Boolean(row.holding.card.image))
           .slice(0, 3)
           .map((row) =>
             el(

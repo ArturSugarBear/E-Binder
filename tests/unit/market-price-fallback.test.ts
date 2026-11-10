@@ -27,7 +27,7 @@ function mockCard(id: string, cardmarket: Record<string, unknown>) {
   );
 }
 
-it('uses exact Cardmarket 7-day average if trend is missing, not a fabricated price', async () => {
+it('uses the exact 7-day Cardmarket average when trend is absent', async () => {
   mockCard('sv01-007', {
     unit: 'EUR',
     updated: '2026-11-09T12:00:00Z',
@@ -42,7 +42,7 @@ it('uses exact Cardmarket 7-day average if trend is missing, not a fabricated pr
   expect(entry.holoPrice).toMatchObject({ amount: 15.75, basis: 'avg7' });
 });
 
-it('never substitutes a normal printing price for an unpriced holo', async () => {
+it('never substitutes normal price for unpriced holo', async () => {
   mockCard('sv01-008', {
     unit: 'EUR',
     updated: '2026-11-09T12:00:00Z',
@@ -55,7 +55,7 @@ it('never substitutes a normal printing price for an unpriced holo', async () =>
   expect(entry.holoPrice).toBeUndefined();
 });
 
-it('understands timestamp observations but rejects a mismatched currency', async () => {
+it('rejects mismatched currency despite valid timestamps', async () => {
   mockCard('sv01-009', {
     unit: 'USD',
     updated: Date.parse('2026-11-09T12:00:00Z') / 1000,

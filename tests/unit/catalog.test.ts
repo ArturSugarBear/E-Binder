@@ -216,9 +216,10 @@ it('keeps zero and missing price observations unknown, and retains positive date
     }),
   );
   expect((await catalogEntry('test-zero', 'en')).price).toBeUndefined();
-  expect((await catalogEntry('test-positive', 'en')).price).toEqual({
+  expect((await catalogEntry('test-positive', 'en')).price).toMatchObject({
     amount: 1.25,
     updated: '2026-11-09T00:00:00Z',
+    basis: 'trend',
   });
 });
 it('passes exact set, illustrator, rarity and pagination filters instead of sorting only the first response locally', async () => {

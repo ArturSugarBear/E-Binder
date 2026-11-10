@@ -3859,3 +3859,30 @@ textarea.w-input,
 .w-portfolio-history-labels strong {
   color: var(--ink);
 }
+
+/* Exact-print fallback: keep the identity readable without misleading artwork. */
+.card-art[data-image-state='unavailable'] .art-fallback {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 10%, rgb(216 242 90 / 0.09), transparent 52%),
+    repeating-linear-gradient(135deg, transparent 0 14px, rgb(255 255 255 / 0.022) 14px 15px),
+    var(--raised);
+  border: 1px solid var(--glass-stroke);
+}
+.w-art-fallback-title { font-size: clamp(8px, 1.2vw, 11px); opacity: 0.8; }
+.w-art-fallback-card { font-size: clamp(10px, 1.75vw, 17px); line-height: 1.25; color: var(--ink); overflow-wrap: anywhere; }
+.w-art-fallback-edition { font-size: clamp(8px, 1.2vw, 11px); line-height: 1.35; color: var(--ink-2); overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .w-confirm-form { gap: 16px; }
+  .w-confirm-card { grid-template-columns: 86px minmax(0, 1fr); gap: 12px; }
+  .w-confirm-card h3 { font-size: 19px; }
+  .w-confirm-card > div { gap: 5px; }
+  .w-confirm-form .w-form-grid { gap: 12px; }
+  .w-confirm-form .w-message { line-height: 1.45; }
+  .w-confirm-form .w-input { min-height: 44px; }
+  .w-portfolio-hero-art:empty { display: none; }
+}
