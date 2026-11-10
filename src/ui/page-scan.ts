@@ -56,6 +56,8 @@ export function openPageScanner(
   sheet.dialog.classList.add('w-page-scan-dialog');
   const lifetime = new AbortController();
   let recognitionAbort: AbortController | undefined;
+  let sharedRecognitionAbort: AbortController | undefined;
+  let sharedRecognition: ReturnType<typeof createRecognitionSession> | undefined;
   let closed = false;
   let processing = false;
   let reAligning = false;
@@ -544,19 +546,31 @@ export function openPageScanner(
     updateSave();
   };
   const recognizeAll = async (tiles: Blob[]) => {
-    const abort = new AbortController();
+    if (
+      !sharedRecognition ||
+      !sharedRecognitionAbort ||
+      sharedRecognitionAbort.signal.aborted
+    ) {
+      const controller = new AbortController();
+      sharedRecognitionAbort = controller;
+      lifetime.signal.addEventListener('abort', () => controller.abort(), {
+        once: true,
+      });
+      sharedRecognition = createRecognitionSession(
+        controller.signal,
+        (label) => {
+          status.textContent = label;
+        },
+      );
+    }
+    const abort = sharedRecognitionAbort;
+    const session = sharedRecognition;
     recognitionAbort = abort;
-    lifetime.signal.addEventListener('abort', () => abort.abort(), {
-      once: true,
-    });
     processing = true;
     progress.hidden = false;
     progress.value = 0;
     stop.hidden = false;
     updateSave();
-    const session = createRecognitionSession(abort.signal, (label) => {
-      status.textContent = label;
-    });
     try {
       // Small, sequential decodes keep peak RAM bounded on older iPhones.
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
@@ -644,7 +658,13 @@ export function openPageScanner(
         status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;
       }
     } finally {
-      session.close();
+      // Keep the ONNX model loaded for subsequent photos in the same batch.
+      // A cancelled scan terminates the worker; the next scan starts fresh.
+      if (abort.signal.aborted || closed) {
+        session.close();
+        if (sharedRecognition === session) sharedRecognition = undefined;
+        if (sharedRecognitionAbort === abort) sharedRecognitionAbort = undefined;
+      }
       if (recognitionAbort === abort) recognitionAbort = undefined;
       processing = false;
       stop.hidden = true;
