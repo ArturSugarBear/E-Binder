@@ -214,3 +214,26 @@ test('failed facet requests preserve a selected filter until retry can verify an
   await expect(rarity).toHaveValue('');
   await expect(main.locator('.w-search-results button')).toHaveCount(24);
 });
+
+test('iPhone Discover gives set logos and card imagery enough visual space', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await catalogue(page);
+  await page.goto('./#entdecken');
+  const setTile = page.locator('.w-discover .w-set-choice').first();
+  await expect(setTile).toBeVisible();
+  const tileSize = await setTile.boundingBox();
+  expect(tileSize).not.toBeNull();
+  expect(tileSize!.width).toBeGreaterThan(150);
+  expect(tileSize!.height).toBeGreaterThan(130);
+  await setTile.click();
+  const art = page
+    .locator('.w-discover .w-search-results .card-art')
+    .first();
+  await expect(art).toBeVisible();
+  expect((await art.boundingBox())!.width).toBeGreaterThan(125);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(391);
+});
