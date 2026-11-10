@@ -8,9 +8,7 @@ test('confirming the review checkbox clears stale errors before saving', async (
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
   const dialog = page.getByRole('dialog', { name: 'Karten hinzufügen' });
-  await dialog
-    .getByRole('button', { name: 'Karte manuell eintragen' })
-    .click();
+  await dialog.getByRole('button', { name: 'Karte manuell eintragen' }).click();
   await dialog.getByLabel('Kartenname', { exact: true }).fill('Iscalar');
   await dialog.getByRole('textbox', { name: 'Set' }).fill('Delta-Herrschaft');
   await dialog.getByLabel('Sammlernummer').fill('113/103');
