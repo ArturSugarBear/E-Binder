@@ -6,6 +6,7 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import { alignPhoto } from './photo-crop';
 import { createCatalogBrowser } from './catalog-browser';
 import {
@@ -432,23 +433,33 @@ export function openAddCards(
         ...ctx.catalog,
         ...ctx.state.holdings.map((item) => item.card),
       ];
+      const printedEnergy = anniversaryEnergyFromText(text, language.value);
       const local = candidatesFromText(text, known);
       status.textContent = 'Kartenausgaben werden im Katalog abgeglichen …';
       let online: PersonalCard[] = [];
       let catalogUnavailable = false;
-      try {
-        online = await fetchRecognizedCards(
-          text,
-          language.value,
-          controller.signal,
-        );
-      } catch {
-        catalogUnavailable = true;
+      // A verified MEE 009–016 code is more specific than any title-only
+      // catalogue lookup. Keep it as a single user-reviewed edition.
+      if (!printedEnergy.length) {
+        try {
+          online = await fetchRecognizedCards(
+            text,
+            language.value,
+            controller.signal,
+          );
+        } catch {
+          catalogUnavailable = true;
+        }
       }
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       let titleHint = '';
-      if (!online.length && navigator.onLine && text.trim()) {
+      if (
+        !printedEnergy.length &&
+        !online.length &&
+        navigator.onLine &&
+        text.trim()
+      ) {
         try {
           const found = await fetchNameHintCandidates(
             text,
@@ -461,11 +472,13 @@ export function openAddCards(
           // No invented edition if an optional name lookup fails.
         }
       }
-      const candidates = [
-        ...new Map(
-          [...online, ...local].map((card) => [card.key, card]),
-        ).values(),
-      ].slice(0, 12);
+      const candidates = printedEnergy.length
+        ? printedEnergy
+        : [
+            ...new Map(
+              [...online, ...local].map((card) => [card.key, card]),
+            ).values(),
+          ].slice(0, 12);
       ctx.commit('Texterkennung abgeschlossen', (state) =>
         changeState(state, (next) => {
           const target = next.captures.find((item) => item.id === shot.id);
@@ -492,6 +505,10 @@ export function openAddCards(
             ? 'Energiekarte gelesen, aber Typ oder genaue Ausgabe sind nicht sicher erkannt. Prüfe den Energietyp und die Sammlernummer auf dem Foto und suche die Karte gezielt. Es wurde nichts übernommen.'
             : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
       );
+      if (printedEnergy.length)
+        tell(
+          `Gedruckten Setcode ${printedEnergy.map((card) => card.number).join(', ')} erkannt: 30-Jahre-Holo-Energie. Dies ist ein Vorschlag ohne Katalogbild. Prüfe Typ, Sprache, Emblem und Ausgabe auf deinem Foto, bevor du den Bestand bestätigst.`,
+        );
       const number = recognitionClues(text)[0]?.number;
       // Prefill the read number, but require an explicit manual search:
       // an OCR fragment alone must not generate unrelated editions.
