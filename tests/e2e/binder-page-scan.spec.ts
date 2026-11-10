@@ -86,9 +86,8 @@ test('a distorted photo is split into nine reviewable positions without changing
   ).toBeDisabled();
   const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
   if (await stop.isVisible()) await stop.click();
-  await expect(dialog.locator('.w-page-scan-pocket.is-scanning')).toHaveCount(0, {
-    timeout: 20_000,
-  });
+  const active = dialog.locator('.w-page-scan-pocket.is-scanning');
+  await expect(active).toHaveCount(0, { timeout: 20_000 });
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })
     .click();
