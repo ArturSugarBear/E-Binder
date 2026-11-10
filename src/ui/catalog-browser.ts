@@ -28,7 +28,6 @@ import {
   input,
   message,
   select,
-  icon,
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { createRarityGuide } from './rarity-guide';
