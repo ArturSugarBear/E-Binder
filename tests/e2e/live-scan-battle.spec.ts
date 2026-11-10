@@ -149,16 +149,16 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await live
     .getByRole('button', { name: 'Karte live scannen schließen' })
     .click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const states = (
-          window as typeof window & { __scanRig: { trackStates: () => string[] } }
-        ).__scanRig.trackStates();
-        return states.length > 0 && states.every((state) => state === 'ended');
-      }),
-    )
-    .toBe(true);
+  // Wait until the native close event runs the cleanup callback.
+  await expect(live).toHaveCount(0);
+  const trackStates = await page.evaluate(() => {
+    const rig = (
+      window as typeof window & { __scanRig: { trackStates: () => string[] } }
+    ).__scanRig;
+    return rig.trackStates();
+  });
+  expect(trackStates.length).toBeGreaterThan(0);
+  expect(trackStates.every((state) => state === 'ended')).toBe(true);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
