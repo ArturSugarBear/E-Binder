@@ -16,4 +16,5 @@ it('rejects arbitrary text and image URLs as card telemetry identifiers', () => 
   expect(safeCatalogueKey('photo: data:image/png;base64,AA')).toBeUndefined();
   expect(safeCatalogueKey('https://example.com/secret')).toBeUndefined();
   expect(safeCatalogueKey('My private notes')).toBeUndefined();
+  expect(safeCatalogueKey('blob:https://example.com/photo')).toBeUndefined();
 });
