@@ -327,13 +327,13 @@ test('Discover card opens centered with a hero-sized card, including on narrow i
   await page.setViewportSize({ width: 390, height: 844 });
   // The actual iPhone layout must have one card-first column, not the
   // previous cramped artwork/sidebar layout from an older PWA cache.
-  const mobileColumns = () =>
-    dialog.locator('.w-discover-card').evaluate((element) =>
-      getComputedStyle(element).gridTemplateColumns.split(/\s+/).length,
+  for (const width of [390, 428]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect(dialog.locator('.w-discover-card')).toHaveCSS(
+      'grid-template-columns',
+      /^\d+(?:\.\d+)?px$/,
     );
-  expect(await mobileColumns()).toBe(1);
-  await page.setViewportSize({ width: 428, height: 844 });
-  expect(await mobileColumns()).toBe(1);
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileArt = await artwork.boundingBox();
   expect(mobileArt).not.toBeNull();
