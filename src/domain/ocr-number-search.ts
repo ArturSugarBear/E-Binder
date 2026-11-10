@@ -16,5 +16,5 @@ export const collectorNumberFallbackRegions: readonly RecognitionRegion[] = [
 
 /** A printed fraction is evidence, not a calibrated confidence or exact card ID. */
 export function hasPrintedCollectorFraction(texts: readonly string[]): boolean {
-  return texts.some((text) => /\d{1,4}\s*\/\s*\d{1,4}/.test(text));
+  return texts.some((text) => /(?<!\d)\d{1,3}\s*[/|]\s*\d{1,3}(?!\d)/.test(text));
 }
