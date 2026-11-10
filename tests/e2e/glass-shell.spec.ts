@@ -79,10 +79,8 @@ test('Home and Profile actions reach the named task and cancellation preserves a
   });
   await page.goto('./#home');
   const main = page.getByRole('main');
-  for (const caption of [
-    'Karte live scannen',
-    'Mit der ersten Karte starten',
-  ]) {
+  // The single primary scan CTA replaces the old duplicate onboarding button.
+  for (const caption of ['Karte live scannen']) {
     await main.getByRole('button', { name: caption, exact: true }).click();
     const live = page.getByRole('dialog', {
       name: 'Karte live scannen',
