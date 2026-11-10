@@ -1,0 +1,29 @@
+name: Format collector-experience feature
+on:
+  push:
+    branches:
+      - feat/collector-experience-20261110
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.repository == 'ArturSugarBear/E-Binder'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply repository's Prettier rules and remove this one-off formatter
+        run: |
+          npx prettier --write src/ui/discover-view.ts src/ui/catalog-browser.ts src/ui/home-view.ts src/ui/collection-view.ts src/ui/add-cards.ts src/catalog.css src/workspace.css
+          git rm .github/workflows/format-collector-temporary.yml
+          git add src/ui/discover-view.ts src/ui/catalog-browser.ts src/ui/home-view.ts src/ui/collection-view.ts src/ui/add-cards.ts src/catalog.css src/workspace.css
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Format collector experience with repository Prettier"
+            git push origin HEAD:feat/collector-experience-20261110
+          fi
