@@ -236,6 +236,43 @@ export function openAddCards(
     }
     photoArea.append(el('div', 'w-photo-comparison', picture, copy));
   };
+  const discardCaptures = (ids: string[]) => {
+    const removable = ctx.state.captures.filter(
+      (shot) => ids.includes(shot.id) && shot.status !== 'confirmed',
+    );
+    if (!removable.length) return;
+    const removed = new Set(removable.map((shot) => shot.id));
+    const ok = ctx.commit(
+      removable.length === 1
+        ? 'Offene Aufnahme entfernt'
+        : 'Offene Aufnahmen entfernt',
+      (state) =>
+        changeState(state, (next) => {
+          next.captures = next.captures.filter((shot) => !removed.has(shot.id));
+        }),
+    );
+    if (!ok) return;
+    for (const id of removed) transientPhotos.delete(id);
+    if (captureId && removed.has(captureId)) {
+      captureId = ctx.state.captures.find(
+        (shot) => shot.status === 'pending',
+      )?.id;
+      selected = undefined;
+      details.replaceChildren();
+      results.replaceChildren();
+      notices.replaceChildren();
+    }
+    showQueue();
+    showCapture();
+    const active = capture();
+    if (active?.candidates.length) renderChoices(active.candidates);
+    else results.replaceChildren();
+    tell(
+      removable.length === 1
+        ? 'Aufnahme entfernt. Der Kartenbestand ist unverändert.'
+        : `${removable.length} offene Aufnahmen entfernt. Der Kartenbestand ist unverändert.`,
+    );
+  };
   const showQueue = () => {
     queue.replaceChildren();
     const shots = ctx.state.captures;
@@ -248,16 +285,28 @@ export function openAddCards(
         `${shots.filter((item) => item.status === 'pending').length} offen · ${shots.filter((item) => item.status === 'confirmed').length} übernommen`,
       ),
     );
-    const list = el('div', 'w-capture-list');
-    for (const shot of [...shots].reverse().slice(0, queueLimit)) {
-      const button = action(
-        `${shot.name} · ${shot.status === 'confirmed' ? 'übernommen' : shot.status === 'skipped' ? 'zurückgestellt' : 'offen'}`,
+    const open = shots.filter((shot) => shot.status !== 'confirmed');
+    if (open.length) {
+      const clear = action(
+        `Alle offenen Aufnahmen entfernen (${open.length})`,
         () => {
-          if (shot.status === 'confirmed' && shot.holdingId) {
-            sheet.close();
-            ctx.openHolding(shot.holdingId);
-            return;
-          }
+          if (
+            window.confirm(
+              `${open.length} offene Erkennungseinträge entfernen? Bereits bestätigte Karten bleiben im Bestand.`,
+            )
+          )
+            discardCaptures(open.map((shot) => shot.id));
+        },
+        'secondary',
+        'trash',
+      );
+      queue.append(clear);
+    }
+    const list = el('div', 'w-capture-list');
+    for (const shot of [...open].reverse().slice(0, queueLimit)) {
+      const button = action(
+        `${shot.name} · ${shot.status === 'skipped' ? 'zurückgestellt' : 'offen'}`,
+        () => {
           interrupt();
           captureId = shot.id;
           selected = undefined;
@@ -270,10 +319,17 @@ export function openAddCards(
         'text',
       );
       button.setAttribute('aria-pressed', String(shot.id === captureId));
-      list.append(button);
+      const remove = action(
+        `Aufnahme ${shot.name} entfernen`,
+        () => discardCaptures([shot.id]),
+        'text',
+        'trash',
+      );
+      remove.setAttribute('aria-label', `Aufnahme ${shot.name} entfernen`);
+      list.append(el('div', 'w-capture-entry', button, remove));
     }
     queue.append(list);
-    if (shots.length > queueLimit)
+    if (open.length > queueLimit)
       queue.append(
         action(
           'Weitere 30 Fotos anzeigen',
@@ -284,6 +340,35 @@ export function openAddCards(
           'text',
         ),
       );
+    const confirmed = shots.filter((shot) => shot.status === 'confirmed');
+    if (confirmed.length) {
+      const history = el(
+        'details',
+        'w-capture-history',
+        el(
+          'summary',
+          '',
+          `Bereits übernommene Aufnahmen (${confirmed.length})`,
+        ),
+      );
+      const completed = el('div', 'w-capture-list');
+      for (const shot of [...confirmed].reverse().slice(0, 30)) {
+        completed.append(
+          action(
+            `${shot.name} · übernommen`,
+            () => {
+              if (shot.holdingId) {
+                sheet.close();
+                ctx.openHolding(shot.holdingId);
+              }
+            },
+            'text',
+          ),
+        );
+      }
+      history.append(completed);
+      queue.append(history);
+    }
   };
 
   async function addFiles(
