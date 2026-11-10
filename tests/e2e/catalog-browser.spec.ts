@@ -181,7 +181,7 @@ test('German search shows matching English artwork with language label and a sep
     .getByRole('button', { name: 'Bestand bestätigen', exact: true })
     .click();
   await expect(dialog.getByRole('alert')).toContainText(
-    'Die Druckvariante ist ausgewählt.',
+    'Bitte prüfe die Angaben',
   );
   await dialog
     .getByLabel('Ausgabe, Sprache, Druckvariante und Gesamtmenge sind geprüft.')

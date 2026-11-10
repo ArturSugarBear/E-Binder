@@ -87,16 +87,16 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   const navigation = page.getByRole('navigation', { name: 'App-Navigation' });
   test.skip(!(await navigation.isVisible()), 'Mobile navigation only.');
 
-  await expect(navigation.locator(':scope > *')).toHaveCount(5);
-  await expect(navigation.locator(':scope > *').nth(0)).toContainText('Home');
-  await expect(navigation.locator(':scope > *').nth(2)).toHaveAttribute(
+  await expect(navigation.locator(':scope > a, :scope > button')).toHaveCount(5);
+  await expect(navigation.locator(':scope > a, :scope > button').nth(0)).toContainText('Home');
+  await expect(navigation.locator(':scope > a, :scope > button').nth(2)).toHaveAttribute(
     'id',
     'workspace-mobile-add',
   );
-  await expect(navigation.locator(':scope > *').nth(3)).toContainText(
+  await expect(navigation.locator(':scope > a, :scope > button').nth(3)).toContainText(
     'Sammlung',
   );
-  await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
+  await expect(navigation.locator(':scope > a, :scope > button').nth(4)).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte scannen' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Karten hinzufügen' }),

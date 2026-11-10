@@ -387,16 +387,20 @@ export async function startWorkspace(): Promise<void> {
   function persist(snapshot: PersonalState): void {
     status.textContent = 'Wird gespeichert …';
     status.dataset.state = 'saving';
-    saving = store
-      .save(snapshot)
+    // Save snapshots sequentially. Two quick edits must never race and
+    // persist an older copy of the wishlist over a newer one.
+    saving = saving
+      .catch(() => undefined)
+      .then(() => store.save(snapshot))
       .then(() => {
-        saveFailed = false;
-        storageError.hidden = true;
         if (
           ctx.state.mode === snapshot.mode &&
           ctx.state.revision === snapshot.revision
-        )
+        ) {
+          saveFailed = false;
+          storageError.hidden = true;
           saved();
+        }
       })
       .catch((error: unknown) => {
         recordBetaEvent(
@@ -405,6 +409,11 @@ export async function startWorkspace(): Promise<void> {
           'save_failed',
           'error',
         );
+        if (
+          ctx.state.mode !== snapshot.mode ||
+          ctx.state.revision !== snapshot.revision
+        )
+          return;
         saveFailed = true;
         status.textContent = 'Nicht gesichert';
         status.dataset.state = 'error';

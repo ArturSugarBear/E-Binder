@@ -50,6 +50,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
   let connectionError = false;
   let chartRevealed = false;
   let historyRange: 7 | 30 | 90 = 30;
+  const expandedBinders = new Set<string>();
 
   function openBinder(binderId: string, pageId?: string) {
     const chosen = ctx.state.binders.find((item) => item.id === binderId);
@@ -541,6 +542,13 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             ),
           ),
         );
+        details.open = expandedBinders.has(binder.id);
+        // Preserve an explicitly expanded binder across asynchronous price
+        // refreshes, which reconstruct the portfolio DOM.
+        details.querySelector('summary')!.addEventListener('click', () => {
+          if (details.open) expandedBinders.delete(binder.id);
+          else expandedBinders.add(binder.id);
+        });
         const pages = el('div', 'w-portfolio-pages');
         for (const page of binder.pages)
           pages.append(
