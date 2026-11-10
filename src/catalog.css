@@ -180,8 +180,11 @@
   overflow-wrap: anywhere;
 }
 .w-discover-info > .w-discover-set-name {
+  margin: 0;
   color: var(--ink-2);
   font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 .w-discover-info > .w-discover-collector {
   justify-self: start;
