@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 test('stale captures can be removed individually or together without changing owned cards', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
@@ -42,7 +42,7 @@ test('stale captures can be removed individually or together without changing ow
 test('camera photo offers alignment, rotation and recoverable cancellation without adding ownership', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
     'true',
@@ -121,7 +121,7 @@ test('camera photo offers alignment, rotation and recoverable cancellation witho
 test('confirming a photo selects the next temporary capture without counting it as owned', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('.w-welcome-art img')).toHaveCount(3);
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
@@ -160,7 +160,7 @@ test('crop review magnifies the actual card footer before OCR and allows correct
   const workers: string[] = [];
   page.on('worker', (worker) => workers.push(worker.url()));
   await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
