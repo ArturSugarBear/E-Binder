@@ -108,7 +108,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   ).toHaveAttribute('aria-current', 'page');
   await navigation.getByRole('link', { name: 'Portfolio' }).click();
   await expect(
-    page.getByRole('heading', { name: 'Dein Portfolio' }),
+    page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
   ).toBeVisible();
   await navigation.getByRole('button', { name: 'Profil und Konto' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
