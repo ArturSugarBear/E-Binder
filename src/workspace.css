@@ -3357,38 +3357,45 @@ textarea.w-input,
 }
 
 /*
- * Keep the first physical binder pockets visible above the floating mobile
- * dock. Page-management controls follow the binder instead of hiding its
- * content; all controls remain in the document and keyboard order.
+ * Show real binder pockets before the page-management controls on small
+ * screens. Keep heading actions readable even at the 320px minimum width.
  */
 @media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-vault-tabs {
+    margin: 6px 0 4px;
+  }
   .w-binders > .w-page-heading {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
-    margin: 10px 0 12px;
+    gap: 6px;
+    margin: 4px 0 6px;
+  }
+  .w-binders > .w-page-heading > div:first-child {
+    min-width: 0;
   }
   .w-binders > .w-page-heading h1 {
-    font-size: 25px;
+    font-size: 23px;
     line-height: 1.1;
   }
   .w-binders > .w-page-heading .w-lead {
     display: none;
   }
   .w-binders > .w-page-heading > .w-action-row {
+    min-width: 0;
+    max-width: calc(100% - 130px);
     width: auto;
-    flex: 0 0 auto;
-    gap: 6px;
+    flex: 0 1 auto;
+    gap: 4px;
   }
   .w-binders > .w-page-heading > .w-action-row .w-button {
     flex: 0 1 auto;
-    padding: 7px 9px;
+    padding: 7px 7px;
     font-size: 11px;
   }
   .w-demo-banner {
-    margin-top: 8px;
-    padding: 10px 12px;
-    gap: 8px;
+    margin-top: 4px;
+    padding: 8px 10px;
+    gap: 5px;
   }
   .w-demo-banner p {
     line-height: 1.35;
@@ -3414,13 +3421,31 @@ textarea.w-input,
     margin-top: 0;
   }
   .w-binders .w-binder-title {
-    padding-bottom: 8px;
+    padding-bottom: 5px;
   }
   .w-binders .w-binder-title h2 {
     font-size: 21px;
   }
   .w-binders .w-binder-toolbar {
     gap: 7px;
-    padding-bottom: 10px;
+    padding-bottom: 7px;
+  }
+}
+@media (max-width: 370px) {
+  .w-binders > .w-page-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .w-binders > .w-page-heading > .w-action-row {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: nowrap;
+  }
+  .w-binders > .w-page-heading > .w-action-row .w-button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 5px;
+    font-size: 10px;
   }
 }
