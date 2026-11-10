@@ -811,7 +811,13 @@ export function openAddCards(
       error.hidden = true;
       error.textContent = '';
     };
-    for (const control of [confirm.input, finish, quantity, detailsLanguage, variant]) {
+    for (const control of [
+      confirm.input,
+      finish,
+      quantity,
+      detailsLanguage,
+      variant,
+    ]) {
       control.addEventListener('change', clearConfirmationError);
       control.addEventListener('input', clearConfirmationError);
     }
