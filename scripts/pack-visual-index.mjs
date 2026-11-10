@@ -31,7 +31,11 @@ if (!sourceFile || !modelFile || !outputDirectory) {
 const parsed = JSON.parse(await readFile(resolve(sourceFile), 'utf8'));
 const entries = parsed.references;
 const preprocessing = parsed.preprocessing ?? 'rgb-0-1-chw-stretch';
-if (!['rgb-0-1-chw-stretch', 'imagenet-meanstd-chw-stretch'].includes(preprocessing))
+if (
+  !['rgb-0-1-chw-stretch', 'imagenet-meanstd-chw-stretch'].includes(
+    preprocessing,
+  )
+)
   throw new Error('Unsupported visual model preprocessing.');
 if (
   !/^[A-Za-z0-9_.-]{3,100}$/.test(parsed.modelId ?? '') ||

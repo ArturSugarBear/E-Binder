@@ -49,7 +49,9 @@ function parseManifest(value: unknown): Manifest {
     entry.format !== 'e-binder-visual-v1' ||
     typeof entry.modelId !== 'string' ||
     !/^[a-zA-Z0-9_.-]{3,100}$/.test(entry.modelId) ||
-    !['rgb-0-1-chw-stretch', 'imagenet-meanstd-chw-stretch'].includes(String(entry.preprocessing)) ||
+    !['rgb-0-1-chw-stretch', 'imagenet-meanstd-chw-stretch'].includes(
+      String(entry.preprocessing),
+    ) ||
     entry.pooling !== 'cls' ||
     entry.size !== 224 ||
     !Number.isInteger(entry.dimensions) ||
@@ -116,7 +118,12 @@ function parseReferences(input: unknown, expected: number): VisualReference[] {
 }
 
 let cached:
-  | Promise<{ session: InferenceSession; index: VisualIndex; size: number; preprocessing: Manifest['preprocessing'] }>
+  | Promise<{
+      session: InferenceSession;
+      index: VisualIndex;
+      size: number;
+      preprocessing: Manifest['preprocessing'];
+    }>
   | undefined;
 
 function load(manifestUrl: string) {
@@ -159,7 +166,12 @@ function load(manifestUrl: string) {
         references,
         vectors: new Int8Array(indexBytes),
       };
-      return { session, index, size: manifest.size, preprocessing: manifest.preprocessing };
+      return {
+        session,
+        index,
+        size: manifest.size,
+        preprocessing: manifest.preprocessing,
+      };
     })().catch((error: unknown) => {
       cached = undefined;
       throw error;
