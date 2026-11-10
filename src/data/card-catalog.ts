@@ -115,6 +115,7 @@ export interface CatalogFilters {
 export interface MarketPrice {
   amount: number;
   updated: string;
+  basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
 }
 export interface CatalogEntry {
   card: PersonalCard;
@@ -358,9 +359,15 @@ const apiCardSchema = resumeSchema.extend({
       cardmarket: z
         .object({
           unit: z.string().optional().catch(undefined),
-          updated: z.string().optional().catch(undefined),
+          updated: z.union([z.string(), z.number()]).optional().catch(undefined),
           trend: z.number().nullable().optional().catch(undefined),
           'trend-holo': z.number().nullable().optional().catch(undefined),
+          avg: z.number().nullable().optional().catch(undefined),
+          'avg-holo': z.number().nullable().optional().catch(undefined),
+          avg7: z.number().nullable().optional().catch(undefined),
+          'avg7-holo': z.number().nullable().optional().catch(undefined),
+          avg30: z.number().nullable().optional().catch(undefined),
+          'avg30-holo': z.number().nullable().optional().catch(undefined),
           idProduct: z
             .number()
             .int()
@@ -538,22 +545,32 @@ export async function catalogEntry(
     if (paired[0]?.image) card.image = `${paired[0].image}/high.webp`;
   }
   const quote = raw.pricing?.cardmarket;
-  const price =
-    quote?.unit === 'EUR' &&
-    typeof quote.trend === 'number' &&
-    quote.trend > 0 &&
-    quote.updated &&
-    Number.isFinite(Date.parse(quote.updated))
-      ? { amount: quote.trend, updated: quote.updated }
-      : undefined;
-  const holoPrice =
-    quote?.unit === 'EUR' &&
-    typeof quote['trend-holo'] === 'number' &&
-    quote['trend-holo'] > 0 &&
-    quote.updated &&
-    Number.isFinite(Date.parse(quote.updated))
-      ? { amount: quote['trend-holo'], updated: quote.updated }
-      : undefined;
+  const updated =
+    typeof quote?.updated === 'number'
+      ? new Date(
+          quote.updated < 1e12 ? quote.updated * 1000 : quote.updated,
+        ).toISOString()
+      : quote?.updated;
+  const bestQuote = (foil: boolean): MarketPrice | undefined => {
+    if (
+      quote?.unit !== 'EUR' ||
+      !updated ||
+      !Number.isFinite(Date.parse(updated)) ||
+      Date.parse(updated) > Date.now()
+    )
+      return undefined;
+    // All choices originate from the exact Cardmarket product and the
+    // requested foil family. Never use normal averages as holo prices.
+    for (const basis of ['trend', 'avg7', 'avg30', 'avg'] as const) {
+      const key = foil ? `${basis}-holo` : basis;
+      const amount = quote[key as keyof typeof quote];
+      if (typeof amount === 'number' && Number.isFinite(amount) && amount > 0)
+        return { amount, updated, basis };
+    }
+    return undefined;
+  };
+  const price = bestQuote(false);
+  const holoPrice = bestQuote(true);
   const cardmarketUrl = quote?.idProduct
     ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
     : undefined;

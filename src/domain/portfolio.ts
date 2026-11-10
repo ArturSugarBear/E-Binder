@@ -5,6 +5,7 @@ export interface PortfolioQuote {
   updated: string;
   source: 'cardmarket';
   variant: 'normal' | 'holo';
+  basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
 }
 
 export interface PortfolioHolding {
@@ -47,8 +48,14 @@ export interface PortfolioSummary {
  */
 export function portfolioQuoteKey(holding: Holding): string | null {
   const { card, finish, variantNote } = holding;
+  // Exact, publisher-verified editorial print IDs are safe to value too.
+  // Ordinary editorial placeholders and manual cards are not.
+  const verifiedEditorial =
+    card.source === 'editorial' &&
+    card.artistSource === 'publisher' &&
+    card.key.startsWith('tcgdex:de:');
   if (
-    card.source !== 'tcgdex' ||
+    (card.source !== 'tcgdex' && !verifiedEditorial) ||
     card.language !== 'de' ||
     (finish !== 'normal' && finish !== 'holo') ||
     variantNote.trim() ||
@@ -56,16 +63,19 @@ export function portfolioQuoteKey(holding: Holding): string | null {
     !card.setId
   )
     return null;
-  const split = card.sourceId.lastIndexOf('-');
+  const sourceId = verifiedEditorial
+    ? card.key.slice('tcgdex:de:'.length)
+    : card.sourceId;
+  const split = sourceId.lastIndexOf('-');
   if (split <= 0) return null;
-  const printedSet = card.sourceId.slice(0, split);
-  const printedNumber = card.sourceId.slice(split + 1);
+  const printedSet = sourceId.slice(0, split);
+  const printedNumber = sourceId.slice(split + 1);
   if (
     card.setId !== printedSet ||
     numberKey(card.number).split('/')[0] !== numberKey(printedNumber)
   )
     return null;
-  return `${card.language}:${card.sourceId}:${finish}`;
+  return `${card.language}:${sourceId}:${finish}`;
 }
 
 export function isUsableQuote(

@@ -101,7 +101,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'w-portfolio-hero-copy',
         el('p', 'w-eyebrow', 'Rare Room / Dein Sammelwert'),
         el('h1', '', 'Dein Portfolio'),
-        el('p', 'w-portfolio-hero-label', 'Erfasster Cardmarket-Katalogtrend'),
+        el('p', 'w-portfolio-hero-label', 'Erfasste Cardmarket-Preisreferenzen'),
         el('p', 'w-portfolio-balance', value),
         el(
           'p',
@@ -474,7 +474,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     const foot = el(
       'p',
       'w-portfolio-footnote',
-      'Wichtig: Angezeigte Werte beruhen ausschließlich auf verfügbaren EUR-Katalogtrends exakt passender deutscher TCGdex-Ausgaben (Normal/Holo, soweit vorhanden). Reverse-Holo, Grading, signierte oder unbekannte Varianten bleiben unbewertet. Fehlende Preise zählen nicht als 0 €. Es handelt sich weder um eine garantierte Verkaufssumme noch um echte „Last Sold“-Daten.',
+      'Wichtig: Werte zeigen datierte EUR-Referenzen zum exakt passenden Cardmarket-Druck (Trend, sonst 7-/30-Tage- oder allgemeiner Verkaufsdurchschnitt). Durchschnitt ist kein Trend. Unbestimmte Varianten, Reverse-Holo und Grading bleiben ohne eindeutige Zuordnung unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine Verkaufserlöse oder historischen Depotkurse.',
     );
     content.replaceChildren(
       hero,
@@ -517,7 +517,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       const results = await Promise.allSettled(
         chunk.map(async ({ key, holding }) => {
           const entry = await catalogEntry(
-            holding.card.sourceId,
+            key.split(':').slice(1, -1).join(':'),
             'de',
             controller.signal,
             false,
@@ -543,6 +543,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           variant: finish === 'holo' ? 'holo' : 'normal',
           amount: price.amount,
           updated: price.updated,
+          basis: price.basis,
         });
       }
       render();
