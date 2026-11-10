@@ -14,6 +14,7 @@ import {
 export async function alignPhoto(
   photo: Blob,
   signal: AbortSignal,
+  mode: 'card' | 'page' = 'card',
 ): Promise<Blob | undefined> {
   const image = new Image();
   const url = URL.createObjectURL(photo);
@@ -22,7 +23,9 @@ export async function alignPhoto(
     await image.decode();
     if (signal.aborted) return;
     return await new Promise((resolve) => {
-      const sheet = modal('Karte ausrichten');
+      const sheet = modal(
+        mode === 'page' ? 'Binderseite ausrichten' : 'Karte ausrichten',
+      );
       sheet.dialog.classList.add('w-crop-dialog');
       const canvas = el('canvas', 'w-crop-canvas');
       const accent = getComputedStyle(document.documentElement)
@@ -144,7 +147,9 @@ export async function alignPhoto(
       }
       canvas.setAttribute(
         'aria-label',
-        'Kartenecken im Foto; alternativ Ecke und Position über die Felder darunter einstellen',
+        mode === 'page'
+          ? 'Binderseiten-Ecken im Foto; alternativ Position über die Felder einstellen'
+          : 'Kartenecken im Foto; alternativ Ecke und Position über die Felder darunter einstellen',
       );
       function pointer(event: PointerEvent): void {
         const bounds = canvas.getBoundingClientRect();
@@ -199,8 +204,8 @@ export async function alignPhoto(
               .getContext('2d')!
               .getImageData(0, 0, source.width, source.height);
             const output = el('canvas');
-            output.width = 630;
-            output.height = 880;
+            output.width = mode === 'page' ? 1260 : 630;
+            output.height = mode === 'page' ? 1760 : 880;
             const out = output.getContext('2d')!;
             const aligned = out.createImageData(output.width, output.height);
             for (let row = 0; row < output.height; row++)
@@ -269,14 +274,26 @@ export async function alignPhoto(
                   'Der ausgerichtete Ausschnitt für die Erkennung',
                 );
                 review.replaceChildren(
-                  el('h3', '', 'So wird deine Karte gelesen'),
+                  el(
+                    'h3',
+                    '',
+                    mode === 'page'
+                      ? 'So wird deine Binderseite gelesen'
+                      : 'So wird deine Karte gelesen',
+                  ),
                   message(
-                    'Siehst du nur die gedruckte Karte? Kunststoffrand, Etikett und Hintergrund gehören außerhalb des Ausschnitts. Prüfe besonders Name und Sammlernummer. Wenn sie verschwommen oder von Reflexionen verdeckt sind, hilft eine neue Aufnahme.',
+                    mode === 'page'
+                      ? 'Der Ausschnitt soll genau die komplette 3×3-Seite umfassen, ohne die Buchringe. Prüfe, ob alle neun Karten vollständig sichtbar sind. Starke Reflexionen und unleserliche Nummern erfordern eine neue Aufnahme.'
+                      : 'Siehst du nur die gedruckte Karte? Kunststoffrand, Etikett und Hintergrund gehören außerhalb des Ausschnitts. Prüfe besonders Name und Sammlernummer. Wenn sie verschwommen oder von Reflexionen verdeckt sind, hilft eine neue Aufnahme.',
                   ),
                   output,
-                  el('h4', '', 'Unterer Kartenrand, vergrößert'),
-                  left,
-                  right,
+                  ...(mode === 'page'
+                    ? []
+                    : [
+                        el('h4', '', 'Unterer Kartenrand, vergrößert'),
+                        left,
+                        right,
+                      ]),
                   action(
                     'Ecken nachbessern',
                     () => {
@@ -308,7 +325,7 @@ export async function alignPhoto(
         'primary',
       );
       const start = action(
-        'Texterkennung starten',
+        mode === 'page' ? 'Neun Fächer auswerten' : 'Texterkennung starten',
         () => {
           if (!prepared || signal.aborted) return;
           result = prepared;
@@ -321,7 +338,9 @@ export async function alignPhoto(
         'div',
         'w-crop-editor',
         message(
-          'Drehe die Karte aufrecht. Ziehe die vier nummerierten Punkte genau auf die Ecken der gedruckten Karte – nicht auf die Schutzhülle. Name und unterer Kartenrand müssen vollständig innerhalb der Punkte liegen.',
+          mode === 'page'
+            ? 'Richte die ganze Binderseite aufrecht aus. Ziehe die vier Punkte auf ihre äußeren Ecken (ohne Buchringe). Alle neun Karten müssen innerhalb der Markierung liegen.'
+            : 'Drehe die Karte aufrecht. Ziehe die vier nummerierten Punkte genau auf die Ecken der gedruckten Karte – nicht auf die Schutzhülle. Name und unterer Kartenrand müssen vollständig innerhalb der Punkte liegen.',
         ),
         field('Ausrichtung', orientation),
         canvas,

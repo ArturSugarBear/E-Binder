@@ -217,6 +217,16 @@ export async function startWorkspace(): Promise<void> {
       window.scrollTo({ top: 0, behavior: 'instant' });
     },
     openAdd: (options) => openAddCards(ctx, options),
+    openPageScan: (binderId) => {
+      void import('./page-scan')
+        .then(({ openPageScanner }) => openPageScanner(ctx, binderId))
+        .catch(() =>
+          ctx.notify(
+            'Der Binderseitenscanner konnte nicht geladen werden.',
+            true,
+          ),
+        );
+    },
     openHolding: (id) => openHolding(ctx, id),
     openBackup: () => openBackup(ctx),
     switchMode: async (mode) => {

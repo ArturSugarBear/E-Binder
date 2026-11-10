@@ -118,6 +118,10 @@ export const pageSchema = z
     slots: z.array(slotSchema).length(9),
     assembled: z.boolean().default(false),
     assembledAt: z.string().optional(),
+    sourceFingerprint: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
   })
   .strict();
 export type PersonalPage = z.infer<typeof pageSchema>;
@@ -589,5 +593,139 @@ export function templateSlots(
       return unit;
     }
     return { kind: 'planned', card, locked: false };
+  });
+}
+
+/** One explicit confirmation imports a photographed 9-pocket page atomically.
+ * A previously free physical copy is reused; only otherwise is quantity increased.
+ * A source fingerprint prevents identical photos being imported twice.
+ */
+export interface ScannedCardChoice {
+  card: PersonalCard;
+  finish: Finish;
+  variantNote: string;
+}
+export interface ScannedPageInput {
+  fingerprint: string;
+  binderId?: string;
+  binderName?: string;
+  slots: (ScannedCardChoice | null)[];
+}
+export function importScannedPage(
+  state: PersonalState,
+  input: ScannedPageInput,
+): PersonalState {
+  if (!/^[a-f0-9]{64}$/.test(input.fingerprint))
+    throw new Error('Ungültiger Seiten-Fingerabdruck.');
+  if (input.slots.length !== 9 || input.slots.every((slot) => !slot))
+    throw new Error('Prüfe mindestens eine Karte und alle neun Positionen.');
+  if (
+    state.binders.some((binder) =>
+      binder.pages.some((page) => page.sourceFingerprint === input.fingerprint),
+    )
+  )
+    throw new Error('Diese Aufnahme wurde bereits als Binderseite übernommen.');
+  return changeState(state, (next) => {
+    let binder = input.binderId
+      ? next.binders.find((item) => item.id === input.binderId)
+      : undefined;
+    if (input.binderId && !binder)
+      throw new Error('Der gewählte Binder existiert nicht mehr.');
+    if (!binder) {
+      if (next.binders.length >= 1000)
+        throw new Error('Maximale Binderanzahl erreicht.');
+      const name = (input.binderName ?? 'Gescannten Binder').trim();
+      if (!name || name.length > 200)
+        throw new Error('Gib einen gültigen Bindernamen an.');
+      binder = { id: uid(), name, isPublic: false, pages: [] };
+      next.binders.push(binder);
+    }
+    if (binder.pages.length >= 200)
+      throw new Error('Dieser Binder hat bereits 200 Seiten.');
+    const occupied = new Set(
+      next.binders.flatMap((item) =>
+        item.pages.flatMap((page) =>
+          page.slots.flatMap((slot) =>
+            slot?.kind === 'owned' ? [unitKey(slot)] : [],
+          ),
+        ),
+      ),
+    );
+    const slots: Slot[] = [];
+    const now = new Date().toISOString();
+    for (const choice of input.slots) {
+      if (!choice) {
+        slots.push(null);
+        continue;
+      }
+      const card = personalCardSchema.parse(choice.card);
+      const variantNote = choice.variantNote.trim();
+      if (
+        !finishes.includes(choice.finish) ||
+        (choice.finish === 'other' && !variantNote)
+      )
+        throw new Error(
+          'Wähle für jede erkannte Karte die korrekte Druckvariante.',
+        );
+      let holding = next.holdings.find(
+        (item) =>
+          sameCard(item.card, card) &&
+          item.finish === choice.finish &&
+          normalize(item.variantNote) === normalize(variantNote),
+      );
+      if (!holding) {
+        holding = {
+          id: uid(),
+          card,
+          finish: choice.finish,
+          variantNote,
+          quantity: 1,
+          tradeQuantity: 0,
+          favorite: false,
+          notes: '',
+          confirmed: true,
+          createdAt: now,
+          updatedAt: now,
+        };
+        next.holdings.push(holding);
+      }
+      let copy = 1;
+      while (
+        copy <= holding.quantity - holding.tradeQuantity &&
+        occupied.has(`${holding.id}:${copy}`)
+      )
+        copy++;
+      if (copy > holding.quantity - holding.tradeQuantity) {
+        if (holding.quantity >= 999)
+          throw new Error('Für eine Karte wurde die maximale Menge erreicht.');
+        holding.quantity++;
+        holding.updatedAt = now;
+        copy = holding.quantity - holding.tradeQuantity;
+        while (occupied.has(`${holding.id}:${copy}`)) {
+          if (holding.quantity >= 999)
+            throw new Error('Kein weiteres freies Kartenexemplar.');
+          holding.quantity++;
+          copy = holding.quantity - holding.tradeQuantity;
+        }
+      }
+      const slot: OwnedSlot = {
+        kind: 'owned',
+        holdingId: holding.id,
+        copy,
+        locked: false,
+      };
+      occupied.add(unitKey(slot));
+      slots.push(slot);
+    }
+    const page = {
+      id: uid(),
+      title: `Seite ${binder.pages.length + 1}`,
+      slots,
+      sourceFingerprint: input.fingerprint,
+      assembled: false,
+    };
+    binder.pages.push(page);
+    next.lastBinderId = binder.id;
+    next.lastPageId = page.id;
   });
 }
