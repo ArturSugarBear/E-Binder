@@ -6,6 +6,10 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import {
+  recordBetaEvent,
+  betaDiagnosticsAuthorized,
+} from '../data/beta-diagnostics';
 import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
@@ -36,6 +40,10 @@ import {
   select,
 } from './workspace-dom';
 import type { AddOptions, WorkspaceContext } from './workspace-context';
+
+function publicCardKey(card: PersonalCard | undefined): string | undefined {
+  return card?.source === 'manual' ? undefined : card?.key;
+}
 
 export function openAddCards(
   ctx: WorkspaceContext,
@@ -608,6 +616,16 @@ export function openAddCards(
               [...online, ...local].map((card) => [card.key, card]),
             ).values(),
           ].slice(0, 12);
+      recordBetaEvent(
+        'scan_result',
+        'scan',
+        candidates.length ? 'candidates_found' : 'no_candidate',
+        candidates.length ? 'ok' : 'unknown',
+        {
+          candidate: publicCardKey(candidates[0]),
+          metric: candidates.length,
+        },
+      );
       ctx.commit('Texterkennung abgeschlossen', (state) =>
         changeState(state, (next) => {
           const target = next.captures.find((item) => item.id === shot.id);
@@ -651,6 +669,7 @@ export function openAddCards(
         );
         return;
       }
+      recordBetaEvent('scan_result', 'scan', 'recognition_failed', 'error');
       const text = errorText(error);
       results.dataset.scanState = 'error';
       ctx.commit('Foto bleibt zur Klärung offen', (state) =>
@@ -690,6 +709,20 @@ export function openAddCards(
     }
   }
   function choose(card: PersonalCard): void {
+    const currentCapture = capture();
+    if (currentCapture)
+      recordBetaEvent(
+        'scan_review',
+        'scan',
+        currentCapture.candidates.length
+          ? 'candidate_selected'
+          : 'manual_selected',
+        'ok',
+        {
+          candidate: publicCardKey(currentCapture.candidates[0]),
+          selected: publicCardKey(card),
+        },
+      );
     captureStart.hidden = true;
     interrupt();
     selected = card;
@@ -848,6 +881,23 @@ export function openAddCards(
       error,
       el('div', 'w-action-row', submit, wish),
     );
+    if (shot?.candidates.length && betaDiagnosticsAuthorized()) {
+      form.append(
+        action(
+          'Erkennung falsch melden',
+          () => {
+            recordBetaEvent('scan_review', 'scan', 'reported_wrong', 'error', {
+              candidate: publicCardKey(shot.candidates[0]),
+              selected: publicCardKey(card),
+            });
+            tell(
+              'Beta-Fehlermeldung erfasst. Keine Fotos oder OCR-Texte übertragen.',
+            );
+          },
+          'text',
+        ),
+      );
+    }
     finish.addEventListener('change', () => {
       const existing = ctx.state.holdings.find(
         (item) =>
@@ -913,6 +963,10 @@ export function openAddCards(
       );
       if (ok) {
         if (shot) {
+          recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
+            candidate: publicCardKey(shot.candidates[0]),
+            selected: publicCardKey(adopted),
+          });
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
           ocrController?.abort();

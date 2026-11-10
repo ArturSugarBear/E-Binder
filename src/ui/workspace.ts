@@ -13,6 +13,12 @@ import { editorialCards } from '../data/card-catalog';
 import { PersonalStore } from '../data/personal-store';
 import { CloudStore } from '../data/cloud-store';
 import { cloudClient } from '../data/supabase';
+import {
+  startBetaDiagnostics,
+  recordBetaEvent,
+  betaArea,
+  betaCommitAction,
+} from '../data/beta-diagnostics';
 import { openAccount } from './account-dialog';
 import { renderSharedBinder } from './shared-binder';
 import { loadCollection } from '../data/load-collection';
@@ -46,6 +52,7 @@ export async function startWorkspace(): Promise<void> {
     ? await cloudClient.auth.getSession()
     : { data: { session: null } };
   const session = sessionData.session;
+  startBetaDiagnostics(session?.user ?? null);
   const account = session
     ? { username: session.user.email?.split('@')[0] ?? 'Konto' }
     : undefined;
@@ -123,16 +130,34 @@ export async function startWorkspace(): Promise<void> {
           if (history.length > 20) history.shift();
         }
         ctx.state = next;
+        recordBetaEvent(
+          'state_change',
+          betaArea(location.hash.slice(1)),
+          betaCommitAction(label),
+        );
         ctx.render();
         persist(next);
         if (options.notify !== false) ctx.notify(label);
         return true;
       } catch (error) {
+        recordBetaEvent(
+          'ui_error',
+          betaArea(location.hash.slice(1)),
+          'commit_rejected',
+          'error',
+        );
         ctx.notify(errorText(error), true);
         return false;
       }
     },
     notify: (text, isError = false) => {
+      if (isError)
+        recordBetaEvent(
+          'ui_error',
+          betaArea(location.hash.slice(1)),
+          'message_shown',
+          'error',
+        );
       clearTimeout(noticeTimer);
       const dialog = document.querySelector<HTMLDialogElement>(
         '.w-dialog[open]:last-of-type',
@@ -246,6 +271,7 @@ export async function startWorkspace(): Promise<void> {
       }
     },
     navigate: (route) => {
+      recordBetaEvent('navigation', betaArea(route), 'open_screen');
       if (location.hash !== `#${route}`) historyPush(route);
       ctx.render();
       root.focus({ preventScroll: true });
@@ -382,6 +408,12 @@ export async function startWorkspace(): Promise<void> {
           ctx.state.revision !== snapshot.revision
         )
           return;
+        recordBetaEvent(
+          'ui_error',
+          betaArea(location.hash.slice(1)),
+          'save_failed',
+          'error',
+        );
         saveFailed = true;
         status.textContent = 'Nicht gesichert';
         status.dataset.state = 'error';
