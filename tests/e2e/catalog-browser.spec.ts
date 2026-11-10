@@ -176,6 +176,7 @@ test('set discovery accepts English aliases, resolves printed leading zeros, and
   const requests = await catalogue(page);
   await open(page);
   const dialog = page.getByRole('dialog');
+  await dialog.locator('.w-add-catalog-advanced > summary').click();
   await dialog
     .getByText('Sets und Illustratoren entdecken', { exact: true })
     .click();
@@ -209,6 +210,7 @@ test('price sorting considers the complete selected set and places unavailable p
   await catalogue(page);
   await open(page);
   const dialog = page.getByRole('dialog');
+  await dialog.locator('.w-add-catalog-advanced > summary').click();
   await dialog
     .getByText('Sets und Illustratoren entdecken', { exact: true })
     .click();
