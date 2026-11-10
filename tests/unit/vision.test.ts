@@ -4,6 +4,10 @@ import {
   recognitionTensor,
 } from '../../src/domain/vision-codec';
 import { recognitionClues } from '../../src/data/card-catalog';
+import {
+  collectorNumberFallbackRegions,
+  hasPrintedCollectorFraction,
+} from '../../src/domain/ocr-number-search';
 it('normalizes RGB into three separate channels without changing original pixels', () => {
   const pixels = new Uint8ClampedArray([255, 0, 127, 255, 0, 255, 255, 255]);
   const before = pixels.slice();
@@ -52,4 +56,21 @@ it('accepts adjoining printed set, language and number fields from the vision mo
     setId: 'sv01',
     number: '211/198',
   });
+});
+it('accepts a complete collector fraction in either OCR crop', () => {
+  expect(hasPrintedCollectorFraction(['TEFDE163/162★', ''])).toBe(true);
+  expect(hasPrintedCollectorFraction(['', '211 / 198'])).toBe(true);
+});
+it('does not treat a partial number or a Pokémon name as a recognized fraction', () => {
+  expect(hasPrintedCollectorFraction(['163/', 'Greninja'])).toBe(false);
+  expect(hasPrintedCollectorFraction(['', 'SVI 211'])).toBe(false);
+});
+it('searches a bounded lower band and right edge without leaving the photo', () => {
+  expect(collectorNumberFallbackRegions.length).toBe(5);
+  for (const [x, y, width, height] of collectorNumberFallbackRegions) {
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(y).toBeGreaterThanOrEqual(0.8);
+    expect(x + width).toBeLessThanOrEqual(1);
+    expect(y + height).toBeLessThanOrEqual(1);
+  }
 });
