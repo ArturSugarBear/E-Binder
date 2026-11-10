@@ -92,7 +92,6 @@ Gleiche Fotodateien werden über SHA-256 nicht zweimal übernommen. Eine neu fot
 
 **Grenzen:** Die 3×3-Geometrie verlangt eine ausgerichtete Seite; automatisch gefundene Ecken, sichere Holo-Unterscheidung, unkontrollierte Perspektiven und vollständig automatische Zuordnung sind nicht zugesichert. Für echte Foto-Qualitätstests eigene oder nachweislich freigegebene Aufnahmen verwenden; keine fremden Verkaufsbilder ins Repository kopieren. Siehe [Scanner-Qualität und Testprotokoll](docs/scanner.md).
 
-
 ### Fotoqualität und realistische Tests
 
 Der Seitenscanner zeigt jetzt neun nummerierte Taschen schon in der Ausrichtungsvorschau und danach **lokale Hinweise zu möglichen Foto-Problemen** (Dunkelheit, helle Reflexionen, niedriger Kontrast und geringe Bilddetails). Sie sind keine OCR-Wahrscheinlichkeiten und überschreiben keine Bestandsdaten. Für reproduzierbare Messungen mit **eigenen oder ausdrücklich nutzbaren realen Fotos** siehe [Scanner-Fotoqualität und Benchmark](docs/scanner-quality.md). Hierfür wird kein externer AI-Dienst benötigt.

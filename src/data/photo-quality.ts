@@ -86,8 +86,7 @@ export function analysePhotoPixels(
     warnings.push('Sehr dunkel');
   if (highlightFraction > 0.31)
     warnings.push('Helle Reflexionen oder Überbelichtung möglich');
-  if (contrast < 48)
-    warnings.push('Wenig Kontrast');
+  if (contrast < 48) warnings.push('Wenig Kontrast');
   if (detail < 5.2)
     warnings.push('Wenige Bilddetails – möglicherweise unscharf oder leer');
   return {

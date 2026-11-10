@@ -23,11 +23,22 @@ Eine Dataset-Lizenz gilt nicht automatisch für fremde Rechte an abgebildeten Po
       "photo": "./bilder/meine-binderseite.jpg",
       "rights": "Eigene Aufnahme; nicht zur Veröffentlichung",
       "conditions": ["low-light", "glare", "perspective"],
-      "corners": [[0.08, 0.05], [0.92, 0.06], [0.9, 0.95], [0.1, 0.94]],
+      "corners": [
+        [0.08, 0.05],
+        [0.92, 0.06],
+        [0.9, 0.95],
+        [0.1, 0.94]
+      ],
       "slots": [
-        "tcgdex:de:svi-211", null, null,
-        null, null, null,
-        null, null, null
+        "tcgdex:de:svi-211",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     }
   ]

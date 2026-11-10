@@ -11,7 +11,9 @@ import { basename, dirname, resolve } from 'node:path';
 
 const manifestPath = process.argv[2];
 if (!manifestPath) {
-  console.error('Usage: node scripts/benchmark-binder-scans.mjs <local-manifest.json>');
+  console.error(
+    'Usage: node scripts/benchmark-binder-scans.mjs <local-manifest.json>',
+  );
   process.exitCode = 2;
 } else {
   await run(manifestPath);
@@ -34,7 +36,9 @@ async function run(path) {
       typeof sample.rights !== 'string' ||
       !sample.rights.trim()
     )
-      throw new Error('Each sample needs photo, rights and exactly nine slots.');
+      throw new Error(
+        'Each sample needs photo, rights and exactly nine slots.',
+      );
     if (
       sample.corners &&
       (!Array.isArray(sample.corners) ||
@@ -74,36 +78,47 @@ async function run(path) {
         await page
           .getByRole('button', { name: 'Binderseite scannen', exact: true })
           .click();
-        const dialog = page.getByRole('dialog', { name: 'Binderseiten scannen' });
+        const dialog = page.getByRole('dialog', {
+          name: 'Binderseiten scannen',
+        });
         const photo = resolve(dirname(input), sample.photo);
         const extension = photo.slice(photo.lastIndexOf('.')).toLowerCase();
         if (!['.jpg', '.jpeg', '.png', '.webp'].includes(extension))
-          throw new Error('Use a browser-supported JPG, PNG or WebP benchmark image.');
+          throw new Error(
+            'Use a browser-supported JPG, PNG or WebP benchmark image.',
+          );
         await dialog.locator('input[type=file][multiple]').setInputFiles(photo);
-        const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
+        const crop = page.getByRole('dialog', {
+          name: 'Binderseite ausrichten',
+        });
         await crop.waitFor();
         if (sample.corners) {
           for (const [index, [x, y]] of sample.corners.entries()) {
             await crop.getByLabel('Ecke auswählen').selectOption(String(index));
-            await crop.getByLabel('Position waagerecht').fill(
-              String(Math.round(x * 1000)),
-            );
-            await crop.getByLabel('Position senkrecht').fill(
-              String(Math.round(y * 1000)),
-            );
+            await crop
+              .getByLabel('Position waagerecht')
+              .fill(String(Math.round(x * 1000)));
+            await crop
+              .getByLabel('Position senkrecht')
+              .fill(String(Math.round(y * 1000)));
           }
         }
         await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
-        await crop.getByRole('button', { name: 'Neun Fächer auswerten' }).click();
+        await crop
+          .getByRole('button', { name: 'Neun Fächer auswerten' })
+          .click();
         await dialog.locator('.w-page-scan-pocket').nth(8).waitFor({
           timeout: 30_000,
         });
-        await dialog.getByRole('button', { name: 'Erkennung stoppen' }).waitFor({
-          state: 'hidden',
-          timeout: 900_000,
-        });
-        const pockets = await dialog.locator('.w-page-scan-pocket').evaluateAll(
-          (nodes) =>
+        await dialog
+          .getByRole('button', { name: 'Erkennung stoppen' })
+          .waitFor({
+            state: 'hidden',
+            timeout: 900_000,
+          });
+        const pockets = await dialog
+          .locator('.w-page-scan-pocket')
+          .evaluateAll((nodes) =>
             nodes.map((node) => ({
               keys: Array.from(
                 node.querySelectorAll('option[data-card-key]'),
@@ -112,7 +127,7 @@ async function run(path) {
               warning: node.querySelector('.w-page-scan-quality')?.textContent,
               status: node.querySelector('small.w-muted')?.textContent,
             })),
-        );
+          );
         const evaluated = pockets.map((pocket, index) => {
           const expected = sample.slots[index];
           return {
@@ -173,7 +188,8 @@ async function run(path) {
   };
   const result = { measuredAt: new Date().toISOString(), summary, reports };
   const outputPath = process.env.BINDER_BENCHMARK_OUT;
-  if (outputPath) await writeFile(resolve(outputPath), JSON.stringify(result, null, 2));
+  if (outputPath)
+    await writeFile(resolve(outputPath), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(summary, null, 2));
   if (reports.some((report) => report.error)) process.exitCode = 1;
 }

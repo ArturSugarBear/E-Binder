@@ -450,7 +450,9 @@ export function openPageScanner(
           quality.textContent = inspection.warnings.length
             ? `Aufnahmehinweis: ${inspection.warnings.join(' · ')}`
             : 'Keine deutlichen Belichtungsprobleme erkannt';
-          quality.dataset.warning = inspection.warnings.length ? 'true' : 'false';
+          quality.dataset.warning = inspection.warnings.length
+            ? 'true'
+            : 'false';
         } catch {
           if (closed || abort.signal.aborted) break;
           pockets[index]!.quality.textContent =
