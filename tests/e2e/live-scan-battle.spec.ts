@@ -153,9 +153,7 @@ test('fake live video never auto-captures a blank scene or a square', async ({
     .poll(() =>
       page.evaluate(() => {
         const states = (
-          window as typeof window & {
-            __scanRig: { trackStates: () => string[] };
-          }
+          window as typeof window & { __scanRig: { trackStates: () => string[] } }
         ).__scanRig.trackStates();
         return states.length > 0 && states.every((state) => state === 'ended');
       }),
