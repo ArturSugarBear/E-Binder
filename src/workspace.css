@@ -1073,6 +1073,34 @@ body:has(.w-dialog[open]) {
   color: var(--accent);
   border-color: var(--accent);
 }
+.w-capture-entry {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  gap: 3px;
+}
+.w-capture-entry > .w-button:first-child {
+  min-width: 0;
+  max-width: min(50vw, 200px);
+  overflow-wrap: anywhere;
+}
+.w-capture-entry > .w-button:last-child {
+  flex: none;
+  min-width: 40px;
+  color: var(--ink-2);
+}
+.w-capture-history {
+  margin-top: 9px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.w-capture-history > summary {
+  cursor: pointer;
+  padding-block: 8px;
+}
+.w-capture-queue > .w-button {
+  margin-top: 8px;
+}
 .w-progress {
   accent-color: var(--accent);
   width: 100%;
