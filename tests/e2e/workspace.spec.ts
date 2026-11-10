@@ -15,7 +15,7 @@ test.afterEach(async ({ page }, info) => {
 });
 
 async function ready(page: Page): Promise<void> {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
     'true',
