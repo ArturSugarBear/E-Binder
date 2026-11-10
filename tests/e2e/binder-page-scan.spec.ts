@@ -61,9 +61,11 @@ test('proposes editable binder corners only for a clear page outline', async ({
     buffer: Buffer.from(image, 'base64'),
   });
   const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
-  await expect(crop.getByText('Ecken automatisch vorgeschlagen.', {
-    exact: false,
-  })).toBeVisible();
+  await expect(
+    crop.getByText('Ecken automatisch vorgeschlagen.', {
+      exact: false,
+    }),
+  ).toBeVisible();
   const x = crop.getByLabel('Position waagerecht');
   expect(Number(await x.inputValue())).toBeGreaterThan(50);
   expect(Number(await x.inputValue())).toBeLessThan(200);
@@ -74,9 +76,11 @@ test('proposes editable binder corners only for a clear page outline', async ({
     element.value = '220';
     element.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  await expect(crop.getByText('Ecken manuell angepasst.', {
-    exact: false,
-  })).toBeVisible();
+  await expect(
+    crop.getByText('Ecken manuell angepasst.', {
+      exact: false,
+    }),
+  ).toBeVisible();
   await crop.getByRole('button', { name: 'Zurück zum Foto' }).click();
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })

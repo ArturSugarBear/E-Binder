@@ -201,7 +201,8 @@ export async function alignPhoto(
         if (dragging < 0) return;
         points[dragging] = p;
         if (mode === 'page')
-          geometryHint.textContent = 'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
+          geometryHint.textContent =
+            'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
         invalidate();
         controls();
       }
@@ -222,7 +223,8 @@ export async function alignPhoto(
             y: Number(y.value) / 1000,
           };
           if (mode === 'page')
-            geometryHint.textContent = 'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
+            geometryHint.textContent =
+              'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
           draw();
         });
       orientation.addEventListener('change', reset);

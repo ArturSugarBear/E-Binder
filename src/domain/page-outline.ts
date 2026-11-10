@@ -56,14 +56,9 @@ export function suggestPageCorners(
           const t = 0.135 + (sample * 0.73) / 39;
           const line = position + slope * (t - 0.5);
           if (line < 0.01 || line > 0.99) continue;
-          const x = Math.round(
-            (axis === 'vertical' ? line : t) * (width - 1),
-          );
-          const y = Math.round(
-            (axis === 'vertical' ? t : line) * (height - 1),
-          );
-          if (x < 3 || y < 3 || x >= width - 3 || y >= height - 3)
-            continue;
+          const x = Math.round((axis === 'vertical' ? line : t) * (width - 1));
+          const y = Math.round((axis === 'vertical' ? t : line) * (height - 1));
+          if (x < 3 || y < 3 || x >= width - 3 || y >= height - 3) continue;
           const before =
             axis === 'vertical'
               ? luminance[y * width + x - 2]!
@@ -106,8 +101,7 @@ export function suggestPageCorners(
   const intersection = (v: EdgeLine, h: EdgeLine): Point => {
     const denominator = 1 - v.slope * h.slope;
     const x =
-      (v.position + v.slope * (h.position - 0.5 - h.slope * 0.5)) /
-      denominator;
+      (v.position + v.slope * (h.position - 0.5 - h.slope * 0.5)) / denominator;
     return { x, y: h.position + h.slope * (x - 0.5) };
   };
   const corners: Quad = [

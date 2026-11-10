@@ -43,7 +43,13 @@ describe('automatic binder page geometry suggestions', () => {
   });
 
   it('returns manual alignment for flat, blank and partially outlined images', () => {
-    expect(suggestPageCorners(photo(() => 145), WIDTH, HEIGHT)).toBeNull();
+    expect(
+      suggestPageCorners(
+        photo(() => 145),
+        WIDTH,
+        HEIGHT,
+      ),
+    ).toBeNull();
     const verticalOnly = photo((x) =>
       x / WIDTH > 0.11 && x / WIDTH < 0.89 ? 20 : 230,
     );
