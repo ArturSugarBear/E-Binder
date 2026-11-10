@@ -23,13 +23,22 @@ export function openLivePageScanner(
   outline.setAttribute('viewBox', '0 0 100 100');
   outline.setAttribute('preserveAspectRatio', 'none');
   outline.setAttribute('aria-hidden', 'true');
-  const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  const polygon = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'polygon',
+  );
   polygon.setAttribute('fill', 'none');
   polygon.setAttribute('stroke', 'var(--accent)');
   polygon.setAttribute('stroke-width', '0.8');
   polygon.setAttribute('vector-effect', 'non-scaling-stroke');
   outline.append(polygon);
-  const stage = el('div', 'w-live-stage w-live-page-stage', video, guide, outline);
+  const stage = el(
+    'div',
+    'w-live-stage w-live-page-stage',
+    video,
+    guide,
+    outline,
+  );
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
   const progress = el('progress', 'w-progress w-live-progress');
@@ -41,14 +50,29 @@ export function openLivePageScanner(
     'w-muted w-live-help',
     'Halte die gesamte 3×3-Binderseite samt Rand im Rahmen. Vermeide Reflexionen. Bei erkannten stabilen Seitenrändern wird automatisch fotografiert; du kannst jederzeit selbst auslösen. Die neun Karten werden erst anschließend einzeln geprüft.',
   );
-  const shutter = action('Seite jetzt aufnehmen', () => void capture(), 'primary', 'camera');
+  const shutter = action(
+    'Seite jetzt aufnehmen',
+    () => void capture(),
+    'primary',
+    'camera',
+  );
   shutter.disabled = true;
-  const retry = action('Kamera wieder starten', () => void start(), 'secondary', 'camera');
+  const retry = action(
+    'Kamera wieder starten',
+    () => void start(),
+    'secondary',
+    'camera',
+  );
   retry.hidden = true;
-  const fallback = action('Stattdessen Foto auswählen', () => {
-    sheet.close();
-    onFallback();
-  }, 'secondary', 'upload');
+  const fallback = action(
+    'Stattdessen Foto auswählen',
+    () => {
+      sheet.close();
+      onFallback();
+    },
+    'secondary',
+    'upload',
+  );
   sheet.body.append(stage, progress, help);
   sheet.footer.append(status, shutter, retry, fallback);
 
@@ -75,26 +99,31 @@ export function openLivePageScanner(
   function drawVisible(canvas: HTMLCanvasElement): void {
     const targetRatio = canvas.width / canvas.height;
     const sourceRatio = video.videoWidth / video.videoHeight;
-    const cropWidth = sourceRatio > targetRatio
-      ? video.videoHeight * targetRatio
-      : video.videoWidth;
-    const cropHeight = sourceRatio > targetRatio
-      ? video.videoHeight
-      : video.videoWidth / targetRatio;
-    canvas.getContext('2d', { willReadFrequently: true })!.drawImage(
-      video,
-      (video.videoWidth - cropWidth) / 2,
-      (video.videoHeight - cropHeight) / 2,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
+    const cropWidth =
+      sourceRatio > targetRatio
+        ? video.videoHeight * targetRatio
+        : video.videoWidth;
+    const cropHeight =
+      sourceRatio > targetRatio
+        ? video.videoHeight
+        : video.videoWidth / targetRatio;
+    canvas
+      .getContext('2d', { willReadFrequently: true })!
+      .drawImage(
+        video,
+        (video.videoWidth - cropWidth) / 2,
+        (video.videoHeight - cropHeight) / 2,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
   }
   async function capture(): Promise<void> {
-    if (closed || busy || !active || !video.videoWidth || !video.videoHeight) return;
+    if (closed || busy || !active || !video.videoWidth || !video.videoHeight)
+      return;
     busy = true;
     shutter.disabled = true;
     status.textContent = 'Binderseite wird fotografiert …';
@@ -167,7 +196,9 @@ export function openLivePageScanner(
     stage.classList.add('has-card-outline');
     polygon.setAttribute(
       'points',
-      lock.corners.map((corner) => `${corner.x * 100},${corner.y * 100}`).join(' '),
+      lock.corners
+        .map((corner) => `${corner.x * 100},${corner.y * 100}`)
+        .join(' '),
     );
     status.textContent =
       observations >= 2
@@ -188,7 +219,8 @@ export function openLivePageScanner(
     polygon.removeAttribute('points');
     status.textContent = 'Kamera wird gestartet …';
     if (!navigator.mediaDevices?.getUserMedia) {
-      status.textContent = 'Live-Kamera nicht verfügbar. Wähle stattdessen ein Kamerafoto.';
+      status.textContent =
+        'Live-Kamera nicht verfügbar. Wähle stattdessen ein Kamerafoto.';
       return;
     }
     try {
@@ -225,7 +257,8 @@ export function openLivePageScanner(
     if (!document.hidden) return;
     stop();
     if (!closed) {
-      status.textContent = 'Kamera pausiert. Starte sie erneut oder wähle ein Foto.';
+      status.textContent =
+        'Kamera pausiert. Starte sie erneut oder wähle ein Foto.';
       retry.hidden = false;
     }
   };

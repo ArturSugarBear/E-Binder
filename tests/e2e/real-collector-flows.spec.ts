@@ -42,7 +42,9 @@ test('Zenith spelling finds the real Zenit der Könige set, even in card search'
     .getByRole('group', { name: 'Katalog erkunden' })
     .getByRole('button', { name: 'Karten suchen' })
     .click();
-  await main.getByLabel('Karte suchen', { exact: true }).fill('Zenith der Könige');
+  await main
+    .getByLabel('Karte suchen', { exact: true })
+    .fill('Zenith der Könige');
   await expect(
     main.locator('.w-catalog-set-suggestions').getByRole('button', {
       name: /Zenit der Könige/,
@@ -54,9 +56,7 @@ test('portfolio gives actual collection composition without inventing market val
   page,
 }) => {
   await page.goto('./#sammlung');
-  await page
-    .getByRole('button', { name: 'Mit Demo ausprobieren' })
-    .click();
+  await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await openVault(page, 'portfolio');
   await expect(
     page.getByRole('heading', { name: 'Deine Sets im Überblick' }),
@@ -98,7 +98,9 @@ test('binder-page scanning opens a real 3x3 camera with safe photo fallback', as
     exact: true,
   });
   await expect(camera.locator('.w-live-page-cell')).toHaveCount(9);
-  await expect(camera.locator('.w-live-status')).toContainText('Kamera nicht verfügbar');
+  await expect(camera.locator('.w-live-status')).toContainText(
+    'Kamera nicht verfügbar',
+  );
   const chooser = page.waitForEvent('filechooser');
   await camera
     .getByRole('button', { name: 'Stattdessen Foto auswählen' })

@@ -718,5 +718,11 @@
   border-radius: 14px;
   background: var(--glass-background);
 }
-.w-catalog-set-suggestions strong { font-size: 13px; }
-.w-catalog-set-suggestions > .w-button { width: 100%; text-align: left; justify-content: flex-start; }
+.w-catalog-set-suggestions strong {
+  font-size: 13px;
+}
+.w-catalog-set-suggestions > .w-button {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}

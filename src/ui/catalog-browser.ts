@@ -375,9 +375,9 @@ export function createCatalogBrowser(options: Options) {
       .replaceAll('koenige', 'konige');
   }
   function setMatches(item: CatalogSet, query: string): boolean {
-    return setSearchKey(
-      `${item.id} ${item.name} ${item.alias ?? ''}`,
-    ).includes(setSearchKey(query));
+    return setSearchKey(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
+      setSearchKey(query),
+    );
   }
   function renderSets(): void {
     sets.replaceChildren();

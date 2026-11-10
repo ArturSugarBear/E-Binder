@@ -452,7 +452,7 @@ function personalFromApi(
     name: raw.name,
     setName:
       language === 'de'
-        ? canonicalGermanSetNames[raw.set.id] ?? raw.set.name
+        ? (canonicalGermanSetNames[raw.set.id] ?? raw.set.name)
         : raw.set.name,
     setId: raw.set.id,
     number:
