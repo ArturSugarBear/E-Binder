@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write src/data/card-images.ts tests/unit/verified-images.test.ts && git diff -- src/data/card-images.ts tests/unit/verified-images.test.ts && prettier --check . && node -e \"process.exit(1)\"",
     "validate:data": "node --import tsx scripts/validate-data.ts",
     "test": "vitest run",
     "test:watch": "vitest",
