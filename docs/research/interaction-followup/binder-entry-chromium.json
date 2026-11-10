@@ -1,0 +1,21 @@
+{
+  "engine": "chromium",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "firstPocket": {
+    "x": 43,
+    "y": 839.25,
+    "width": 102.65625,
+    "height": 143.390625
+  },
+  "dock": {
+    "x": 11,
+    "y": 762,
+    "width": 368,
+    "height": 72
+  },
+  "firstPocketStartsBelowDock": true,
+  "note": "Measured initial viewport. Scroll and interaction coverage remain separate audit tasks."
+}
