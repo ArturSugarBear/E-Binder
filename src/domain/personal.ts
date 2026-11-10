@@ -2,13 +2,20 @@ import { z } from 'zod';
 
 const text = z.string().trim().min(1).max(200);
 const id = z.string().min(1).max(250);
-export const finishes = ['normal', 'holo', 'reverse', 'other'] as const;
+export const finishes = [
+  'normal',
+  'holo',
+  'reverse',
+  'other',
+  'unverified',
+] as const;
 export type Finish = (typeof finishes)[number];
 export const finishLabels: Record<Finish, string> = {
   normal: 'Nicht holografisch',
   holo: 'Holografisch',
   reverse: 'Reverse-Holo',
   other: 'Andere Variante',
+  unverified: 'Nicht bestimmt',
 };
 
 export const paletteSchema = z

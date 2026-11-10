@@ -1,10 +1,13 @@
 import {
   candidatesFromText,
+  recognitionClues,
   fetchCatalogCard,
   fetchRecognizedCards,
   searchCatalog,
 } from '../data/card-catalog';
 import { extractPagePockets } from '../data/page-pockets';
+import { autoAlignPage } from '../data/auto-page-align';
+import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
 import {
@@ -18,7 +21,6 @@ import {
 } from '../domain/personal';
 import {
   action,
-  check,
   el,
   errorText,
   field,
@@ -42,6 +44,7 @@ type Pocket = {
   status: HTMLElement;
   quality: HTMLElement;
   container?: HTMLElement;
+  ocrText?: string;
 };
 
 /** Import a physical binder as repeated, explicitly reviewed 3x3 page captures. */
@@ -53,8 +56,12 @@ export function openPageScanner(
   sheet.dialog.classList.add('w-page-scan-dialog');
   const lifetime = new AbortController();
   let recognitionAbort: AbortController | undefined;
+  let sharedRecognitionAbort: AbortController | undefined;
+  let sharedRecognition:
+    ReturnType<typeof createRecognitionSession> | undefined;
   let closed = false;
   let processing = false;
+  let reAligning = false;
   let current: File | undefined;
   let fingerprint = '';
   let queued: File[] = [];
@@ -69,6 +76,7 @@ export function openPageScanner(
   status.setAttribute('aria-live', 'polite');
   const queueStatus = el('p', 'w-muted');
   const grid = el('div', 'w-page-scan-grid');
+  const reviewSummary = el('p', 'w-muted w-page-scan-summary');
   const progress = el('progress', 'w-progress');
   progress.max = 9;
   progress.hidden = true;
@@ -97,14 +105,80 @@ export function openPageScanner(
     binderNameField.hidden = Boolean(binder.value);
   });
   const language = select([
+    ['auto', 'Automatisch (DE/EN/JA)'],
     ['de', 'Deutsch'],
     ['en', 'Englisch'],
     ['ja', 'Japanisch'],
   ]);
-  language.value = 'de';
-  const approved = check(
-    'Ich habe alle neun Positionen und die Druckvarianten geprüft. Fehlende Karten werden nicht automatisch ergänzt.',
+  language.value = 'auto';
+  const preferredLanguage = (text: string) => {
+    if (language.value !== 'auto') return language.value;
+    const printed = recognitionClues(text).find(
+      (clue) => clue.language,
+    )?.language;
+    if (printed) return printed;
+    if (/[\u3040-\u30ff]/.test(text)) return 'ja';
+    if (/\b(BASIC|ABILITY|WEAKNESS|RETREAT)\b/i.test(text)) return 'en';
+    return 'de';
+  };
+  const scanOptions = el(
+    'details',
+    'w-page-scan-options',
+    el('summary', '', 'Erweiterte Scanoptionen'),
+    field('Sprache der Karten (optional)', language),
   );
+  const manualAlign = action(
+    'Zuschnitt korrigieren',
+    () => {
+      if (!current || processing || reAligning) return;
+      const photo = current;
+      reAligning = true;
+      updateSave();
+      void (async () => {
+        try {
+          const aligned = await alignPhoto(photo, lifetime.signal, 'page');
+          if (
+            !aligned ||
+            closed ||
+            lifetime.signal.aborted ||
+            current !== photo
+          )
+            return;
+          const tiles = await extractPagePockets(aligned, lifetime.signal);
+          if (closed || lifetime.signal.aborted || current !== photo) return;
+          releasePreviews();
+          buildGrid(tiles);
+          void recognizeAll(tiles);
+        } catch (error) {
+          if (!closed) status.textContent = errorText(error);
+        } finally {
+          reAligning = false;
+          updateSave();
+        }
+      })();
+    },
+    'secondary',
+  );
+  manualAlign.hidden = true;
+  const skipPage = action(
+    'Seite überspringen',
+    () => {
+      if (!current || processing || reAligning) return;
+      releasePreviews();
+      grid.replaceChildren();
+      pockets = [];
+      current = undefined;
+      manualAlign.hidden = true;
+      skipPage.hidden = true;
+      updateSave();
+      reportQueue();
+      if (queued.length) void nextPage();
+      else
+        status.textContent = 'Seite ausgelassen. Kein Bestand wurde verändert.';
+    },
+    'secondary',
+  );
+  skipPage.hidden = true;
   const stop = action(
     'Erkennung stoppen',
     () => recognitionAbort?.abort(),
@@ -114,7 +188,7 @@ export function openPageScanner(
   const save = action(
     'Geprüfte Binderseite übernehmen',
     () => {
-      if (!current || processing || !approved.input.checked) return;
+      if (!current || processing) return;
       const slots: (ScannedCardChoice | null)[] = pockets.map((pocket) =>
         pocket.decision === 'card' && pocket.card
           ? {
@@ -149,9 +223,10 @@ export function openPageScanner(
       binderNameField.hidden = true;
       releasePreviews();
       current = undefined;
+      manualAlign.hidden = true;
+      skipPage.hidden = true;
       pockets = [];
       grid.replaceChildren();
-      approved.input.checked = false;
       if (queued.length) {
         void nextPage();
       } else {
@@ -164,23 +239,33 @@ export function openPageScanner(
   );
   save.disabled = true;
   const updateSave = () => {
+    manualAlign.disabled = !current || processing || reAligning;
+    skipPage.disabled = !current || processing || reAligning;
     save.disabled =
       !current ||
       processing ||
-      !approved.input.checked ||
+      reAligning ||
       pockets.length !== 9 ||
       !pockets.some((pocket) => pocket.decision === 'card') ||
       pockets.some(
         (pocket) =>
-          pocket.decision === 'pending' ||
-          (pocket.decision === 'card' &&
-            (!pocket.card ||
-              !pocket.finish.value ||
-              (pocket.finish.value === 'other' &&
-                !pocket.variant.value.trim()))),
+          pocket.decision === 'card' &&
+          (!pocket.card ||
+            (pocket.finish.value === 'other' && !pocket.variant.value.trim())),
       );
+    const matches = pockets.filter(
+      (pocket) => pocket.decision === 'card',
+    ).length;
+    const empty = pockets.filter(
+      (pocket) => pocket.decision === 'empty',
+    ).length;
+    const open = pockets.filter(
+      (pocket) => pocket.decision === 'pending' || pocket.decision === 'skip',
+    ).length;
+    reviewSummary.textContent = pockets.length
+      ? `${matches} ausgewählt · ${empty} vermutlich leer · ${open} offen. Du kannst nur die ausgewählten Karten übernehmen.`
+      : 'Noch keine Binderseite eingelesen.';
   };
-  approved.input.addEventListener('change', updateSave);
   const reportQueue = () => {
     queueStatus.textContent = `${current ? 'Eine Seite in Prüfung. ' : ''}${queued.length} weitere Seiten vorgemerkt.`;
   };
@@ -199,13 +284,7 @@ export function openPageScanner(
     message(
       'Ein Foto pro physischer 9-Pocket-Seite. E-Binder schneidet neun Positionen lokal aus und schlägt Karten vor. Erst deine Prüfung trägt Exemplare in den Bestand ein; identische Fotos können nicht zweimal importiert werden.',
     ),
-    el(
-      'div',
-      'w-form-grid',
-      field('Zielbinder', binder),
-      binderNameField,
-      field('Kartensprache', language),
-    ),
+    el('div', 'w-form-grid', field('Zielbinder', binder), binderNameField),
     el(
       'div',
       'w-action-row',
@@ -224,13 +303,14 @@ export function openPageScanner(
     ),
     camera,
     gallery,
+    scanOptions,
+    el('div', 'w-action-row', manualAlign, skipPage),
     queueStatus,
     status,
     progress,
     grid,
-    approved.row,
+    reviewSummary,
   );
-  approved.row.hidden = true;
   sheet.footer.append(stop, save);
   reportQueue();
 
@@ -247,6 +327,13 @@ export function openPageScanner(
       pocket.card = undefined;
       pocket.decision = 'pending';
     }
+    if (pocket.decision === 'card' && pocket.card)
+      pocket.status.textContent = `${pocket.card.name} · ${pocket.card.number}`;
+    else if (pocket.decision === 'empty')
+      pocket.status.textContent = 'Vermutlich leer · antippen zum Ändern';
+    else if (pocket.decision === 'skip')
+      pocket.status.textContent = 'Nicht zugeordnet';
+    if (pocket.container) pocket.container.dataset.decision = pocket.decision;
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -291,6 +378,27 @@ export function openPageScanner(
     pocket.select.value = value;
     updatePocket(pocket);
   };
+  const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
+    const number = (value: string) =>
+      value
+        .replace(/\s/g, '')
+        .replace(/(^|\/)0+(?=\d)/g, '$1')
+        .toLowerCase();
+    const clues = recognitionClues(text).filter((clue) => clue.setId);
+    const exact = pocket.candidates.filter((card) =>
+      clues.some(
+        (clue) =>
+          clue.setId === card.setId &&
+          number(clue.number) === number(card.number) &&
+          (!clue.language || clue.language === card.language),
+      ),
+    );
+    // A name or an unqualified number cannot establish a printing.
+    if (pocket.decision !== 'pending' || exact.length !== 1) return false;
+    pocket.select.value = `card:${pocket.candidates.indexOf(exact[0]!)}`;
+    updatePocket(pocket);
+    return true;
+  };
   const searchPocket = async (pocket: Pocket) => {
     const query = pocket.search.value.trim();
     if (query.length < 2) {
@@ -309,27 +417,32 @@ export function openPageScanner(
       );
       let online: PersonalCard[] = [];
       if (navigator.onLine) {
-        const found = await searchCatalog(
-          query,
-          language.value,
-          lifetime.signal,
+        const locales =
+          language.value === 'auto' ? ['de', 'en', 'ja'] : [language.value];
+        const batches = await Promise.allSettled(
+          locales.map(async (locale) => {
+            const found = await searchCatalog(query, locale, lifetime.signal);
+            const resolved = await Promise.allSettled(
+              found
+                .slice(0, 6)
+                .map((item) =>
+                  fetchCatalogCard(item.id, locale, lifetime.signal),
+                ),
+            );
+            return resolved.flatMap((result) =>
+              result.status === 'fulfilled' ? [result.value] : [],
+            );
+          }),
         );
-        const resolved = await Promise.allSettled(
-          found
-            .slice(0, 6)
-            .map((item) =>
-              fetchCatalogCard(item.id, language.value, lifetime.signal),
-            ),
-        );
-        online = resolved.flatMap((result) =>
-          result.status === 'fulfilled' ? [result.value] : [],
+        online = batches.flatMap((result) =>
+          result.status === 'fulfilled' ? result.value : [],
         );
       }
       if (closed || lifetime.signal.aborted) return;
       displayCandidates(pocket, [...online, ...existing]);
       pocket.status.textContent =
         online.length + existing.length
-          ? 'Wähle die genaue Ausgabe und bestätige ihre Variante.'
+          ? 'Wähle die genaue Kartenausgabe. Druckdetails sind optional.'
           : 'Keine passende Ausgabe. Diese Position kann ungeklärt bleiben.';
     } catch {
       if (!closed && !lifetime.signal.aborted)
@@ -351,10 +464,15 @@ export function openPageScanner(
         ['empty', 'Fach ist leer'],
         ['skip', 'Nicht erkannt – leer lassen'],
       ]);
-      const finish = select([
-        ['', 'Druckvariante bestätigen'],
-        ...finishes.map((key) => [key, finishLabels[key]] as [string, string]),
-      ]);
+      const finish = select(
+        [
+          ['unverified', 'Nicht bestimmt (später ändern)'],
+          ...finishes
+            .filter((key) => key !== 'unverified')
+            .map((key) => [key, finishLabels[key]] as [string, string]),
+        ],
+        'unverified',
+      );
       finish.hidden = true;
       const variant = input('text');
       variant.placeholder = 'Auflage / Stempel beschreiben';
@@ -412,31 +530,48 @@ export function openPageScanner(
         el('div', 'w-page-scan-photo-frame', photo),
         info,
         quality,
-        pick,
-        finish,
-        variant,
-        el('div', 'w-page-scan-search', query, searchButton),
+        el(
+          'details',
+          'w-page-scan-editor',
+          el('summary', '', 'Prüfen / ändern'),
+          pick,
+          finish,
+          variant,
+          el('div', 'w-page-scan-search', query, searchButton),
+        ),
       );
       pocket.container = container;
+      container.dataset.decision = 'pending';
       grid.append(container);
     }
-    approved.row.hidden = false;
     updateSave();
   };
   const recognizeAll = async (tiles: Blob[]) => {
-    const abort = new AbortController();
+    if (
+      !sharedRecognition ||
+      !sharedRecognitionAbort ||
+      sharedRecognitionAbort.signal.aborted
+    ) {
+      const controller = new AbortController();
+      sharedRecognitionAbort = controller;
+      lifetime.signal.addEventListener('abort', () => controller.abort(), {
+        once: true,
+      });
+      sharedRecognition = createRecognitionSession(
+        controller.signal,
+        (label) => {
+          status.textContent = label;
+        },
+      );
+    }
+    const abort = sharedRecognitionAbort;
+    const session = sharedRecognition;
     recognitionAbort = abort;
-    lifetime.signal.addEventListener('abort', () => abort.abort(), {
-      once: true,
-    });
     processing = true;
     progress.hidden = false;
     progress.value = 0;
     stop.hidden = false;
     updateSave();
-    const session = createRecognitionSession(abort.signal, (label) => {
-      status.textContent = label;
-    });
     try {
       // Small, sequential decodes keep peak RAM bounded on older iPhones.
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
@@ -449,6 +584,7 @@ export function openPageScanner(
           );
           if (closed || abort.signal.aborted) break;
           const quality = pockets[index]!.quality;
+          quality.hidden = inspection.warnings.length === 0;
           quality.textContent = inspection.warnings.length
             ? `Aufnahmehinweis: ${inspection.warnings.join(' · ')}`
             : 'Keine deutlichen Belichtungsprobleme erkannt';
@@ -457,6 +593,7 @@ export function openPageScanner(
             : 'false';
         } catch {
           if (closed || abort.signal.aborted) break;
+          pockets[index]!.quality.hidden = false;
           pockets[index]!.quality.textContent =
             'Fotoqualität konnte nicht geprüft werden. Bitte selbst kontrollieren.';
         }
@@ -464,12 +601,27 @@ export function openPageScanner(
       for (let index = 0; index < tiles.length; index++) {
         if (closed || abort.signal.aborted) break;
         const pocket = pockets[index]!;
+        try {
+          if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
+            if (closed || abort.signal.aborted) break;
+            pocket.select.value = 'empty';
+            updatePocket(pocket);
+            pocket.container?.classList.add('is-processed');
+            progress.value = index + 1;
+            status.textContent = `${index + 1} von 9 Fächern geprüft.`;
+            continue;
+          }
+        } catch {
+          if (closed || abort.signal.aborted) break;
+          // If occupancy cannot be determined, try OCR instead.
+        }
         pocket.status.textContent = 'Lese Karte …';
         pocket.container?.classList.remove('is-processed');
         pocket.container?.classList.add('is-scanning');
         try {
           const text = await session.recognize(tiles[index]!);
           if (closed || abort.signal.aborted) break;
+          pocket.ocrText = text;
           const local = candidatesFromText(text, [
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
@@ -479,7 +631,7 @@ export function openPageScanner(
             try {
               online = await fetchRecognizedCards(
                 text,
-                language.value,
+                preferredLanguage(text),
                 abort.signal,
               );
             } catch {
@@ -488,9 +640,12 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           displayCandidates(pocket, [...online, ...local]);
-          pocket.status.textContent = pocket.candidates.length
-            ? `${pocket.candidates.length} Vorschläge · Bitte selbst prüfen`
-            : 'Keine sichere Zuordnung – manuell suchen oder überspringen';
+          const matched = selectExactPrintedMatch(pocket, text);
+          pocket.status.textContent = matched
+            ? `${pocket.card!.name} · ${pocket.card!.number}`
+            : pocket.candidates.length
+              ? `${pocket.candidates.length} Vorschläge · prüfen`
+              : 'Noch nicht erkannt · prüfen';
         } catch {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent =
@@ -504,7 +659,14 @@ export function openPageScanner(
         status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;
       }
     } finally {
-      session.close();
+      // Keep the ONNX model loaded for subsequent photos in the same batch.
+      // A cancelled scan terminates the worker; the next scan starts fresh.
+      if (abort.signal.aborted || closed) {
+        session.close();
+        if (sharedRecognition === session) sharedRecognition = undefined;
+        if (sharedRecognitionAbort === abort)
+          sharedRecognitionAbort = undefined;
+      }
       if (recognitionAbort === abort) recognitionAbort = undefined;
       processing = false;
       stop.hidden = true;
@@ -513,7 +675,7 @@ export function openPageScanner(
       if (!closed)
         status.textContent = abort.signal.aborted
           ? 'Erkennung angehalten. Prüfe die vorhandenen Vorschläge oder suche fehlende Karten manuell.'
-          : 'Erkennung abgeschlossen. Prüfe alle neun Fächer und bestätige die Druckvarianten.';
+          : 'Erkennung abgeschlossen. Prüfe die offenen Fächer oder übernimm die ausgewählten Karten.';
     }
   };
   const nextPage = async () => {
@@ -521,8 +683,6 @@ export function openPageScanner(
     current = queued.shift()!;
     reportQueue();
     fingerprint = '';
-    approved.row.hidden = true;
-    approved.input.checked = false;
     grid.replaceChildren();
     pockets = [];
     releasePreviews();
@@ -541,19 +701,16 @@ export function openPageScanner(
         throw new Error(
           'Diese Aufnahme wurde bereits importiert. Die vorhandene Binderseite bleibt unverändert.',
         );
+      status.textContent = 'Binderseite wird automatisch ausgerichtet …';
+      const aligned = await autoAlignPage(file, lifetime.signal);
+      if (lifetime.signal.aborted || closed) return;
+      manualAlign.hidden = false;
+      skipPage.hidden = false;
       status.textContent =
-        'Richte jetzt die vier äußeren Ecken der Binderseite aus.';
-      const aligned = await alignPhoto(file, lifetime.signal, 'page');
-      if (!aligned || lifetime.signal.aborted || closed) {
-        if (!closed)
-          status.textContent =
-            'Seitenausrichtung abgebrochen. Kein Bestand wurde verändert.';
-        current = undefined;
-        reportQueue();
-        return;
-      }
-      status.textContent = 'Neun Kartenfächer werden lokal ausgeschnitten …';
-      const tiles = await extractPagePockets(aligned, lifetime.signal);
+        aligned.method === 'detected'
+          ? 'Seitenränder erkannt. Neun Kartenfächer werden gelesen …'
+          : 'Foto automatisch auf neun Fächer aufgeteilt. Falls nötig, „Zuschnitt korrigieren“ wählen.';
+      const tiles = await extractPagePockets(aligned.blob, lifetime.signal);
       if (closed || lifetime.signal.aborted) return;
       buildGrid(tiles);
       void recognizeAll(tiles);
