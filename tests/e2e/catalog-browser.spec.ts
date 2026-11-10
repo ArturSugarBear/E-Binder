@@ -147,7 +147,9 @@ test('capture opens without demo catalogue cards or overwhelming set filters', a
     'open',
   );
   await dialog.getByLabel('Karte suchen', { exact: true }).fill('Floink');
-  await expect(dialog.locator('.w-search-results button').first()).toBeVisible();
+  await expect(
+    dialog.locator('.w-search-results button').first(),
+  ).toBeVisible();
 });
 
 test('German search shows matching English artwork with language label and a separate missing-confirmation message', async ({

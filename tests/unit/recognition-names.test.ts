@@ -13,9 +13,7 @@ describe('OCR card-title fallback', () => {
 
   it('offers only a generic search for energy cards, never a printing', () => {
     expect(recognizedNameHints('BASIS-ENERGIE')).toEqual(['Energie']);
-    expect(recognizedNameHints('001/182\nBasis Energie')).toEqual([
-      'Energie',
-    ]);
+    expect(recognizedNameHints('001/182\nBasis Energie')).toEqual(['Energie']);
   });
 
   it('accepts Japanese card names but never converts them into German printings', () => {

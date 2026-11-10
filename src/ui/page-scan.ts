@@ -648,13 +648,10 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           let titleHint = '';
-          if (
-            navigator.onLine &&
-            text.trim() &&
-            !online.length
-          ) {
+          if (navigator.onLine && text.trim() && !online.length) {
             try {
-              pocket.status.textContent = 'Kartenname wird im Katalog gesucht …';
+              pocket.status.textContent =
+                'Kartenname wird im Katalog gesucht …';
               const hint = await fetchNameHintCandidates(
                 text,
                 preferredLanguage(text),
@@ -686,8 +683,7 @@ export function openPageScanner(
                       : 'Kein lesbarer Kartenname · Foto prüfen';
         } catch (error) {
           if (closed || abort.signal.aborted) break;
-          pocket.status.textContent =
-            `Erkennung fehlgeschlagen: ${errorText(error)}`;
+          pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
           if (!closed && !abort.signal.aborted)

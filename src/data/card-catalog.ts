@@ -698,9 +698,7 @@ export async function fetchNameHintCandidates(
     .filter((item) => normalize(item.name).includes(normalized))
     .slice(0, 6);
   const checked = await Promise.allSettled(
-    matching.map((item) =>
-      fetchCatalogCard(item.id, language, searchSignal),
-    ),
+    matching.map((item) => fetchCatalogCard(item.id, language, searchSignal)),
   );
   return {
     query,

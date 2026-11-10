@@ -137,13 +137,7 @@ export function openAddCards(
     'section',
     'w-capture-start',
     el('h3', '', 'Wie möchtest du Karten erfassen?'),
-    el(
-      'div',
-      'w-capture-start-grid',
-      scanBinder,
-      takePhoto,
-      upload,
-    ),
+    el('div', 'w-capture-start-grid', scanBinder, takePhoto, upload),
     action('Karte manuell eintragen', () => manualForm(), 'text'),
   );
   captureStart.hidden = Boolean(options.correctHoldingId || options.card);
@@ -153,7 +147,9 @@ export function openAddCards(
     el('summary', '', 'Erweiterte Suche: Set, Illustrator und Seltenheit'),
     browser.element,
   );
-  advancedCatalog.open = Boolean(options.browse || options.setId || options.artist);
+  advancedCatalog.open = Boolean(
+    options.browse || options.setId || options.artist,
+  );
   sheet.body.append(
     captureStart,
     el(
