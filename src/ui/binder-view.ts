@@ -374,7 +374,7 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     if (document.querySelector('.w-dialog[open]')) return;
     const adjacent = binder.pages[pageIndex + step];
     if (!adjacent) return;
-    pendingPageSwipe = step;
+    pendingPageSwipe = step > 0 ? 1 : -1;
     if (!choosePage(adjacent.id)) pendingPageSwipe = 0;
   });
   const assembly = action(
