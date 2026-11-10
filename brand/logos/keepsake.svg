@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title desc">
+  <title id="title">E-Binder Keepsake — card lifted from an album</title>
+  <desc id="desc">A warm violet album with a single rose card emerging from the upper pocket.</desc>
+  <rect x="8" y="9" width="55" height="62" rx="13" fill="#4B3E9C"/>
+  <path d="M18 23h28v16H18zm0 24h28v15H18z" fill="none" stroke="#F8F4EB" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M39 6l23 6-9 34-23-6z" fill="#DE5A76" stroke="#F8F4EB" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M43 18l11 3" stroke="#F8F4EB" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 14v48" stroke="#B8A9FF" stroke-width="2.8" stroke-linecap="round"/>
+</svg>
