@@ -30,6 +30,11 @@ const verifiedArtists: Record<string, string> = {
   'pal-209': 'Tomokazu Komiya',
   'pal-210': 'Tomokazu Komiya',
 };
+const canonicalGermanSetNames: Record<string, string> = {
+  'swsh12.5': 'Zenit der Könige',
+  'swsh12.5gg': 'Zenit der Könige Galar-Galerie',
+};
+
 const setIds: Record<string, string> = {
   svi: 'sv01',
   pal: 'sv02',
@@ -445,14 +450,25 @@ function personalFromApi(
   return personalCardSchema.parse({
     key: `tcgdex:${language}:${raw.id}`,
     name: raw.name,
-    setName: raw.set.name,
+    setName:
+      language === 'de'
+        ? canonicalGermanSetNames[raw.set.id] ?? raw.set.name
+        : raw.set.name,
     setId: raw.set.id,
     number:
       raw.set.cardCount.official > 0
         ? `${raw.localId}/${raw.set.cardCount.official}`
         : raw.localId,
     language,
-    image: raw.image ? `${raw.image}/high.webp` : '',
+    // TCGdex's Galarian Gallery artwork lives in the parent Crown Zenith
+    // asset directory, even though its physical set ID is swsh12.5gg.
+    // The printed GG number is unchanged: never use another card's artwork.
+    image:
+      raw.set.id === 'swsh12.5gg' && /^GG\d{1,2}$/i.test(raw.localId)
+        ? `https://assets.tcgdex.net/${language}/swsh/swsh12.5/${raw.localId}/high.webp`
+        : raw.image
+          ? `${raw.image}/high.webp`
+          : '',
     source: 'tcgdex',
     sourceId: raw.id,
     artist: raw.illustrator ?? '',
