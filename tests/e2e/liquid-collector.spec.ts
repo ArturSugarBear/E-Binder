@@ -7,7 +7,7 @@ test('liquid shell remains usable and supports reduce-motion/reduce-transparency
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('link', { name: 'Entdecken' }).first().click();
   await expect(page).toHaveURL(/#entdecken$/);
-  await expect(page.getByRole('main').getByRole('heading', { name: /Karten entdecken/i })).toBeVisible();
+  await expect(page.getByRole('main').locator('.w-discover-mode')).toBeVisible();
 });
 
 test('camera scanner switches modes without writing inventory', async ({ page }) => {
@@ -17,8 +17,8 @@ test('camera scanner switches modes without writing inventory', async ({ page })
       value: { getUserMedia: async () => { throw new DOMException('Camera denied', 'NotAllowedError'); } },
     });
   });
-  await page.goto('./#home');
-  await page.getByRole('button', { name: 'Karte live scannen', exact: true }).first().click();
+  await page.goto('./#sammlung');
+  await page.getByRole('main').getByRole('button', { name: 'Karten hinzufügen', exact: true }).click();
   const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
   await add.getByRole('button', { name: 'Karte live scannen' }).click();
   const single = page.getByRole('dialog', { name: 'Karte live scannen' });
