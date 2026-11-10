@@ -27,9 +27,9 @@ export function anniversaryEnergyFromText(
   if (language !== 'de' && language !== 'en') return [];
   const numbers = new Set<number>();
   for (const match of text.matchAll(
-    /\bMEE[\s:.-]*([0-9O]{2,3})\b(?!\s*[/|]\s*[0-9O])/gi,
+    /\bMEE[\s:.-]*([0-9OIl]{2,3})\b(?!\s*[/|]\s*[0-9OIl])/gi,
   )) {
-    const number = Number(match[1]!.replace(/O/gi, '0'));
+    const number = Number(match[1]!.replace(/O/gi, '0').replace(/[Il]/g, '1'));
     if (Number.isInteger(number) && number >= 9 && number <= 16)
       numbers.add(number);
   }
