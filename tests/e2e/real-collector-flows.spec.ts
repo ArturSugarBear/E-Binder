@@ -197,7 +197,9 @@ test('an exact confirmed German card receives a real EUR trend and a valued set 
   });
   await page.reload();
   await expect(page.locator('.w-portfolio-balance')).toContainText('19,00');
-  await expect(page.locator('.w-portfolio-set-row')).toContainText('2 Exemplare');
+  await expect(page.locator('.w-portfolio-set-row')).toContainText(
+    '2 Exemplare',
+  );
   await expect(page.locator('.w-portfolio-leader')).toHaveCount(1);
   await expect(page.locator('.w-portfolio-missing-card')).toHaveCount(0);
 });
