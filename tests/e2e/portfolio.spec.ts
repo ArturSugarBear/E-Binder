@@ -45,3 +45,28 @@ test('portfolio retains unpriced demo collection and links to binder pages', asy
     page.getByRole('heading', { name: 'Deine Binder', exact: true }),
   ).toBeVisible();
 });
+
+test('late price responses preserve an opened binder', async ({ page }) => {
+  let release!: () => void;
+  const responseGate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('https://api.tcgdex.net/**', async (route) => {
+    await responseGate;
+    await route.fulfill({
+      status: 503,
+      body: 'Unavailable for regression test',
+    });
+  });
+  await page.goto('./#sammlung');
+  await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
+  await openVault(page, 'portfolio');
+  await expect(page.locator('.w-portfolio-load-progress')).toBeVisible();
+  await page.locator('.w-portfolio-binder summary').click();
+  await expect(page.locator('.w-portfolio-binder')).toHaveAttribute('open', '');
+  release();
+  await expect(page.locator('.w-portfolio-load-progress')).toHaveCount(0);
+  await expect(page.locator('.w-portfolio-binder')).toHaveAttribute('open', '');
+  await page.locator('.w-portfolio-pages > button').first().click();
+  await expect(page).toHaveURL(/#binder$/);
+});
