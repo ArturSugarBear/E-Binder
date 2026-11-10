@@ -97,8 +97,12 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   );
   await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte scannen' }).click();
-  await expect(page.getByRole('dialog', { name: 'Karten hinzufügen' })).toBeVisible();
-  await expect(page.getByRole('dialog', { name: 'Karte live scannen' })).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Karten hinzufügen' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Karte live scannen' }),
+  ).toBeVisible();
   await page
     .getByRole('dialog', { name: 'Karte live scannen' })
     .getByRole('button', { name: 'Karte live scannen schließen' })
@@ -112,7 +116,9 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   await expect(
     navigation.getByRole('link', { name: 'Sammlung' }),
   ).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByRole('link', { name: 'Portfolio', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Portfolio', exact: true }),
+  ).toBeVisible();
   await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),

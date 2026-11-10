@@ -3,7 +3,10 @@ import type { WorkspaceContext } from './workspace-context';
 
 export type VaultRoute = 'binder' | 'sammlung' | 'portfolio';
 
-export function vaultTabs(ctx: WorkspaceContext, active: VaultRoute): HTMLElement {
+export function vaultTabs(
+  ctx: WorkspaceContext,
+  active: VaultRoute,
+): HTMLElement {
   const navigation = el('nav', 'w-vault-tabs w-glass-panel');
   navigation.setAttribute('aria-label', 'Sammlungsansichten');
   const tabs: [VaultRoute, string][] = [

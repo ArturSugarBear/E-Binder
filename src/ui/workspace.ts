@@ -174,7 +174,9 @@ export async function startWorkspace(): Promise<void> {
         const inVault = ['binder', 'sammlung', 'portfolio'].includes(route);
         const active =
           destination === route ||
-          (destination === 'binder' && inVault && link.closest('.w-mobile-nav'));
+          (destination === 'binder' &&
+            inVault &&
+            link.closest('.w-mobile-nav'));
         link.setAttribute('aria-current', active ? 'page' : 'false');
       }
       if (

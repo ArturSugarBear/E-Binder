@@ -2870,7 +2870,9 @@ textarea.w-input,
   border-radius: 12px;
   font-size: 14px;
   font-weight: 650;
-  transition: background 180ms ease, color 180ms ease;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
 }
 .w-vault-tab[aria-current='page'] {
   color: var(--on-accent);
@@ -2922,7 +2924,11 @@ textarea.w-input,
   padding: clamp(26px, 5vw, 52px);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 85% 10%, rgb(216 242 90 / 0.15), transparent 55%),
+    radial-gradient(
+      ellipse at 85% 10%,
+      rgb(216 242 90 / 0.15),
+      transparent 55%
+    ),
     linear-gradient(135deg, rgb(36 40 42 / 0.94), rgb(18 19 24 / 0.95));
 }
 .w-home-hero h1 {
@@ -2976,7 +2982,11 @@ textarea.w-input,
   width: 110px;
   height: 154px;
   margin-left: -35px;
-  background: linear-gradient(140deg, rgb(216 242 90 / 0.16), rgb(255 255 255 / 0.04));
+  background: linear-gradient(
+    140deg,
+    rgb(216 242 90 / 0.16),
+    rgb(255 255 255 / 0.04)
+  );
   border: 1px solid rgb(216 242 90 / 0.23);
   border-radius: 10px;
   color: var(--accent);
@@ -3193,7 +3203,9 @@ textarea.w-input,
     background: rgb(31 33 39 / 0.78);
     -webkit-backdrop-filter: blur(30px) saturate(190%);
     backdrop-filter: blur(30px) saturate(190%);
-    box-shadow: 0 14px 35px rgb(0 0 0 / 0.48), inset 0 1px rgb(255 255 255 / 0.12);
+    box-shadow:
+      0 14px 35px rgb(0 0 0 / 0.48),
+      inset 0 1px rgb(255 255 255 / 0.12);
   }
   .w-mobile-nav > a,
   .w-mobile-nav > button {
@@ -3285,7 +3297,9 @@ textarea.w-input,
     padding-bottom: calc(134px + env(safe-area-inset-bottom));
   }
 }
-@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
   .w-glass-panel,
   .w-mobile-nav,
   .w-navigation,

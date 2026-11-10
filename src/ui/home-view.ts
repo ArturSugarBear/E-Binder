@@ -18,7 +18,11 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     'header',
     'w-home-hero w-glass-panel',
     el('p', 'w-eyebrow', 'Rare Room · Dein Sammelraum'),
-    el('h1', '', copies ? 'Deine Sammlung. Deine Geschichte.' : 'Dein Fund. Dein Moment.'),
+    el(
+      'h1',
+      '',
+      copies ? 'Deine Sammlung. Deine Geschichte.' : 'Dein Fund. Dein Moment.',
+    ),
     el(
       'p',
       'w-home-intro',
@@ -29,8 +33,18 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     el(
       'div',
       'w-home-hero-actions',
-      action('Karte live scannen', () => ctx.openAdd({ live: true }), 'primary', 'camera'),
-      action('Meine Binder', () => ctx.navigate('binder'), 'secondary', 'binder'),
+      action(
+        'Karte live scannen',
+        () => ctx.openAdd({ live: true }),
+        'primary',
+        'camera',
+      ),
+      action(
+        'Meine Binder',
+        () => ctx.navigate('binder'),
+        'secondary',
+        'binder',
+      ),
     ),
   );
   const preview = el('div', 'w-home-art');
@@ -57,16 +71,37 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       el(
         'section',
         'w-home-onboarding',
-        el('div', 'w-home-section-heading', el('h2', '', 'So beginnt dein Binder')),
+        el(
+          'div',
+          'w-home-section-heading',
+          el('h2', '', 'So beginnt dein Binder'),
+        ),
         el(
           'div',
           'w-home-steps',
-          step('01', 'Karte scannen', 'Halte die Karte in den Live-Rahmen. Wir helfen beim Ausrichten.'),
-          step('02', 'Ausgabe prüfen', 'Kontrolliere Set, Nummer, Sprache und Variante vor dem Speichern.'),
-          step('03', 'Binder gestalten', 'Ordne deine Karten auf echten 9-Pocket-Seiten an.'),
+          step(
+            '01',
+            'Karte scannen',
+            'Halte die Karte in den Live-Rahmen. Wir helfen beim Ausrichten.',
+          ),
+          step(
+            '02',
+            'Ausgabe prüfen',
+            'Kontrolliere Set, Nummer, Sprache und Variante vor dem Speichern.',
+          ),
+          step(
+            '03',
+            'Binder gestalten',
+            'Ordne deine Karten auf echten 9-Pocket-Seiten an.',
+          ),
         ),
       ),
-      action('Mit der ersten Karte starten', () => ctx.openAdd({ live: true }), 'primary', 'camera'),
+      action(
+        'Mit der ersten Karte starten',
+        () => ctx.openAdd({ live: true }),
+        'primary',
+        'camera',
+      ),
     );
     return root;
   }
@@ -102,7 +137,12 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     button.classList.add('w-home-recent-card');
     button.replaceChildren(
       el('div', 'w-home-recent-art', ctx.images.artwork(holding.card)),
-      el('div', '', el('strong', '', holding.card.name), el('small', '', `${holding.card.setName} · ${holding.card.number}`)),
+      el(
+        'div',
+        '',
+        el('strong', '', holding.card.name),
+        el('small', '', `${holding.card.setName} · ${holding.card.number}`),
+      ),
     );
     recent.append(button);
   }
@@ -123,17 +163,29 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       'div',
       'w-home-section-heading',
       el('h2', '', 'Deine Sets'),
-      action('Sets entdecken', () => ctx.navigate('entdecken'), 'text', 'arrow'),
+      action(
+        'Sets entdecken',
+        () => ctx.navigate('entdecken'),
+        'text',
+        'arrow',
+      ),
     ),
   );
   const sets = el('div', 'w-home-set-list');
-  for (const set of [...groups.values()].sort((a, b) => b.count - a.count).slice(0, 4))
+  for (const set of [...groups.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4))
     sets.append(
       el(
         'div',
         'w-home-set-row w-glass-panel',
         el('span', 'w-home-set-mark', set.name.slice(0, 2).toUpperCase()),
-        el('span', '', el('strong', '', set.name), el('small', '', 'In deiner Sammlung')),
+        el(
+          'span',
+          '',
+          el('strong', '', set.name),
+          el('small', '', 'In deiner Sammlung'),
+        ),
         el('b', '', `${set.count} Karten`),
       ),
     );
@@ -143,8 +195,23 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
   const shortcut = el(
     'section',
     'w-home-next w-glass-panel',
-    el('div', '', el('p', 'w-eyebrow', 'Dein nächster Fund'), el('h2', '', 'Was ist dein Binder wert?'), el('p', '', 'Entdecke verifizierte Preisreferenzen, Werte pro Binderseite und noch unbewertete Karten.')),
-    action('Portfolio ansehen', () => ctx.navigate('portfolio'), 'secondary', 'arrow'),
+    el(
+      'div',
+      '',
+      el('p', 'w-eyebrow', 'Dein nächster Fund'),
+      el('h2', '', 'Was ist dein Binder wert?'),
+      el(
+        'p',
+        '',
+        'Entdecke verifizierte Preisreferenzen, Werte pro Binderseite und noch unbewertete Karten.',
+      ),
+    ),
+    action(
+      'Portfolio ansehen',
+      () => ctx.navigate('portfolio'),
+      'secondary',
+      'arrow',
+    ),
   );
   root.append(shortcut);
   return root;

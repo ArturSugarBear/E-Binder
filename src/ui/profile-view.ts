@@ -27,7 +27,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       'w-profile-options w-glass-panel',
       option(
         'Konto verwalten',
-        ctx.account ? 'Anmeldung, Synchronisierung und Abmeldung' : 'Optional anmelden und den Bestand sichern',
+        ctx.account
+          ? 'Anmeldung, Synchronisierung und Abmeldung'
+          : 'Optional anmelden und den Bestand sichern',
         () =>
           document
             .querySelector<HTMLButtonElement>('#workspace-account')
@@ -38,10 +40,8 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
         'Exportieren oder eine vorhandene Sicherung einspielen',
         () => ctx.openBackup(),
       ),
-      option(
-        'Wunschliste',
-        'Karten ansehen, die du noch suchst',
-        () => ctx.navigate('wunschliste'),
+      option('Wunschliste', 'Karten ansehen, die du noch suchst', () =>
+        ctx.navigate('wunschliste'),
       ),
     ),
   );
@@ -79,9 +79,13 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
   );
   if (ctx.state.mode === 'demo')
     root.append(
-      action('Persönlichen Bestand öffnen', () => {
-        void ctx.switchMode('personal');
-      }, 'secondary'),
+      action(
+        'Persönlichen Bestand öffnen',
+        () => {
+          void ctx.switchMode('personal');
+        },
+        'secondary',
+      ),
     );
   return root;
 }
@@ -94,7 +98,12 @@ function option(
   const control = action(title, handler, 'text', 'arrow');
   control.classList.add('w-profile-option');
   control.replaceChildren(
-    el('span', 'w-profile-option-label', el('strong', '', title), el('small', '', description)),
+    el(
+      'span',
+      'w-profile-option-label',
+      el('strong', '', title),
+      el('small', '', description),
+    ),
     el('span', 'w-profile-option-arrow', '↗'),
   );
   return control;

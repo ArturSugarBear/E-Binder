@@ -12,7 +12,9 @@ test('fresh Rare Room entry explains the collector journey without inventing a p
   await expect(
     page.getByRole('heading', { name: 'Dein Fund. Dein Moment.' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'So beginnt dein Binder' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'So beginnt dein Binder' }),
+  ).toBeVisible();
   await expect(page.locator('.w-home-step')).toHaveCount(3);
   await expect(page.locator('.w-home-hero')).not.toContainText('€0');
   await expect(page.locator('.w-home-hero')).not.toContainText('100 %');
@@ -23,16 +25,29 @@ test('the Vault groups binder, cards and portfolio without changing saved holdin
 }) => {
   await page.goto('./#binder');
   await expect(page.locator('.w-vault-tabs a')).toHaveCount(3);
-  await expect(page.getByRole('heading', { name: 'Deine Binder' })).toBeVisible();
-  await page.locator('.w-vault-tabs').getByRole('link', { name: 'Karten' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Deine Binder' }),
+  ).toBeVisible();
+  await page
+    .locator('.w-vault-tabs')
+    .getByRole('link', { name: 'Karten' })
+    .click();
   await expect(page).toHaveURL(/#sammlung$/);
-  await expect(page.getByRole('heading', { name: 'Deine Sammlung' })).toBeVisible();
-  await page.locator('.w-vault-tabs').getByRole('link', { name: 'Portfolio' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Deine Sammlung' }),
+  ).toBeVisible();
+  await page
+    .locator('.w-vault-tabs')
+    .getByRole('link', { name: 'Portfolio' })
+    .click();
   await expect(page).toHaveURL(/#portfolio$/);
   await expect(
     page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
   ).toBeVisible();
-  await page.locator('.w-vault-tabs').getByRole('link', { name: 'Binder' }).click();
+  await page
+    .locator('.w-vault-tabs')
+    .getByRole('link', { name: 'Binder' })
+    .click();
   await expect(page).toHaveURL(/#binder$/);
   await expect(page.locator('.w-vault-tabs')).toHaveCount(1);
 });
