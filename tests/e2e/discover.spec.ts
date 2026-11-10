@@ -195,9 +195,15 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
     timeout: 15_000,
   });
   await expect(main.locator('.w-catalog-owned')).toHaveText('Gemerkt');
-  await openVault(page, 'sammlung');
+  const discoveryURL = page.url();
+  const navigationSteps = await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await page.goBack();
+  for (let step = 0; step < navigationSteps; step++) {
+    await page.goBack();
+    if (navigationSteps === 2 && step === 0)
+      await expect(page).toHaveURL(/#binder$/);
+  }
+  await expect(page).toHaveURL(discoveryURL);
   await expect(main.locator('.w-search-results button')).toHaveCount(1, {
     timeout: 15_000,
   });
