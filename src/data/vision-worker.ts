@@ -180,7 +180,13 @@ async function recognize({
       texts.push(await read([0.7, 0.9, 0.27, 0.045]));
     }
     report('Kartenname wird gegengeprüft …', id);
-    texts.push(await read([0.18, 0.025, 0.56, 0.055]));
+    // Real sleeve photos often shift the title well outside the narrow
+    // centre band. The second, wider top read is only needed for weak OCR.
+    const title = await read([0.08, 0.02, 0.83, 0.065]);
+    texts.push(title);
+    if (!/\p{L}{3}/u.test(title)) {
+      texts.push(await read([0.05, 0.005, 0.9, 0.095], 'gray'));
+    }
     scope.postMessage({ type: 'done', id, text: texts.join('\n') });
   } finally {
     bitmap.close();
