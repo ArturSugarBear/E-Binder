@@ -115,6 +115,7 @@ export interface CatalogEntry {
   card: PersonalCard;
   rarity: string;
   price?: MarketPrice;
+  holoPrice?: MarketPrice;
   cardmarketUrl?: string;
 }
 export const catalogSetSchema = z.object({
@@ -318,6 +319,7 @@ const apiCardSchema = resumeSchema.extend({
           unit: z.string().optional().catch(undefined),
           updated: z.string().optional().catch(undefined),
           trend: z.number().nullable().optional().catch(undefined),
+          'trend-holo': z.number().nullable().optional().catch(undefined),
           idProduct: z
             .number()
             .int()
@@ -495,10 +497,24 @@ export async function catalogEntry(
     Number.isFinite(Date.parse(quote.updated))
       ? { amount: quote.trend, updated: quote.updated }
       : undefined;
+  const holoPrice =
+    quote?.unit === 'EUR' &&
+    typeof quote['trend-holo'] === 'number' &&
+    quote['trend-holo'] > 0 &&
+    quote.updated &&
+    Number.isFinite(Date.parse(quote.updated))
+      ? { amount: quote['trend-holo'], updated: quote.updated }
+      : undefined;
   const cardmarketUrl = quote?.idProduct
     ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
     : undefined;
-  return { card, rarity: raw.rarity ?? '', price, cardmarketUrl };
+  return {
+    card,
+    rarity: raw.rarity ?? '',
+    price,
+    holoPrice,
+    cardmarketUrl,
+  };
 }
 export async function catalogSetCards(
   id: string,
