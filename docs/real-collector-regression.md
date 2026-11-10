@@ -21,6 +21,7 @@ Release acceptance on the corrected branch:
 - Extract exactly nine crops and require explicit binder import.
 - Verify the special Galarian Gallery artwork path by exact GG card ID.
 - Check mobile Chromium, desktop Chromium, WebKit, and the public Pages site.
+- Value two real matched 9.50 EUR cards as 19.00 EUR, not zero.
 
 The live browser environment had no camera device, so physical recognition
 accuracy remains a separate real-device acceptance test.
