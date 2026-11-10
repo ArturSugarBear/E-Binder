@@ -13,6 +13,7 @@ import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
 import { createVisualSearchSession } from '../data/visual-search';
+import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import {
   reviewVisualCandidates,
   type VisualHit,
@@ -737,6 +738,10 @@ export function openPageScanner(
               ...localVisual,
             ];
           }
+          const printedEnergy = anniversaryEnergyFromText(
+            text,
+            preferredLanguage(text),
+          );
           const local = candidatesFromText(text, [
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
@@ -749,6 +754,7 @@ export function openPageScanner(
             AbortSignal.timeout(11000),
           ]);
           if (
+            !printedEnergy.length &&
             navigator.onLine &&
             text.trim() &&
             (!resolvedVisual.length || visualReview.kind !== 'exact-print')
@@ -767,6 +773,7 @@ export function openPageScanner(
           if (closed || abort.signal.aborted) break;
           let titleHint = '';
           if (
+            !printedEnergy.length &&
             navigator.onLine &&
             text.trim() &&
             !online.length &&
@@ -788,11 +795,18 @@ export function openPageScanner(
             }
           }
           if (closed || abort.signal.aborted) break;
-          displayCandidates(pocket, [...resolvedVisual, ...online, ...local]);
+          displayCandidates(
+            pocket,
+            printedEnergy.length
+              ? printedEnergy
+              : [...resolvedVisual, ...online, ...local],
+          );
           if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
-          pocket.status.textContent = matched
-            ? `${pocket.card!.name} · ${pocket.card!.number}`
+          pocket.status.textContent = printedEnergy.length
+            ? `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`
+            : matched
+              ? `${pocket.card!.name} · ${pocket.card!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
               : pocket.candidates.length && titleHint
