@@ -1,0 +1,26 @@
+name: Format real portfolio history
+on:
+  push:
+    branches: [feat/liquid-collector-beta-20261110]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format historical value features and remove formatter
+        run: |
+          npx prettier --write src/data/portfolio-history.ts src/ui/portfolio-view.ts src/ui/collector-polish.ts src/workspace.css tests/unit/portfolio-history.test.ts
+          git rm .github/workflows/format-portfolio-history-one-shot.yml
+          git add src/data/portfolio-history.ts src/ui/portfolio-view.ts src/ui/collector-polish.ts src/workspace.css tests/unit/portfolio-history.test.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Format real portfolio history and tests"
+          git push origin HEAD:feat/liquid-collector-beta-20261110
+      - run: npm run typecheck
