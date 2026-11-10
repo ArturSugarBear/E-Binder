@@ -516,10 +516,9 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     if (!active || !pageRail.isConnected) return;
     const rail = pageRail.getBoundingClientRect();
     const thumb = active.getBoundingClientRect();
-    pageRail.scrollLeft = Math.max(
-      0,
-      pageRail.scrollLeft + thumb.left - rail.left - (rail.width - thumb.width) / 2,
-    );
+    const distance = thumb.left - rail.left;
+    const center = (rail.width - thumb.width) / 2;
+    pageRail.scrollLeft = Math.max(0, pageRail.scrollLeft + distance - center);
   });
   const workspace = el(
     'div',

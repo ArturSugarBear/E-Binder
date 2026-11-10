@@ -414,6 +414,9 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       for (const row of top) {
         const { holding } = row;
         const quote = row.quoteKey ? quotes.get(row.quoteKey) : undefined;
+        const basis = quote?.basis
+          ? quoteBasisLabel[quote.basis]
+          : 'Preisreferenz';
         const button = action(
           `${holding.card.name} anzeigen`,
           () => ctx.openHolding(holding.id),
@@ -444,7 +447,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el(
               'small',
               '',
-              `${euros.format(row.unitValue!)} je Exemplar · ${quote?.basis ? quoteBasisLabel[quote.basis] : 'Preisreferenz'}`,
+              `${euros.format(row.unitValue!)} je Exemplar · ${basis}`,
             ),
           ),
         );
