@@ -780,7 +780,8 @@ export function openAddCards(
             : 'unknown',
         evolvesFrom: '',
         stage: '',
-        finishes: [...finishes],
+        // 'unverified' is a holding state, not a fifth advertised printing.
+        finishes: finishes.filter((printing) => printing !== 'unverified'),
       };
       choose(manual);
     });
