@@ -263,7 +263,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'Einige Katalogpreise sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
     else
       status.textContent = targets.length
-        ? `${known} von ${targets.length} unterschiedlichen Druckvarianten geprüft. Quelle: TCGdex / Cardmarket.`
+        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} angefragten Druckvarianten mit gültiger EUR-Preisreferenz · Quelle: TCGdex / Cardmarket.`
         : 'Für deine Sonderausgaben oder unbestimmten Varianten liegen noch keine eindeutig passenden Preisreferenzen vor.';
 
     const source = el(
@@ -437,7 +437,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el(
               'small',
               '',
-              `${euros.format(row.unitValue!)} je Exemplar · Katalogtrend`,
+              `${euros.format(row.unitValue!)} je Exemplar · ${({ trend: 'Trendpreis', avg7: '7-Tage-Durchschnitt', avg30: '30-Tage-Durchschnitt', avg: 'Verkaufsdurchschnitt' } as const)[row.quoteKey ? quotes.get(row.quoteKey)?.basis ?? 'trend' : 'trend']}`,
             ),
           ),
         );
@@ -467,8 +467,8 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         .slice(0, 12)) {
         const card = row.holding.card;
         const reason =
-          card.source !== 'tcgdex'
-            ? 'Nicht mit einer geprüften Katalogausgabe verknüpft'
+          !row.quoteKey
+            ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
             : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
               ? 'Druckvariante noch nicht eindeutig bepreist'
               : row.holding.variantNote

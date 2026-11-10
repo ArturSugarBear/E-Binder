@@ -594,7 +594,14 @@ export async function catalogEntry(
     return undefined;
   };
   const price = bestQuote(false);
-  const holoPrice = bestQuote(true);
+  // Cardmarket's secondary "-holo" series often denotes reverse foil, NOT
+  // the regular holo-only printing. A holo-only card's real market reference
+  // is the standard series (e.g. SV 151's illustration rare cards).
+  // Mixed/ambiguous variants stay unpriced rather than borrowing reverse data.
+  const holoPrice =
+    raw.variants?.holo === true && raw.variants.normal === false
+      ? price
+      : undefined;
   const cardmarketUrl = quote?.idProduct
     ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
     : undefined;

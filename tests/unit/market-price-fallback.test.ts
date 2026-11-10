@@ -3,7 +3,11 @@ import { catalogEntry } from '../../src/data/card-catalog';
 
 afterEach(() => vi.unstubAllGlobals());
 
-function mockCard(id: string, cardmarket: Record<string, unknown>) {
+function mockCard(
+  id: string,
+  cardmarket: Record<string, unknown>,
+  variants = { normal: true, holo: true, reverse: true },
+) {
   vi.stubGlobal(
     'fetch',
     vi.fn(
@@ -18,7 +22,7 @@ function mockCard(id: string, cardmarket: Record<string, unknown>) {
               name: 'Karmesin & Purpur',
               cardCount: { official: 198 },
             },
-            variants: { normal: true, holo: true, reverse: true },
+            variants,
             pricing: { cardmarket },
           }),
           { status: 200, headers: { 'content-type': 'application/json' } },
@@ -27,7 +31,7 @@ function mockCard(id: string, cardmarket: Record<string, unknown>) {
   );
 }
 
-it('uses the exact 7-day Cardmarket average when trend is absent', async () => {
+it('reads a nonfoil price but never mislabels the secondary reverse series as holo', async () => {
   mockCard('sv01-007', {
     unit: 'EUR',
     updated: '2026-11-09T12:00:00Z',
@@ -39,7 +43,7 @@ it('uses the exact 7-day Cardmarket average when trend is absent', async () => {
   });
   const entry = await catalogEntry('sv01-007', 'de', undefined, false);
   expect(entry.price).toMatchObject({ amount: 7.25, basis: 'avg7' });
-  expect(entry.holoPrice).toMatchObject({ amount: 15.75, basis: 'avg7' });
+  expect(entry.holoPrice).toBeUndefined();
 });
 
 it('never substitutes normal price for unpriced holo', async () => {
@@ -63,5 +67,38 @@ it('rejects mismatched currency despite valid timestamps', async () => {
   });
   const entry = await catalogEntry('sv01-009', 'de', undefined, false);
   expect(entry.price).toBeUndefined();
+  expect(entry.holoPrice).toBeUndefined();
+});
+
+it('prices a standard holo-only printing from its actual Cardmarket regular series', async () => {
+  mockCard(
+    'sv01-211',
+    {
+      unit: 'EUR',
+      updated: '2026-11-09T23:49:36.460Z',
+      trend: 32.36,
+      'trend-holo': 0,
+      'avg-holo': null,
+    },
+    { normal: false, holo: true, reverse: false },
+  );
+  const entry = await catalogEntry('sv01-211', 'de', undefined, false);
+  expect(entry.price).toMatchObject({ amount: 32.36, basis: 'trend' });
+  expect(entry.holoPrice).toMatchObject({ amount: 32.36, basis: 'trend' });
+});
+
+it('does not value a normal-only print as holo even when a secondary foil series exists', async () => {
+  mockCard(
+    'sv01-010',
+    {
+      unit: 'EUR',
+      updated: '2026-11-09T12:00:00Z',
+      trend: 3.5,
+      'trend-holo': 20,
+    },
+    { normal: true, holo: false, reverse: true },
+  );
+  const entry = await catalogEntry('sv01-010', 'de', undefined, false);
+  expect(entry.price).toMatchObject({ amount: 3.5 });
   expect(entry.holoPrice).toBeUndefined();
 });
