@@ -131,6 +131,25 @@ async function open(page: Page): Promise<void> {
     .click();
 }
 
+test('capture opens without demo catalogue cards or overwhelming set filters', async ({
+  page,
+}) => {
+  await open(page);
+  const dialog = page.getByRole('dialog', { name: 'Karten hinzufügen' });
+  await expect(
+    dialog.getByRole('button', { name: 'Ganze Binderseite scannen' }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole('button', { name: 'Karte fotografieren' }),
+  ).toBeVisible();
+  await expect(dialog.locator('.w-search-results button')).toHaveCount(0);
+  await expect(dialog.locator('.w-add-catalog-advanced')).not.toHaveAttribute(
+    'open',
+  );
+  await dialog.getByLabel('Karte suchen', { exact: true }).fill('Floink');
+  await expect(dialog.locator('.w-search-results button').first()).toBeVisible();
+});
+
 test('German search shows matching English artwork with language label and a separate missing-confirmation message', async ({
   page,
 }) => {
