@@ -55,7 +55,7 @@ describe('Lovebrand kit proposals', () => {
         ['ink', 'surface'],
         ['muted', 'surface'],
         ['actionInk', 'action'],
-      ]) {
+      ] as const) {
         expect(
           ratio(c[front]!, c[back]!),
           name + ':' + front,
