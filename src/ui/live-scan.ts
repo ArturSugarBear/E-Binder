@@ -1,5 +1,6 @@
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestPageCorners } from '../domain/page-outline';
+import { nextCardLock } from '../domain/live-card-lock';
 import { action, el, errorText, modal } from './workspace-dom';
 
 type CaptureHandler = (file: File, aligned: boolean) => Promise<void>;
@@ -103,13 +104,6 @@ async function snapshot(
   });
 }
 
-function closeCorners(a: Quad, b: Quad): boolean {
-  return a.every(
-    (point, index) =>
-      Math.hypot(point.x - b[index]!.x, point.y - b[index]!.y) < 0.045,
-  );
-}
-
 /**
  * Camera-first on-device scanner. Only the actual detection result turns
  * the frame lime; three stable observations trigger automatic capture.
@@ -190,6 +184,7 @@ export function openLiveScanner(
   sheet.body.append(stage, status, progress, help);
   sheet.footer.append(trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
+  let cameraGeneration = 0;
   let frameId = 0;
   let running = false;
   let busy = false;
@@ -203,6 +198,7 @@ export function openLiveScanner(
   sample.height = 256;
 
   function stopCamera(): void {
+    cameraGeneration++;
     running = false;
     cancelAnimationFrame(frameId);
     if (stream) {
@@ -223,6 +219,7 @@ export function openLiveScanner(
       : 'Foto wird aufgenommen · Ecken anschließend prüfen …';
     try {
       const blob = await snapshot(video, chosen);
+      if (closed) return;
       stopCamera();
       status.textContent =
         'Aufnahme gesichert · OCR und Katalogabgleich laufen …';
@@ -261,16 +258,23 @@ export function openLiveScanner(
     if (document.hidden || time - sampled < 280 || video.readyState < 2) return;
     sampled = time;
     if (!video.videoWidth || !video.videoHeight) return;
-    drawVisible(video, sample);
-    const pixels = sample
-      .getContext('2d', { willReadFrequently: true })!
-      .getImageData(0, 0, sample.width, sample.height);
-    const corners = suggestPageCorners(
-      pixels.data,
+    let corners: Quad | null = null;
+    try {
+      drawVisible(video, sample);
+      const pixels = sample
+        .getContext('2d', { willReadFrequently: true })!
+        .getImageData(0, 0, sample.width, sample.height);
+      corners = suggestPageCorners(pixels.data, sample.width, sample.height);
+    } catch {
+      // A temporarily missing camera frame must never trigger a shutter.
+    }
+    const lock = nextCardLock(
+      { corners: last, stableFrames: observations },
+      corners,
       sample.width,
       sample.height,
     );
-    if (!corners) {
+    if (!lock.corners) {
       observations = 0;
       last = null;
       reliable = null;
@@ -280,13 +284,14 @@ export function openLiveScanner(
       status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
-    observations =
-      last && closeCorners(last, corners) ? Math.min(3, observations + 1) : 1;
-    last = corners;
-    reliable = observations >= 2 ? corners : null;
+    observations = lock.stableFrames;
+    last = lock.corners;
+    reliable = observations >= 2 ? lock.corners : null;
     polygon.setAttribute(
       'points',
-      corners.map((point) => `${point.x * 100},${point.y * 100}`).join(' '),
+      lock.corners
+        .map((point) => `${point.x * 100},${point.y * 100}`)
+        .join(' '),
     );
     stage.classList.add('has-card-outline');
     progress.value = observations;
@@ -300,7 +305,9 @@ export function openLiveScanner(
   async function startCamera(): Promise<void> {
     if (closed || busy) return;
     stopCamera();
+    const generation = cameraGeneration;
     next.hidden = true;
+    next.querySelector('span')!.textContent = 'Nächste Karte scannen';
     finish.hidden = true;
     trigger.hidden = false;
     trigger.disabled = true;
@@ -326,14 +333,14 @@ export function openLiveScanner(
           height: { ideal: 1920 },
         },
       });
-      if (closed) {
+      if (closed || document.hidden || generation !== cameraGeneration) {
         for (const track of opened.getTracks()) track.stop();
         return;
       }
       stream = opened;
       video.srcObject = opened;
       await video.play();
-      if (closed) {
+      if (closed || document.hidden || generation !== cameraGeneration) {
         stopCamera();
         return;
       }
@@ -342,6 +349,7 @@ export function openLiveScanner(
       status.textContent = 'Kamera bereit · Karte in den Rahmen halten';
       frameId = requestAnimationFrame(inspectFrame);
     } catch (error) {
+      if (closed || generation !== cameraGeneration) return;
       stopCamera();
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
       help.textContent =
@@ -356,6 +364,7 @@ export function openLiveScanner(
         status.textContent =
           'Kamera pausiert. Tippe auf „Kamera wieder starten“.';
         next.hidden = false;
+        trigger.hidden = true;
         next.querySelector('span')!.textContent = 'Kamera wieder starten';
       }
     }
