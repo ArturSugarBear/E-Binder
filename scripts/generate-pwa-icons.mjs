@@ -27,7 +27,10 @@ for (const [name, size] of [
   ['icon-512.png', 512],
   ['icon-maskable-512.png', 512],
 ]) {
-  const svg = appIcon('rare', '', size);
+  // Maskable artwork stays inside the central 80%-diameter safe circle.
+  const svg = name.includes('maskable')
+    ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(5 5) scale(.9)">${appIcon('rare', '', 100)}</g></svg>`
+    : appIcon('rare', '', size);
   writeFileSync(
     'public/icons/' + name,
     new Resvg(svg, {
