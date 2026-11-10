@@ -1,3 +1,4 @@
+import { secondaryCardArt } from './artwork-fallbacks';
 import { z } from 'zod';
 import type { Collection } from '../domain/collection';
 import { recognizedNameHints } from '../domain/recognition-names';
@@ -259,6 +260,24 @@ function exactGalleryArtwork(
   return image;
 }
 
+export function catalogArtworkUrl(url?: string): string {
+  if (!url) return '';
+  return /\.(webp|png|jpe?g)(?:\?|$)/i.test(url) ||
+    url.includes('images.scrydex.com/')
+    ? url
+    : `${url}/high.webp`;
+}
+async function completeArtwork<T extends CatalogResult>(
+  cards: T[],
+): Promise<T[]> {
+  return Promise.all(
+    cards.map(async (card) => {
+      if (card.image) return card;
+      const fallback = await secondaryCardArt(catalogResumeCard(card));
+      return fallback ? { ...card, image: fallback.url } : card;
+    }),
+  );
+}
 export function catalogResumeCard(result: CatalogResult): PersonalCard {
   const split = result.id.lastIndexOf('-');
   const setId = result.id.slice(0, split);
@@ -269,14 +288,14 @@ export function catalogResumeCard(result: CatalogResult): PersonalCard {
     setId,
     number: result.number ?? result.localId,
     language: result.language,
-    image: exactGalleryArtwork(
-      result.id,
-      result.localId,
-      result.language,
-      result.image,
-    )
-      ? `${exactGalleryArtwork(result.id, result.localId, result.language, result.image)}/high.webp`
-      : '',
+    image: catalogArtworkUrl(
+      exactGalleryArtwork(
+        result.id,
+        result.localId,
+        result.language,
+        result.image,
+      ),
+    ),
     source: 'tcgdex',
     sourceId: result.id,
     artist: '',
@@ -301,7 +320,7 @@ export async function fillCatalogImages(
     ),
   }));
   const missing = exact.filter((card) => !card.image && card.language === 'de');
-  if (!missing.length) return exact;
+  if (!missing.length) return completeArtwork(exact);
   const params = new URLSearchParams({
     id: `eq:${missing.map((card) => card.id).join('|')}`,
     'pagination:page': '1',
@@ -316,10 +335,10 @@ export async function fillCatalogImages(
           signal,
         ),
       );
-    return pairCatalogImages(exact, alternatives);
+    return completeArtwork(pairCatalogImages(exact, alternatives));
   } catch (error) {
     if (signal?.aborted) throw error;
-    return exact;
+    return completeArtwork(exact);
   }
 }
 /** Preserve the requested printing/language; only replace artwork for an exact paired ID. */
@@ -341,6 +360,8 @@ function pairCatalogImages<T extends CatalogResult>(
 export function imageLanguage(image: string): string | undefined {
   try {
     const url = new URL(image);
+    if (['images.pokemontcg.io', 'images.scrydex.com'].includes(url.hostname))
+      return 'en';
     return url.hostname === 'assets.tcgdex.net'
       ? url.pathname.split('/')[1]
       : undefined;
@@ -545,7 +566,7 @@ export async function catalogEntry(
       [{ id: raw.id, localId: raw.localId, name: raw.name, language }],
       signal,
     );
-    if (paired[0]?.image) card.image = `${paired[0].image}/high.webp`;
+    if (paired[0]?.image) card.image = catalogArtworkUrl(paired[0].image);
   }
   const quote = raw.pricing?.cardmarket;
   const updated =
@@ -916,5 +937,5 @@ export async function catalogSetFacets(
       // Missing source images never change the requested card edition or language.
     }
   }
-  return { cards: previews };
+  return { cards: await completeArtwork(previews) };
 }

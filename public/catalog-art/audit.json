@@ -1,0 +1,6032 @@
+{
+  "checkedAt": "2026-11-10T21:22:42.770Z",
+  "scope": "Bundled cards and all DE/EN set logos/symbols; dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.",
+  "sets": [
+    {
+      "id": "2011bw",
+      "name": "McDonald's Collection 2011",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd11/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd11/logo.png"
+    },
+    {
+      "id": "2012bw",
+      "name": "McDonald's Collection 2012",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd12/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd12/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd12/logo.png"
+    },
+    {
+      "id": "2014xy",
+      "name": "McDonald's Collection 2014",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd14/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd14/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd14/logo.png"
+    },
+    {
+      "id": "2015xy",
+      "name": "McDonald's Collection 2015",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd15/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd15/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd15/logo.png"
+    },
+    {
+      "id": "2016xy",
+      "name": "McDonald's Collection 2016",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd16/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd16/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd16/logo.png"
+    },
+    {
+      "id": "2017sm",
+      "name": "McDonald's Collection 2017",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd17/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd17/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd17/logo.png"
+    },
+    {
+      "id": "2018sm",
+      "name": "McDonald's Collection 2018",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd18/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd18/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd18/logo.png"
+    },
+    {
+      "id": "2019sm",
+      "name": "McDonald's Collection 2019",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd19/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd19/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/mcd19/logo.png"
+    },
+    {
+      "id": "2021swsh",
+      "name": "McDonald's Collection 2021",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/mc/2021swsh/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd21/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd21/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 25,
+      "displayFallback": "https://images.pokemontcg.io/mcd21/logo.png"
+    },
+    {
+      "id": "2022swsh",
+      "name": "McDonald's Collection 2022",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/mcd22/logo.png",
+        "symbol": "https://images.pokemontcg.io/mcd22/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 15,
+      "displayFallback": "https://images.pokemontcg.io/mcd22/logo.png"
+    },
+    {
+      "id": "2023sv",
+      "name": "McDonald's Collection 2023",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "2024sv",
+      "name": "McDonald's Collection 2024",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "30th",
+      "name": "30th Celebration",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me55-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me55-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 161,
+      "displayFallback": "https://images.scrydex.com/pokemon/me55-logo/logo"
+    },
+    {
+      "id": "30th-c",
+      "name": "30th Classic Collection",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "A1",
+      "name": "Genetic Apex",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/A1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A1/logo.webp"
+    },
+    {
+      "id": "A1a",
+      "name": "Mythical Island",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A1a/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A1a/logo.webp"
+    },
+    {
+      "id": "A2",
+      "name": "Space-Time Smackdown",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A2/logo.webp"
+    },
+    {
+      "id": "A2a",
+      "name": "Triumphant Light",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A2a/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/A2a/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A2a/logo.webp"
+    },
+    {
+      "id": "A2b",
+      "name": "Shining Revelry",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A2b/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/A2b/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A2b/logo.webp"
+    },
+    {
+      "id": "A3",
+      "name": "Celestial Guardians",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A3/logo.webp"
+    },
+    {
+      "id": "A3a",
+      "name": "Extradimensional Crisis",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "A3b",
+      "name": "Eevee Grove",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "A4",
+      "name": "Wisdom of Sea and Sky",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A4/logo.webp"
+    },
+    {
+      "id": "A4a",
+      "name": "Secluded Springs",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/A4a/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/A4a/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/A4a/logo.webp"
+    },
+    {
+      "id": "B1",
+      "name": "Mega Rising",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/B1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/B1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/B1/logo.webp"
+    },
+    {
+      "id": "B1a",
+      "name": "Crimson Blaze",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "B2",
+      "name": "Fantastical Parade",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/B2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tcgp/B2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/B2/logo.webp"
+    },
+    {
+      "id": "B2a",
+      "name": "Paldean Wonders",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "base1",
+      "name": "Base Set",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/base1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base1/logo.png",
+        "symbol": "https://images.pokemontcg.io/base1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 102,
+      "displayFallback": "https://assets.tcgdex.net/en/base/base1/logo.webp"
+    },
+    {
+      "id": "base2",
+      "name": "Jungle",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/base2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/base/base2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base2/logo.png",
+        "symbol": "https://images.pokemontcg.io/base2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 64,
+      "displayFallback": "https://assets.tcgdex.net/en/base/base2/logo.webp"
+    },
+    {
+      "id": "base3",
+      "name": "Fossil",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/base3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/base/base3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base3/logo.png",
+        "symbol": "https://images.pokemontcg.io/base3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 62,
+      "displayFallback": "https://assets.tcgdex.net/en/base/base3/logo.webp"
+    },
+    {
+      "id": "base4",
+      "name": "Base Set 2",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/base4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/base/base4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base4/logo.png",
+        "symbol": "https://images.pokemontcg.io/base4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 130,
+      "displayFallback": "https://assets.tcgdex.net/en/base/base4/logo.webp"
+    },
+    {
+      "id": "base5",
+      "name": "Team Rocket",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/base5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/base/base5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base5/logo.png",
+        "symbol": "https://images.pokemontcg.io/base5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 83,
+      "displayFallback": "https://assets.tcgdex.net/en/base/base5/logo.webp"
+    },
+    {
+      "id": "basep",
+      "name": "Wizards Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/base/basep/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/base/basep/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/basep/logo.png",
+        "symbol": "https://images.pokemontcg.io/basep/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 53,
+      "displayFallback": "https://images.pokemontcg.io/basep/logo.png"
+    },
+    {
+      "id": "bog",
+      "name": "Best of game",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ecard/bog/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bp/logo.png",
+        "symbol": "https://images.pokemontcg.io/bp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 9,
+      "displayFallback": "https://images.pokemontcg.io/bp/logo.png"
+    },
+    {
+      "id": "bw1",
+      "name": "Black & White",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw1/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 115,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw1/logo.webp"
+    },
+    {
+      "id": "bw10",
+      "name": "Plasma Blast",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw10/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 105,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw10/logo.webp"
+    },
+    {
+      "id": "bw11",
+      "name": "Legendary Treasures",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw11/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw11/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw11/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 140,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw11/logo.webp"
+    },
+    {
+      "id": "bw2",
+      "name": "Emerging Powers",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw2/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 98,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw2/logo.webp"
+    },
+    {
+      "id": "bw3",
+      "name": "Noble Victories",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw3/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 102,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw3/logo.webp"
+    },
+    {
+      "id": "bw4",
+      "name": "Next Destinies",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw4/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 103,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw4/logo.webp"
+    },
+    {
+      "id": "bw5",
+      "name": "Dark Explorers",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw5/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 111,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw5/logo.webp"
+    },
+    {
+      "id": "bw6",
+      "name": "Dragons Exalted",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw6/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 128,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw6/logo.webp"
+    },
+    {
+      "id": "bw7",
+      "name": "Boundaries Crossed",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw7/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 153,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw7/logo.webp"
+    },
+    {
+      "id": "bw8",
+      "name": "Plasma Storm",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw8/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 138,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw8/logo.webp"
+    },
+    {
+      "id": "bw9",
+      "name": "Plasma Freeze",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bw9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bw9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bw9/logo.png",
+        "symbol": "https://images.pokemontcg.io/bw9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 122,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bw9/logo.webp"
+    },
+    {
+      "id": "bwp",
+      "name": "BW Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/bwp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/bwp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/bwp/logo.png",
+        "symbol": "https://images.pokemontcg.io/bwp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 101,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/bwp/logo.webp"
+    },
+    {
+      "id": "cel25",
+      "name": "Celebrations",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/cel25/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/cel25/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/cel25/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/cel25/logo.png",
+        "symbol": "https://images.pokemontcg.io/cel25/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 25,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/cel25/logo.webp"
+    },
+    {
+      "id": "cel25cc",
+      "name": "Celebrations Classic Collection",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/cel25c/logo.png",
+        "symbol": "https://images.pokemontcg.io/cel25c/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 21,
+      "displayFallback": "https://images.pokemontcg.io/cel25c/logo.png"
+    },
+    {
+      "id": "col1",
+      "name": "Call of Legends",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/col/col1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/col/col1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/col1/logo.png",
+        "symbol": "https://images.pokemontcg.io/col1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 106,
+      "displayFallback": "https://assets.tcgdex.net/en/col/col1/logo.webp"
+    },
+    {
+      "id": "dc1",
+      "name": "Double Crisis",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/dc1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/dc1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dc1/logo.png",
+        "symbol": "https://images.pokemontcg.io/dc1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 34,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/dc1/logo.webp"
+    },
+    {
+      "id": "det1",
+      "name": "Detective Pikachu",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/det1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/det1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/det1/logo.png",
+        "symbol": "https://images.pokemontcg.io/det1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 18,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/det1/logo.webp"
+    },
+    {
+      "id": "dp1",
+      "name": "Diamond & Pearl",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp1/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 130,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp1/logo.webp"
+    },
+    {
+      "id": "dp2",
+      "name": "Mysterious Treasures",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp2/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 124,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp2/logo.webp"
+    },
+    {
+      "id": "dp3",
+      "name": "Secret Wonders",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp3/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 132,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp3/logo.webp"
+    },
+    {
+      "id": "dp4",
+      "name": "Great Encounters",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp4/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 106,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp4/logo.webp"
+    },
+    {
+      "id": "dp5",
+      "name": "Majestic Dawn",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp5/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 100,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp5/logo.webp"
+    },
+    {
+      "id": "dp6",
+      "name": "Legends Awakened",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp6/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 146,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp6/logo.webp"
+    },
+    {
+      "id": "dp7",
+      "name": "Stormfront",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dp7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dp7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dp7/logo.png",
+        "symbol": "https://images.pokemontcg.io/dp7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 106,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dp7/logo.webp"
+    },
+    {
+      "id": "dpp",
+      "name": "DP Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/dp/dpp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/dp/dpp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dpp/logo.png",
+        "symbol": "https://images.pokemontcg.io/dpp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 56,
+      "displayFallback": "https://assets.tcgdex.net/en/dp/dpp/logo.webp"
+    },
+    {
+      "id": "dv1",
+      "name": "Dragon Vault",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/bw/dv1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/bw/dv1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/dv1/logo.png",
+        "symbol": "https://images.pokemontcg.io/dv1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 21,
+      "displayFallback": "https://assets.tcgdex.net/en/bw/dv1/logo.webp"
+    },
+    {
+      "id": "ecard1",
+      "name": "Expedition Base Set",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ecard/ecard1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ecard/ecard1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ecard1/logo.png",
+        "symbol": "https://images.pokemontcg.io/ecard1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 165,
+      "displayFallback": "https://assets.tcgdex.net/en/ecard/ecard1/logo.webp"
+    },
+    {
+      "id": "ecard2",
+      "name": "Aquapolis",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ecard/ecard2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ecard/ecard2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ecard2/logo.png",
+        "symbol": "https://images.pokemontcg.io/ecard2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 182,
+      "displayFallback": "https://assets.tcgdex.net/en/ecard/ecard2/logo.webp"
+    },
+    {
+      "id": "ecard3",
+      "name": "Skyridge",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ecard/ecard3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ecard/ecard3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ecard3/logo.png",
+        "symbol": "https://images.pokemontcg.io/ecard3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 182,
+      "displayFallback": "https://assets.tcgdex.net/en/ecard/ecard3/logo.webp"
+    },
+    {
+      "id": "ex1",
+      "name": "Ruby & Sapphire",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex1/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 109,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex1/logo.webp"
+    },
+    {
+      "id": "ex10",
+      "name": "Unseen Forces",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex10/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 143,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex10/logo.webp"
+    },
+    {
+      "id": "ex11",
+      "name": "Delta Species",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex11/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex11/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex11/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 114,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex11/logo.webp"
+    },
+    {
+      "id": "ex12",
+      "name": "Legend Maker",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex12/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex12/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex12/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex12/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 93,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex12/logo.webp"
+    },
+    {
+      "id": "ex13",
+      "name": "Holon Phantoms",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex13/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex13/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex13/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex13/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 111,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex13/logo.webp"
+    },
+    {
+      "id": "ex14",
+      "name": "Crystal Guardians",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex14/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex14/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex14/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex14/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 100,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex14/logo.webp"
+    },
+    {
+      "id": "ex15",
+      "name": "Dragon Frontiers",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex15/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex15/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex15/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex15/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 101,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex15/logo.webp"
+    },
+    {
+      "id": "ex16",
+      "name": "Power Keepers",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex16/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex16/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex16/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex16/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 108,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex16/logo.webp"
+    },
+    {
+      "id": "ex2",
+      "name": "Sandstorm",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex2/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 100,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex2/logo.webp"
+    },
+    {
+      "id": "ex3",
+      "name": "Dragon",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex3/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 100,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex3/logo.webp"
+    },
+    {
+      "id": "ex4",
+      "name": "Team Magma vs Team Aqua",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex4/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 97,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex4/logo.webp"
+    },
+    {
+      "id": "ex5",
+      "name": "Hidden Legends",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex5/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 102,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex5/logo.webp"
+    },
+    {
+      "id": "ex5.5",
+      "name": "Poké Card Creator Pack",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "ex6",
+      "name": "FireRed & LeafGreen",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex6/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 116,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex6/logo.webp"
+    },
+    {
+      "id": "ex7",
+      "name": "Team Rocket Returns",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex7/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 111,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex7/logo.webp"
+    },
+    {
+      "id": "ex8",
+      "name": "Deoxys",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex8/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 108,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex8/logo.webp"
+    },
+    {
+      "id": "ex9",
+      "name": "Emerald",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/ex/ex9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ex/ex9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ex9/logo.png",
+        "symbol": "https://images.pokemontcg.io/ex9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 107,
+      "displayFallback": "https://assets.tcgdex.net/en/ex/ex9/logo.webp"
+    },
+    {
+      "id": "exu",
+      "name": "Unseen Forces Unown Collection",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "fut2020",
+      "name": "Pokémon Futsal 2020",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/fut2020/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/fut2020/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/swsh/fut2020/logo.webp"
+    },
+    {
+      "id": "g1",
+      "name": "Generations",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/g1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/g1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/g1/logo.png",
+        "symbol": "https://images.pokemontcg.io/g1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 117,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/g1/logo.webp"
+    },
+    {
+      "id": "gym1",
+      "name": "Gym Heroes",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/gym/gym1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/gym/gym1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/gym1/logo.png",
+        "symbol": "https://images.pokemontcg.io/gym1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 132,
+      "displayFallback": "https://assets.tcgdex.net/en/gym/gym1/logo.webp"
+    },
+    {
+      "id": "gym2",
+      "name": "Gym Challenge",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/gym/gym2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/gym/gym2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/gym2/logo.png",
+        "symbol": "https://images.pokemontcg.io/gym2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 132,
+      "displayFallback": "https://assets.tcgdex.net/en/gym/gym2/logo.webp"
+    },
+    {
+      "id": "hgss1",
+      "name": "HeartGold SoulSilver",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/hgss/hgss1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/hgss/hgss1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/hgss1/logo.png",
+        "symbol": "https://images.pokemontcg.io/hgss1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 124,
+      "displayFallback": "https://assets.tcgdex.net/en/hgss/hgss1/logo.webp"
+    },
+    {
+      "id": "hgss2",
+      "name": "Unleashed",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/hgss/hgss2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/hgss/hgss2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/hgss/hgss2/logo.webp"
+    },
+    {
+      "id": "hgss3",
+      "name": "Undaunted",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/hgss/hgss3/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/hgss/hgss3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "hgss4",
+      "name": "Triumphant",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/hgss/hgss4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/hgss/hgss4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/hgss/hgss4/logo.webp"
+    },
+    {
+      "id": "hgssp",
+      "name": "HGSS Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/hgss/hgssp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/hgss/hgssp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/hsp/logo.png",
+        "symbol": "https://images.pokemontcg.io/hsp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 25,
+      "displayFallback": "https://assets.tcgdex.net/en/hgss/hgssp/logo.webp"
+    },
+    {
+      "id": "jumbo",
+      "name": "Jumbo cards",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "lc",
+      "name": "Legendary Collection",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/lc/lc/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/lc/lc/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/base6/logo.png",
+        "symbol": "https://images.pokemontcg.io/base6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 110,
+      "displayFallback": "https://assets.tcgdex.net/en/lc/lc/logo.webp"
+    },
+    {
+      "id": "me01",
+      "name": "Mega Evolution",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me01/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me01/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/me/me01/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/me1/logo.png",
+        "symbol": "https://images.pokemontcg.io/me1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 188,
+      "displayFallback": "https://assets.tcgdex.net/de/me/me01/logo.webp"
+    },
+    {
+      "id": "me02",
+      "name": "Phantasmal Flames",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me02/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me02/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/me2/logo.png",
+        "symbol": "https://images.pokemontcg.io/me2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 130,
+      "displayFallback": "https://assets.tcgdex.net/de/me/me02/logo.webp"
+    },
+    {
+      "id": "me02.5",
+      "name": "Ascended Heroes",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me02.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me02.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/me/me02.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me2pt5-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me2pt5-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 295,
+      "displayFallback": "https://assets.tcgdex.net/de/me/me02.5/logo.webp"
+    },
+    {
+      "id": "me03",
+      "name": "Perfect Order",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me03/logo.webp",
+            "available": false
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me03/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/me/me03/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me3-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me3-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 124,
+      "displayFallback": "https://images.scrydex.com/pokemon/me3-logo/logo"
+    },
+    {
+      "id": "me04",
+      "name": "Chaos Rising",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me04/logo.webp",
+            "available": false
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me04/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/me/me04/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me4-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me4-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 122,
+      "displayFallback": "https://images.scrydex.com/pokemon/me4-logo/logo"
+    },
+    {
+      "id": "me05",
+      "name": "Pitch Black",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/me/me05/logo.webp",
+            "available": false
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/me/me05/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/me/me05/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me5-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me5-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 120,
+      "displayFallback": "https://images.scrydex.com/pokemon/me5-logo/logo"
+    },
+    {
+      "id": "me06",
+      "name": "Delta Reign",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.scrydex.com/pokemon/me6-logo/logo",
+        "symbol": "https://images.scrydex.com/pokemon/me6-symbol/symbol"
+      },
+      "unresolved": [],
+      "indexedCards": 141,
+      "displayFallback": "https://images.scrydex.com/pokemon/me6-logo/logo"
+    },
+    {
+      "id": "mee",
+      "name": "Mega Evolution Energy",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "mep",
+      "name": "MEP Black Star Promos",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "mfb",
+      "name": "My First Battle",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "miscp",
+      "name": "Miscellaneous Promos",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "neo1",
+      "name": "Neo Genesis",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/neo/neo1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/neo/neo1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/neo1/logo.png",
+        "symbol": "https://images.pokemontcg.io/neo1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 111,
+      "displayFallback": "https://assets.tcgdex.net/en/neo/neo1/logo.webp"
+    },
+    {
+      "id": "neo2",
+      "name": "Neo Discovery",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/neo/neo2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/neo/neo2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/neo2/logo.png",
+        "symbol": "https://images.pokemontcg.io/neo2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 75,
+      "displayFallback": "https://assets.tcgdex.net/en/neo/neo2/logo.webp"
+    },
+    {
+      "id": "neo3",
+      "name": "Neo Revelation",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/neo/neo3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/neo/neo3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/neo3/logo.png",
+        "symbol": "https://images.pokemontcg.io/neo3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 66,
+      "displayFallback": "https://assets.tcgdex.net/en/neo/neo3/logo.webp"
+    },
+    {
+      "id": "neo4",
+      "name": "Neo Destiny",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/neo/neo4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/neo/neo4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/neo4/logo.png",
+        "symbol": "https://images.pokemontcg.io/neo4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 113,
+      "displayFallback": "https://assets.tcgdex.net/en/neo/neo4/logo.webp"
+    },
+    {
+      "id": "np",
+      "name": "Nintendo Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/np/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/np/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/np/logo.png",
+        "symbol": "https://images.pokemontcg.io/np/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 40,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/np/logo.webp"
+    },
+    {
+      "id": "P-A",
+      "name": "Promos-A",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/tcgp/P-A/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "symbol"
+      ],
+      "displayFallback": "https://assets.tcgdex.net/en/tcgp/P-A/logo.webp"
+    },
+    {
+      "id": "pl1",
+      "name": "Platinum",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pl/pl1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pl/pl1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pl1/logo.png",
+        "symbol": "https://images.pokemontcg.io/pl1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 133,
+      "displayFallback": "https://assets.tcgdex.net/en/pl/pl1/logo.webp"
+    },
+    {
+      "id": "pl2",
+      "name": "Rising Rivals",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pl/pl2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pl/pl2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pl2/logo.png",
+        "symbol": "https://images.pokemontcg.io/pl2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 120,
+      "displayFallback": "https://assets.tcgdex.net/en/pl/pl2/logo.webp"
+    },
+    {
+      "id": "pl3",
+      "name": "Supreme Victors",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pl/pl3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pl/pl3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pl3/logo.png",
+        "symbol": "https://images.pokemontcg.io/pl3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 153,
+      "displayFallback": "https://assets.tcgdex.net/en/pl/pl3/logo.webp"
+    },
+    {
+      "id": "pl4",
+      "name": "Arceus",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pl/pl4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pl/pl4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pl4/logo.png",
+        "symbol": "https://images.pokemontcg.io/pl4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 111,
+      "displayFallback": "https://assets.tcgdex.net/en/pl/pl4/logo.webp"
+    },
+    {
+      "id": "pop1",
+      "name": "POP Series 1",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop1/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop1/logo.webp"
+    },
+    {
+      "id": "pop2",
+      "name": "POP Series 2",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop2/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop2/logo.webp"
+    },
+    {
+      "id": "pop3",
+      "name": "POP Series 3",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop3/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop3/logo.webp"
+    },
+    {
+      "id": "pop4",
+      "name": "POP Series 4",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop4/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop4/logo.webp"
+    },
+    {
+      "id": "pop5",
+      "name": "POP Series 5",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop5/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop5/logo.webp"
+    },
+    {
+      "id": "pop6",
+      "name": "POP Series 6",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop6/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop6/logo.webp"
+    },
+    {
+      "id": "pop7",
+      "name": "POP Series 7",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop7/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop7/logo.webp"
+    },
+    {
+      "id": "pop8",
+      "name": "POP Series 8",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop8/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop8/logo.webp"
+    },
+    {
+      "id": "pop9",
+      "name": "POP Series 9",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pop/pop9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pop/pop9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pop9/logo.png",
+        "symbol": "https://images.pokemontcg.io/pop9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 17,
+      "displayFallback": "https://assets.tcgdex.net/en/pop/pop9/logo.webp"
+    },
+    {
+      "id": "rc",
+      "name": "Radiant Collection",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "ru1",
+      "name": "Pokémon Rumble",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/pl/ru1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/pl/ru1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/ru1/logo.png",
+        "symbol": "https://images.pokemontcg.io/ru1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 16,
+      "displayFallback": "https://assets.tcgdex.net/en/pl/ru1/logo.webp"
+    },
+    {
+      "id": "si1",
+      "name": "Southern Islands",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/neo/si1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/neo/si1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/si1/logo.png",
+        "symbol": "https://images.pokemontcg.io/si1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 18,
+      "displayFallback": "https://assets.tcgdex.net/en/neo/si1/logo.webp"
+    },
+    {
+      "id": "sm1",
+      "name": "Sun & Moon",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm1/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 173,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm1/logo.webp"
+    },
+    {
+      "id": "sm10",
+      "name": "Unbroken Bonds",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm10/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 238,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm10/logo.webp"
+    },
+    {
+      "id": "sm11",
+      "name": "Unified Minds",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm11/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm11/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm11/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 261,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm11/logo.webp"
+    },
+    {
+      "id": "sm115",
+      "name": "Hidden Fates",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm115/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm115/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm115/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm115/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 69,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm115/logo.webp"
+    },
+    {
+      "id": "sm12",
+      "name": "Cosmic Eclipse",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm12/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm12/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm12/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm12/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 272,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm12/logo.webp"
+    },
+    {
+      "id": "sm2",
+      "name": "Guardians Rising",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm2/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 180,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm2/logo.webp"
+    },
+    {
+      "id": "sm3",
+      "name": "Burning Shadows",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm3/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 177,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm3/logo.webp"
+    },
+    {
+      "id": "sm3.5",
+      "name": "Shining Legends",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm35/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm35/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 81,
+      "displayFallback": "https://images.pokemontcg.io/sm35/logo.png"
+    },
+    {
+      "id": "sm4",
+      "name": "Crimson Invasion",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm4/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 126,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm4/logo.webp"
+    },
+    {
+      "id": "sm5",
+      "name": "Ultra Prism",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 178,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm5/logo.webp"
+    },
+    {
+      "id": "sm6",
+      "name": "Forbidden Light",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm6/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 150,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm6/logo.webp"
+    },
+    {
+      "id": "sm7",
+      "name": "Celestial Storm",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm7/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 187,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm7/logo.webp"
+    },
+    {
+      "id": "sm7.5",
+      "name": "Dragon Majesty",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm75/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm75/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 80,
+      "displayFallback": "https://images.pokemontcg.io/sm75/logo.png"
+    },
+    {
+      "id": "sm8",
+      "name": "Lost Thunder",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm8/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 240,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm8/logo.webp"
+    },
+    {
+      "id": "sm9",
+      "name": "Team Up",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/sm9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sm9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sm9/logo.png",
+        "symbol": "https://images.pokemontcg.io/sm9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 198,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/sm9/logo.webp"
+    },
+    {
+      "id": "sma",
+      "name": "Hidden Fates Shiny Vault",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/sma/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sma/logo.png",
+        "symbol": "https://images.pokemontcg.io/sma/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 94,
+      "displayFallback": "https://images.pokemontcg.io/sma/logo.png"
+    },
+    {
+      "id": "smp",
+      "name": "SM Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sm/smp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sm/smp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/smp/logo.png",
+        "symbol": "https://images.pokemontcg.io/smp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 251,
+      "displayFallback": "https://assets.tcgdex.net/en/sm/smp/logo.webp"
+    },
+    {
+      "id": "sp",
+      "name": "Sample",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/ecard/sp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "sv01",
+      "name": "Scarlet & Violet",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv01/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv01/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv01/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv1/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 258,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv01/logo.webp"
+    },
+    {
+      "id": "sv02",
+      "name": "Paldea Evolved",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv02/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv02/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv02/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv2/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 279,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv02/logo.webp"
+    },
+    {
+      "id": "sv03",
+      "name": "Obsidian Flames",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv03/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv03/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv03/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv3/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 230,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv03/logo.webp"
+    },
+    {
+      "id": "sv03.5",
+      "name": "151",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv03.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv03.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv03.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv3pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv3pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 207,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv03.5/logo.webp"
+    },
+    {
+      "id": "sv04",
+      "name": "Paradox Rift",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv04/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv04/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv04/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv4/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 266,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv04/logo.webp"
+    },
+    {
+      "id": "sv04.5",
+      "name": "Paldean Fates",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv04.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv04.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv04.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv4pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv4pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 245,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv04.5/logo.webp"
+    },
+    {
+      "id": "sv05",
+      "name": "Temporal Forces",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv05/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv05/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 218,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv05/logo.webp"
+    },
+    {
+      "id": "sv06",
+      "name": "Twilight Masquerade",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv06/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv06/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv06/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv6/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 226,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv06/logo.webp"
+    },
+    {
+      "id": "sv06.5",
+      "name": "Shrouded Fable",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv06.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv06.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv06.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv6pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv6pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 99,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv06.5/logo.webp"
+    },
+    {
+      "id": "sv07",
+      "name": "Stellar Crown",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv07/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv07/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv7/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 175,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv07/logo.webp"
+    },
+    {
+      "id": "sv08",
+      "name": "Surging Sparks",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv08/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv08/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv8/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 252,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv08/logo.webp"
+    },
+    {
+      "id": "sv08.5",
+      "name": "Prismatic Evolutions",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv08.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv08.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv8pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv8pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 180,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv08.5/logo.webp"
+    },
+    {
+      "id": "sv09",
+      "name": "Journey Together",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv09/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv09/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv09/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv9/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 190,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv09/logo.webp"
+    },
+    {
+      "id": "sv10",
+      "name": "Destined Rivals",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/sv/sv10/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/sv10/logo.png",
+        "symbol": "https://images.pokemontcg.io/sv10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 244,
+      "displayFallback": "https://assets.tcgdex.net/de/sv/sv10/logo.webp"
+    },
+    {
+      "id": "sv10.5b",
+      "name": "Black Bolt",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv10.5b/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv10.5b/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/zsv10pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/zsv10pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 170,
+      "displayFallback": "https://assets.tcgdex.net/en/sv/sv10.5b/logo.webp"
+    },
+    {
+      "id": "sv10.5w",
+      "name": "White Flare",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/sv/sv10.5w/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/sv/sv10.5w/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/rsv10pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/rsv10pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 173,
+      "displayFallback": "https://assets.tcgdex.net/en/sv/sv10.5w/logo.webp"
+    },
+    {
+      "id": "sve",
+      "name": "Scarlet & Violet Energy",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "svp",
+      "name": "SVP Black Star Promos",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "swsh1",
+      "name": "Sword & Shield",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh1/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh1/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 216,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh1/logo.webp"
+    },
+    {
+      "id": "swsh10",
+      "name": "Astral Radiance",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh10/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh10/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 216,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh10/logo.webp"
+    },
+    {
+      "id": "swsh10.5",
+      "name": "Pokémon GO",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh10.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh10.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh10.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/pgo/logo.png",
+        "symbol": "https://images.pokemontcg.io/pgo/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 88,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh10.5/logo.webp"
+    },
+    {
+      "id": "swsh10tg",
+      "name": "Astral Radiance Trainer Gallery",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh10tg/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh10tg/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 30,
+      "displayFallback": "https://images.pokemontcg.io/swsh10tg/logo.png"
+    },
+    {
+      "id": "swsh11",
+      "name": "Lost Origin",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh11/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh11/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh11/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh11/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 217,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh11/logo.webp"
+    },
+    {
+      "id": "swsh11tg",
+      "name": "Lost Origin Trainer Gallery",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh11tg/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh11tg/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 30,
+      "displayFallback": "https://images.pokemontcg.io/swsh11tg/logo.png"
+    },
+    {
+      "id": "swsh12",
+      "name": "Silver Tempest",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh12/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh12/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh12/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh12/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh12/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 215,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh12/logo.webp"
+    },
+    {
+      "id": "swsh12.5",
+      "name": "Crown Zenith",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh12.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh12.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh12.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh12pt5/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh12pt5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 160,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh12.5/logo.webp"
+    },
+    {
+      "id": "swsh12.5gg",
+      "name": "Crown Zenith Galarian Gallery",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh12pt5gg/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh12pt5gg/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 70,
+      "displayFallback": "https://images.pokemontcg.io/swsh12pt5gg/logo.png"
+    },
+    {
+      "id": "swsh12tg",
+      "name": "Silver Tempest Trainer Gallery",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh12tg/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh12tg/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 30,
+      "displayFallback": "https://images.pokemontcg.io/swsh12tg/logo.png"
+    },
+    {
+      "id": "swsh2",
+      "name": "Rebel Clash",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh2/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh2/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 209,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh2/logo.webp"
+    },
+    {
+      "id": "swsh3",
+      "name": "Darkness Ablaze",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh3/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh3/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh3/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 201,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh3/logo.webp"
+    },
+    {
+      "id": "swsh3.5",
+      "name": "Champion's Path",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh3.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh3.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh3.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh35/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh35/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 80,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh3.5/logo.webp"
+    },
+    {
+      "id": "swsh4",
+      "name": "Vivid Voltage",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh4/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh4/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 203,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh4/logo.webp"
+    },
+    {
+      "id": "swsh4.5",
+      "name": "Shining Fates",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh4.5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh4.5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh4.5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh45/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh45/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 73,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh4.5/logo.webp"
+    },
+    {
+      "id": "swsh4.5sv",
+      "name": "Shining Fates Shiny Vault",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh45sv/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh45sv/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 122,
+      "displayFallback": "https://images.pokemontcg.io/swsh45sv/logo.png"
+    },
+    {
+      "id": "swsh5",
+      "name": "Battle Styles",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh5/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh5/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 183,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh5/logo.webp"
+    },
+    {
+      "id": "swsh6",
+      "name": "Chilling Reign",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh6/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh6/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 233,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh6/logo.webp"
+    },
+    {
+      "id": "swsh7",
+      "name": "Evolving Skies",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh7/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh7/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 237,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh7/logo.webp"
+    },
+    {
+      "id": "swsh8",
+      "name": "Fusion Strike",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh8/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh8/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 284,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh8/logo.webp"
+    },
+    {
+      "id": "swsh9",
+      "name": "Brilliant Stars",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swsh9/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swsh9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swsh9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh9/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 186,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swsh9/logo.webp"
+    },
+    {
+      "id": "swsh9tg",
+      "name": "Brilliant Stars Trainer Gallery",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swsh9tg/logo.png",
+        "symbol": "https://images.pokemontcg.io/swsh9tg/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 30,
+      "displayFallback": "https://images.pokemontcg.io/swsh9tg/logo.png"
+    },
+    {
+      "id": "swshp",
+      "name": "SWSH Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/de/swsh/swshp/logo.webp",
+            "available": true
+          },
+          {
+            "url": "https://assets.tcgdex.net/en/swsh/swshp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/swsh/swshp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/swshp/logo.png",
+        "symbol": "https://images.pokemontcg.io/swshp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 304,
+      "displayFallback": "https://assets.tcgdex.net/de/swsh/swshp/logo.webp"
+    },
+    {
+      "id": "tk-bw-e",
+      "name": "BW trainer Kit (Excadrill)",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-bw-z",
+      "name": "BW trainer Kit (Zoroark)",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-dp-l",
+      "name": "DP trainer Kit (Lucario)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-dp-l/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-dp-m",
+      "name": "DP trainer Kit (Manaphy)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-dp-m/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-ex-latia",
+      "name": "EX trainer Kit (Latias)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-ex-latia/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/tk1a/logo.png",
+        "symbol": "https://images.pokemontcg.io/tk1a/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 10,
+      "displayFallback": "https://images.pokemontcg.io/tk1a/logo.png"
+    },
+    {
+      "id": "tk-ex-latio",
+      "name": "EX trainer Kit (Latios)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-ex-latio/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/tk1b/logo.png",
+        "symbol": "https://images.pokemontcg.io/tk1b/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 10,
+      "displayFallback": "https://images.pokemontcg.io/tk1b/logo.png"
+    },
+    {
+      "id": "tk-ex-m",
+      "name": "EX trainer Kit 2 (Minun)",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/tk2b/logo.png",
+        "symbol": "https://images.pokemontcg.io/tk2b/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/tk2b/logo.png"
+    },
+    {
+      "id": "tk-ex-p",
+      "name": "EX trainer Kit 2 (Plusle)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-ex-p/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/tk2a/logo.png",
+        "symbol": "https://images.pokemontcg.io/tk2a/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 12,
+      "displayFallback": "https://images.pokemontcg.io/tk2a/logo.png"
+    },
+    {
+      "id": "tk-hs-g",
+      "name": "HS trainer Kit (Gyarados)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-hs-g/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-hs-r",
+      "name": "HS trainer Kit (Raichu)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-hs-r/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-sm-l",
+      "name": "SM trainer Kit (Lycanroc)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-sm-l/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-sm-r",
+      "name": "SM trainer Kit (Alolan Raichu)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-sm-r/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-b",
+      "name": "XY trainer Kit (Bisharp)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-b/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-latia",
+      "name": "XY trainer Kit (Latias)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-latia/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-latio",
+      "name": "XY trainer Kit (Latios)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-latio/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-n",
+      "name": "XY trainer Kit (Noivern)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-n/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-p",
+      "name": "XY trainer Kit (Pikachu Libre)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-p/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-su",
+      "name": "XY trainer Kit (Suicune)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-su/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-sy",
+      "name": "XY trainer Kit (Sylveon)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-sy/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "tk-xy-w",
+      "name": "XY trainer Kit (Wigglytuff)",
+      "primary": {
+        "logo": [],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/tk/tk-xy-w/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "wp",
+      "name": "W Promotional",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "xy0",
+      "name": "Kalos Starter Set",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy0/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy0/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy0/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy0/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 39,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy0/logo.webp"
+    },
+    {
+      "id": "xy1",
+      "name": "XY",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy1/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy1/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy1/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy1/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 146,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy1/logo.webp"
+    },
+    {
+      "id": "xy10",
+      "name": "Fates Collide",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy10/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy10/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy10/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy10/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 129,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy10/logo.webp"
+    },
+    {
+      "id": "xy11",
+      "name": "Steam Siege",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy11/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy11/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy11/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy11/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 116,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy11/logo.webp"
+    },
+    {
+      "id": "xy12",
+      "name": "Evolutions",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy12/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy12/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy12/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy12/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 113,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy12/logo.webp"
+    },
+    {
+      "id": "xy2",
+      "name": "Flashfire",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy2/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy2/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy2/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy2/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 110,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy2/logo.webp"
+    },
+    {
+      "id": "xy3",
+      "name": "Furious Fists",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy3/logo.webp",
+            "available": false
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy3/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy3/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy3/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 114,
+      "displayFallback": "https://images.pokemontcg.io/xy3/logo.png"
+    },
+    {
+      "id": "xy4",
+      "name": "Phantom Forces",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy4/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy4/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy4/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy4/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 124,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy4/logo.webp"
+    },
+    {
+      "id": "xy5",
+      "name": "Primal Clash",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy5/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy5/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy5/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy5/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 164,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy5/logo.webp"
+    },
+    {
+      "id": "xy6",
+      "name": "Roaring Skies",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy6/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy6/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy6/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy6/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 112,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy6/logo.webp"
+    },
+    {
+      "id": "xy7",
+      "name": "Ancient Origins",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy7/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy7/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy7/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy7/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 101,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy7/logo.webp"
+    },
+    {
+      "id": "xy8",
+      "name": "BREAKthrough",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy8/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy8/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy8/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy8/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 165,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy8/logo.webp"
+    },
+    {
+      "id": "xy9",
+      "name": "BREAKpoint",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xy9/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xy9/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xy9/logo.png",
+        "symbol": "https://images.pokemontcg.io/xy9/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 126,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xy9/logo.webp"
+    },
+    {
+      "id": "xya",
+      "name": "Yellow A Alternate",
+      "primary": {
+        "logo": [],
+        "symbol": []
+      },
+      "fallback": {},
+      "unresolved": [
+        "logo",
+        "symbol"
+      ],
+      "displayFallback": "neutral-set-identifier"
+    },
+    {
+      "id": "xyp",
+      "name": "XY Black Star Promos",
+      "primary": {
+        "logo": [
+          {
+            "url": "https://assets.tcgdex.net/en/xy/xyp/logo.webp",
+            "available": true
+          }
+        ],
+        "symbol": [
+          {
+            "url": "https://assets.tcgdex.net/univ/xy/xyp/symbol.webp",
+            "available": false
+          }
+        ]
+      },
+      "fallback": {
+        "logo": "https://images.pokemontcg.io/xyp/logo.png",
+        "symbol": "https://images.pokemontcg.io/xyp/symbol.png"
+      },
+      "unresolved": [],
+      "indexedCards": 216,
+      "displayFallback": "https://assets.tcgdex.net/en/xy/xyp/logo.webp"
+    }
+  ],
+  "bundledCards": [
+    {
+      "id": "floink",
+      "path": "assets/cards/floink.webp",
+      "available": true
+    },
+    {
+      "id": "ferkokel",
+      "path": "assets/cards/ferkokel.webp",
+      "available": true
+    },
+    {
+      "id": "flambirex",
+      "path": "assets/cards/flambirex.webp",
+      "available": true
+    },
+    {
+      "id": "felori",
+      "path": "assets/cards/felori.webp",
+      "available": true
+    },
+    {
+      "id": "feliospa",
+      "path": "assets/cards/feliospa.webp",
+      "available": true
+    },
+    {
+      "id": "maskagato",
+      "path": "assets/cards/maskagato.webp",
+      "available": true
+    },
+    {
+      "id": "zwirrlicht",
+      "path": "assets/cards/zwirrlicht.webp",
+      "available": true
+    },
+    {
+      "id": "zwirrklop",
+      "path": "assets/cards/zwirrklop.webp",
+      "available": true
+    },
+    {
+      "id": "zwirrfinst",
+      "path": "assets/cards/zwirrfinst.webp",
+      "available": true
+    },
+    {
+      "id": "svi-211",
+      "path": "assets/cards/svi-211.webp",
+      "available": true
+    },
+    {
+      "id": "svi-212",
+      "path": "assets/cards/svi-212.webp",
+      "available": true
+    },
+    {
+      "id": "svi-245",
+      "path": "assets/cards/svi-245.webp",
+      "available": true
+    },
+    {
+      "id": "obf-207",
+      "path": "assets/cards/obf-207.webp",
+      "available": true
+    },
+    {
+      "id": "obf-208",
+      "path": "assets/cards/obf-208.webp",
+      "available": true
+    },
+    {
+      "id": "obf-225",
+      "path": "assets/cards/obf-225.webp",
+      "available": true
+    },
+    {
+      "id": "pal-208",
+      "path": "assets/cards/pal-208.webp",
+      "available": true
+    },
+    {
+      "id": "pal-209",
+      "path": "assets/cards/pal-209.webp",
+      "available": true
+    },
+    {
+      "id": "pal-210",
+      "path": "assets/cards/pal-210.webp",
+      "available": true
+    },
+    {
+      "id": "svi-199",
+      "path": "assets/cards/svi-199.webp",
+      "available": true
+    },
+    {
+      "id": "svi-200",
+      "path": "assets/cards/svi-200.webp",
+      "available": true
+    },
+    {
+      "id": "svi-201",
+      "path": "assets/cards/svi-201.webp",
+      "available": true
+    },
+    {
+      "id": "pal-194",
+      "path": "assets/cards/pal-194.webp",
+      "available": true
+    },
+    {
+      "id": "pal-195",
+      "path": "assets/cards/pal-195.webp",
+      "available": true
+    },
+    {
+      "id": "pal-198",
+      "path": "assets/cards/pal-198.webp",
+      "available": true
+    },
+    {
+      "id": "sesokitz",
+      "path": "assets/cards/sesokitz.webp",
+      "available": true
+    },
+    {
+      "id": "kronjuwild",
+      "path": "assets/cards/kronjuwild.webp",
+      "available": true
+    },
+    {
+      "id": "tef-164",
+      "path": "assets/cards/tef-164.webp",
+      "available": true
+    },
+    {
+      "id": "twm-169",
+      "path": "assets/cards/twm-169.webp",
+      "available": true
+    },
+    {
+      "id": "scr-144",
+      "path": "assets/cards/scr-144.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-193",
+      "path": "assets/cards/ssp-193.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-192",
+      "path": "assets/cards/ssp-192.webp",
+      "available": true
+    },
+    {
+      "id": "twm-168",
+      "path": "assets/cards/twm-168.webp",
+      "available": true
+    },
+    {
+      "id": "pal-215",
+      "path": "assets/cards/pal-215.webp",
+      "available": true
+    },
+    {
+      "id": "obf-198",
+      "path": "assets/cards/obf-198.webp",
+      "available": true
+    },
+    {
+      "id": "tef-172",
+      "path": "assets/cards/tef-172.webp",
+      "available": true
+    },
+    {
+      "id": "dri-185",
+      "path": "assets/cards/dri-185.webp",
+      "available": true
+    },
+    {
+      "id": "svi-204",
+      "path": "assets/cards/svi-204.webp",
+      "available": true
+    },
+    {
+      "id": "svi-205",
+      "path": "assets/cards/svi-205.webp",
+      "available": true
+    },
+    {
+      "id": "svi-206",
+      "path": "assets/cards/svi-206.webp",
+      "available": true
+    },
+    {
+      "id": "pal-206",
+      "path": "assets/cards/pal-206.webp",
+      "available": true
+    },
+    {
+      "id": "par-191",
+      "path": "assets/cards/par-191.webp",
+      "available": true
+    },
+    {
+      "id": "twm-176",
+      "path": "assets/cards/twm-176.webp",
+      "available": true
+    },
+    {
+      "id": "twm-186",
+      "path": "assets/cards/twm-186.webp",
+      "available": true
+    },
+    {
+      "id": "pal-204",
+      "path": "assets/cards/pal-204.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-208",
+      "path": "assets/cards/ssp-208.webp",
+      "available": true
+    },
+    {
+      "id": "par-189",
+      "path": "assets/cards/par-189.webp",
+      "available": true
+    },
+    {
+      "id": "twm-175",
+      "path": "assets/cards/twm-175.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-198",
+      "path": "assets/cards/ssp-198.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-200",
+      "path": "assets/cards/ssp-200.webp",
+      "available": true
+    },
+    {
+      "id": "tef-173",
+      "path": "assets/cards/tef-173.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-162",
+      "path": "assets/cards/jtg-162.webp",
+      "available": true
+    },
+    {
+      "id": "par-192",
+      "path": "assets/cards/par-192.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-207",
+      "path": "assets/cards/ssp-207.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-199",
+      "path": "assets/cards/ssp-199.webp",
+      "available": true
+    },
+    {
+      "id": "par-188",
+      "path": "assets/cards/par-188.webp",
+      "available": true
+    },
+    {
+      "id": "pal-205",
+      "path": "assets/cards/pal-205.webp",
+      "available": true
+    },
+    {
+      "id": "obf-222",
+      "path": "assets/cards/obf-222.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-201",
+      "path": "assets/cards/ssp-201.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-165",
+      "path": "assets/cards/jtg-165.webp",
+      "available": true
+    },
+    {
+      "id": "scr-149",
+      "path": "assets/cards/scr-149.webp",
+      "available": true
+    },
+    {
+      "id": "twm-174",
+      "path": "assets/cards/twm-174.webp",
+      "available": true
+    },
+    {
+      "id": "tef-168",
+      "path": "assets/cards/tef-168.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-161",
+      "path": "assets/cards/jtg-161.webp",
+      "available": true
+    },
+    {
+      "id": "svi-203",
+      "path": "assets/cards/svi-203.webp",
+      "available": true
+    },
+    {
+      "id": "pal-199",
+      "path": "assets/cards/pal-199.webp",
+      "available": true
+    },
+    {
+      "id": "pal-200",
+      "path": "assets/cards/pal-200.webp",
+      "available": true
+    },
+    {
+      "id": "obf-199",
+      "path": "assets/cards/obf-199.webp",
+      "available": true
+    },
+    {
+      "id": "par-186",
+      "path": "assets/cards/par-186.webp",
+      "available": true
+    },
+    {
+      "id": "tef-167",
+      "path": "assets/cards/tef-167.webp",
+      "available": true
+    },
+    {
+      "id": "twm-172",
+      "path": "assets/cards/twm-172.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-195",
+      "path": "assets/cards/ssp-195.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-197",
+      "path": "assets/cards/ssp-197.webp",
+      "available": true
+    },
+    {
+      "id": "obf-203",
+      "path": "assets/cards/obf-203.webp",
+      "available": true
+    },
+    {
+      "id": "pal-222",
+      "path": "assets/cards/pal-222.webp",
+      "available": true
+    },
+    {
+      "id": "pal-220",
+      "path": "assets/cards/pal-220.webp",
+      "available": true
+    },
+    {
+      "id": "par-202",
+      "path": "assets/cards/par-202.webp",
+      "available": true
+    },
+    {
+      "id": "svi-216",
+      "path": "assets/cards/svi-216.webp",
+      "available": true
+    },
+    {
+      "id": "svi-217",
+      "path": "assets/cards/svi-217.webp",
+      "available": true
+    },
+    {
+      "id": "par-183",
+      "path": "assets/cards/par-183.webp",
+      "available": true
+    },
+    {
+      "id": "pal-219",
+      "path": "assets/cards/pal-219.webp",
+      "available": true
+    },
+    {
+      "id": "pal-221",
+      "path": "assets/cards/pal-221.webp",
+      "available": true
+    },
+    {
+      "id": "par-208",
+      "path": "assets/cards/par-208.webp",
+      "available": true
+    },
+    {
+      "id": "par-209",
+      "path": "assets/cards/par-209.webp",
+      "available": true
+    },
+    {
+      "id": "par-210",
+      "path": "assets/cards/par-210.webp",
+      "available": true
+    },
+    {
+      "id": "tef-178",
+      "path": "assets/cards/tef-178.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-209",
+      "path": "assets/cards/ssp-209.webp",
+      "available": true
+    },
+    {
+      "id": "tef-179",
+      "path": "assets/cards/tef-179.webp",
+      "available": true
+    },
+    {
+      "id": "twm-184",
+      "path": "assets/cards/twm-184.webp",
+      "available": true
+    },
+    {
+      "id": "twm-182",
+      "path": "assets/cards/twm-182.webp",
+      "available": true
+    },
+    {
+      "id": "dri-201",
+      "path": "assets/cards/dri-201.webp",
+      "available": true
+    },
+    {
+      "id": "svi-221",
+      "path": "assets/cards/svi-221.webp",
+      "available": true
+    },
+    {
+      "id": "par-213",
+      "path": "assets/cards/par-213.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-203",
+      "path": "assets/cards/ssp-203.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-214",
+      "path": "assets/cards/ssp-214.webp",
+      "available": true
+    },
+    {
+      "id": "pal-225",
+      "path": "assets/cards/pal-225.webp",
+      "available": true
+    },
+    {
+      "id": "pal-227",
+      "path": "assets/cards/pal-227.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-169",
+      "path": "assets/cards/jtg-169.webp",
+      "available": true
+    },
+    {
+      "id": "svi-219",
+      "path": "assets/cards/svi-219.webp",
+      "available": true
+    },
+    {
+      "id": "schlapfel",
+      "path": "assets/cards/schlapfel.webp",
+      "available": true
+    },
+    {
+      "id": "svi-210",
+      "path": "assets/cards/svi-210.webp",
+      "available": true
+    },
+    {
+      "id": "svi-214",
+      "path": "assets/cards/svi-214.webp",
+      "available": true
+    },
+    {
+      "id": "pal-212",
+      "path": "assets/cards/pal-212.webp",
+      "available": true
+    },
+    {
+      "id": "pal-213",
+      "path": "assets/cards/pal-213.webp",
+      "available": true
+    },
+    {
+      "id": "par-205",
+      "path": "assets/cards/par-205.webp",
+      "available": true
+    },
+    {
+      "id": "tef-177",
+      "path": "assets/cards/tef-177.webp",
+      "available": true
+    },
+    {
+      "id": "par-198",
+      "path": "assets/cards/par-198.webp",
+      "available": true
+    },
+    {
+      "id": "obf-204",
+      "path": "assets/cards/obf-204.webp",
+      "available": true
+    },
+    {
+      "id": "par-207",
+      "path": "assets/cards/par-207.webp",
+      "available": true
+    },
+    {
+      "id": "par-201",
+      "path": "assets/cards/par-201.webp",
+      "available": true
+    },
+    {
+      "id": "obf-202",
+      "path": "assets/cards/obf-202.webp",
+      "available": true
+    },
+    {
+      "id": "tef-171",
+      "path": "assets/cards/tef-171.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-204",
+      "path": "assets/cards/ssp-204.webp",
+      "available": true
+    },
+    {
+      "id": "par-214",
+      "path": "assets/cards/par-214.webp",
+      "available": true
+    },
+    {
+      "id": "par-216",
+      "path": "assets/cards/par-216.webp",
+      "available": true
+    },
+    {
+      "id": "svi-244",
+      "path": "assets/cards/svi-244.webp",
+      "available": true
+    },
+    {
+      "id": "scr-151",
+      "path": "assets/cards/scr-151.webp",
+      "available": true
+    },
+    {
+      "id": "par-215",
+      "path": "assets/cards/par-215.webp",
+      "available": true
+    },
+    {
+      "id": "svi-208",
+      "path": "assets/cards/svi-208.webp",
+      "available": true
+    },
+    {
+      "id": "par-193",
+      "path": "assets/cards/par-193.webp",
+      "available": true
+    },
+    {
+      "id": "par-194",
+      "path": "assets/cards/par-194.webp",
+      "available": true
+    },
+    {
+      "id": "par-206",
+      "path": "assets/cards/par-206.webp",
+      "available": true
+    },
+    {
+      "id": "pal-211",
+      "path": "assets/cards/pal-211.webp",
+      "available": true
+    },
+    {
+      "id": "pal-216",
+      "path": "assets/cards/pal-216.webp",
+      "available": true
+    },
+    {
+      "id": "pal-217",
+      "path": "assets/cards/pal-217.webp",
+      "available": true
+    },
+    {
+      "id": "twm-187",
+      "path": "assets/cards/twm-187.webp",
+      "available": true
+    },
+    {
+      "id": "pal-226",
+      "path": "assets/cards/pal-226.webp",
+      "available": true
+    },
+    {
+      "id": "svi-222",
+      "path": "assets/cards/svi-222.webp",
+      "available": true
+    },
+    {
+      "id": "dri-205",
+      "path": "assets/cards/dri-205.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-212",
+      "path": "assets/cards/ssp-212.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-168",
+      "path": "assets/cards/jtg-168.webp",
+      "available": true
+    },
+    {
+      "id": "schlurp",
+      "path": "assets/cards/schlurp.webp",
+      "available": true
+    },
+    {
+      "id": "tef-181",
+      "path": "assets/cards/tef-181.webp",
+      "available": true
+    },
+    {
+      "id": "tef-184",
+      "path": "assets/cards/tef-184.webp",
+      "available": true
+    },
+    {
+      "id": "picochilla",
+      "path": "assets/cards/picochilla.webp",
+      "available": true
+    },
+    {
+      "id": "chillabell",
+      "path": "assets/cards/chillabell.webp",
+      "available": true
+    },
+    {
+      "id": "twm-185",
+      "path": "assets/cards/twm-185.webp",
+      "available": true
+    },
+    {
+      "id": "sirapfel",
+      "path": "assets/cards/sirapfel.webp",
+      "available": true
+    },
+    {
+      "id": "dri-188",
+      "path": "assets/cards/dri-188.webp",
+      "available": true
+    },
+    {
+      "id": "hefel",
+      "path": "assets/cards/hefel.webp",
+      "available": true
+    },
+    {
+      "id": "backel",
+      "path": "assets/cards/backel.webp",
+      "available": true
+    },
+    {
+      "id": "hokumil",
+      "path": "assets/cards/hokumil.webp",
+      "available": true
+    },
+    {
+      "id": "sabbaione",
+      "path": "assets/cards/sabbaione.webp",
+      "available": true
+    },
+    {
+      "id": "pokusan",
+      "path": "assets/cards/pokusan.webp",
+      "available": true
+    },
+    {
+      "id": "gelatroppo",
+      "path": "assets/cards/gelatroppo.webp",
+      "available": true
+    },
+    {
+      "id": "twm-211",
+      "path": "assets/cards/twm-211.webp",
+      "available": true
+    },
+    {
+      "id": "twm-212",
+      "path": "assets/cards/twm-212.webp",
+      "available": true
+    },
+    {
+      "id": "twm-213",
+      "path": "assets/cards/twm-213.webp",
+      "available": true
+    },
+    {
+      "id": "twm-215",
+      "path": "assets/cards/twm-215.webp",
+      "available": true
+    },
+    {
+      "id": "twm-171",
+      "path": "assets/cards/twm-171.webp",
+      "available": true
+    },
+    {
+      "id": "twm-210",
+      "path": "assets/cards/twm-210.webp",
+      "available": true
+    },
+    {
+      "id": "gemma",
+      "path": "assets/cards/gemma.webp",
+      "available": true
+    },
+    {
+      "id": "fukano",
+      "path": "assets/cards/fukano.webp",
+      "available": true
+    },
+    {
+      "id": "twm-179",
+      "path": "assets/cards/twm-179.webp",
+      "available": true
+    },
+    {
+      "id": "dri-193",
+      "path": "assets/cards/dri-193.webp",
+      "available": true
+    },
+    {
+      "id": "dri-194",
+      "path": "assets/cards/dri-194.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-167",
+      "path": "assets/cards/jtg-167.webp",
+      "available": true
+    },
+    {
+      "id": "dri-184",
+      "path": "assets/cards/dri-184.webp",
+      "available": true
+    },
+    {
+      "id": "dri-190",
+      "path": "assets/cards/dri-190.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-164",
+      "path": "assets/cards/jtg-164.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-163",
+      "path": "assets/cards/jtg-163.webp",
+      "available": true
+    },
+    {
+      "id": "dri-203",
+      "path": "assets/cards/dri-203.webp",
+      "available": true
+    },
+    {
+      "id": "jtg-170",
+      "path": "assets/cards/jtg-170.webp",
+      "available": true
+    },
+    {
+      "id": "svi-215",
+      "path": "assets/cards/svi-215.webp",
+      "available": true
+    },
+    {
+      "id": "scr-153",
+      "path": "assets/cards/scr-153.webp",
+      "available": true
+    },
+    {
+      "id": "par-200",
+      "path": "assets/cards/par-200.webp",
+      "available": true
+    },
+    {
+      "id": "twm-183",
+      "path": "assets/cards/twm-183.webp",
+      "available": true
+    },
+    {
+      "id": "svi-220",
+      "path": "assets/cards/svi-220.webp",
+      "available": true
+    },
+    {
+      "id": "par-212",
+      "path": "assets/cards/par-212.webp",
+      "available": true
+    },
+    {
+      "id": "obf-206",
+      "path": "assets/cards/obf-206.webp",
+      "available": true
+    },
+    {
+      "id": "tef-175",
+      "path": "assets/cards/tef-175.webp",
+      "available": true
+    },
+    {
+      "id": "twm-173",
+      "path": "assets/cards/twm-173.webp",
+      "available": true
+    },
+    {
+      "id": "pal-223",
+      "path": "assets/cards/pal-223.webp",
+      "available": true
+    },
+    {
+      "id": "par-204",
+      "path": "assets/cards/par-204.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-202",
+      "path": "assets/cards/ssp-202.webp",
+      "available": true
+    },
+    {
+      "id": "svi-202",
+      "path": "assets/cards/svi-202.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-213",
+      "path": "assets/cards/ssp-213.webp",
+      "available": true
+    },
+    {
+      "id": "ssp-206",
+      "path": "assets/cards/ssp-206.webp",
+      "available": true
+    },
+    {
+      "id": "par-184",
+      "path": "assets/cards/par-184.webp",
+      "available": true
+    },
+    {
+      "id": "pal-229",
+      "path": "assets/cards/pal-229.webp",
+      "available": true
+    },
+    {
+      "id": "pal-228",
+      "path": "assets/cards/pal-228.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-xyp-xy133",
+      "path": "assets/cards/greninja-xyp-xy133.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-xyp-xy24",
+      "path": "assets/cards/greninja-xyp-xy24.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-swshp-swsh144",
+      "path": "assets/cards/greninja-swshp-swsh144.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-me04-116",
+      "path": "assets/cards/greninja-me04-116.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-sv06-214",
+      "path": "assets/cards/greninja-sv06-214.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-me04-122",
+      "path": "assets/cards/greninja-me04-122.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-swshp-swsh305",
+      "path": "assets/cards/greninja-swshp-swsh305.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-sma-sv56",
+      "path": "assets/cards/greninja-sma-sv56.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-sm6-133",
+      "path": "assets/cards/greninja-sm6-133.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-xyp-xy20",
+      "path": "assets/cards/greninja-xyp-xy20.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-xy9-41",
+      "path": "assets/cards/greninja-xy9-41.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-xyp-xy162",
+      "path": "assets/cards/greninja-xyp-xy162.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-sm6-120",
+      "path": "assets/cards/greninja-sm6-120.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-det1-9",
+      "path": "assets/cards/greninja-det1-9.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-sm10-117",
+      "path": "assets/cards/greninja-sm10-117.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-swsh10-046",
+      "path": "assets/cards/greninja-swsh10-046.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-svp-132",
+      "path": "assets/cards/greninja-svp-132.webp",
+      "available": true
+    },
+    {
+      "id": "greninja-30th-148",
+      "path": "assets/cards/greninja-30th-148.webp",
+      "available": true
+    }
+  ],
+  "errors": []
+}

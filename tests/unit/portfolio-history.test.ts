@@ -71,7 +71,7 @@ describe('real, comparable portfolio history', () => {
     const points = comparableHistory(state, summary, 30);
     expect(points).toHaveLength(2);
     expect(points.map((point) => point.knownValue)).toEqual([15.5, 15.5]);
-    const serialized = storage.get('e-binder-portfolio-history-v1:personal')!;
+    const serialized = storage.get('e-binder-portfolio-history-v2:personal')!;
     expect(serialized).not.toContain('Echte Karte');
     expect(serialized).not.toContain('sv01');
   });
@@ -109,5 +109,33 @@ describe('real, comparable portfolio history', () => {
       '2026-11-09',
     );
     expect(readPortfolioHistory('personal')).toEqual([]);
+  });
+  it('never connects equal-sized coverage of different cards', () => {
+    const { state } = stateWithPricedCard();
+    const second = structuredClone(state.holdings[0]!);
+    second.id = 'second';
+    second.card.key = 'tcgdex:de:sv01-002';
+    second.card.sourceId = 'sv01-002';
+    second.card.number = '002/198';
+    state.holdings.push(second);
+    const quote = (id: string, amount: number) =>
+      summarizePortfolio(
+        state,
+        new Map([
+          [
+            `de:${id}:normal`,
+            {
+              source: 'cardmarket' as const,
+              variant: 'normal' as const,
+              amount,
+              updated: '2026-11-09',
+            },
+          ],
+        ]),
+      );
+    recordPortfolioObservation(state, quote('sv01-001', 10), '2026-11-09');
+    const today = quote('sv01-002', 100);
+    recordPortfolioObservation(state, today, '2026-11-10');
+    expect(comparableHistory(state, today, 30)).toHaveLength(1);
   });
 });

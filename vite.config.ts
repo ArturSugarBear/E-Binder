@@ -60,6 +60,7 @@ export default defineConfig({
         globPatterns: ['**/*.{html,js,css,json,woff2,svg,png,webmanifest}'],
         globIgnores: [
           '**/assets/cards/**',
+          '**/catalog-art/**',
           '**/assets/ocr/**',
           '**/assets/vision/**',
           '**/*.map',
@@ -70,6 +71,28 @@ export default defineConfig({
           new RegExp('^' + basePattern + '(?:index\\.html)?$'),
         ],
         runtimeCaching: [
+          {
+            urlPattern: new RegExp(basePattern + 'catalog-art/.*\\.json$'),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'e-binder-artwork-index',
+              expiration: { maxEntries: 60, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+          {
+            urlPattern:
+              /^https:\/\/(?:images\.pokemontcg\.io|images\.scrydex\.com)\//,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'e-binder-secondary-artwork',
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: {
+                maxEntries: 180,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
+            },
+          },
           {
             urlPattern: new RegExp(basePattern + 'assets/cards/.*\\.webp$'),
             handler: 'CacheFirst',

@@ -1,3 +1,4 @@
+import { secondarySetArt } from '../data/artwork-fallbacks';
 import {
   catalogEntry,
   catalogResumeCard,
@@ -333,6 +334,8 @@ export function createCatalogBrowser(options: Options) {
     image.alt = '';
     image.loading = 'lazy';
     let index = 0;
+    let resolving = false;
+    let secondary: string[] = [];
     const next = () => {
       while (index < sources.length) {
         const base = sources[index++]!;
@@ -347,11 +350,29 @@ export function createCatalogBrowser(options: Options) {
           // Ignore invalid provider URLs; never load an arbitrary host.
         }
       }
+      if (!resolving) {
+        resolving = true;
+        void secondarySetArt(item.id).then((urls) => {
+          secondary = urls;
+          next();
+        });
+        return;
+      }
+      if (secondary.length) {
+        image.src = secondary.shift()!;
+        icon.dataset.imageSource = 'secondary';
+        icon.replaceChildren(image);
+        return;
+      }
       image.remove();
+      icon.dataset.imageState = 'unavailable';
       icon.textContent = item.id.toUpperCase();
       if (item.id === 'me06') icon.classList.add('w-set-me06-identity');
     };
     image.addEventListener('error', next);
+    image.addEventListener('load', () => {
+      icon.dataset.imageState = 'loaded';
+    });
     next();
     return icon;
   }
