@@ -3743,3 +3743,119 @@ textarea.w-input,
     grid-column: 1 / -1;
   }
 }
+
+/* Material engine handles actual glass optics; these styles protect layout. */
+.w-mobile-nav {
+  isolation: isolate;
+}
+.w-mobile-nav > .w-liquid-optic {
+  position: absolute;
+  inset: 0;
+  display: block;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+}
+.w-mobile-nav > :is(a, button) {
+  position: relative;
+  z-index: 1;
+}
+.w-mobile-nav.w-liquid-ready {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .w-mobile-nav.w-liquid-ready {
+    background: var(--paper);
+    box-shadow: 0 6px 22px rgb(0 0 0 / 0.28);
+  }
+  .w-mobile-nav > .w-liquid-optic {
+    display: none;
+  }
+}
+/* One scan mode across single-card and physical 3x3 workflows. */
+.w-scan-mode-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding: 5px;
+  width: min(100%, 420px);
+  margin-inline: auto;
+  border-radius: 999px;
+  border: 1px solid var(--glass-stroke);
+  background: var(--glass-background);
+}
+.w-scan-mode-toggle .w-button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  text-align: center;
+  justify-content: center;
+}
+.w-scan-mode-toggle .w-button[aria-pressed='true'] {
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow:
+    0 2px 12px rgb(0 0 0 / 0.18),
+    inset 0 1px rgb(255 255 255 / 0.12);
+}
+.w-page-scan-pocket[data-scan-outcome='card'] {
+  border-color: var(--accent);
+}
+.w-page-scan-pocket[data-scan-outcome='empty'] {
+  border-color: var(--glass-stroke);
+}
+.w-page-scan-pocket[data-scan-outcome='unknown'] {
+  border-color: var(--w-border);
+}
+
+.w-portfolio-history {
+  display: grid;
+  gap: 14px;
+}
+.w-portfolio-periods {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: max-content;
+  max-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 999px;
+  background: var(--glass-background);
+}
+.w-portfolio-periods .w-button {
+  min-width: 64px;
+  min-height: 42px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+}
+.w-portfolio-periods .w-button[aria-pressed='true'] {
+  background: var(--raised);
+  color: var(--ink);
+}
+.w-portfolio-history-svg {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  overflow: visible;
+}
+.w-portfolio-history-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.w-portfolio-history-labels strong {
+  color: var(--ink);
+}

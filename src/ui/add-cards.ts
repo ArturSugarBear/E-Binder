@@ -149,6 +149,10 @@ export function openAddCards(
         () => camera.click(),
         () =>
           ctx.state.captures.filter((shot) => shot.status === 'pending').length,
+        () => {
+          sheet.close();
+          ctx.openPageScan();
+        },
       ),
     'primary',
     'camera',
