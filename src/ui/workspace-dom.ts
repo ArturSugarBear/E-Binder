@@ -1,3 +1,5 @@
+import { enableSheetDrag } from './sheet-gestures';
+
 let nextField = 0;
 export type Child = Node | string | null | undefined | false;
 export function el<K extends keyof HTMLElementTagNameMap>(
@@ -164,12 +166,15 @@ export function modal(
   const alerts = el('div', 'w-dialog-alerts');
   alerts.setAttribute('role', 'alert');
   alerts.hidden = true;
-  dialog.append(
-    el('header', 'w-dialog-head', heading, closeButton),
-    alerts,
-    body,
-    footer,
+  const header = el(
+    'header',
+    'w-dialog-head',
+    el('span', 'w-sheet-grabber'),
+    heading,
+    closeButton,
   );
+  header.querySelector('.w-sheet-grabber')!.setAttribute('aria-hidden', 'true');
+  dialog.append(header, alerts, body, footer);
   const callbacks: (() => void)[] = [];
   dialog.addEventListener('close', () => {
     callbacks.forEach((callback) => callback());
@@ -201,6 +206,7 @@ export function modal(
   });
   document.body.append(dialog);
   dialog.showModal();
+  enableSheetDrag(dialog, dialog, [header]);
   return {
     dialog,
     body,
