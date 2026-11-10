@@ -628,15 +628,22 @@ export function openPageScanner(
             ...ctx.state.holdings.map((holding) => holding.card),
           ]);
           let online: PersonalCard[] = [];
+          let catalogFailed = false;
+          // Never make one bad TCGdex request stall a whole 9-pocket page.
+          const lookupSignal = AbortSignal.any([
+            abort.signal,
+            AbortSignal.timeout(11000),
+          ]);
           if (navigator.onLine && text.trim()) {
             try {
               online = await fetchRecognizedCards(
                 text,
                 preferredLanguage(text),
-                abort.signal,
+                lookupSignal,
               );
             } catch {
-              // Manual lookup and local matches remain available.
+              catalogFailed = true;
+              // OCR and local cards remain available without a connection.
             }
           }
           if (closed || abort.signal.aborted) break;
@@ -647,14 +654,16 @@ export function openPageScanner(
             !online.length
           ) {
             try {
+              pocket.status.textContent = 'Kartenname wird im Katalog gesucht …';
               const hint = await fetchNameHintCandidates(
                 text,
                 preferredLanguage(text),
-                abort.signal,
+                lookupSignal,
               );
               online = hint.candidates;
               titleHint = hint.query;
             } catch {
+              catalogFailed = true;
               // Never substitute a guessed printing for an unavailable lookup.
             }
           }
@@ -668,9 +677,13 @@ export function openPageScanner(
               ? `„${titleHint}“ erkannt · Ausgabe wählen`
               : pocket.candidates.length
                 ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
-                : text.trim()
-                  ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
-                  : 'Kein lesbarer Kartenname · Foto prüfen';
+                : !navigator.onLine
+                  ? 'Offline · Katalogabgleich benötigt Internet'
+                  : catalogFailed
+                    ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
+                    : text.trim()
+                      ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                      : 'Kein lesbarer Kartenname · Foto prüfen';
         } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent =
