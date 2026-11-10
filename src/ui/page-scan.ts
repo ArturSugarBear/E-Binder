@@ -3,6 +3,7 @@ import {
   recognitionClues,
   fetchCatalogCard,
   fetchRecognizedCards,
+  fetchNameHintCandidates,
   searchCatalog,
 } from '../data/card-catalog';
 import { extractPagePockets } from '../data/page-pockets';
@@ -639,17 +640,42 @@ export function openPageScanner(
             }
           }
           if (closed || abort.signal.aborted) break;
+          let titleHint = '';
+          if (
+            navigator.onLine &&
+            text.trim() &&
+            !online.length &&
+            !local.length
+          ) {
+            try {
+              const hint = await fetchNameHintCandidates(
+                text,
+                preferredLanguage(text),
+                abort.signal,
+              );
+              online = hint.candidates;
+              titleHint = hint.query;
+            } catch {
+              // Never substitute a guessed printing for an unavailable lookup.
+            }
+          }
+          if (closed || abort.signal.aborted) break;
           displayCandidates(pocket, [...online, ...local]);
+          if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
-            : pocket.candidates.length
-              ? `${pocket.candidates.length} Vorschläge · prüfen`
-              : 'Noch nicht erkannt · prüfen';
-        } catch {
+            : pocket.candidates.length && titleHint
+              ? `„${titleHint}“ erkannt · Ausgabe wählen`
+              : pocket.candidates.length
+                ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
+                : text.trim()
+                  ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                  : 'Kein lesbarer Kartenname · Foto prüfen';
+        } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent =
-            'Keine Erkennung – manuell suchen oder überspringen';
+            `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
           if (!closed && !abort.signal.aborted)
