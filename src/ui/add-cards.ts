@@ -1,6 +1,7 @@
 import {
   candidatesFromText,
   fetchRecognizedCards,
+  fetchNameHintCandidates,
   recognitionClues,
   matchesCard,
 } from '../data/card-catalog';
@@ -450,6 +451,20 @@ export function openAddCards(
       }
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
+      let titleHint = '';
+      if (!online.length && !local.length && navigator.onLine && text.trim()) {
+        try {
+          const found = await fetchNameHintCandidates(
+            text,
+            language.value,
+            controller.signal,
+          );
+          online = found.candidates;
+          titleHint = found.query;
+        } catch {
+          // No invented edition if an optional name lookup fails.
+        }
+      }
       const candidates = [
         ...new Map(
           [...online, ...local].map((card) => [card.key, card]),
@@ -476,8 +491,8 @@ export function openAddCards(
       }
       tell(
         candidates.length
-          ? `Erkennungsvorschläge, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Online-Abgleich war nicht erreichbar; diese Vorschläge stammen aus dem lokalen Katalog.' : ''}`
-          : 'Keine eindeutige Karte gefunden. Die Aufnahme bleibt bis zum Schließen geöffnet. Suche nach Name oder Nummer oder trage die Ausgabe manuell ein.',
+          ? `${titleHint ? `Kartenname „${titleHint}“ gelesen. ` : ''}Mögliche Ausgaben, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Nummernabgleich war nicht erreichbar.' : ''}`
+          : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
       );
       const number = recognitionClues(text)[0]?.number;
       if (number && !candidates.length) {
