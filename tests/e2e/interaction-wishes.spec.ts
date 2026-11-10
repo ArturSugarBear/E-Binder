@@ -56,6 +56,9 @@ test('manual wishes use the selected language, expose duplicates and export the 
   await french
     .getByRole('button', { name: 'Wunsch speichern', exact: true })
     .click();
+  await expect(page.locator('#workspace-save-status')).toHaveText(
+    'Auf diesem Gerät gespeichert',
+  );
   await page.reload();
   await expect(
     french.getByLabel('Gewünschte Menge', { exact: true }),
