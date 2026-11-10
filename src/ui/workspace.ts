@@ -19,6 +19,7 @@ import { openAddCards } from './add-cards';
 import { renderCollection, renderWishes, openHolding } from './collection-view';
 import { createDiscoverView } from './discover-view';
 import { renderBinders } from './binder-view';
+import { createPortfolioView } from './portfolio-view';
 import { openBackup } from './backup-dialog';
 import { action, el, errorText, message } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
@@ -87,6 +88,7 @@ export async function startWorkspace(): Promise<void> {
   let noticeTimer: ReturnType<typeof setTimeout>;
   let catalogLoading = false;
   let discovery: ReturnType<typeof createDiscoverView> | undefined;
+  let portfolio: ReturnType<typeof createPortfolioView> | undefined;
   const ctx: WorkspaceContext = {
     account,
     state: initial,
@@ -176,7 +178,16 @@ export async function startWorkspace(): Promise<void> {
         discovery.close();
         discovery = undefined;
       }
-      if (route === 'entdecken') {
+      if (portfolio && route !== 'portfolio') {
+        portfolio.close();
+        portfolio = undefined;
+      }
+      if (route === 'portfolio') {
+        portfolio ??= createPortfolioView(ctx);
+        if (root.firstElementChild !== portfolio.element)
+          root.replaceChildren(portfolio.element);
+        portfolio.refresh();
+      } else if (route === 'entdecken') {
         discovery ??= createDiscoverView(ctx);
         if (root.firstElementChild !== discovery.element)
           root.replaceChildren(discovery.element);
@@ -191,7 +202,7 @@ export async function startWorkspace(): Promise<void> {
                 ? renderWishes(ctx)
                 : renderCollection(ctx),
         );
-      document.title = `${route === 'entdecken' ? 'Karten entdecken' : route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
+      document.title = `${route === 'portfolio' ? 'Dein Portfolio' : route === 'entdecken' ? 'Karten entdecken' : route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
       demo.hidden = ctx.state.mode !== 'demo';
       undoButton.hidden = !history.length;
       undoButton.disabled = !history.length;
@@ -481,7 +492,13 @@ export async function startWorkspace(): Promise<void> {
       const remembered = localStorage.getItem('e-binder-route');
       if (
         remembered &&
-        ['sammlung', 'binder', 'wunschliste', 'entdecken'].includes(remembered)
+        [
+          'sammlung',
+          'binder',
+          'portfolio',
+          'wunschliste',
+          'entdecken',
+        ].includes(remembered)
       )
         route = remembered;
     } catch {

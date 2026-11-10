@@ -86,7 +86,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   const navigation = page.getByRole('navigation', { name: 'App-Navigation' });
   test.skip(!(await navigation.isVisible()), 'Mobile navigation only.');
 
-  await expect(navigation.locator(':scope > *')).toHaveCount(5);
+  await expect(navigation.locator(':scope > *')).toHaveCount(6);
   await expect(navigation.locator(':scope > *').nth(0)).toContainText(
     'Sammlung',
   );
@@ -94,7 +94,10 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     'id',
     'workspace-mobile-add',
   );
-  await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
+  await expect(navigation.locator(':scope > *').nth(4)).toContainText(
+    'Portfolio',
+  );
+  await expect(navigation.locator(':scope > *').nth(5)).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte hinzufügen' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -103,6 +106,10 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   await expect(
     navigation.getByRole('link', { name: 'Meine Binder' }),
   ).toHaveAttribute('aria-current', 'page');
+  await navigation.getByRole('link', { name: 'Portfolio' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
+  ).toBeVisible();
   await navigation.getByRole('button', { name: 'Profil und Konto' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');

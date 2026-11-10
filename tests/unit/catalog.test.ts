@@ -580,3 +580,31 @@ it('keeps an exact market listing available when the EUR observation is undated 
     expect(result.card.sourceId).toBe(id);
   }
 });
+
+it('retains separate normal and holo Cardmarket EUR trends for portfolio quoting', async () => {
+  const { catalogEntry } = await import('../../src/data/card-catalog');
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          ...card,
+          id: 'sv01-209',
+          localId: '209',
+          pricing: {
+            cardmarket: {
+              unit: 'EUR',
+              updated: '2026-11-09T12:00:00Z',
+              trend: 8.5,
+              'trend-holo': 23.75,
+            },
+          },
+        }),
+      ),
+    ),
+  );
+  const result = await catalogEntry('sv01-209', 'de', undefined, false);
+  expect(result.price?.amount).toBe(8.5);
+  expect(result.holoPrice?.amount).toBe(23.75);
+  expect(result.price?.updated).toBe('2026-11-09T12:00:00Z');
+});
