@@ -11,6 +11,7 @@ export interface AddOptions {
   card?: PersonalCard;
   captureId?: string;
   photos?: boolean;
+  live?: boolean;
   correctHoldingId?: string;
 }
 export interface WorkspaceContext {
