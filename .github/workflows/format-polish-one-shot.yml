@@ -1,0 +1,27 @@
+name: Format polished collector experience
+on:
+  push:
+    branches: [feat/liquid-collector-beta-20261110]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Apply Prettier and remove one-off workflow
+        run: |
+          npx prettier --write src/ui/collector-polish.ts src/ui/workspace.ts src/ui/page-scan.ts src/ui/portfolio-view.ts src/ui/live-page-scan.ts src/ui/live-scan.ts src/ui/add-cards.ts src/ui/card-market.ts src/data/card-catalog.ts src/domain/portfolio.ts src/workspace.css src/main.ts tests/unit/portfolio-scenarios.test.ts tests/e2e/liquid-collector.spec.ts
+          git rm .github/workflows/format-polish-one-shot.yml
+          git add src tests
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Format collector polish with pinned open source libraries"
+          git push origin HEAD:feat/liquid-collector-beta-20261110
+      - name: Typecheck formatted collector
+        run: npm run typecheck
