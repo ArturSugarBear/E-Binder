@@ -45,6 +45,13 @@ it('never drops a colourful, bright or highlighted card as empty', () => {
   ).toBe(false);
 });
 
+it('does not hide a dark, visually detailed card', () => {
+  const darkTextured = image(64, 64, (x) =>
+    x % 3 === 0 ? [105, 107, 108] : [25, 26, 27],
+  );
+  expect(looksLikeEmptyPocket(darkTextured, 64, 64)).toBe(false);
+});
+
 it('is conservative when input geometry is invalid', () => {
   expect(looksLikeEmptyPocket(new Uint8ClampedArray(0), 64, 64)).toBe(false);
 });
