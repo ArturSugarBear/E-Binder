@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title desc">
+<title id="title">E-Binder Folio House — folded paper archive</title>
+<desc id="desc">An archival green folder with an ivory page and folded corner.</desc>
+<path d="M12 12h38l18 18v39H12z" fill="#DCEBAD"/>
+<path d="M50 12v18h18" fill="#F0ABAF"/>
+<path d="M20 23h24v32H20z" fill="#17362F"/>
+<path d="M29 30h15v25H29z" fill="#F7F5EC"/>
+<path d="M21 63h37" stroke="#17362F" stroke-width="4" stroke-linecap="square"/>
+</svg>
