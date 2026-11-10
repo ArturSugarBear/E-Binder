@@ -123,31 +123,48 @@ export function openAddCards(
     'secondary',
     'camera',
   );
-  sheet.body.append(
-    message(
-      'Suche die genaue Ausgabe oder erfasse pro Foto eine Karte. Fotografiere die Karte aufrecht und möglichst bildfüllend, mit lesbarem Namen und Sammlernummer. Besitz entsteht erst nach deiner Bestätigung.',
-    ),
+  const scanBinder = action(
+    'Ganze Binderseite scannen',
+    () => {
+      sheet.close();
+      ctx.openPageScan();
+    },
+    'primary',
+    'binder',
+  );
+  const captureStart = el(
+    'section',
+    'w-capture-start',
+    el('h3', '', 'Wie möchtest du Karten erfassen?'),
     el(
       'div',
-      'w-action-row',
+      'w-capture-start-grid',
+      scanBinder,
       takePhoto,
       upload,
-      action('Karte manuell eintragen', () => manualForm(), 'text'),
-      action(
-        'Ganze Binderseite scannen',
-        () => {
-          sheet.close();
-          ctx.openPageScan();
-        },
-        'secondary',
-        'binder',
-      ),
+    ),
+    action('Karte manuell eintragen', () => manualForm(), 'text'),
+  );
+  captureStart.hidden = Boolean(options.correctHoldingId);
+  const advancedCatalog = el(
+    'details',
+    'w-add-catalog-advanced',
+    el('summary', '', 'Erweiterte Suche: Set, Illustrator und Seltenheit'),
+    browser.element,
+  );
+  advancedCatalog.open = Boolean(options.browse || options.setId || options.artist);
+  sheet.body.append(
+    captureStart,
+    el(
+      'p',
+      'w-muted w-add-capture-intro',
+      'Ein Foto für eine Einzelkarte oder ein Foto für eine ganze Binderseite. Keine Beispielkarten werden automatisch als deine Karten vorgeschlagen.',
     ),
     gallery,
     camera,
     queue,
     searchLine,
-    browser.element,
+    advancedCatalog,
     notices,
     photoArea,
     results,
@@ -792,7 +809,7 @@ export function openAddCards(
   async function onlineSearch(reset = true): Promise<void> {
     const value = search.value.trim();
     if (value.length < 2 && !browser.hasFilters()) {
-      renderChoices(ctx.catalog.slice(0, 12));
+      results.replaceChildren();
       browser.pager.replaceChildren();
       return;
     }
@@ -808,11 +825,16 @@ export function openAddCards(
   search.addEventListener('input', () => {
     interrupt();
     clearTimeout(debounce);
-    renderChoices(
-      ctx.catalog
-        .filter((card) => matchesCard(card, search.value))
-        .slice(0, 18),
-    );
+    if (search.value.trim().length >= 2) {
+      renderChoices(
+        ctx.catalog
+          .filter((card) => matchesCard(card, search.value))
+          .slice(0, 18),
+      );
+    } else {
+      results.replaceChildren();
+      browser.pager.replaceChildren();
+    }
     if (search.value.trim().length >= 2 || browser.hasFilters())
       debounce = setTimeout(() => {
         void onlineSearch();
@@ -826,7 +848,7 @@ export function openAddCards(
   showCapture();
   if (selected) renderConfirmation();
   else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
-  else renderChoices(ctx.catalog.slice(0, 12));
+  else results.replaceChildren();
   if (options.photos) gallery.click();
   else search.focus();
 }
