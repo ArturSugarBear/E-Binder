@@ -77,7 +77,8 @@ export function suggestPocketGridCorners(
     const weights = [1, 2, 3, 4, 3, 2, 1] as const;
     for (let p = 3; p < size - 3; p++)
       for (let k = -3; k <= 3; k++)
-        filtered[p] += (profile[p + k]! * weights[k + 3]!) / 16;
+        filtered[p] =
+          (filtered[p] ?? 0) + (profile[p + k]! * weights[k + 3]!) / 16;
 
     const peak = (band: [number, number]) => {
       const start = Math.max(3, Math.round(band[0] * (size - 1)));
