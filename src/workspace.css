@@ -2281,3 +2281,61 @@ textarea.w-input,
     transition: none !important;
   }
 }
+
+/* Card capture starts with the physical action, never a seeded demonstration list. */
+.w-capture-start {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--w-border);
+  border-radius: 16px;
+  background: var(--raised);
+}
+.w-capture-start h3 {
+  font-size: clamp(17px, 3vw, 20px);
+  line-height: 1.25;
+}
+.w-capture-start-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.w-capture-start-grid > .w-button {
+  min-height: 72px;
+  padding: 12px;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+}
+.w-add-capture-intro {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.w-add-catalog-advanced {
+  min-width: 0;
+  border: 1px solid var(--w-border);
+  border-radius: 12px;
+}
+.w-add-catalog-advanced > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.w-add-catalog-advanced > .w-catalog-browser {
+  padding: 12px;
+}
+@media (max-width: 640px) {
+  .w-capture-start {
+    padding: 12px;
+  }
+  .w-capture-start-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .w-capture-start-grid > .w-button {
+    min-height: 54px;
+  }
+}
