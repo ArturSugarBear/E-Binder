@@ -1,0 +1,188 @@
+{
+  "captured_by": "E-Binder user; screen recordings of third-party apps",
+  "capture_date": "2026-11-10",
+  "recordings": [
+    {
+      "app": "collectr",
+      "file": "collectr/01-intro.mp4",
+      "description": "Intro and first-run navigation",
+      "duration_sec": 16.67,
+      "frame_samples_sec": [
+        1.17,
+        4.0,
+        7.0,
+        10.0,
+        13.0,
+        15.67
+      ],
+      "contact_sheet": "collectr/01-intro-contact.jpg"
+    },
+    {
+      "app": "collectr",
+      "file": "collectr/02-search-catalog.mp4",
+      "description": "Search, category and set discovery",
+      "duration_sec": 50.17,
+      "frame_samples_sec": [
+        3.51,
+        12.04,
+        21.07,
+        30.1,
+        39.13,
+        47.16
+      ],
+      "contact_sheet": "collectr/02-search-catalog-contact.jpg"
+    },
+    {
+      "app": "collectr",
+      "file": "collectr/03-scanning-and-portfolio.mp4",
+      "description": "Scan, variants, portfolio and grid navigation",
+      "duration_sec": 119.79,
+      "frame_samples_sec": [
+        8.39,
+        28.75,
+        50.31,
+        71.88,
+        93.44,
+        112.6
+      ],
+      "contact_sheet": "collectr/03-scanning-and-portfolio-contact.jpg"
+    },
+    {
+      "app": "hologem",
+      "file": "hologem/01-onboarding.mp4",
+      "description": "First-run onboarding",
+      "duration_sec": 32.08,
+      "frame_samples_sec": [
+        2.25,
+        7.7,
+        13.47,
+        19.25,
+        25.02,
+        30.16
+      ],
+      "contact_sheet": "hologem/01-onboarding-contact.jpg"
+    },
+    {
+      "app": "hologem",
+      "file": "hologem/02-scan-experience.mp4",
+      "description": "Camera and scan feedback",
+      "duration_sec": 46.58,
+      "frame_samples_sec": [
+        3.26,
+        11.18,
+        19.56,
+        27.95,
+        36.33,
+        43.79
+      ],
+      "contact_sheet": "hologem/02-scan-experience-contact.jpg"
+    },
+    {
+      "app": "hologem",
+      "file": "hologem/03-vault-and-home.mp4",
+      "description": "Home, portfolio, vault and set progress",
+      "duration_sec": 61.75,
+      "frame_samples_sec": [
+        4.32,
+        14.82,
+        25.93,
+        37.05,
+        48.16,
+        58.04
+      ],
+      "contact_sheet": "hologem/03-vault-and-home-contact.jpg"
+    }
+  ],
+  "assets": [
+    {
+      "path": "collectr/01-home-empty.png",
+      "sha256": "a0886862084128c6e73142eddcfe53ce802374b04691aabf6108f0b0b528f392",
+      "bytes": 174350
+    },
+    {
+      "path": "collectr/01-intro-contact.jpg",
+      "sha256": "b13e1caef9d16de5f62d70b04b69e68f0bdfaea0fe6e8138cc6b6e2270ae6d4e",
+      "bytes": 91931
+    },
+    {
+      "path": "collectr/01-intro.mp4",
+      "sha256": "31469452b9db9941097cb09ce3027c26a3f134c4189ce680c8244da3f153ca0b",
+      "bytes": 640998
+    },
+    {
+      "path": "collectr/02-discover-sets.jpeg",
+      "sha256": "bd5e35ef6f0fea582002e925ab599f081068a3c2b3686e9e35830a5c6a4a1bc9",
+      "bytes": 281604
+    },
+    {
+      "path": "collectr/02-search-catalog-contact.jpg",
+      "sha256": "23a9335a745dea5acabe109a0a08d4b3a91305b07640e1681cfc84a0fb674acd",
+      "bytes": 123575
+    },
+    {
+      "path": "collectr/02-search-catalog.mp4",
+      "sha256": "18e5852c7ef7128ed17b5537d33ed0ecf0b74461cb76de10c37a36d9e40b0382",
+      "bytes": 2610855
+    },
+    {
+      "path": "collectr/03-collection-grid.jpeg",
+      "sha256": "d57b75bbed5d786b1d5e824787989967f67eeffca6dcd2ca8e109ed9c923f949",
+      "bytes": 251398
+    },
+    {
+      "path": "collectr/03-scanning-and-portfolio-contact.jpg",
+      "sha256": "6b9ed7c7b1d5b3a603e095cdecdbfc6e3db7dfe09389249ccccab4902eca0e49",
+      "bytes": 121073
+    },
+    {
+      "path": "collectr/03-scanning-and-portfolio.mp4",
+      "sha256": "5d5bf010a5b4e930ce211267b65dcdcbea33f8d271e856213b44696d5f057217",
+      "bytes": 7346910
+    },
+    {
+      "path": "hologem/01-onboarding-contact.jpg",
+      "sha256": "aef7d100a51a0ceb6a45cfc19c8f851bae723900b849521192575f963de5e539",
+      "bytes": 79624
+    },
+    {
+      "path": "hologem/01-onboarding.jpeg",
+      "sha256": "4c91c4a405df61bc5e053d1cc772510d4cfeaa369f8ed4e03eae997cf6502611",
+      "bytes": 153756
+    },
+    {
+      "path": "hologem/01-onboarding.mp4",
+      "sha256": "f0c8c41797c6f0f19df3eab04ea44c6814fcb21c5a0ae3cdc1d7ce90fd351da5",
+      "bytes": 467594
+    },
+    {
+      "path": "hologem/02-portfolio-chart.png",
+      "sha256": "cef7eaac08365287382c433cd124b815d83165435b2464d4ecc417f1b2c165be",
+      "bytes": 594011
+    },
+    {
+      "path": "hologem/02-scan-experience-contact.jpg",
+      "sha256": "e15043539aae4c37271052bda4f15c56517b29a67a80a2625b42049ad66e0e45",
+      "bytes": 82093
+    },
+    {
+      "path": "hologem/02-scan-experience.mp4",
+      "sha256": "d1b7521d1d7ad2bd29fbfee13b014c04fe5efec09e0e060544664e31267fe095",
+      "bytes": 1283117
+    },
+    {
+      "path": "hologem/03-home-progress.png",
+      "sha256": "4518b13afb0ec390bc373895c4738d387a262d056fb41f726def203858848db1",
+      "bytes": 773923
+    },
+    {
+      "path": "hologem/03-vault-and-home-contact.jpg",
+      "sha256": "4199658b503667a7023488e55975383d6667a16872c7c743ffb6b85984225975",
+      "bytes": 112376
+    },
+    {
+      "path": "hologem/03-vault-and-home.mp4",
+      "sha256": "e7de02794e0af0e3912cee78808681648952e273d07c89d513edefeb2ad7dd66",
+      "bytes": 2124212
+    }
+  ]
+}

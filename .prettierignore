@@ -8,3 +8,6 @@ package-lock.json
 LICENSE
 
 public/E-Binder_Brand-Lab_v2.html
+
+# Preserve the owner-supplied provenance manifest byte for byte.
+docs/benchmarks/competitors/2026-11-10/media-manifest.json

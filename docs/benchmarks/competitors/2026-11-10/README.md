@@ -4,11 +4,11 @@
 
 ## Reference library
 
-The original handoff describes a companion ZIP named `E-Binder_Competitive_Benchmark_Collectr_HoloGem_2026-11-10.zip`, containing **six complete compressed MP4 recordings, six original screenshots, six 6-frame video contact sheets, a SHA-256 media manifest, and an import/verification script**. It reports about 16.5 MiB of media, 24 fps H.264 video, full captured sequences and no audio. These properties and the reported prior hash verification have **not been independently verified in this checkout**: neither the archive nor its media manifest is available in the current session.
+Imported from the owner-provided Google Drive ZIP `E-Binder_Competitive_Benchmark_Collectr_HoloGem_2026-11-10.zip` (17,015,184 bytes, SHA-256 `804206601a3ba922b482d03bc47f40d95361c3ad4bea7a955e593823e04a9ee6`). This directory contains **six MP4 recordings, six original screenshots, six 6-frame video contact sheets and the original SHA-256 media manifest**. The 18 assets total 17,313,400 bytes. All six imported videos are H.264, 512×1106, 24 fps, without audio (verified with `ffprobe`). Their full imported durations were reviewed through timestamped frame samples; the larger pre-compression originals were not available for comparison.
 
-**Note:** The current GitHub connector only writes UTF-8 files. This PR contains the analysis/reference instructions; the actual binary media must be imported from the companion ZIP into this directory. Never claim to have viewed media based solely on the filename or this note.
+**Verification:** `node scripts/verify-competitor-media.mjs` succeeds with **18/18 benchmark media verified**. The import was extracted at repository root. The ZIP also contained older copies of this README and the verifier; the reviewed branch versions were retained and updated rather than reverting their integrity checks.
 
-**Current verification:** `node scripts/verify-competitor-media.mjs` exits with code 1 because `media-manifest.json` is absent. No media has been reviewed in this checkout. The timecodes below are handoff pointers, not fresh observations. See [integration status](INTEGRATION.md) for the inspected PR boundaries and pending checks.
+Read the [complete analysis and evidence inventory](ANALYSIS.md), then the [integration status](INTEGRATION.md). These distinguish observed competitor behavior, transferred principles, changes implemented in #39 and work owned by the still-open #37/#38.
 
 | App      | Recording in companion ZIP               | Examine                                                                                                    |
 | -------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -44,4 +44,4 @@ git add docs/benchmarks/competitors/2026-11-10 scripts/verify-competitor-media.m
 git commit -m "Add owner-captured Collectr and HoloGem reference media"
 ```
 
-Do not put the reference recordings into `public/` or bundle them into E-Binder's PWA. The E-Binder GitHub repo is public: review rights before making third-party screen captures publicly available. Until these files are imported, **full competitive-video review is blocked**, despite the written requirements being present.
+The media are now imported; the command above documents the original bundle layout. Do not overwrite a newer verifier or analysis with older bundled text files. Keep the reference recordings outside `public/`, application imports and the PWA precache. #39 remains a reviewable PR; no automatic merge is implied by media verification.
