@@ -103,31 +103,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: new RegExp(basePattern + 'assets/vision/manifest\\.json
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'e-binder-on-demand-ocr',
-              cacheableResponse: { statuses: [200] },
-              expiration: {
-                maxEntries: 2,
-                maxAgeSeconds: 60 * 24 * 60 * 60,
-                purgeOnQuotaError: true,
-              },
-            },
-          },
-        ],
-      },
-    }),
-  ],
-  build: {
-    target: 'es2022',
-    sourcemap: true,
-    rollupOptions: {
-      input: { main: resolve('index.html'), archive: resolve('archive.html') },
-    },
-  },
-});
-),
+            urlPattern: new RegExp(basePattern + 'assets/vision/manifest\\.json$'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'e-binder-visual-manifest',
@@ -143,31 +119,7 @@ export default defineConfig({
           {
             urlPattern: new RegExp(
               basePattern +
-                'assets/vision/(?:visual-model-[A-Za-z0-9_.-]+\\.onnx|index-[A-Za-z0-9_.-]+\\.i8|references-[A-Za-z0-9_.-]+\\.json)
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'e-binder-on-demand-ocr',
-              cacheableResponse: { statuses: [200] },
-              expiration: {
-                maxEntries: 2,
-                maxAgeSeconds: 60 * 24 * 60 * 60,
-                purgeOnQuotaError: true,
-              },
-            },
-          },
-        ],
-      },
-    }),
-  ],
-  build: {
-    target: 'es2022',
-    sourcemap: true,
-    rollupOptions: {
-      input: { main: resolve('index.html'), archive: resolve('archive.html') },
-    },
-  },
-});
-,
+                'assets/vision/(?:visual-model-[A-Za-z0-9_.-]+\\.onnx|index-[A-Za-z0-9_.-]+\\.i8|references-[A-Za-z0-9_.-]+\\.json)$',
             ),
             handler: 'CacheFirst',
             options: {
@@ -183,31 +135,7 @@ export default defineConfig({
           {
             urlPattern: new RegExp(
               basePattern +
-                'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt)
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'e-binder-on-demand-ocr',
-              cacheableResponse: { statuses: [200] },
-              expiration: {
-                maxEntries: 2,
-                maxAgeSeconds: 60 * 24 * 60 * 60,
-                purgeOnQuotaError: true,
-              },
-            },
-          },
-        ],
-      },
-    }),
-  ],
-  build: {
-    target: 'es2022',
-    sourcemap: true,
-    rollupOptions: {
-      input: { main: resolve('index.html'), archive: resolve('archive.html') },
-    },
-  },
-});
-,
+                'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt)$',
             ),
             handler: 'CacheFirst',
             options: {
