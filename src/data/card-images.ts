@@ -1,6 +1,7 @@
 import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
 import type { PersonalStore } from './personal-store';
 import { catalogEntry, fillCatalogImages, imageLanguage } from './card-catalog';
+import { verifiedLocalArt } from './verified-images';
 
 export class CardImages {
   private palettes = new Map<string, Promise<Palette | undefined>>();
@@ -14,10 +15,15 @@ export class CardImages {
   private async remote(card: PersonalCard): Promise<string> {
     if (!card.image && card.source === 'tcgdex' && card.sourceId) {
       try {
-        return (await catalogEntry(card.sourceId, card.language)).card.image;
+        const apiImage = (await catalogEntry(card.sourceId, card.language)).card
+          .image;
+        if (apiImage) return apiImage;
       } catch {
-        return '';
+        // Known, licensed-in-project local artwork still works offline.
       }
+      const local = verifiedLocalArt(card);
+      if (local) return `${import.meta.env.BASE_URL}${local}`;
+      return '';
     }
     return card.image.startsWith('assets/')
       ? `${import.meta.env.BASE_URL}${card.image}`
@@ -44,6 +50,15 @@ export class CardImages {
       frame.dataset.imageState = 'unavailable';
     };
     let retried = false;
+    let triedLocal = false;
+    const localFallback = () => {
+      const local = verifiedLocalArt({ ...card, image: '' });
+      if (local && !triedLocal) {
+        triedLocal = true;
+        image.src = `${import.meta.env.BASE_URL}${local}`;
+        language.hidden = true;
+      } else missing();
+    };
     const image = document.createElement('img');
     image.alt = `${card.name}, ${card.setName} ${card.number}`;
     image.width = 63;
@@ -61,7 +76,7 @@ export class CardImages {
         card.source !== 'tcgdex' ||
         imageLanguage(image.src) === 'en'
       ) {
-        missing();
+        localFallback();
         return;
       }
       retried = true;
@@ -76,13 +91,13 @@ export class CardImages {
         .then((cards) => {
           const url = cards[0]?.image;
           if (!url) {
-            missing();
+            localFallback();
             return;
           }
           image.src = `${url}/high.webp`;
           labelLanguage(image.src);
         })
-        .catch(missing);
+        .catch(localFallback);
     });
     frame.append(fallback, image, language);
     frame.dataset.imageState = 'loading';
