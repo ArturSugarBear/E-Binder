@@ -19,11 +19,11 @@ jobs:
       - run: npm ci
       - name: Format only scanner PR files
         run: |
-          npx prettier --write src/domain/page-outline.ts src/ui/photo-crop.ts tests/unit/page-outline.test.ts tests/e2e/binder-page-scan.spec.ts
+          npx prettier --write src/domain/page-outline.ts src/domain/personal.ts src/ui/photo-crop.ts src/ui/page-scan.ts src/workspace.css src/data/auto-page-align.ts src/data/pocket-occupancy.ts tests/unit/page-outline.test.ts tests/unit/pocket-occupancy.test.ts tests/unit/binder-page-scan.test.ts tests/e2e/binder-page-scan.spec.ts
           if ! git diff --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add src/domain/page-outline.ts src/ui/photo-crop.ts tests/unit/page-outline.test.ts tests/e2e/binder-page-scan.spec.ts
+            git add src/domain/page-outline.ts src/domain/personal.ts src/ui/photo-crop.ts src/ui/page-scan.ts src/workspace.css src/data/auto-page-align.ts src/data/pocket-occupancy.ts tests/unit/page-outline.test.ts tests/unit/pocket-occupancy.test.ts tests/unit/binder-page-scan.test.ts tests/e2e/binder-page-scan.spec.ts
             git commit -m "Format new scanner geometry code"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
