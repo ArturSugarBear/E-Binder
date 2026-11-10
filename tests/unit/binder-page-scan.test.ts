@@ -109,6 +109,22 @@ describe('atomic binder page import', () => {
     ).toThrow(/bereits/);
     expect(next.binders[0]!.pages).toHaveLength(2);
   });
+  it('keeps duplicates and unresolved printings without inventing holo status', () => {
+    const card = { ...choice(0), finish: 'unverified' as const };
+    const next = importScannedPage(emptyState(), {
+      fingerprint: fingerprint('d'),
+      binderName: 'Mixed printings',
+      slots: [card, card, null, null, null, null, null, null, null],
+    });
+    expect(next.holdings).toHaveLength(1);
+    expect(next.holdings[0]!.finish).toBe('unverified');
+    expect(next.holdings[0]!.quantity).toBe(2);
+    expect(next.binders[0]!.pages[0]!.slots[2]).toBeNull();
+    const assigned = next.binders[0]!.pages[0]!.slots.slice(0, 2);
+    expect(assigned.map((slot) => (slot?.kind === 'owned' ? slot.copy : 0))).toEqual([
+      1, 2,
+    ]);
+  });
   it('rejects all-empty pages and unknown binders without writes', () => {
     const state = emptyState();
     expect(() =>
