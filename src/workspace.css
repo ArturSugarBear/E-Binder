@@ -888,6 +888,10 @@ button.w-pocket:hover {
   padding: 10px;
 }
 .w-dialog {
+  /* Native dialog is in the top layer; center it explicitly on desktop. */
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(610px, calc(100% - 32px));
   max-width: 100%;
   max-height: calc(100dvh - 32px);

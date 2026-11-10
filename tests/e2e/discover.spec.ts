@@ -294,6 +294,62 @@ test('catalogue failures can be retried without losing the chosen set or creatin
   });
 });
 
+test('Discover card opens centered with a hero-sized card, including on narrow iPhones', async ({
+  page,
+}) => {
+  await catalogue(page);
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await page.goto('./#entdecken?setId=sv10');
+  const card = page.locator('.w-search-results button').first();
+  await expect(card).toBeVisible();
+  await card.click();
+  const dialog = page.getByRole('dialog', { name: 'Karte 1' });
+  const artwork = dialog.locator('.w-discover-stage .card-art');
+  await expect(dialog).toBeVisible();
+  await expect(artwork).toBeVisible();
+  await expect(dialog.locator('.w-discover-info')).toContainText(
+    'Ewige Rivalen',
+  );
+  await expect(
+    dialog.getByRole('region', { name: 'Preis und Bezugsquelle' }),
+  ).toBeVisible();
+
+  const desktop = await dialog.boundingBox();
+  expect(desktop).not.toBeNull();
+  expect(Math.abs(desktop!.x + desktop!.width / 2 - 640)).toBeLessThanOrEqual(
+    3,
+  );
+  expect(Math.abs(desktop!.y + desktop!.height / 2 - 410)).toBeLessThanOrEqual(
+    3,
+  );
+  expect((await artwork.boundingBox())!.width).toBeGreaterThan(200);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileArt = await artwork.boundingBox();
+  expect(mobileArt).not.toBeNull();
+  expect(
+    Math.abs(mobileArt!.x + mobileArt!.width / 2 - 195),
+  ).toBeLessThanOrEqual(3);
+  expect(mobileArt!.width).toBeGreaterThan(165);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(391);
+  const isBottomSheet = await page.evaluate(
+    () => matchMedia('(max-width: 720px) and (pointer: coarse)').matches,
+  );
+  if (isBottomSheet) {
+    const mobileSheet = await dialog.boundingBox();
+    expect(mobileSheet).not.toBeNull();
+    expect(
+      Math.abs(mobileSheet!.y + mobileSheet!.height - 844),
+    ).toBeLessThanOrEqual(3);
+  }
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(card).toBeFocused();
+});
+
 test('card details expose a dated EUR trend and an exact external listing without creating ownership', async ({
   page,
 }) => {

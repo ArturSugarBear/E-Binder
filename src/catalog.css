@@ -139,14 +139,66 @@
   max-height: none;
   overflow: visible;
 }
+/* Match the demo binder's card-first detail sheet, not a tiny two-column
+   catalogue form. The artwork remains the clear visual centerpiece. */
 .w-discover-card {
   display: grid;
-  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: minmax(0, 275px) minmax(0, 1fr);
+  gap: 30px;
+  align-items: start;
+  min-width: 0;
 }
-.w-discover-card .card-art {
+.w-discover-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  touch-action: pan-y;
+}
+.w-discover-stage > .card-art {
+  display: block;
   width: 100%;
+  max-width: 275px;
+  aspect-ratio: 63 / 88;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 18px 38px -18px rgb(0 0 0 / 0.7);
+}
+.w-discover-info {
+  display: grid;
+  min-width: 0;
+  gap: 11px;
+  align-content: start;
+}
+.w-discover-info > .w-discover-overline {
+  color: var(--accent);
+  font: 600 11px/1.5 var(--mono);
+  letter-spacing: 0.1em;
+}
+.w-card-detail-dialog .w-discover-info h3 {
+  font-size: clamp(27px, 3vw, 38px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+.w-discover-info > .w-discover-set-name {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+.w-discover-info > .w-discover-collector {
+  justify-self: start;
+  padding: 4px 9px;
+  color: var(--ink);
+  background: var(--raised);
+  border: 1px solid var(--w-border);
+  border-radius: 6px;
+  font: 500 12px/1.6 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.w-discover-info > .w-muted {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.w-discover-info .w-card-market {
+  margin-top: 13px;
 }
 .w-catalog-owned {
   color: var(--accent) !important;
@@ -158,10 +210,6 @@
   }
   .w-discover .w-search-results {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .w-discover-card {
-    grid-template-columns: minmax(0, 120px) minmax(0, 1fr);
-    gap: 14px;
   }
   .w-navigation {
     justify-content: space-between;
@@ -279,8 +327,19 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-.w-card-detail-dialog {
-  width: min(700px, calc(100% - 32px));
+.w-dialog.w-card-detail-dialog {
+  width: min(780px, calc(100vw - 32px));
+  border-radius: 20px;
+}
+.w-card-detail-dialog .w-dialog-body {
+  padding: 26px;
+  gap: 0;
+}
+.w-card-detail-dialog .w-dialog-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--paper);
+  z-index: 2;
 }
 .w-card-market {
   display: grid;
@@ -313,8 +372,25 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .w-card-detail-dialog .w-discover-card {
-    grid-template-columns: minmax(0, 135px) minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    justify-items: center;
+  }
+  .w-card-detail-dialog .w-discover-stage {
+    width: 100%;
+  }
+  .w-card-detail-dialog .w-discover-stage > .card-art {
+    width: min(66vw, 265px, calc(49dvh * 0.716));
+  }
+  .w-card-detail-dialog .w-discover-info {
+    width: 100%;
+    gap: 8px;
+  }
+  .w-card-detail-dialog .w-discover-info h3 {
+    font-size: 30px;
+  }
+  .w-card-detail-dialog .w-dialog-body {
+    padding: 18px 20px 24px;
   }
   .w-preference-form > .w-choices .w-choice-list {
     flex-direction: column;
@@ -350,4 +426,16 @@
   padding: 0;
   color: var(--ink-2);
   font-size: 12px;
+}
+
+/* The mobile presentation is a bottom sheet; desktop stays centered. */
+@media (max-width: 720px) and (pointer: coarse) {
+  .w-dialog.w-card-detail-dialog {
+    position: fixed;
+    inset: auto 0 0;
+    margin: 0;
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 12px);
+    border-radius: 24px 24px 0 0;
+  }
 }
