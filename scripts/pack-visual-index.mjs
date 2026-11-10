@@ -75,7 +75,8 @@ await mkdir(directory, { recursive: true });
 const modelName = 'visual-model.onnx';
 await copyFile(resolve(modelFile), join(directory, modelName));
 await writeFile(join(directory, 'index.i8'), packed);
-await writeFile(join(directory, 'references.json'), JSON.stringify(references));
+const referencesBytes = Buffer.from(JSON.stringify(references));
+await writeFile(join(directory, 'references.json'), referencesBytes);
 await writeFile(join(directory, 'manifest.json'), JSON.stringify({
   format: 'e-binder-visual-v1',
   modelId: parsed.modelId,
@@ -88,6 +89,7 @@ await writeFile(join(directory, 'manifest.json'), JSON.stringify({
   indexFile: 'index.i8',
   indexSha256: sha256(packed),
   referencesFile: 'references.json',
+  referencesSha256: sha256(referencesBytes),
   count: entries.length,
 }, null, 2) + '\n');
 console.log(`Prepared ${entries.length} model-bound references (${dimensions} dims, ${packed.length} packed bytes).`);
