@@ -184,28 +184,40 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   await mode(page, 'card');
   await expect(live.locator('.w-live-status')).toContainText(
-    /Scan abgeschlossen|Scan fehlgeschlagen/,
+    /Aufnahme verarbeitet|Scan fehlgeschlagen/,
     { timeout: 35_000 },
   );
   await expect(live.locator('.w-live-status')).toContainText(
-    'Scan abgeschlossen',
+    'Aufnahme verarbeitet',
+  );
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    '1 offene Aufnahme',
+  );
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    'erst nach deiner Bestätigung',
   );
   await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await mode(page, 'blank');
   await live.getByRole('button', { name: 'Nächste Karte scannen' }).click();
+  await expect(
+    live.getByRole('button', { name: 'Ergebnisse prüfen (1)', exact: true }),
+  ).toBeVisible();
   await expect(live.locator('.w-live-status')).toContainText(
     'Ecken werden gesucht',
     { timeout: 10_000 },
   );
   await mode(page, 'card2');
   await expect(live.locator('.w-live-status')).toContainText(
-    'Scan abgeschlossen',
+    'Aufnahme verarbeitet',
     {
       timeout: 35_000,
     },
   );
   await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    '2 offene Aufnahmen',
+  );
   await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
   const states = await page.evaluate(() =>
     (
