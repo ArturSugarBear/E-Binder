@@ -4,6 +4,7 @@ import {
   confirmHolding,
   createBinder,
   emptyState,
+  templateSlots,
   validateState,
   type PersonalState,
 } from '../domain/personal';
@@ -490,6 +491,37 @@ export async function startWorkspace(): Promise<void> {
     .addEventListener('click', () => {
       void ctx.switchMode('personal');
     });
+  demo.append(
+    action(
+      'Demo neu starten',
+      () => {
+        if (ctx.state.mode !== 'demo') return;
+        if (!ctx.chapters.length) {
+          ctx.notify(
+            'Die Beispielseiten sind noch nicht geladen. Versuche es nach dem Laden der Vorlagen erneut.',
+            true,
+          );
+          return;
+        }
+        if (
+          !window.confirm(
+            'Die Demokarten und Beispielseiten auf den Ausgangsstand zurücksetzen? Deine persönlichen Karten bleiben erhalten.',
+          )
+        )
+          return;
+        if (
+          ctx.commit('Demo neu gestartet', (state) => ({
+            ...demoState(ctx.chapters),
+            revision: state.revision + 1,
+          }))
+        ) {
+          ctx.filters = { query: '', kind: 'all', order: 'recent' };
+          ctx.navigate('binder');
+        }
+      },
+      'text',
+    ),
+  );
   undoButton.addEventListener('click', () => {
     const previous = history.pop();
     if (!previous) return;
@@ -546,5 +578,11 @@ function demoState(chapters: Collection): PersonalState {
   state = createBinder(state, 'Mein Beispielbinder');
   return changeState(state, (next) => {
     next.wishes = [];
+    const chapter = chapters[0];
+    const page = next.binders[0]!.pages[0]!;
+    if (chapter) {
+      page.title = chapter.title;
+      page.slots = templateSlots(next, cards.slice(0, 9));
+    }
   });
 }

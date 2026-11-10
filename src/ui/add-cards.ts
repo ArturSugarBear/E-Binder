@@ -724,6 +724,55 @@ export function openAddCards(
       'check',
     );
     submit.type = 'submit';
+    const chosenCard = (): PersonalCard => {
+      const chosen: PersonalCard = {
+        ...card,
+        language: detailsLanguage.value,
+        ...(card.source === 'manual'
+          ? {
+              key: `manual:${normalize(card.setName)}:${normalize(card.number)}:${detailsLanguage.value}`,
+            }
+          : {}),
+      };
+      delete chosen.photoId;
+      return chosen;
+    };
+    const wish = action(
+      'Auf die Wunschliste',
+      () => {
+        const chosen = chosenCard();
+        if (ctx.state.wishes.some((item) => sameCard(item.card, chosen)))
+          return;
+        if (
+          ctx.commit('Wunschkarte hinzugefügt', (state) =>
+            changeState(state, (next) => {
+              next.wishes.push({
+                id: uid(),
+                card: chosen,
+                quantity: 1,
+                priority: 'normal',
+                notes: '',
+              });
+            }),
+          )
+        ) {
+          tell('Wunschkarte gespeichert. Dein Besitz wurde nicht verändert.');
+          refreshWish();
+        }
+      },
+      'secondary',
+      'star',
+    );
+    const refreshWish = () => {
+      wish.disabled = ctx.state.wishes.some((item) =>
+        sameCard(item.card, chosenCard()),
+      );
+      wish.querySelector('span')!.textContent = wish.disabled
+        ? 'Auf deiner Wunschliste'
+        : 'Auf die Wunschliste';
+    };
+    detailsLanguage.addEventListener('change', refreshWish);
+    refreshWish();
     form.append(
       el(
         'div',
@@ -749,34 +798,7 @@ export function openAddCards(
       ),
       confirm.row,
       error,
-      el(
-        'div',
-        'w-action-row',
-        submit,
-        action(
-          'Auf die Wunschliste',
-          () => {
-            if (!ctx.state.wishes.some((wish) => sameCard(wish.card, card))) {
-              ctx.commit('Wunschkarte hinzugefügt', (state) =>
-                changeState(state, (next) => {
-                  next.wishes.push({
-                    id: uid(),
-                    card,
-                    quantity: 1,
-                    priority: 'normal',
-                    notes: '',
-                  });
-                }),
-              );
-              tell(
-                'Wunschkarte gespeichert. Dein Besitz wurde nicht verändert.',
-              );
-            }
-          },
-          'secondary',
-          'star',
-        ),
-      ),
+      el('div', 'w-action-row', submit, wish),
     );
     finish.addEventListener('change', () => {
       const existing = ctx.state.holdings.find(
@@ -803,16 +825,7 @@ export function openAddCards(
         confirm.input.focus();
         return;
       }
-      const adopted: PersonalCard = {
-        ...card,
-        language: detailsLanguage.value,
-        ...(card.source === 'manual'
-          ? {
-              key: `manual:${normalize(card.setName)}:${normalize(card.number)}:${detailsLanguage.value}`,
-            }
-          : {}),
-      };
-      delete adopted.photoId;
+      const adopted = chosenCard();
       const previous =
         original ??
         ctx.state.holdings.find(
