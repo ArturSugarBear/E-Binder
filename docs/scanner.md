@@ -6,7 +6,7 @@ Stand: 9. November 2026. Diese Seite beschreibt implementierte Grenzen und repro
 
 - In einem Binder **„Binderseite scannen“** wählen; alternativ über **+ Karte → Ganze Binderseite scannen**.
 - Ein Bild der ganzen physischen 3×3-Seite aufnehmen oder bis zu 40 Seitenfotos als Batch auswählen. Die Seiten werden einzeln ausgerichtet, erkannt und bestätigt; keine Fotos werden persistent gespeichert.
-- Die vier äußeren Seiten-Ecken anpassen (keine Buchringe). E-Binder projiziert das Bild auf 1260×1760 Pixel und erzeugt neun Ausschnitte, in Zeilenreihenfolge 1–9. Die Plastiknaht am Taschenrand wird vorsichtig abgeschnitten.
+- E-Binder schlägt die vier äußeren Seiten-Ecken bei gut sichtbaren, kontrastreichen Seitenrändern automatisch vor. Der Vorschlag ist keine verifizierte Geometrie: Kontrolliere die Ecken (ohne Buchringe), korrigiere sie bei Bedarf oder richte die Aufnahme vollständig manuell aus. E-Binder projiziert die bestätigte Auswahl auf 1260×1760 Pixel und erzeugt neun Ausschnitte in Zeilenreihenfolge 1–9. Die Plastiknaht am Taschenrand wird vorsichtig abgeschnitten.
 - Ein PaddleOCR-Modell wird je Seitensitzung einmal in einem Worker geladen. Es liest jeden Ausschnitt. TCGdex und lokale Katalogdaten liefern Vorschläge, aber **keine automatische Bestandsänderung**.
 - Jede Position als konkrete Kartenausgabe, „Fach ist leer“ oder „nicht erkannt“ prüfen. Eine Druckvariante muss aktiv gewählt werden. Ein globaler Bestätigungs-Haken ist erforderlich. Die ganze Seite wird in einem Zustands-Commit geschrieben oder bei Fehler vollständig verworfen.
 - Im selben Binder werden bereits ungebundene Exemplare zuerst verwendet. Die Fotodatei-Hashsperre blockiert identische Wiederholungen; erneute Fotos desselben Motives können ein anderes Hash haben.
@@ -56,3 +56,11 @@ Automatische Erkennung der äußeren Seitenkante (statt manueller Vierpunkt-Ausw
 ## OCR-Suche bei verschobener Sammlernummer (10. November 2026)
 
 Wenn die beiden ursprünglichen Bildausschnitte keine plausible gedruckte Sammlernummer enthalten, durchsucht der lokale OCR-Worker vier benachbarte untere Zeilen und den unteren rechten Bereich. Bei einem Treffer werden weitere teure OCR-Durchläufe übersprungen. Erst wenn das nicht reicht, werden Kontrastvarianten geprüft. Eine gefundene Nummernfraktion ist nur ein Hinweis, keine verifizierte Kartenidentität: Set, Sprache und Druckvariante müssen weiterhin explizit bestätigt werden. Die Heuristik ist durch Unit-Tests abgesichert; ihre reale Erkennungsquote ist bis zum Benchmark mit eigenen oder rechtmäßig nutzbaren Binderfotos unbekannt.
+
+## Automatischer Seitenumriss: bewusst konservativer erster Schritt
+
+Die automatische Seiteneckensuche verwendet **kein ML-Modell und kein OpenCV**. Auf einer temporären, höchstens 256 Pixel breiten/hohen Kopie wertet sie links/rechts und oben/unten gerichtete Helligkeitskanten aus. Nur vier kräftige, konsistente Außenlinien und ein gültiges, ausreichend großes Viereck ergeben einen Vorschlag. Das funktioniert besonders gut bei deutlich vom Hintergrund abgegrenzten Binderseiten.
+
+Ein dunkler Binder auf dunklem Hintergrund, unscharfe oder verdeckte Außenkanten, Buchringe, spiegelnde Folien und stark perspektivisch verzerrte Seiten können die Erkennung verhindern oder eine fehlerhafte Position vorschlagen. Bei unklaren Linien bleiben die vier manuell verschiebbaren Ausgangspunkte erhalten; bei einem Vorschlag können sie jederzeit korrigiert werden. Auch nach automatischer Ausrichtung müssen die **neun Fächer in der Vorschau geprüft werden**, bevor eine Erkennung gestartet wird.
+
+Die zugehörigen Unit-Tests prüfen synthetische, schräg begrenzte 3×3-Seiten, flache Hintergründe und fehlende Kanten. Ein Browser-Test prüft automatische Vorschläge, die Neun-Fächer-Vorschau und die manuelle Korrektur. **Keine belastbare reale Erkennungsquote** liegt vor: Dafür fehlen noch ausreichend viele eigene oder nachweislich rechtmäßig nutzbare und korrekt annotierte Binderfotos mit sehr unterschiedlicher Beleuchtung und Perspektive.
