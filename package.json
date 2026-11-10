@@ -25,7 +25,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
+    "motion": "14.12.0",
     "onnxruntime-web": "1.31.1",
+    "simple-liquid-glass": "5.7.0",
     "zod": "4.6.7"
   },
   "devDependencies": {
