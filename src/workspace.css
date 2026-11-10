@@ -3812,3 +3812,50 @@ textarea.w-input,
 .w-page-scan-pocket[data-scan-outcome='unknown'] {
   border-color: var(--w-border);
 }
+
+.w-portfolio-history {
+  display: grid;
+  gap: 14px;
+}
+.w-portfolio-periods {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: max-content;
+  max-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 999px;
+  background: var(--glass-background);
+}
+.w-portfolio-periods .w-button {
+  min-width: 64px;
+  min-height: 42px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+}
+.w-portfolio-periods .w-button[aria-pressed='true'] {
+  background: var(--raised);
+  color: var(--ink);
+}
+.w-portfolio-history-svg {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  overflow: visible;
+}
+.w-portfolio-history-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.w-portfolio-history-labels strong {
+  color: var(--ink);
+}

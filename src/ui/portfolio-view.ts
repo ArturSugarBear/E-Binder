@@ -5,7 +5,11 @@ import {
   type PortfolioQuote,
 } from '../domain/portfolio';
 import { changeState, finishLabels, type Holding } from '../domain/personal';
-import { revealPortfolioBars } from './collector-polish';
+import { revealPortfolioBars, revealHistoryStroke } from './collector-polish';
+import {
+  comparableHistory,
+  recordPortfolioObservation,
+} from '../data/portfolio-history';
 import { action, el, message } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 
@@ -45,6 +49,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
   let limit = 40;
   let connectionError = false;
   let chartRevealed = false;
+  let historyRange: 7 | 30 | 90 = 30;
 
   function openBinder(binderId: string, pageId?: string) {
     const chosen = ctx.state.binders.find((item) => item.id === binderId);
@@ -134,6 +139,104 @@ export function createPortfolioView(ctx: WorkspaceContext) {
               ctx.images.artwork(row.holding.card),
             ),
           ),
+      ),
+    );
+
+    const historyPoints = comparableHistory(
+      ctx.state,
+      overview,
+      historyRange,
+    );
+    const historyChart = el(
+      'section',
+      'w-portfolio-section w-portfolio-history',
+      el(
+        'div',
+        'w-portfolio-section-head',
+        el('h2', '', 'Wertentwicklung'),
+      ),
+    );
+    const periods = el('div', 'w-portfolio-periods');
+    periods.setAttribute('role', 'group');
+    periods.setAttribute('aria-label', 'Zeitraum der Wertentwicklung');
+    for (const days of [7, 30, 90] as const) {
+      const option = action(
+        `${days} Tage`,
+        () => {
+          historyRange = days;
+          render();
+        },
+        'secondary',
+      );
+      option.setAttribute('aria-pressed', String(days === historyRange));
+      periods.append(option);
+    }
+    historyChart.append(periods);
+    if (historyPoints.length < 2) {
+      historyChart.append(
+        message(
+          historyPoints.length
+            ? 'Die erste echte EUR-Messung wurde gespeichert. Ein Verlauf erscheint nach einer weiteren vergleichbaren Messung an einem anderen Tag.'
+            : 'Noch keine vergleichbare Preisentwicklung erfasst. Nach zwei unterschiedlichen Tagen mit gleicher Sammlung und Preisabdeckung erscheint hier dein tatsächlicher Verlauf.',
+        ),
+      );
+    } else {
+      const values = historyPoints.map((point) => point.knownValue);
+      const low = Math.min(...values);
+      const high = Math.max(...values);
+      const spread = Math.max(high - low, 0.01);
+      const first = Date.parse(`${historyPoints[0]!.day}T00:00:00Z`);
+      const last = Date.parse(`${historyPoints.at(-1)!.day}T00:00:00Z`);
+      const x = (date: string) =>
+        24 +
+        (512 * (Date.parse(`${date}T00:00:00Z`) - first)) /
+          Math.max(last - first, 1);
+      const y = (value: number) => 185 - (145 * (value - low)) / spread;
+      const points = historyPoints.map(
+        (point) => `${x(point.day)},${y(point.knownValue)}`,
+      );
+      const svg = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'svg',
+      );
+      svg.setAttribute('viewBox', '0 0 560 220');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute(
+        'aria-label',
+        `Gemessener EUR-Teilwert von ${euros.format(values[0]!)} bis ${euros.format(values.at(-1)!)} an ${historyPoints.length} Tagen`,
+      );
+      svg.classList.add('w-portfolio-history-svg');
+      const line = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'path',
+      );
+      line.setAttribute('d', `M ${points.join(' L ')}`);
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', 'var(--accent)');
+      line.setAttribute('stroke-width', '3.5');
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('stroke-linejoin', 'round');
+      line.classList.add('w-portfolio-history-path');
+      svg.append(line);
+      historyChart.append(
+        svg,
+        el(
+          'div',
+          'w-portfolio-history-labels',
+          el('span', '', historyPoints[0]!.day),
+          el('strong', '', `${euros.format(low)} – ${euros.format(high)}`),
+          el('span', '', historyPoints.at(-1)!.day),
+        ),
+      );
+      queueMicrotask(() => {
+        if (!closed && line.isConnected) revealHistoryStroke(line);
+      });
+    }
+    historyChart.append(
+      el(
+        'small',
+        'w-muted',
+        'Nur echte lokale Tagesmessungen desselben Bestands mit gleicher Preisabdeckung. Fehlende Preise, neue Karten und unterschiedliche Bestände werden nicht als Gewinne oder Verluste verbunden.',
       ),
     );
 
@@ -483,6 +586,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     content.replaceChildren(
       hero,
       overviewStats,
+      historyChart,
       bySet,
       source,
       leaders,
@@ -553,6 +657,14 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       render();
     }
     loading = false;
+    if (!closed) {
+      const all = uniqueQuoteTargets(ctx.state.holdings);
+      if (all.length && all.every((target) => attempted.has(target.key)))
+        recordPortfolioObservation(
+          ctx.state,
+          summarizePortfolio(ctx.state, quotes),
+        );
+    }
     render();
   }
 

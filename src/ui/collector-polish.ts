@@ -77,3 +77,13 @@ export function revealPortfolioBars(scope: HTMLElement): void {
     );
   });
 }
+
+/** Motion, never hand-built easing, draws only measured historical points. */
+export function revealHistoryStroke(path: SVGPathElement): void {
+  if (prefersCalm()) return;
+  animate(
+    path,
+    { pathLength: [0, 1] },
+    { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  );
+}
