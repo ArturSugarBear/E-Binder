@@ -262,11 +262,11 @@ export function openLiveScanner(
       if (!closed) {
         stopCamera();
         recordBetaEvent(
-        'scan_result',
-        'scan',
-        'camera_capture_failed',
-        'error',
-      );
+          'scan_result',
+          'scan',
+          'camera_capture_failed',
+          'error',
+        );
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
         refreshReview();
@@ -346,12 +346,7 @@ export function openLiveScanner(
     polygon.removeAttribute('points');
     status.textContent = 'Kamera wird gestartet …';
     if (!navigator.mediaDevices?.getUserMedia) {
-      recordBetaEvent(
-        'scan_result',
-        'scan',
-        'camera_unavailable',
-        'error',
-      );
+      recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
       status.textContent =
         'Der Browser bietet keine Live-Kamera. Nutze stattdessen ein Kamerafoto.';
       return;
@@ -385,12 +380,7 @@ export function openLiveScanner(
     } catch (error) {
       if (closed || generation !== cameraGeneration) return;
       stopCamera();
-      recordBetaEvent(
-        'scan_result',
-        'scan',
-        'camera_start_failed',
-        'error',
-      );
+      recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
       help.textContent =
         'Prüfe die Kameraberechtigung in Safari oder verwende die Fotoaufnahme als Rückfallmöglichkeit.';

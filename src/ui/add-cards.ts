@@ -41,6 +41,10 @@ import {
 } from './workspace-dom';
 import type { AddOptions, WorkspaceContext } from './workspace-context';
 
+function publicCardKey(card: PersonalCard | undefined): string | undefined {
+  return card?.source === 'manual' ? undefined : card?.key;
+}
+
 export function openAddCards(
   ctx: WorkspaceContext,
   options: AddOptions = {},
@@ -594,10 +598,7 @@ export function openAddCards(
         candidates.length ? 'candidates_found' : 'no_candidate',
         candidates.length ? 'ok' : 'unknown',
         {
-          candidate:
-            candidates[0]?.source === 'manual'
-              ? undefined
-              : candidates[0]?.key,
+          candidate: publicCardKey(candidates[0]),
           metric: candidates.length,
         },
       );
@@ -693,11 +694,8 @@ export function openAddCards(
           : 'manual_selected',
         'ok',
         {
-          candidate:
-            currentCapture.candidates[0]?.source === 'manual'
-              ? undefined
-              : currentCapture.candidates[0]?.key,
-          selected: card.source === 'manual' ? undefined : card.key,
+          candidate: publicCardKey(currentCapture.candidates[0]),
+          selected: publicCardKey(card),
         },
       );
     captureStart.hidden = true;
@@ -848,11 +846,8 @@ export function openAddCards(
           'Erkennung falsch melden',
           () => {
             recordBetaEvent('scan_review', 'scan', 'reported_wrong', 'error', {
-              candidate:
-                shot.candidates[0]?.source === 'manual'
-                  ? undefined
-                  : shot.candidates[0]?.key,
-              selected: card.source === 'manual' ? undefined : card.key,
+              candidate: publicCardKey(shot.candidates[0]),
+              selected: publicCardKey(card),
             });
             tell(
               'Beta-Fehlermeldung erfasst. Keine Fotos oder OCR-Texte übertragen.',
@@ -928,11 +923,8 @@ export function openAddCards(
       if (ok) {
         if (shot) {
           recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
-            candidate:
-              shot.candidates[0]?.source === 'manual'
-                ? undefined
-                : shot.candidates[0]?.key,
-            selected: adopted.source === 'manual' ? undefined : adopted.key,
+            candidate: publicCardKey(shot.candidates[0]),
+            selected: publicCardKey(adopted),
           });
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
