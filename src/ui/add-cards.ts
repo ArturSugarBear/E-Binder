@@ -1,6 +1,7 @@
 import {
   candidatesFromText,
   fetchRecognizedCards,
+  fetchNameHintCandidates,
   recognitionClues,
   matchesCard,
 } from '../data/card-catalog';
@@ -123,31 +124,44 @@ export function openAddCards(
     'secondary',
     'camera',
   );
+  const scanBinder = action(
+    'Ganze Binderseite scannen',
+    () => {
+      sheet.close();
+      ctx.openPageScan();
+    },
+    'primary',
+    'binder',
+  );
+  const captureStart = el(
+    'section',
+    'w-capture-start',
+    el('h3', '', 'Wie möchtest du Karten erfassen?'),
+    el('div', 'w-capture-start-grid', scanBinder, takePhoto, upload),
+    action('Karte manuell eintragen', () => manualForm(), 'text'),
+  );
+  captureStart.hidden = Boolean(options.correctHoldingId || options.card);
+  const advancedCatalog = el(
+    'details',
+    'w-add-catalog-advanced',
+    el('summary', '', 'Erweiterte Suche: Set, Illustrator und Seltenheit'),
+    browser.element,
+  );
+  advancedCatalog.open = Boolean(
+    options.browse || options.setId || options.artist,
+  );
   sheet.body.append(
-    message(
-      'Suche die genaue Ausgabe oder erfasse pro Foto eine Karte. Fotografiere die Karte aufrecht und möglichst bildfüllend, mit lesbarem Namen und Sammlernummer. Besitz entsteht erst nach deiner Bestätigung.',
-    ),
+    captureStart,
     el(
-      'div',
-      'w-action-row',
-      takePhoto,
-      upload,
-      action('Karte manuell eintragen', () => manualForm(), 'text'),
-      action(
-        'Ganze Binderseite scannen',
-        () => {
-          sheet.close();
-          ctx.openPageScan();
-        },
-        'secondary',
-        'binder',
-      ),
+      'p',
+      'w-muted w-add-capture-intro',
+      'Ein Foto für eine Einzelkarte oder ein Foto für eine ganze Binderseite. Keine Beispielkarten werden automatisch als deine Karten vorgeschlagen.',
     ),
     gallery,
     camera,
     queue,
     searchLine,
-    browser.element,
+    advancedCatalog,
     notices,
     photoArea,
     results,
@@ -433,6 +447,20 @@ export function openAddCards(
       }
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
+      let titleHint = '';
+      if (!online.length && navigator.onLine && text.trim()) {
+        try {
+          const found = await fetchNameHintCandidates(
+            text,
+            language.value,
+            controller.signal,
+          );
+          online = found.candidates;
+          titleHint = found.query;
+        } catch {
+          // No invented edition if an optional name lookup fails.
+        }
+      }
       const candidates = [
         ...new Map(
           [...online, ...local].map((card) => [card.key, card]),
@@ -459,8 +487,8 @@ export function openAddCards(
       }
       tell(
         candidates.length
-          ? `Erkennungsvorschläge, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Online-Abgleich war nicht erreichbar; diese Vorschläge stammen aus dem lokalen Katalog.' : ''}`
-          : 'Keine eindeutige Karte gefunden. Die Aufnahme bleibt bis zum Schließen geöffnet. Suche nach Name oder Nummer oder trage die Ausgabe manuell ein.',
+          ? `${titleHint ? `Kartenname „${titleHint}“ gelesen. ` : ''}Mögliche Ausgaben, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Nummernabgleich war nicht erreichbar.' : ''}`
+          : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
       );
       const number = recognitionClues(text)[0]?.number;
       if (number && !candidates.length) {
@@ -508,6 +536,7 @@ export function openAddCards(
     }
   }
   function choose(card: PersonalCard): void {
+    captureStart.hidden = true;
     interrupt();
     selected = card;
     details.replaceChildren();
@@ -792,7 +821,7 @@ export function openAddCards(
   async function onlineSearch(reset = true): Promise<void> {
     const value = search.value.trim();
     if (value.length < 2 && !browser.hasFilters()) {
-      renderChoices(ctx.catalog.slice(0, 12));
+      results.replaceChildren();
       browser.pager.replaceChildren();
       return;
     }
@@ -808,11 +837,16 @@ export function openAddCards(
   search.addEventListener('input', () => {
     interrupt();
     clearTimeout(debounce);
-    renderChoices(
-      ctx.catalog
-        .filter((card) => matchesCard(card, search.value))
-        .slice(0, 18),
-    );
+    if (search.value.trim().length >= 2) {
+      renderChoices(
+        ctx.catalog
+          .filter((card) => matchesCard(card, search.value))
+          .slice(0, 18),
+      );
+    } else {
+      results.replaceChildren();
+      browser.pager.replaceChildren();
+    }
     if (search.value.trim().length >= 2 || browser.hasFilters())
       debounce = setTimeout(() => {
         void onlineSearch();
@@ -826,7 +860,8 @@ export function openAddCards(
   showCapture();
   if (selected) renderConfirmation();
   else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
-  else renderChoices(ctx.catalog.slice(0, 12));
+  else results.replaceChildren();
   if (options.photos) gallery.click();
-  else search.focus();
+  else if (options.browse || options.setId || options.artist) search.focus();
+  else if (!options.card) scanBinder.focus({ preventScroll: true });
 }
