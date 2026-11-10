@@ -644,8 +644,7 @@ export function openPageScanner(
           if (
             navigator.onLine &&
             text.trim() &&
-            !online.length &&
-            !local.length
+            !online.length
           ) {
             try {
               const hint = await fetchNameHintCandidates(
