@@ -1,9 +1,10 @@
 import { suggestPageCorners } from '../domain/page-outline';
+import { suggestPocketGridCorners } from '../domain/page-pocket-grid';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 
 export type AutomaticPageAlignment = {
   blob: Blob;
-  method: 'detected' | 'full-photo';
+  method: 'detected' | 'grid' | 'full-photo';
 };
 
 /**
@@ -44,11 +45,8 @@ export async function autoAlignPage(
     if (!thumb) throw new Error('Fotoverarbeitung ist nicht verfügbar.');
     thumb.drawImage(source, 0, 0, small.width, small.height);
 
-    const proposed = suggestPageCorners(
-      thumb.getImageData(0, 0, small.width, small.height).data,
-      small.width,
-      small.height,
-    );
+    const pixels = thumb.getImageData(0, 0, small.width, small.height).data;
+    const proposed = suggestPageCorners(pixels, small.width, small.height);
     // A partly occupied page still occupies the whole 3x3 sheet. Never crop
     // to only the visible cards or silently discard empty pockets.
     const wideEnough =
@@ -57,9 +55,12 @@ export async function autoAlignPage(
       proposed[2].x - proposed[3].x > 0.72 &&
       proposed[3].y - proposed[0].y > 0.68 &&
       proposed[2].y - proposed[1].y > 0.68;
+    const gridCorners = wideEnough
+      ? null
+      : suggestPocketGridCorners(pixels, small.width, small.height);
     const corners: Quad = wideEnough
       ? proposed
-      : [
+      : gridCorners ?? [
           { x: 0, y: 0 },
           { x: 1, y: 0 },
           { x: 1, y: 1 },
@@ -127,7 +128,14 @@ export async function autoAlignPage(
         0.94,
       ),
     );
-    return { blob, method: wideEnough ? 'detected' : 'full-photo' };
+    return {
+      blob,
+      method: wideEnough
+        ? 'detected'
+        : gridCorners
+          ? 'grid'
+          : 'full-photo',
+    };
   } finally {
     URL.revokeObjectURL(url);
   }
