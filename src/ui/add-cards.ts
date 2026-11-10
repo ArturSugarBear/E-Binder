@@ -130,6 +130,8 @@ export function openAddCards(
           await addFiles([file], true, aligned);
         },
         () => camera.click(),
+        () =>
+          ctx.state.captures.filter((shot) => shot.status === 'pending').length,
       ),
     'primary',
     'camera',

@@ -182,7 +182,7 @@
   gap: 8px;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: 44px;
   padding: 10px 15px;
   border: 1px solid transparent;
   border-radius: var(--w-field-radius);
@@ -2467,6 +2467,8 @@ textarea.w-input,
   stroke-linejoin: round;
 }
 .w-live-status {
+  flex: 1 1 100%;
+  margin: 0;
   min-height: 2.6em;
   text-align: center;
   font-weight: 600;
@@ -2488,6 +2490,13 @@ textarea.w-input,
   bottom: 0;
   background: var(--paper);
   z-index: 3;
+}
+.w-live-review-summary {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
 }
 @media (max-width: 640px) {
   .w-live-scan-dialog .w-dialog-body {

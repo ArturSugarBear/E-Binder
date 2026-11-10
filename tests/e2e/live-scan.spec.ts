@@ -32,6 +32,18 @@ test('live scanner offers a clear camera-permission fallback without collecting 
   await expect(live.locator('.w-live-status')).toContainText(
     'Live-Kamera nicht verfügbar',
   );
+  // The camera feedback must be painted above the sticky review controls.
+  expect(
+    await live.locator('.w-live-status').evaluate((node) => {
+      const bounds = node.getBoundingClientRect();
+      return node.contains(
+        document.elementFromPoint(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        ),
+      );
+    }),
+  ).toBe(true);
   await expect(
     live.getByRole('button', {
       name: 'Stattdessen Kamerafoto verwenden',
@@ -43,5 +55,80 @@ test('live scanner offers a clear camera-permission fallback without collecting 
   await expect(live).toHaveCount(0);
   await expect(capture).toBeVisible();
   await expect(capture.locator('.w-capture-queue')).toBeEmpty();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
+
+test('pending scans remain reviewable while the camera is unavailable, including with reduced motion', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: async () => {
+          throw new DOMException('Camera permission denied', 'NotAllowedError');
+        },
+      },
+    });
+  });
+  await page.goto('./');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    exact: true,
+  });
+  await add
+    .locator('input[type=file][multiple]')
+    .setInputFiles([
+      'public/assets/cards/svi-211.webp',
+      'public/assets/cards/obf-207.webp',
+    ]);
+  await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
+  await add
+    .getByRole('button', { name: 'Karte live scannen', exact: true })
+    .click();
+  const live = page.getByRole('dialog', {
+    name: 'Karte live scannen',
+    exact: true,
+  });
+  await expect(live.locator('.w-live-status')).toContainText(
+    'Live-Kamera nicht verfügbar',
+  );
+  expect(
+    await live.locator('.w-live-status').evaluate((node) => {
+      const bounds = node.getBoundingClientRect();
+      return node.contains(
+        document.elementFromPoint(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        ),
+      );
+    }),
+  ).toBe(true);
+  await expect(live.locator('.w-live-review-summary')).toHaveText(
+    '2 offene Aufnahmen · erst nach deiner Bestätigung im Bestand.',
+  );
+  const review = live.getByRole('button', {
+    name: 'Ergebnisse prüfen (2)',
+    exact: true,
+  });
+  const target = await review.boundingBox();
+  expect(target!.height).toBeGreaterThanOrEqual(44);
+  expect(target!.width).toBeGreaterThanOrEqual(44);
+  await review.click();
+  await expect(live).toHaveCount(0);
+  await expect(add).toBeVisible();
+  await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
+  await expect(
+    add.getByRole('button', { name: 'Karte live scannen', exact: true }),
+  ).toBeFocused();
+  await add
+    .getByRole('button', { name: 'Karten hinzufügen schließen', exact: true })
+    .click();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  await page.reload();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
