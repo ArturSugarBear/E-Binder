@@ -580,6 +580,51 @@
           max-width: 100% !important;
         }
       }
+      @media (max-width: 400px) {
+        .lab {
+          padding-inline: 16px;
+        }
+        h1 {
+          font-size: clamp(35px, 10vw, 40px);
+          letter-spacing: -0.045em;
+        }
+        .sub {
+          font-size: 15px;
+        }
+        .preview {
+          padding-inline: 14px;
+        }
+        .signature,
+        .brand-side,
+        .phone-side {
+          min-width: 0;
+        }
+        .signature {
+          gap: 11px;
+        }
+        .identity-mark {
+          width: 64px;
+          height: 64px;
+        }
+        .wordmark {
+          font-size: 30px;
+        }
+        .hero-copy h2 {
+          font-size: clamp(37px, 11vw, 44px);
+          overflow-wrap: break-word;
+        }
+        .type-sample {
+          flex-wrap: wrap;
+        }
+        .navbar {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+        .navbar div {
+          min-width: 0;
+          font-size: 9px;
+          letter-spacing: -0.025em;
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
         * {
           transition: none !important;

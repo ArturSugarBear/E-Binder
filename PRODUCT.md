@@ -16,7 +16,7 @@ People who collect because cards carry memories, nostalgia, favorite artists, ch
 
 ## Brand promise
 
-"Deine Karten. Deine Geschichten." / The joy of collecting, beautifully kept.
+"Dein Fund. Dein Moment." — Rare Room V2, selected production identity.
 Memorable, independent, warm, collectible. A small art-directed object, not a crypto-trading dashboard or generic AI admin panel.
 
 ## Existing frustrations — authoritative feedback
@@ -36,6 +36,6 @@ The user dislikes the current black/navy/cyan palette, anonymous nine-blue-squar
 
 Black-on-cyan developer dashboards; glowing neon buttons; fake holographic rainbow gradients; random star/sparkle emojis; generic purple gradient SaaS identity; nine unmodified squares used as a logo; excessive small uppercase labels and faux-tech monospace; cards nested inside decorative cards; another premium aesthetic that increases scanning friction.
 
-## Brand release gate
+## Selected identity
 
-Identity directions are **proposals**, not production defaults. Put asset sources and previews in brand/ or public/brand-lab.html. Preserve the live theme, logo, typography and PWA icon until one direction is selected and its font licenses, 16px logo test, contrast, iPhone screen, browser and offline checks have passed.
+Rare Room V2 (B) is explicitly selected for production. Use `public/E-Binder_Brand-Lab_v2.html` as the authoritative vector and palette source, superseding the older proposals and Midnight/Cyan. Preserve the source HTML unchanged.

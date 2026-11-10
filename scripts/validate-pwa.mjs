@@ -14,7 +14,7 @@ const [manifest, main, archive, worker] = await Promise.all([
 assert.equal(manifest.start_url, base);
 assert.equal(manifest.scope, base);
 assert.equal(manifest.display, 'standalone');
-assert.equal(manifest.background_color, '#02070a');
+assert.equal(manifest.background_color, '#141519');
 assert.ok(main.includes(base + 'manifest.webmanifest'));
 assert.ok(main.includes(base + 'icons/icon-180.png'));
 assert.ok(archive.includes(base + 'icons/icon-180.png'));
