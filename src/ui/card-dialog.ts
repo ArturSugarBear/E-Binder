@@ -1,11 +1,17 @@
 import type { Chapter } from '../domain/collection';
 import { button, textElement, icon, imagePath, query } from './dom';
 import { enableSwipe } from './swipe';
+import { enableSheetDrag } from './sheet-gestures';
 
 export function createCardDialog(sheet: HTMLDialogElement) {
   let currentChapter: Chapter | undefined;
   let cardIndex = 0;
   let opener: HTMLElement | undefined;
+  const top = query('.sheet-top', sheet);
+  const grabber = document.createElement('span');
+  grabber.className = 'sheet-grabber';
+  grabber.setAttribute('aria-hidden', 'true');
+  top.prepend(grabber);
   const cardControls = [-1, 1].map((step) => {
     const control = button('sn', () => showCard(cardIndex + step));
     const caption = textElement('span', '', step < 0 ? 'Vorherige' : 'Nächste');
@@ -51,8 +57,13 @@ export function createCardDialog(sheet: HTMLDialogElement) {
     const focused = document.activeElement;
     cardControls[0]!.disabled = position === 0;
     cardControls[1]!.disabled = position === entry.cards.length - 1;
-    if (!sheet.open) sheet.showModal();
-    else if (
+    if (!sheet.open) {
+      sheet.showModal();
+      enableSheetDrag(sheet, query('.sheet-body', sheet), [
+        top,
+        query('.stage', sheet),
+      ]);
+    } else if (
       focused instanceof HTMLButtonElement &&
       cardControls.includes(focused) &&
       focused.disabled

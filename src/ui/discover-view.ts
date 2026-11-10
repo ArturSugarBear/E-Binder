@@ -1,3 +1,4 @@
+import { enableSheetDrag } from './sheet-gestures';
 import type { CatalogEntry } from '../data/card-catalog';
 import { cardMarket } from './card-market';
 import { addWish, sameCard, type PersonalCard } from '../domain/personal';
@@ -220,6 +221,12 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       ),
       cardMarket(entry),
     );
+    const cardSurface =
+      view.body.querySelector<HTMLElement>('.w-discover-card');
+    if (cardSurface) {
+      cardSurface.classList.add('w-card-touch-surface');
+      enableSheetDrag(view.dialog, view.dialog, [cardSurface]);
+    }
     view.footer.append(
       action(
         'Zum Bestand hinzufügen',

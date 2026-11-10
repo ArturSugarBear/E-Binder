@@ -27,7 +27,11 @@ import {
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { openRecommendations } from './recommend-dialog';
+import { enableSwipe } from './swipe';
+import { enableSheetDrag } from './sheet-gestures';
 import { cloudClient } from '../data/supabase';
+
+let pendingPageSwipe: -1 | 0 | 1 = 0;
 
 export function newBinder(ctx: WorkspaceContext): void {
   textPrompt(
@@ -352,6 +356,27 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     el('div', 'w-binder-rings', el('i'), el('i'), el('i')),
     grid,
   );
+  paper.classList.add('w-binder-gesture-zone');
+  paper.setAttribute('role', 'group');
+  paper.setAttribute(
+    'aria-label',
+    `Binderseite ${pageIndex + 1} von ${binder.pages.length}. Zum Blättern nach links oder rechts wischen.`,
+  );
+  if (pendingPageSwipe) {
+    paper.classList.add(
+      pendingPageSwipe > 0
+        ? 'is-page-arriving-next'
+        : 'is-page-arriving-previous',
+    );
+    pendingPageSwipe = 0;
+  }
+  enableSwipe(paper, (step) => {
+    if (document.querySelector('.w-dialog[open]')) return;
+    const adjacent = binder.pages[pageIndex + step];
+    if (!adjacent) return;
+    pendingPageSwipe = step > 0 ? 1 : -1;
+    if (!choosePage(adjacent.id)) pendingPageSwipe = 0;
+  });
   const assembly = action(
     page.assembled ? 'Aufbau-Markierung aufheben' : 'Als aufgebaut markieren',
     () => {
@@ -581,6 +606,12 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
         ),
       ),
     );
+  const slotPreview =
+    sheet.body.querySelector<HTMLElement>('.w-holding-preview');
+  if (slotPreview) {
+    slotPreview.classList.add('w-card-touch-surface');
+    enableSheetDrag(sheet.dialog, sheet.dialog, [slotPreview]);
+  }
   if (slot) {
     const lock = action(
       slot.locked ? 'Fixierung lösen' : 'Platz festhalten',
