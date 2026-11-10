@@ -87,10 +87,14 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
           'w-muted',
           'Nur auf diesem Testkonto: Bedienaktionen, technische Fehler und Erkennungs-Korrekturen. Keine Fotos, OCR-Texte, Suchbegriffe oder privaten Notizen.',
         ),
-        action(suspended ? 'Diagnose fortsetzen' : 'Diagnose pausieren', () => {
-          setBetaDiagnosticsPaused(!suspended);
-          ctx.render();
-        }, 'secondary'),
+        action(
+          suspended ? 'Diagnose fortsetzen' : 'Diagnose pausieren',
+          () => {
+            setBetaDiagnosticsPaused(!suspended);
+            ctx.render();
+          },
+          'secondary',
+        ),
       ),
     );
   }

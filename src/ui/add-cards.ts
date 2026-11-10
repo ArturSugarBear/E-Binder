@@ -594,7 +594,10 @@ export function openAddCards(
         candidates.length ? 'candidates_found' : 'no_candidate',
         candidates.length ? 'ok' : 'unknown',
         {
-          candidate: candidates[0]?.source === 'manual' ? undefined : candidates[0]?.key,
+          candidate:
+            candidates[0]?.source === 'manual'
+              ? undefined
+              : candidates[0]?.key,
           metric: candidates.length,
         },
       );
@@ -685,12 +688,15 @@ export function openAddCards(
       recordBetaEvent(
         'scan_review',
         'scan',
-        currentCapture.candidates.length ? 'candidate_selected' : 'manual_selected',
+        currentCapture.candidates.length
+          ? 'candidate_selected'
+          : 'manual_selected',
         'ok',
         {
-          candidate: currentCapture.candidates[0]?.source === 'manual'
-            ? undefined
-            : currentCapture.candidates[0]?.key,
+          candidate:
+            currentCapture.candidates[0]?.source === 'manual'
+              ? undefined
+              : currentCapture.candidates[0]?.key,
           selected: card.source === 'manual' ? undefined : card.key,
         },
       );
@@ -842,12 +848,15 @@ export function openAddCards(
           'Erkennung falsch melden',
           () => {
             recordBetaEvent('scan_review', 'scan', 'reported_wrong', 'error', {
-              candidate: shot.candidates[0]?.source === 'manual'
-                ? undefined
-                : shot.candidates[0]?.key,
+              candidate:
+                shot.candidates[0]?.source === 'manual'
+                  ? undefined
+                  : shot.candidates[0]?.key,
               selected: card.source === 'manual' ? undefined : card.key,
             });
-            tell('Beta-Fehlermeldung erfasst. Keine Fotos oder OCR-Texte übertragen.');
+            tell(
+              'Beta-Fehlermeldung erfasst. Keine Fotos oder OCR-Texte übertragen.',
+            );
           },
           'text',
         ),
@@ -919,9 +928,10 @@ export function openAddCards(
       if (ok) {
         if (shot) {
           recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
-            candidate: shot.candidates[0]?.source === 'manual'
-              ? undefined
-              : shot.candidates[0]?.key,
+            candidate:
+              shot.candidates[0]?.source === 'manual'
+                ? undefined
+                : shot.candidates[0]?.key,
             selected: adopted.source === 'manual' ? undefined : adopted.key,
           });
           transientPhotos.delete(shot.id);

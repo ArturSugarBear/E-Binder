@@ -1,6 +1,8 @@
 import { expect, it } from 'vitest';
 import {
-  betaArea, betaCommitAction, safeCatalogueKey,
+  betaArea,
+  betaCommitAction,
+  safeCatalogueKey,
 } from '../../src/data/beta-diagnostics';
 
 it('restricts diagnostic routes and action labels to static categories', () => {
