@@ -3771,7 +3771,9 @@ textarea.w-input,
     background: var(--paper);
     box-shadow: 0 6px 22px rgb(0 0 0 / 0.28);
   }
-  .w-mobile-nav > .w-liquid-optic { display: none; }
+  .w-mobile-nav > .w-liquid-optic {
+    display: none;
+  }
 }
 /* One scan mode across single-card and physical 3x3 workflows. */
 .w-scan-mode-toggle {
@@ -3797,7 +3799,9 @@ textarea.w-input,
 .w-scan-mode-toggle .w-button[aria-pressed='true'] {
   background: var(--raised);
   color: var(--ink);
-  box-shadow: 0 2px 12px rgb(0 0 0 / 0.18), inset 0 1px rgb(255 255 255 / 0.12);
+  box-shadow:
+    0 2px 12px rgb(0 0 0 / 0.18),
+    inset 0 1px rgb(255 255 255 / 0.12);
 }
 .w-page-scan-pocket[data-scan-outcome='card'] {
   border-color: var(--accent);

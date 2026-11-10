@@ -19,7 +19,9 @@ function makeHolding(index: number): Holding {
   const card: PersonalCard = {
     key: `tcgdex:de:${id}`,
     name: `Karte ${index + 1}`,
-    setName: ['Karmesin & Purpur', 'Entwicklungen', 'Zenit der Könige'][index % 3]!,
+    setName: ['Karmesin & Purpur', 'Entwicklungen', 'Zenit der Könige'][
+      index % 3
+    ]!,
     setId,
     number: `${String(serial).padStart(3, '0')}/198`,
     language: 'de',
@@ -66,23 +68,33 @@ function scenario(count: number) {
     expectedTotal += amount * holding.quantity;
     expectedCovered += holding.quantity;
   }
-  return { state: validateState(state), quotes, expectedCovered, expectedTotal };
+  return {
+    state: validateState(state),
+    quotes,
+    expectedCovered,
+    expectedTotal,
+  };
 }
 
-describe.each([1, 25, 250])('%i confirmed cards in a realistic portfolio', (size) => {
-  it('does not invent prices or confuse duplicates with editions', () => {
-    const { state, quotes, expectedCovered, expectedTotal } = scenario(size);
-    const summary = summarizePortfolio(state, quotes);
-    expect(summary.holdings).toHaveLength(size);
-    expect(summary.pricedCopies).toBe(expectedCovered);
-    expect(summary.knownValue).toBeCloseTo(expectedTotal, 5);
-    expect(summary.missingCopies).toBe(
-      summary.ownedCopies - expectedCovered,
-    );
-    expect(summary.ownedCopies).toBeGreaterThanOrEqual(size);
-    expect(summary.holdings.every((row) => row.totalValue === null || row.totalValue > 0)).toBe(true);
-  });
-});
+describe.each([1, 25, 250])(
+  '%i confirmed cards in a realistic portfolio',
+  (size) => {
+    it('does not invent prices or confuse duplicates with editions', () => {
+      const { state, quotes, expectedCovered, expectedTotal } = scenario(size);
+      const summary = summarizePortfolio(state, quotes);
+      expect(summary.holdings).toHaveLength(size);
+      expect(summary.pricedCopies).toBe(expectedCovered);
+      expect(summary.knownValue).toBeCloseTo(expectedTotal, 5);
+      expect(summary.missingCopies).toBe(summary.ownedCopies - expectedCovered);
+      expect(summary.ownedCopies).toBeGreaterThanOrEqual(size);
+      expect(
+        summary.holdings.every(
+          (row) => row.totalValue === null || row.totalValue > 0,
+        ),
+      ).toBe(true);
+    });
+  },
+);
 
 it('accepts only exact publisher-verified editorial print IDs', () => {
   const official = makeHolding(1);

@@ -101,7 +101,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'w-portfolio-hero-copy',
         el('p', 'w-eyebrow', 'Rare Room / Dein Sammelwert'),
         el('h1', '', 'Dein Portfolio'),
-        el('p', 'w-portfolio-hero-label', 'Erfasste Cardmarket-Preisreferenzen'),
+        el(
+          'p',
+          'w-portfolio-hero-label',
+          'Erfasste Cardmarket-Preisreferenzen',
+        ),
         el('p', 'w-portfolio-balance', value),
         el(
           'p',

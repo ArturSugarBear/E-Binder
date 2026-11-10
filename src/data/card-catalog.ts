@@ -359,7 +359,10 @@ const apiCardSchema = resumeSchema.extend({
       cardmarket: z
         .object({
           unit: z.string().optional().catch(undefined),
-          updated: z.union([z.string(), z.number()]).optional().catch(undefined),
+          updated: z
+            .union([z.string(), z.number()])
+            .optional()
+            .catch(undefined),
           trend: z.number().nullable().optional().catch(undefined),
           'trend-holo': z.number().nullable().optional().catch(undefined),
           avg: z.number().nullable().optional().catch(undefined),

@@ -25,9 +25,13 @@ export function initCollectorMaterial(): void {
   optic.setAttribute('frost', '0.14');
   optic.setAttribute('saturation', '135');
   nav.prepend(optic);
-  customElements.whenDefined('liquid-glass').then(() => {
-    if (nav.isConnected && optic.isConnected) nav.classList.add('w-liquid-ready');
-  }).catch(() => undefined);
+  customElements
+    .whenDefined('liquid-glass')
+    .then(() => {
+      if (nav.isConnected && optic.isConnected)
+        nav.classList.add('w-liquid-ready');
+    })
+    .catch(() => undefined);
 }
 
 /** Navigation should feel spatial, not repaint dozens of unrelated tiles. */
