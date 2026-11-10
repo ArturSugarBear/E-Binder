@@ -80,3 +80,17 @@ describe('visual-first card retrieval', () => {
     expect(stableFrameCandidate(['card-a', 'card-a', 'card-b'])).toBeNull();
   });
 });
+
+it('uses incomplete OCR digits only as visual ranking hints, never as printing proof', async () => {
+  const { visualNumberClues } = await import('../../src/data/card-catalog');
+  const clues = visualNumberClues('SVI de\n2I1\n211');
+  expect(clues[0]).toMatchObject({ number: '211', observations: 2 });
+  const hits = searchVisualIndex(
+    { modelId: 'fixture-v1', values: new Float32Array([0, 1, 0, 0]) },
+    fixture(),
+  );
+  const review = reviewVisualCandidates(hits, clues);
+  expect(review.kind).toBe('review');
+  expect(review.suggested).toBeUndefined();
+  expect(visualNumberClues('SVI DE 211/198')[0]?.number).toBe('211/198');
+});
