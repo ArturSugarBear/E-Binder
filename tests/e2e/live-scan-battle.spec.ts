@@ -151,14 +151,22 @@ test('fake live video never auto-captures a blank scene or a square', async ({
     .click();
   // Wait until the native close event runs the cleanup callback.
   await expect(live).toHaveCount(0);
-  const trackStates = await page.evaluate(() => {
-    const rig = (
-      window as typeof window & { __scanRig: { trackStates: () => string[] } }
-    ).__scanRig;
-    return rig.trackStates();
-  });
-  expect(trackStates.length).toBeGreaterThan(0);
-  expect(trackStates.every((state) => state === 'ended')).toBe(true);
+  // A closed scanner must release *every* acquired camera track, including
+  // streams from a late permission or play response. Poll the browser's own
+  // readyState rather than treating a removed dialog as proof of cleanup.
+  await expect
+    .poll(async () => {
+      const states = await page.evaluate(() => {
+        const rig = (
+          window as typeof window & {
+            __scanRig: { trackStates: () => string[] };
+          }
+        ).__scanRig;
+        return rig.trackStates();
+      });
+      return states.length > 0 && states.every((state) => state === 'ended');
+    })
+    .toBe(true);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 

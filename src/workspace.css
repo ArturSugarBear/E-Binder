@@ -3355,3 +3355,72 @@ textarea.w-input,
     transition: none;
   }
 }
+
+/*
+ * Keep the first physical binder pockets visible above the floating mobile
+ * dock. Page-management controls follow the binder instead of hiding its
+ * content; all controls remain in the document and keyboard order.
+ */
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-binders > .w-page-heading {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 12px;
+  }
+  .w-binders > .w-page-heading h1 {
+    font-size: 25px;
+    line-height: 1.1;
+  }
+  .w-binders > .w-page-heading .w-lead {
+    display: none;
+  }
+  .w-binders > .w-page-heading > .w-action-row {
+    width: auto;
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+  .w-binders > .w-page-heading > .w-action-row .w-button {
+    flex: 0 1 auto;
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+  .w-demo-banner {
+    margin-top: 8px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .w-demo-banner p {
+    line-height: 1.35;
+    font-size: 12px;
+  }
+  .w-binders .w-binder-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .w-binders .w-binder-workspace {
+    order: 0;
+    width: 100%;
+  }
+  .w-binders .w-binder-sidebar {
+    order: 1;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .w-binders .w-page-inspector {
+    order: 2;
+    width: 100%;
+    margin-top: 0;
+  }
+  .w-binders .w-binder-title {
+    padding-bottom: 8px;
+  }
+  .w-binders .w-binder-title h2 {
+    font-size: 21px;
+  }
+  .w-binders .w-binder-toolbar {
+    gap: 7px;
+    padding-bottom: 10px;
+  }
+}

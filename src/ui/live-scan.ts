@@ -196,6 +196,9 @@ export function openLiveScanner(
   sheet.body.append(stage, progress, help);
   sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
+  // Track every granted stream, even when a late permission/play response races
+  // with closing or restarting the scanner.
+  const acquiredStreams = new Set<MediaStream>();
   let cameraGeneration = 0;
   let frameId = 0;
   let running = false;
@@ -213,6 +216,10 @@ export function openLiveScanner(
     cameraGeneration++;
     running = false;
     cancelAnimationFrame(frameId);
+    for (const acquired of acquiredStreams) {
+      for (const track of acquired.getTracks()) track.stop();
+    }
+    acquiredStreams.clear();
     if (stream) {
       for (const track of stream.getTracks()) track.stop();
       stream = null;
@@ -345,8 +352,10 @@ export function openLiveScanner(
           height: { ideal: 1920 },
         },
       });
+      acquiredStreams.add(opened);
       if (closed || document.hidden || generation !== cameraGeneration) {
         for (const track of opened.getTracks()) track.stop();
+        acquiredStreams.delete(opened);
         return;
       }
       stream = opened;
