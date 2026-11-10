@@ -12,10 +12,12 @@ test('stale captures can be removed individually or together without changing ow
     name: 'Karten hinzufügen',
     exact: true,
   });
-  await add.locator('input[type=file][multiple]').setInputFiles([
-    'public/assets/cards/svi-211.webp',
-    'public/assets/cards/obf-207.webp',
-  ]);
+  await add
+    .locator('input[type=file][multiple]')
+    .setInputFiles([
+      'public/assets/cards/svi-211.webp',
+      'public/assets/cards/obf-207.webp',
+    ]);
   await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
   await add
     .getByRole('button', { name: 'Aufnahme svi-211.webp entfernen' })
