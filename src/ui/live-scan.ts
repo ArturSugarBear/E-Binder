@@ -26,10 +26,7 @@ function visibleCrop(video: HTMLVideoElement, width: number, height: number) {
 }
 
 /** Draw only the actually visible camera area; detection and OCR share coordinates. */
-function drawVisible(
-  video: HTMLVideoElement,
-  canvas: HTMLCanvasElement,
-): void {
+function drawVisible(video: HTMLVideoElement, canvas: HTMLCanvasElement): void {
   const crop = visibleCrop(video, canvas.width, canvas.height);
   canvas
     .getContext('2d', { willReadFrequently: true })!
@@ -62,12 +59,9 @@ async function snapshot(
   let output: HTMLCanvasElement = source;
   if (corners) {
     const project = cardProjection(corners);
-    const pixels = source.getContext('2d', { willReadFrequently: true })!.getImageData(
-      0,
-      0,
-      source.width,
-      source.height,
-    );
+    const pixels = source
+      .getContext('2d', { willReadFrequently: true })!
+      .getImageData(0, 0, source.width, source.height);
     output = document.createElement('canvas');
     output.width = 630;
     output.height = 880;
@@ -82,7 +76,10 @@ async function snapshot(
         );
         const py = Math.max(
           0,
-          Math.min(source.height - 1, Math.round(point.y * (source.height - 1))),
+          Math.min(
+            source.height - 1,
+            Math.round(point.y * (source.height - 1)),
+          ),
         );
         const offset = (py * source.width + px) * 4;
         const destination = (y * output.width + x) * 4;
@@ -131,10 +128,7 @@ export function openLiveScanner(
   video.setAttribute('aria-label', 'Live-Kamerabild der Kartenaufnahme');
   const frame = el('div', 'w-live-frame-guide');
   frame.setAttribute('aria-hidden', 'true');
-  const outline = document.createElementNS(
-    'http://www.w3.org/2000/svg',
-    'svg',
-  );
+  const outline = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   outline.classList.add('w-live-outline');
   outline.setAttribute('viewBox', '0 0 100 100');
   outline.setAttribute('preserveAspectRatio', 'none');
@@ -149,11 +143,7 @@ export function openLiveScanner(
   polygon.setAttribute('vector-effect', 'non-scaling-stroke');
   outline.append(polygon);
   const stage = el('div', 'w-live-stage', video, frame, outline);
-  const status = el(
-    'p',
-    'w-live-status',
-    'Kamera wird gestartet …',
-  );
+  const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
@@ -164,14 +154,29 @@ export function openLiveScanner(
     'w-muted w-live-help',
     'Halte die ganze Karte aufrecht in den Rahmen. Leuchtet die Umrandung grün, werden die Ecken live erkannt. Das Foto bleibt lokal.',
   );
-  const trigger = action('Jetzt aufnehmen', () => {
-    void captureCard();
-  }, 'primary', 'camera');
-  const next = action('Nächste Karte scannen', () => {
-    void startCamera();
-  }, 'primary', 'camera');
+  const trigger = action(
+    'Jetzt aufnehmen',
+    () => {
+      void captureCard();
+    },
+    'primary',
+    'camera',
+  );
+  const next = action(
+    'Nächste Karte scannen',
+    () => {
+      void startCamera();
+    },
+    'primary',
+    'camera',
+  );
   next.hidden = true;
-  const finish = action('Ergebnisse prüfen', () => sheet.close(), 'secondary', 'check');
+  const finish = action(
+    'Ergebnisse prüfen',
+    () => sheet.close(),
+    'secondary',
+    'check',
+  );
   finish.hidden = true;
   const fallback = action(
     'Stattdessen Kamerafoto verwenden',
@@ -182,12 +187,7 @@ export function openLiveScanner(
     'secondary',
     'camera',
   );
-  sheet.body.append(
-    stage,
-    status,
-    progress,
-    help,
-  );
+  sheet.body.append(stage, status, progress, help);
   sheet.footer.append(trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
   let frameId = 0;
@@ -224,7 +224,8 @@ export function openLiveScanner(
     try {
       const blob = await snapshot(video, chosen);
       stopCamera();
-      status.textContent = 'Aufnahme gesichert · OCR und Katalogabgleich laufen …';
+      status.textContent =
+        'Aufnahme gesichert · OCR und Katalogabgleich laufen …';
       progress.value = 3;
       await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
@@ -257,8 +258,7 @@ export function openLiveScanner(
   function inspectFrame(time: number): void {
     if (!running || closed) return;
     frameId = requestAnimationFrame(inspectFrame);
-    if (document.hidden || time - sampled < 280 || video.readyState < 2)
-      return;
+    if (document.hidden || time - sampled < 280 || video.readyState < 2) return;
     sampled = time;
     if (!video.videoWidth || !video.videoHeight) return;
     drawVisible(video, sample);
@@ -280,16 +280,13 @@ export function openLiveScanner(
       status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
-    observations = last && closeCorners(last, corners)
-      ? Math.min(3, observations + 1)
-      : 1;
+    observations =
+      last && closeCorners(last, corners) ? Math.min(3, observations + 1) : 1;
     last = corners;
     reliable = observations >= 2 ? corners : null;
     polygon.setAttribute(
       'points',
-      corners
-        .map((point) => `${point.x * 100},${point.y * 100}`)
-        .join(' '),
+      corners.map((point) => `${point.x * 100},${point.y * 100}`).join(' '),
     );
     stage.classList.add('has-card-outline');
     progress.value = observations;
