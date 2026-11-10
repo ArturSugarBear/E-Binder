@@ -255,7 +255,7 @@ test('scan metadata resumes without ownership and exports no image bytes', async
   await expect(page.locator('.w-form-notices')).toContainText(
     '1 identische Fotos',
   );
-  await expect(page.locator('.w-capture-list button')).toHaveCount(1);
+  await expect(page.locator('.w-capture-entry')).toHaveCount(1);
   await page.keyboard.press('Escape');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await expect(page.locator('#workspace-save-status')).toHaveText(
