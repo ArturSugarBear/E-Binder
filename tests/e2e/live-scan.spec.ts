@@ -72,7 +72,7 @@ test('pending scans remain reviewable while the camera is unavailable, including
       },
     });
   });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();

@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 
@@ -264,7 +265,7 @@ test('empty artist recommendations explain missing inventory and open the global
   await catalogue(page);
   await page.goto('./#sammlung');
   await expect(page.locator('.w-welcome-art img')).toHaveCount(3);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page
     .getByRole('button', { name: 'Ersten Binder anlegen', exact: true })
     .click();

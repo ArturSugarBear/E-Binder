@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 
 test('portfolio opens directly without inventing a zero market price', async ({
@@ -31,7 +32,7 @@ test('portfolio retains unpriced demo collection and links to binder pages', asy
 }) => {
   await page.goto('./#sammlung');
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
-  await page.getByRole('link', { name: 'Portfolio' }).click();
+  await openVault(page, 'portfolio');
   await expect(page.locator('.w-portfolio-balance')).toHaveText('—');
   await expect(page.locator('.w-portfolio-binder')).toHaveCount(1);
   await page.locator('.w-portfolio-binder summary').click();

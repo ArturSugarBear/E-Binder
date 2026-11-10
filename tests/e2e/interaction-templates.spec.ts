@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
@@ -51,7 +52,7 @@ test('the demo shows the original physical page and can restart without replacin
   await add
     .getByRole('button', { name: 'Bestand bestätigen', exact: true })
     .click();
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page
     .getByRole('button', { name: 'Beispielbinder ansehen', exact: true })
     .click();
@@ -143,7 +144,7 @@ test('all 22 original pages can be previewed inside the binder without creating 
       exact: true,
     }),
   ).toBeVisible();
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
@@ -188,7 +189,7 @@ test('template search recovers from no results and explicitly creates a planned 
   await expect(page.locator('.w-binder-title h2')).toHaveText(
     chapters[21]!.title,
   );
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
@@ -252,7 +253,7 @@ test('required names reject whitespace at the field before any confirmation or s
   await expect(
     page.getByRole('heading', { name: 'Mein gültiger Binder', exact: true }),
   ).toBeVisible();
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();

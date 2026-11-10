@@ -493,6 +493,7 @@ export function openAddCards(
     selected = undefined;
     details.replaceChildren();
     results.replaceChildren();
+    results.dataset.scanState = 'running';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
     const progress = el('progress', 'w-progress');
@@ -595,6 +596,7 @@ export function openAddCards(
       );
       showCapture();
       renderChoices(candidates);
+      results.dataset.scanState = 'complete';
       if (candidates.length) results.scrollIntoView({ block: 'start' });
       else {
         photoArea.scrollIntoView({ block: 'start' });
@@ -626,6 +628,7 @@ export function openAddCards(
         return;
       }
       const text = errorText(error);
+      results.dataset.scanState = 'error';
       ctx.commit('Foto bleibt zur Klärung offen', (state) =>
         changeState(state, (next) => {
           const target = next.captures.find((item) => item.id === shot.id);
@@ -633,6 +636,9 @@ export function openAddCards(
         }),
       );
       tell(text, true);
+    } finally {
+      if (results.dataset.scanState === 'running')
+        results.dataset.scanState = 'cancelled';
     }
   }
 
@@ -645,6 +651,7 @@ export function openAddCards(
     ].slice(0, 24);
     for (const card of unique) {
       const button = action(card.name, () => choose(card), 'card');
+      button.dataset.cardKey = card.key;
       button.replaceChildren(
         ctx.images.artwork(card),
         el(

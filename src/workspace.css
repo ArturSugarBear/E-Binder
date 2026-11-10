@@ -1841,9 +1841,21 @@ textarea.w-input,
 }
 
 /* iPhone-first navigation. Other layouts retain the existing desktop header. */
-.w-header-shortcut,
 .w-mobile-nav {
   display: none;
+}
+.w-header-shortcut {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: var(--ink-2);
+  border-radius: 12px;
+  text-decoration: none;
+}
+.w-header-shortcut svg {
+  width: 21px;
+  height: 21px;
 }
 @media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
   html {
@@ -3229,6 +3241,7 @@ textarea.w-input,
   }
   .w-mobile-nav > a,
   .w-mobile-nav > button {
+    color: var(--ink);
     font-size: 10px;
     gap: 5px;
     min-height: 58px;

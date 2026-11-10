@@ -75,7 +75,7 @@ try {
   const context = await browser.newContext();
   context.setDefaultTimeout(20000);
   const page = await context.newPage();
-  await page.goto(base);
+  await page.goto(new URL('#sammlung', base).href);
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
     'true',
@@ -201,7 +201,7 @@ try {
     const second = await browser.newContext();
     second.setDefaultTimeout(20000);
     const secondPage = await second.newPage();
-    await secondPage.goto(base);
+    await secondPage.goto(new URL('#sammlung', base).href);
     await auth(secondPage, false);
     const baselineQuantity = Number(
       (await secondPage.locator('.w-quantity-badge').innerText()).replace(

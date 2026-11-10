@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 
 test.use({ serviceWorkers: 'allow' });
@@ -53,7 +54,7 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   await expect
     .poll(async () => page.evaluate(() => !!navigator.serviceWorker.controller))
     .toBe(true);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
   await page
     .getByRole('dialog')
@@ -119,7 +120,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   await expect(
     page.getByRole('link', { name: 'Portfolio', exact: true }),
   ).toBeVisible();
-  await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
+  await openVault(page, 'portfolio');
   await expect(
     page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
   ).toBeVisible();
