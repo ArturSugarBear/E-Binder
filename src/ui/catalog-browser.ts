@@ -264,7 +264,7 @@ export function createCatalogBrowser(options: Options) {
             el(
               'a',
               'w-set-official-link',
-              'Delta-Herrschaft: Karten beim Herausgeber ansehen',
+              'Delta-Herrschaft: 141 Karten mit Bildern ansehen',
             ),
           ]
         : []),
@@ -290,11 +290,11 @@ export function createCatalogBrowser(options: Options) {
       );
       if (reference) {
         reference.href =
-          'https://www.pokemon.com/de/news/die-erweiterung-mega-entwicklung-delta-herrschaft-des-pokemon-sammelkartenspiels-ist-jetzt-erhaeltlich';
+          'https://www.bisafans.de/sammelkarten/sets/me/delta-herrschaft/galerie.php';
         reference.target = '_blank';
         reference.rel = 'noopener noreferrer';
         reference.title =
-          'Externe Pokémon-Seite. E-Binder speichert keine fremden Bilder.';
+          'Externe Kartengalerie (Bisafans). E-Binder übernimmt keine fremden Bilder.';
       }
     }
   }
