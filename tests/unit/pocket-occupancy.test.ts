@@ -21,7 +21,11 @@ function image(
 
 it('can propose a dark neutral pocket as empty', () => {
   expect(
-    looksLikeEmptyPocket(image(64, 64, () => [40, 43, 48]), 64, 64),
+    looksLikeEmptyPocket(
+      image(64, 64, () => [40, 43, 48]),
+      64,
+      64,
+    ),
   ).toBe(true);
 });
 
@@ -33,7 +37,11 @@ it('never drops a colourful, bright or highlighted card as empty', () => {
   );
   expect(looksLikeEmptyPocket(fullArt, 64, 64)).toBe(false);
   expect(
-    looksLikeEmptyPocket(image(64, 64, () => [235, 235, 235]), 64, 64),
+    looksLikeEmptyPocket(
+      image(64, 64, () => [235, 235, 235]),
+      64,
+      64,
+    ),
   ).toBe(false);
 });
 

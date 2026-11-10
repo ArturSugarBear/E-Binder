@@ -110,7 +110,9 @@ export function openPageScanner(
   language.value = 'auto';
   const preferredLanguage = (text: string) => {
     if (language.value !== 'auto') return language.value;
-    const printed = recognitionClues(text).find((clue) => clue.language)?.language;
+    const printed = recognitionClues(text).find(
+      (clue) => clue.language,
+    )?.language;
     if (printed) return printed;
     if (/[\u3040-\u30ff]/.test(text)) return 'ja';
     if (/\b(BASIC|ABILITY|WEAKNESS|RETREAT)\b/i.test(text)) return 'en';
@@ -132,7 +134,12 @@ export function openPageScanner(
       void (async () => {
         try {
           const aligned = await alignPhoto(photo, lifetime.signal, 'page');
-          if (!aligned || closed || lifetime.signal.aborted || current !== photo)
+          if (
+            !aligned ||
+            closed ||
+            lifetime.signal.aborted ||
+            current !== photo
+          )
             return;
           const tiles = await extractPagePockets(aligned, lifetime.signal);
           if (closed || lifetime.signal.aborted || current !== photo) return;
@@ -163,7 +170,8 @@ export function openPageScanner(
       updateSave();
       reportQueue();
       if (queued.length) void nextPage();
-      else status.textContent = 'Seite ausgelassen. Kein Bestand wurde verändert.';
+      else
+        status.textContent = 'Seite ausgelassen. Kein Bestand wurde verändert.';
     },
     'secondary',
   );
@@ -240,12 +248,17 @@ export function openPageScanner(
         (pocket) =>
           pocket.decision === 'card' &&
           (!pocket.card ||
-            (pocket.finish.value === 'other' &&
-              !pocket.variant.value.trim())),
+            (pocket.finish.value === 'other' && !pocket.variant.value.trim())),
       );
-    const matches = pockets.filter((pocket) => pocket.decision === 'card').length;
-    const empty = pockets.filter((pocket) => pocket.decision === 'empty').length;
-    const open = pockets.filter((pocket) => pocket.decision === 'pending' || pocket.decision === 'skip').length;
+    const matches = pockets.filter(
+      (pocket) => pocket.decision === 'card',
+    ).length;
+    const empty = pockets.filter(
+      (pocket) => pocket.decision === 'empty',
+    ).length;
+    const open = pockets.filter(
+      (pocket) => pocket.decision === 'pending' || pocket.decision === 'skip',
+    ).length;
     reviewSummary.textContent = pockets.length
       ? `${matches} ausgewählt · ${empty} vermutlich leer · ${open} offen. Du kannst nur die ausgewählten Karten übernehmen.`
       : 'Noch keine Binderseite eingelesen.';
@@ -268,12 +281,7 @@ export function openPageScanner(
     message(
       'Ein Foto pro physischer 9-Pocket-Seite. E-Binder schneidet neun Positionen lokal aus und schlägt Karten vor. Erst deine Prüfung trägt Exemplare in den Bestand ein; identische Fotos können nicht zweimal importiert werden.',
     ),
-    el(
-      'div',
-      'w-form-grid',
-      field('Zielbinder', binder),
-      binderNameField,
-    ),
+    el('div', 'w-form-grid', field('Zielbinder', binder), binderNameField),
     el(
       'div',
       'w-action-row',
@@ -322,8 +330,7 @@ export function openPageScanner(
       pocket.status.textContent = 'Vermutlich leer · antippen zum Ändern';
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
-    if (pocket.container)
-      pocket.container.dataset.decision = pocket.decision;
+    if (pocket.container) pocket.container.dataset.decision = pocket.decision;
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -370,7 +377,10 @@ export function openPageScanner(
   };
   const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
     const number = (value: string) =>
-      value.replace(/\s/g, '').replace(/(^|\/)0+(?=\d)/g, '$1').toLowerCase();
+      value
+        .replace(/\s/g, '')
+        .replace(/(^|\/)0+(?=\d)/g, '$1')
+        .toLowerCase();
     const clues = recognitionClues(text).filter((clue) => clue.setId);
     const exact = pocket.candidates.filter((card) =>
       clues.some(
@@ -404,16 +414,17 @@ export function openPageScanner(
       );
       let online: PersonalCard[] = [];
       if (navigator.onLine) {
-        const locales = language.value === 'auto'
-          ? ['de', 'en', 'ja']
-          : [language.value];
+        const locales =
+          language.value === 'auto' ? ['de', 'en', 'ja'] : [language.value];
         const batches = await Promise.allSettled(
           locales.map(async (locale) => {
             const found = await searchCatalog(query, locale, lifetime.signal);
             const resolved = await Promise.allSettled(
-              found.slice(0, 6).map((item) =>
-                fetchCatalogCard(item.id, locale, lifetime.signal),
-              ),
+              found
+                .slice(0, 6)
+                .map((item) =>
+                  fetchCatalogCard(item.id, locale, lifetime.signal),
+                ),
             );
             return resolved.flatMap((result) =>
               result.status === 'fulfilled' ? [result.value] : [],
@@ -450,12 +461,15 @@ export function openPageScanner(
         ['empty', 'Fach ist leer'],
         ['skip', 'Nicht erkannt – leer lassen'],
       ]);
-      const finish = select([
-        ['unverified', 'Nicht bestimmt (später ändern)'],
-        ...finishes
-          .filter((key) => key !== 'unverified')
-          .map((key) => [key, finishLabels[key]] as [string, string]),
-      ], 'unverified');
+      const finish = select(
+        [
+          ['unverified', 'Nicht bestimmt (später ändern)'],
+          ...finishes
+            .filter((key) => key !== 'unverified')
+            .map((key) => [key, finishLabels[key]] as [string, string]),
+        ],
+        'unverified',
+      );
       finish.hidden = true;
       const variant = input('text');
       variant.placeholder = 'Auflage / Stempel beschreiben';

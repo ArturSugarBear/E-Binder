@@ -37,10 +37,7 @@ export async function autoAlignPage(
     context.drawImage(image, 0, 0, source.width, source.height);
 
     const small = document.createElement('canvas');
-    const reduction = Math.min(
-      1,
-      256 / Math.max(source.width, source.height),
-    );
+    const reduction = Math.min(1, 256 / Math.max(source.width, source.height));
     small.width = Math.max(48, Math.round(source.width * reduction));
     small.height = Math.max(48, Math.round(source.height * reduction));
     const thumb = small.getContext('2d', { willReadFrequently: true });
@@ -82,10 +79,7 @@ export async function autoAlignPage(
     for (let y = 0; y < output.height; y++) {
       if (signal.aborted) throw new DOMException('Abgebrochen', 'AbortError');
       for (let x = 0; x < output.width; x++) {
-        const point = mapping(
-          x / (output.width - 1),
-          y / (output.height - 1),
-        );
+        const point = mapping(x / (output.width - 1), y / (output.height - 1));
         const sx = Math.max(
           0,
           Math.min(source.width - 1, point.x * (source.width - 1)),
@@ -126,7 +120,9 @@ export async function autoAlignPage(
         (result) =>
           result
             ? resolve(result)
-            : reject(new Error('Der automatische Zuschnitt ist fehlgeschlagen.')),
+            : reject(
+                new Error('Der automatische Zuschnitt ist fehlgeschlagen.'),
+              ),
         'image/jpeg',
         0.94,
       ),

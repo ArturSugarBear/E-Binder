@@ -8,11 +8,7 @@ export function looksLikeEmptyPocket(
   width: number,
   height: number,
 ): boolean {
-  if (
-    width < 16 ||
-    height < 16 ||
-    rgba.length !== width * height * 4
-  )
+  if (width < 16 || height < 16 || rgba.length !== width * height * 4)
     return false;
   let saturation = 0;
   let brightness = 0;
