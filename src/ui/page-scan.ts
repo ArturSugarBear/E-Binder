@@ -5,6 +5,7 @@ import {
   searchCatalog,
 } from '../data/card-catalog';
 import { extractPagePockets } from '../data/page-pockets';
+import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
 import {
   finishLabels,
@@ -39,6 +40,7 @@ type Pocket = {
   variant: HTMLInputElement;
   search: HTMLInputElement;
   status: HTMLElement;
+  quality: HTMLElement;
 };
 
 /** Import a physical binder as repeated, explicitly reviewed 3x3 page captures. */
@@ -279,6 +281,10 @@ export function openPageScanner(
     for (const [key, caption] of options) {
       const choice = el('option', '', caption);
       choice.value = key;
+      if (key.startsWith('card:')) {
+        const card = pocket.candidates[Number(key.slice(5))];
+        if (card) choice.dataset.cardKey = card.key;
+      }
       pocket.select.append(choice);
     }
     pocket.select.value = value;
@@ -361,6 +367,11 @@ export function openPageScanner(
       query.placeholder = 'Name oder Sammlernummer';
       query.setAttribute('aria-label', `Karte in Fach ${index + 1} suchen`);
       const info = el('small', 'w-muted', 'Noch nicht erkannt');
+      const quality = el(
+        'small',
+        'w-muted w-page-scan-quality',
+        'Bildqualität wird geprüft …',
+      );
       const pocket: Pocket = {
         candidates: [],
         decision: 'pending',
@@ -369,6 +380,7 @@ export function openPageScanner(
         variant,
         search: query,
         status: info,
+        quality,
       };
       pockets.push(pocket);
       pick.setAttribute('aria-label', `Karte für Fach ${index + 1} auswählen`);
@@ -398,6 +410,7 @@ export function openPageScanner(
         el('h3', '', `Fach ${index + 1}`),
         photo,
         info,
+        quality,
         pick,
         finish,
         variant,
@@ -423,6 +436,27 @@ export function openPageScanner(
       status.textContent = label;
     });
     try {
+      // Small, sequential decodes keep peak RAM bounded on older iPhones.
+      // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
+      for (let index = 0; index < tiles.length; index++) {
+        if (closed || abort.signal.aborted) break;
+        try {
+          const inspection = await inspectPocketPhoto(
+            tiles[index]!,
+            abort.signal,
+          );
+          if (closed || abort.signal.aborted) break;
+          const quality = pockets[index]!.quality;
+          quality.textContent = inspection.warnings.length
+            ? `Aufnahmehinweis: ${inspection.warnings.join(' · ')}`
+            : 'Keine deutlichen Belichtungsprobleme erkannt';
+          quality.dataset.warning = inspection.warnings.length ? 'true' : 'false';
+        } catch {
+          if (closed || abort.signal.aborted) break;
+          pockets[index]!.quality.textContent =
+            'Fotoqualität konnte nicht geprüft werden. Bitte selbst kontrollieren.';
+        }
+      }
       for (let index = 0; index < tiles.length; index++) {
         if (closed || abort.signal.aborted) break;
         const pocket = pockets[index]!;
