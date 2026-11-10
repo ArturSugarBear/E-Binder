@@ -735,7 +735,11 @@ export function openPageScanner(
             abort.signal,
             AbortSignal.timeout(11000),
           ]);
-          if (navigator.onLine && text.trim() && !resolvedVisual.length) {
+          if (
+            navigator.onLine &&
+            text.trim() &&
+            (!resolvedVisual.length || visualReview.kind !== 'exact-print')
+          ) {
             try {
               online = await fetchRecognizedCards(
                 text,
