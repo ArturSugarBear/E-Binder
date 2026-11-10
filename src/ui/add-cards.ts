@@ -452,7 +452,7 @@ export function openAddCards(
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       let titleHint = '';
-      if (!online.length && !local.length && navigator.onLine && text.trim()) {
+      if (!online.length && navigator.onLine && text.trim()) {
         try {
           const found = await fetchNameHintCandidates(
             text,
