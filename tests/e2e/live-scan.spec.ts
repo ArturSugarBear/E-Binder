@@ -14,7 +14,7 @@ test('live scanner offers a clear camera-permission fallback without collecting 
     });
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
@@ -72,7 +72,7 @@ test('pending scans remain reviewable while the camera is unavailable, including
       },
     });
   });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();

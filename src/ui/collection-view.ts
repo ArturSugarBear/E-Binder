@@ -577,7 +577,11 @@ export function renderWishes(ctx: WorkspaceContext): HTMLElement {
         'div',
         'w-wish-copy',
         el('h2', '', wish.card.name),
-        el('p', 'w-muted', `${wish.card.setName} · ${wish.card.number}`),
+        el(
+          'p',
+          'w-muted',
+          `${wish.card.setName} · ${wish.card.number} · ${wish.card.language.toUpperCase()}`,
+        ),
         el(
           'p',
           '',

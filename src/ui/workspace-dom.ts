@@ -121,6 +121,13 @@ export function field(
   control: HTMLElement,
   help?: string,
 ): HTMLElement {
+  if (
+    control instanceof HTMLInputElement &&
+    control.type === 'text' &&
+    control.required &&
+    !control.pattern
+  )
+    control.pattern = '.*\\S.*';
   const id = control.id || `w-field-${++nextField}`;
   control.id = id;
   const caption = el('label', 'w-label', label);
