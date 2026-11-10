@@ -3,6 +3,10 @@ import { test, expect } from './fixtures';
 
 /** Real mobile touch input, not a synthetic click or a fake PointerEvent. */
 async function drag(page: Page, target: Locator, dx: number, dy: number) {
+  // CDP does not auto-scroll like locator.click; keep the gesture above fixed tabs.
+  await target.evaluate((node) =>
+    node.scrollIntoView({ block: 'center', behavior: 'instant' }),
+  );
   const rect = await target.boundingBox();
   if (!rect) throw new Error('Touch target is not visible');
   const x = rect.x + rect.width * 0.48;

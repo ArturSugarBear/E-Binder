@@ -96,8 +96,8 @@
   right: 5px;
   padding: 4px 5px;
   border-radius: 4px;
-  background: #02070a;
-  color: #f2f6fa;
+  background: var(--desk);
+  color: var(--ink);
   font: 10px/1.2 var(--sans);
 }
 .card-art[data-image-state='unavailable'] .art-fallback {

@@ -91,11 +91,11 @@ export async function alignPhoto(
             0,
             Math.PI * 2,
           );
-          context.fillStyle = i === Number(corner.value) ? accent : '#02070a';
+          context.fillStyle = i === Number(corner.value) ? accent : '#141519';
           context.fill();
           context.stroke();
           context.fillStyle =
-            i === Number(corner.value) ? '#02070a' : '#f2f6fa';
+            i === Number(corner.value) ? '#141519' : '#f4f1ea';
           context.font = 'bold 14px sans-serif';
           context.textAlign = 'center';
           context.fillText(

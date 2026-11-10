@@ -17,15 +17,15 @@ export default defineConfig({
       includeAssets: ['icons/*.png'],
       manifest: {
         id: base,
-        name: 'E-Binder · Dein Kartenatelier',
+        name: 'E-Binder · Dein Fund. Dein Moment.',
         short_name: 'E-Binder',
         description: 'Deine Karten, deine Sammlung und deine Binderseiten.',
         lang: 'de',
         start_url: base,
         scope: base,
         display: 'standalone',
-        background_color: '#02070a',
-        theme_color: '#02070a',
+        background_color: '#141519',
+        theme_color: '#141519',
         icons: [
           {
             src: base + 'icons/icon-192.png',

@@ -1,46 +1,31 @@
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url('/assets/fonts/bricolage-grotesque.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400 500;
-  font-display: swap;
-  src: url('/assets/fonts/jetbrains-mono.woff2') format('woff2');
-}
 :root {
-  --desk: #02070a;
-  --paper: #0c151e;
-  --raised: #132331;
-  --ink: #f2f6fa;
-  --ink-2: #b6c5d1;
-  --ink-3: #92a5b5;
-  --line: #243949;
-  --binder: #101b25;
-  --binder-2: #081219;
-  --sleeve: #1c2c38;
-  --accent: #6ad0e0;
-  --electric-blue: #0297de;
-  --accent-hover: #94e4ef;
-  --on-accent: #02070a;
-  --focus: #0297de;
-  --surface-hover: #1a2e3d;
-  --field-border: #526e82;
+  --desk: #141519;
+  --paper: #22242b;
+  --raised: #2e3038;
+  --ink: #f4f1ea;
+  --ink-2: #a9a8b4;
+  --ink-3: #a9a8b4;
+  --line: #41434d;
+  --binder: #0b0c0f;
+  --binder-2: #0b0c0f;
+  --sleeve: #22242b;
+  --accent: #d8f25a;
+  --brand: var(--accent);
+  --foil: #b9a6ff;
+  --accent-hover: #e5f78e;
+  --on-accent: #141519;
+  --focus: #d8f25a;
+  --surface-hover: #2e3038;
+  --field-border: #72717e;
   --success: #8bd8b3;
   --error: #ffb8c4;
   --error-surface: #30191e;
-  --selection: #143444;
-  --selection-ink: #c9edf5;
+  --selection: #303429;
+  --selection-ink: #f4f1ea;
   --ink-tertiary: var(--ink-3);
   --sans:
-    'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, Arial, sans-serif;
-  --mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --pad: clamp(16px, 4vw, 32px);
 }
@@ -52,7 +37,7 @@ html {
   color: var(--ink);
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scrollbar-color: #526e82 var(--desk);
+  scrollbar-color: #72717e var(--desk);
 }
 body {
   margin: 0;
@@ -71,7 +56,7 @@ body:has(.sheet[open]) {
   width: 12px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #526e82;
+  background: #72717e;
   border-radius: 12px;
   border: 4px solid var(--desk);
 }
@@ -341,8 +326,8 @@ svg {
   min-height: 64px;
   padding: 8px 12px 8px 8px;
   border-radius: 10px;
-  background: rgb(19 35 49 / calc(var(--on, 0)));
-  box-shadow: inset 0 0 0 1px rgb(82 110 130 / calc(var(--on, 0) * 0.7));
+  background: rgb(46 48 56 / calc(var(--on, 0)));
+  box-shadow: inset 0 0 0 1px rgb(114 113 126 / calc(var(--on, 0) * 0.7));
   transition: background-color 0.15s var(--ease);
 }
 @media (hover: hover) {
@@ -472,7 +457,7 @@ svg {
   overflow: visible;
 }
 .sheet::backdrop {
-  background: rgb(2 7 10 / 0.78);
+  background: rgb(20 21 25 / 0.78);
   animation: fade 0.2s var(--ease) backwards;
 }
 .sheet-body {
