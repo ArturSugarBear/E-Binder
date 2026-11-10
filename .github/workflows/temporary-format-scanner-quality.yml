@@ -1,0 +1,29 @@
+name: Format scanner quality feature
+on:
+  push:
+    branches: [feat/scanner-quality-and-photo-benchmarks]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/scanner-quality-and-photo-benchmarks
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/data/photo-quality.ts tests/unit/photo-quality.test.ts src/ui/page-scan.ts src/ui/photo-crop.ts src/workspace.css tests/e2e/binder-page-scan.spec.ts README.md docs/scanner-quality.md scripts/benchmark-binder-scans.mjs
+      - name: Commit formatting
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/data/photo-quality.ts tests/unit/photo-quality.test.ts src/ui/page-scan.ts src/ui/photo-crop.ts src/workspace.css tests/e2e/binder-page-scan.spec.ts README.md docs/scanner-quality.md scripts/benchmark-binder-scans.mjs
+            git commit -m "style(scan): format quality diagnostics and benchmark"
+            git push origin HEAD:feat/scanner-quality-and-photo-benchmarks
+          fi
