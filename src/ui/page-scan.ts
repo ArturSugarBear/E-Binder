@@ -58,6 +58,7 @@ export function openPageScanner(
   let recognitionAbort: AbortController | undefined;
   let closed = false;
   let processing = false;
+  let reAligning = false;
   let current: File | undefined;
   let fingerprint = '';
   let queued: File[] = [];
@@ -113,6 +114,52 @@ export function openPageScanner(
     el('summary', '', 'Erweiterte Scanoptionen'),
     field('Sprache der Karten (optional)', language),
   );
+  const manualAlign = action(
+    'Zuschnitt korrigieren',
+    () => {
+      if (!current || processing || reAligning) return;
+      const photo = current;
+      reAligning = true;
+      updateSave();
+      void (async () => {
+        try {
+          const aligned = await alignPhoto(photo, lifetime.signal, 'page');
+          if (!aligned || closed || lifetime.signal.aborted || current !== photo)
+            return;
+          const tiles = await extractPagePockets(aligned, lifetime.signal);
+          if (closed || lifetime.signal.aborted || current !== photo) return;
+          releasePreviews();
+          buildGrid(tiles);
+          void recognizeAll(tiles);
+        } catch (error) {
+          if (!closed) status.textContent = errorText(error);
+        } finally {
+          reAligning = false;
+          updateSave();
+        }
+      })();
+    },
+    'secondary',
+  );
+  manualAlign.hidden = true;
+  const skipPage = action(
+    'Seite überspringen',
+    () => {
+      if (!current || processing || reAligning) return;
+      releasePreviews();
+      grid.replaceChildren();
+      pockets = [];
+      current = undefined;
+      manualAlign.hidden = true;
+      skipPage.hidden = true;
+      updateSave();
+      reportQueue();
+      if (queued.length) void nextPage();
+      else status.textContent = 'Seite ausgelassen. Kein Bestand wurde verändert.';
+    },
+    'secondary',
+  );
+  skipPage.hidden = true;
   const stop = action(
     'Erkennung stoppen',
     () => recognitionAbort?.abort(),
@@ -157,6 +204,8 @@ export function openPageScanner(
       binderNameField.hidden = true;
       releasePreviews();
       current = undefined;
+      manualAlign.hidden = true;
+      skipPage.hidden = true;
       pockets = [];
       grid.replaceChildren();
       if (queued.length) {
@@ -171,9 +220,12 @@ export function openPageScanner(
   );
   save.disabled = true;
   const updateSave = () => {
+    manualAlign.disabled = !current || processing || reAligning;
+    skipPage.disabled = !current || processing || reAligning;
     save.disabled =
       !current ||
       processing ||
+      reAligning ||
       pockets.length !== 9 ||
       !pockets.some((pocket) => pocket.decision === 'card') ||
       pockets.some(
@@ -213,7 +265,6 @@ export function openPageScanner(
       'w-form-grid',
       field('Zielbinder', binder),
       binderNameField,
-      field('Kartensprache', language),
     ),
     el(
       'div',
@@ -233,6 +284,8 @@ export function openPageScanner(
     ),
     camera,
     gallery,
+    scanOptions,
+    el('div', 'w-action-row', manualAlign, skipPage),
     queueStatus,
     status,
     progress,
@@ -435,7 +488,6 @@ export function openPageScanner(
       pocket.container = container;
       grid.append(container);
     }
-    approved.row.hidden = false;
     updateSave();
   };
   const recognizeAll = async (tiles: Blob[]) => {
@@ -536,8 +588,6 @@ export function openPageScanner(
     current = queued.shift()!;
     reportQueue();
     fingerprint = '';
-    approved.row.hidden = true;
-    approved.input.checked = false;
     grid.replaceChildren();
     pockets = [];
     releasePreviews();
@@ -556,19 +606,16 @@ export function openPageScanner(
         throw new Error(
           'Diese Aufnahme wurde bereits importiert. Die vorhandene Binderseite bleibt unverändert.',
         );
+      status.textContent = 'Binderseite wird automatisch ausgerichtet …';
+      const aligned = await autoAlignPage(file, lifetime.signal);
+      if (lifetime.signal.aborted || closed) return;
+      manualAlign.hidden = false;
+      skipPage.hidden = false;
       status.textContent =
-        'Richte jetzt die vier äußeren Ecken der Binderseite aus.';
-      const aligned = await alignPhoto(file, lifetime.signal, 'page');
-      if (!aligned || lifetime.signal.aborted || closed) {
-        if (!closed)
-          status.textContent =
-            'Seitenausrichtung abgebrochen. Kein Bestand wurde verändert.';
-        current = undefined;
-        reportQueue();
-        return;
-      }
-      status.textContent = 'Neun Kartenfächer werden lokal ausgeschnitten …';
-      const tiles = await extractPagePockets(aligned, lifetime.signal);
+        aligned.method === 'detected'
+          ? 'Seitenränder erkannt. Neun Kartenfächer werden gelesen …'
+          : 'Foto automatisch auf neun Fächer aufgeteilt. Falls nötig, „Zuschnitt korrigieren“ wählen.';
+      const tiles = await extractPagePockets(aligned.blob, lifetime.signal);
       if (closed || lifetime.signal.aborted) return;
       buildGrid(tiles);
       void recognizeAll(tiles);
