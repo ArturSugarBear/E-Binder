@@ -110,7 +110,10 @@ test('Home and Profile actions reach the named task and cancellation preserves a
   });
   await expect(pageScan).toBeVisible();
   await pageScan
-    .getByRole('button', { name: 'Binderseiten scannen schließen', exact: true })
+    .getByRole('button', {
+      name: 'Binderseiten scannen schließen',
+      exact: true,
+    })
     .click();
   await main.getByRole('button', { name: 'Meine Binder', exact: true }).click();
   await expect(page).toHaveURL(/#binder$/);
