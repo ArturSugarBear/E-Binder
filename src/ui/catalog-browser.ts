@@ -301,8 +301,8 @@ export function createCatalogBrowser(options: Options) {
   }
   function setIcon(item: CatalogSet): HTMLElement {
     const icon = el('span', 'w-set-symbol', item.id.toUpperCase());
-    const sources = [item.logo, item.symbol].filter(
-      (value): value is string => Boolean(value),
+    const sources = [item.logo, item.symbol].filter((value): value is string =>
+      Boolean(value),
     );
     const image = el('img');
     image.alt = '';
@@ -313,10 +313,7 @@ export function createCatalogBrowser(options: Options) {
         const base = sources[index++]!;
         try {
           const url = new URL(base);
-          if (
-            url.protocol !== 'https:' ||
-            url.hostname !== 'assets.tcgdex.net'
-          )
+          if (url.protocol !== 'https:' || url.hostname !== 'assets.tcgdex.net')
             continue;
           image.src = `${base}.webp`;
           icon.replaceChildren(image);
