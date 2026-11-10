@@ -113,3 +113,91 @@ test('binder-page scanning opens a real 3x3 camera with safe photo fallback', as
   });
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
+
+test('an exact confirmed German card receives a real EUR trend and a valued set bar', async ({
+  page,
+}) => {
+  await page.route('https://api.tcgdex.net/v2/de/cards/sv01-211', (route) =>
+    route.fulfill({
+      json: {
+        id: 'sv01-211',
+        localId: '211',
+        name: 'Trasla',
+        set: {
+          id: 'sv01',
+          name: 'Karmesin & Purpur',
+          cardCount: { official: 198 },
+        },
+        variants: { normal: true },
+        pricing: {
+          cardmarket: {
+            unit: 'EUR',
+            updated: '2026-11-09T12:00:00.000Z',
+            trend: 9.5,
+            idProduct: 123,
+          },
+        },
+      },
+    }),
+  );
+  await page.goto('./#portfolio');
+  await page.evaluate(async () => {
+    const request = indexedDB.open('e-binder-personal', 2);
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const now = '2026-11-09T12:00:00.000Z';
+    const card = {
+      key: 'tcgdex:de:sv01-211',
+      name: 'Trasla',
+      setName: 'Karmesin & Purpur',
+      setId: 'sv01',
+      number: '211/198',
+      language: 'de',
+      image: '',
+      source: 'tcgdex',
+      sourceId: 'sv01-211',
+      artist: '',
+      artistSource: 'unknown',
+      evolvesFrom: '',
+      stage: '',
+      finishes: ['normal', 'holo', 'reverse'],
+    };
+    const state = {
+      schemaVersion: 1,
+      revision: 0,
+      mode: 'personal',
+      holdings: [
+        {
+          id: 'real-test-holding',
+          card,
+          finish: 'normal',
+          variantNote: '',
+          quantity: 2,
+          tradeQuantity: 0,
+          favorite: false,
+          notes: '',
+          confirmed: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ],
+      binders: [],
+      wishes: [],
+      captures: [],
+    };
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction('states', 'readwrite');
+      transaction.objectStore('states').put(state, 'personal');
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    db.close();
+  });
+  await page.reload();
+  await expect(page.locator('.w-portfolio-balance')).toContainText('19,00');
+  await expect(page.locator('.w-portfolio-set-row')).toContainText('2 Exemplare');
+  await expect(page.locator('.w-portfolio-leader')).toHaveCount(1);
+  await expect(page.locator('.w-portfolio-missing-card')).toHaveCount(0);
+});
