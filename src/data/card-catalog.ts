@@ -601,6 +601,27 @@ export function recognitionClues(text: string): RecognitionClue[] {
       observations,
     }));
 }
+/**
+ * Number-band OCR sometimes reads only half of a collector fraction.
+ * Such fragments may reorder visual candidates, never verify a printing.
+ */
+export function visualNumberClues(text: string): RecognitionClue[] {
+  const complete = recognitionClues(text);
+  if (complete.length) return complete;
+  const counts = new Map<string, number>();
+  for (const match of text.matchAll(
+    /(?<![A-Za-z0-9])(?:TG|GG|RC|SV)?([0-9OIl]{2,3})(?![A-Za-z0-9])/gi,
+  )) {
+    const value = match[1]!.replace(/O/gi, '0').replace(/[Il]/g, '1');
+    const part = numberKey(value);
+    if (part === '0') continue;
+    counts.set(part, (counts.get(part) ?? 0) + 1);
+  }
+  return [...counts]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([number, observations]) => ({ number, observations }));
+}
 const setResume = z.object({
   id: z.string(),
   cardCount: z.object({ official: z.number() }),

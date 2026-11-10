@@ -1,6 +1,7 @@
 import {
   candidatesFromText,
   recognitionClues,
+  visualNumberClues,
   fetchCatalogCard,
   fetchRecognizedCards,
   fetchNameHintCandidates,
@@ -11,6 +12,11 @@ import { autoAlignPage } from '../data/auto-page-align';
 import { likelyEmptyPocket } from '../data/pocket-occupancy';
 import { inspectPocketPhoto } from '../data/photo-quality';
 import { createRecognitionSession } from '../data/recognize';
+import { createVisualSearchSession } from '../data/visual-search';
+import {
+  reviewVisualCandidates,
+  type VisualHit,
+} from '../domain/visual-retrieval';
 import {
   finishLabels,
   finishes,
@@ -44,6 +50,7 @@ type Pocket = {
   search: HTMLInputElement;
   status: HTMLElement;
   quality: HTMLElement;
+  quickChoices?: HTMLElement;
   container?: HTMLElement;
   ocrText?: string;
 };
@@ -60,6 +67,8 @@ export function openPageScanner(
   let sharedRecognitionAbort: AbortController | undefined;
   let sharedRecognition:
     ReturnType<typeof createRecognitionSession> | undefined;
+  let sharedVisualPromise:
+    ReturnType<typeof createVisualSearchSession> | undefined;
   let closed = false;
   let processing = false;
   let reAligning = false;
@@ -335,6 +344,17 @@ export function openPageScanner(
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
     if (pocket.container) pocket.container.dataset.decision = pocket.decision;
+    pocket.quickChoices
+      ?.querySelectorAll<HTMLButtonElement>('.w-page-scan-candidate')
+      .forEach((button, index) =>
+        button.setAttribute(
+          'aria-pressed',
+          String(
+            pocket.decision === 'card' &&
+              pocket.select.value === `card:${index}`,
+          ),
+        ),
+      );
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -377,6 +397,32 @@ export function openPageScanner(
       pocket.select.append(choice);
     }
     pocket.select.value = value;
+    pocket.quickChoices?.replaceChildren();
+    for (const [index, card] of pocket.candidates.slice(0, 3).entries()) {
+      const choice = action(
+        `${card.name} · ${card.setName} · ${card.number}`,
+        () => {
+          pocket.select.value = `card:${index}`;
+          updatePocket(pocket);
+        },
+        'card',
+      );
+      choice.classList.add('w-page-scan-candidate');
+      choice.replaceChildren(
+        ctx.images.artwork(card),
+        el(
+          'span',
+          'w-page-scan-candidate-caption',
+          el('strong', '', card.name),
+          el('small', '', `${card.setName} · ${card.number}`),
+        ),
+      );
+      choice.setAttribute(
+        'aria-label',
+        `${card.name}, ${card.setName}, ${card.number} für Fach auswählen`,
+      );
+      pocket.quickChoices?.append(choice);
+    }
     updatePocket(pocket);
   };
   const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
@@ -492,7 +538,9 @@ export function openPageScanner(
         'w-muted w-page-scan-quality',
         'Bildqualität wird geprüft …',
       );
+      const quickChoices = el('div', 'w-page-scan-candidates');
       const pocket: Pocket = {
+        quickChoices,
         candidates: [],
         decision: 'pending',
         select: pick,
@@ -535,6 +583,7 @@ export function openPageScanner(
           'details',
           'w-page-scan-editor',
           el('summary', '', 'Prüfen / ändern'),
+          quickChoices,
           pick,
           finish,
           variant,
@@ -558,6 +607,7 @@ export function openPageScanner(
       lifetime.signal.addEventListener('abort', () => controller.abort(), {
         once: true,
       });
+      sharedVisualPromise = undefined;
       sharedRecognition = createRecognitionSession(
         controller.signal,
         (label) => {
@@ -574,6 +624,13 @@ export function openPageScanner(
     stop.hidden = false;
     updateSave();
     try {
+      // Optional visual search is local and prepared once per binder scan.
+      // Until a versioned licensed model/corpus is installed, the OCR path remains.
+      const visual = await (sharedVisualPromise ??= createVisualSearchSession(
+        abort.signal,
+      ));
+      if (closed || abort.signal.aborted) return;
+      let visualFailure = false;
       // Small, sequential decodes keep peak RAM bounded on older iPhones.
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
       for (let index = 0; index < tiles.length; index++) {
@@ -620,9 +677,66 @@ export function openPageScanner(
         pocket.container?.classList.remove('is-processed');
         pocket.container?.classList.add('is-scanning');
         try {
-          const text = await session.recognize(tiles[index]!);
+          let visualHits: VisualHit[] = [];
+          if (visual && !visualFailure) {
+            try {
+              pocket.status.textContent = 'Kartenmotiv wird lokal verglichen …';
+              visualHits = await visual.match(tiles[index]!);
+              if (closed || abort.signal.aborted) break;
+            } catch {
+              visualFailure = true;
+              visual.close();
+              // Never make an optional embedding model block OCR or ownership review.
+            }
+          }
+          const text = await session.recognize(
+            tiles[index]!,
+            visualHits.length > 0,
+          );
           if (closed || abort.signal.aborted) break;
           pocket.ocrText = text;
+          const visualReview = reviewVisualCandidates(
+            visualHits,
+            visualNumberClues(text),
+          );
+          const existingCards = [
+            ...ctx.catalog,
+            ...ctx.state.holdings.map((holding) => holding.card),
+          ];
+          const localVisual = visualReview.choices.flatMap((hit) => {
+            const sourceId = hit.reference.id.split(':').at(-1)!;
+            return existingCards.filter(
+              (card) =>
+                card.sourceId === sourceId &&
+                card.language === hit.reference.language &&
+                card.setId === hit.reference.setId,
+            );
+          });
+          let resolvedVisual = [...localVisual];
+          if (visualReview.choices.length && navigator.onLine) {
+            // Fetch only the three best image candidates, never a full catalog.
+            const candidateSignal = AbortSignal.any([
+              abort.signal,
+              AbortSignal.timeout(10000),
+            ]);
+            const found = await Promise.allSettled(
+              visualReview.choices.map((hit) => {
+                const sourceId = hit.reference.id.split(':').at(-1)!;
+                return fetchCatalogCard(
+                  sourceId,
+                  hit.reference.language,
+                  candidateSignal,
+                );
+              }),
+            );
+            if (closed || abort.signal.aborted) break;
+            resolvedVisual = [
+              ...found.flatMap((item) =>
+                item.status === 'fulfilled' ? [item.value] : [],
+              ),
+              ...localVisual,
+            ];
+          }
           const local = candidatesFromText(text, [
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
@@ -634,7 +748,11 @@ export function openPageScanner(
             abort.signal,
             AbortSignal.timeout(11000),
           ]);
-          if (navigator.onLine && text.trim()) {
+          if (
+            navigator.onLine &&
+            text.trim() &&
+            (!resolvedVisual.length || visualReview.kind !== 'exact-print')
+          ) {
             try {
               online = await fetchRecognizedCards(
                 text,
@@ -648,7 +766,12 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           let titleHint = '';
-          if (navigator.onLine && text.trim() && !online.length) {
+          if (
+            navigator.onLine &&
+            text.trim() &&
+            !online.length &&
+            !resolvedVisual.length
+          ) {
             try {
               pocket.status.textContent =
                 'Kartenname wird im Katalog gesucht …';
@@ -665,22 +788,24 @@ export function openPageScanner(
             }
           }
           if (closed || abort.signal.aborted) break;
-          displayCandidates(pocket, [...online, ...local]);
+          displayCandidates(pocket, [...resolvedVisual, ...online, ...local]);
           if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
-            : pocket.candidates.length && titleHint
-              ? `„${titleHint}“ erkannt · Ausgabe wählen`
-              : pocket.candidates.length
-                ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
-                : !navigator.onLine
-                  ? 'Offline · Katalogabgleich benötigt Internet'
-                  : catalogFailed
-                    ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
-                    : text.trim()
-                      ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
-                      : 'Kein lesbarer Kartenname · Foto prüfen';
+            : resolvedVisual.length
+              ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
+              : pocket.candidates.length && titleHint
+                ? `„${titleHint}“ erkannt · Ausgabe wählen`
+                : pocket.candidates.length
+                  ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
+                  : !navigator.onLine
+                    ? 'Offline · Katalogabgleich benötigt Internet'
+                    : catalogFailed
+                      ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
+                      : text.trim()
+                        ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                        : 'Kein lesbarer Kartenname · Foto prüfen';
         } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;

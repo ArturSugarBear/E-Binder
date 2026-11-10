@@ -53,7 +53,12 @@ export default defineConfig({
         skipWaiting: false,
         clientsClaim: false,
         globPatterns: ['**/*.{html,js,css,json,woff2,svg,png,webmanifest}'],
-        globIgnores: ['**/assets/cards/**', '**/assets/ocr/**', '**/*.map'],
+        globIgnores: [
+          '**/assets/cards/**',
+          '**/assets/ocr/**',
+          '**/assets/vision/**',
+          '**/*.map',
+        ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: base + 'index.html',
         navigateFallbackAllowlist: [
@@ -98,6 +103,38 @@ export default defineConfig({
               expiration: {
                 maxEntries: 120,
                 maxAgeSeconds: 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
+            },
+          },
+          {
+            urlPattern: new RegExp(
+              basePattern + 'assets/vision/manifest\\.json$',
+            ),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'e-binder-visual-manifest',
+              networkTimeoutSeconds: 5,
+              cacheableResponse: { statuses: [200] },
+              expiration: {
+                maxEntries: 2,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+                purgeOnQuotaError: true,
+              },
+            },
+          },
+          {
+            urlPattern: new RegExp(
+              basePattern +
+                'assets/vision/(?:visual-model-[A-Za-z0-9_.-]+\\.onnx|index-[A-Za-z0-9_.-]+\\.i8|references-[A-Za-z0-9_.-]+\\.json)$',
+            ),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'e-binder-visual-models',
+              cacheableResponse: { statuses: [200] },
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 24 * 60 * 60,
                 purgeOnQuotaError: true,
               },
             },

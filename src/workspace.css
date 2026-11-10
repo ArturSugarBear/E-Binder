@@ -2339,3 +2339,54 @@ textarea.w-input,
     min-height: 54px;
   }
 }
+
+/* Image-first scan: only the best three alternatives are immediately tappable. */
+.w-page-scan-candidates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.w-page-scan-candidates:empty {
+  display: none;
+}
+.w-page-scan-candidate {
+  min-width: 0;
+  padding: 6px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  text-align: left;
+  border: 1px solid var(--w-border);
+  border-radius: 10px;
+  background: var(--raised);
+  color: var(--ink);
+}
+.w-page-scan-candidate[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgb(106 208 224 / 0.25);
+}
+.w-page-scan-candidate .card-art {
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  min-width: 0;
+  overflow: hidden;
+}
+.w-page-scan-candidate-caption {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.w-page-scan-candidate-caption strong,
+.w-page-scan-candidate-caption small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-size: 11px;
+}
+@media (max-width: 640px) {
+  .w-page-scan-pocket:has(.w-page-scan-editor[open]) .w-page-scan-candidates {
+    grid-column: 1 / -1;
+  }
+}

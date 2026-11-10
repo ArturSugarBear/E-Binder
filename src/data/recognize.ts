@@ -59,7 +59,7 @@ export function createRecognitionSession(
       );
     }
   };
-  const recognize = (photo: Blob): Promise<string> =>
+  const recognize = (photo: Blob, numberOnly = false): Promise<string> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -82,6 +82,7 @@ export function createRecognitionSession(
         worker.postMessage({
           id,
           photo,
+          numberOnly,
           modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
           dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
         });
