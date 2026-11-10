@@ -28,8 +28,19 @@ async function addFirst(page: Page, quantity = '1'): Promise<void> {
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByLabel('Karte suchen', { exact: true }).fill('Floink');
-  await dialog.locator('.w-search-results button').first().click();
+  // Inventory tests require this exact edition, not whichever live search hit
+  // happens to arrive first. Catalogue searching is covered separately.
+  await dialog
+    .getByRole('button', { name: 'Karte manuell eintragen', exact: true })
+    .click();
+  await dialog.getByLabel('Kartenname', { exact: true }).fill('Floink');
+  await dialog
+    .getByRole('textbox', { name: 'Set', exact: true })
+    .fill('Weiße Flammen');
+  await dialog.getByLabel('Sammlernummer', { exact: true }).fill('096/086');
+  await dialog
+    .getByRole('button', { name: 'Angaben und Menge prüfen', exact: true })
+    .click();
   await dialog
     .getByLabel('Druckvariante', { exact: true })
     .selectOption('holo');
