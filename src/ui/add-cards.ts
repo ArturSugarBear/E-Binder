@@ -146,7 +146,7 @@ export function openAddCards(
     ),
     action('Karte manuell eintragen', () => manualForm(), 'text'),
   );
-  captureStart.hidden = Boolean(options.correctHoldingId);
+  captureStart.hidden = Boolean(options.correctHoldingId || options.card);
   const advancedCatalog = el(
     'details',
     'w-add-catalog-advanced',
@@ -540,6 +540,7 @@ export function openAddCards(
     }
   }
   function choose(card: PersonalCard): void {
+    captureStart.hidden = true;
     interrupt();
     selected = card;
     details.replaceChildren();
@@ -865,5 +866,6 @@ export function openAddCards(
   else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
   else results.replaceChildren();
   if (options.photos) gallery.click();
-  else search.focus();
+  else if (options.browse || options.setId || options.artist) search.focus();
+  else if (!options.card) scanBinder.focus({ preventScroll: true });
 }
