@@ -98,7 +98,9 @@ export function createCatalogBrowser(options: Options) {
     el(
       'summary',
       '',
-      options.standalone ? 'Alle Sets und Reihen' : 'Sets und Illustratoren entdecken',
+      options.standalone
+        ? 'Alle Sets und Reihen'
+        : 'Sets und Illustratoren entdecken',
     ),
     el(
       'div',
@@ -274,7 +276,10 @@ export function createCatalogBrowser(options: Options) {
       const meter = el('progress', 'w-set-progress') as HTMLProgressElement;
       meter.max = current.cardCount.official;
       meter.value = Math.min(ownedEditions, meter.max);
-      meter.setAttribute('aria-label', `${ownedEditions} von ${meter.max} Setpositionen`);
+      meter.setAttribute(
+        'aria-label',
+        `${ownedEditions} von ${meter.max} Setpositionen`,
+      );
       info.append(meter);
     }
     selectedSet.append(
@@ -399,13 +404,23 @@ export function createCatalogBrowser(options: Options) {
         const ownedEditions = editionsInSet(item.id);
         if (ownedEditions) {
           label.append(
-            el('small', 'w-set-owned-note', `${ownedEditions} Ausgaben gesammelt`),
+            el(
+              'small',
+              'w-set-owned-note',
+              `${ownedEditions} Ausgaben gesammelt`,
+            ),
           );
           if (item.cardCount.official) {
-            const meter = el('progress', 'w-set-progress') as HTMLProgressElement;
+            const meter = el(
+              'progress',
+              'w-set-progress',
+            ) as HTMLProgressElement;
             meter.max = item.cardCount.official;
             meter.value = Math.min(ownedEditions, meter.max);
-            meter.setAttribute('aria-label', `${ownedEditions} von ${meter.max} Setpositionen`);
+            meter.setAttribute(
+              'aria-label',
+              `${ownedEditions} von ${meter.max} Setpositionen`,
+            );
             label.append(meter);
           }
         }

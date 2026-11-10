@@ -114,7 +114,9 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     () => {
       setGallery.open = false;
       status.replaceChildren(
-        message('Suche eine Karte oder wähle oben ein Set. Erst nach deiner Bestätigung wird sie deinem Bestand hinzugefügt.'),
+        message(
+          'Suche eine Karte oder wähle oben ein Set. Erst nach deiner Bestätigung wird sie deinem Bestand hinzugefügt.',
+        ),
       );
       search.focus({ preventScroll: true });
     },

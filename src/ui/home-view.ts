@@ -75,7 +75,11 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       el(
         'div',
         'w-home-section-heading',
-        el('h2', '', copies ? 'Dein nächster Schritt' : 'Starte, wie du sammelst'),
+        el(
+          'h2',
+          '',
+          copies ? 'Dein nächster Schritt' : 'Starte, wie du sammelst',
+        ),
       ),
       el(
         'div',
