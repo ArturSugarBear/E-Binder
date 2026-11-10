@@ -278,25 +278,37 @@ export function createCatalogBrowser(options: Options) {
   }
   function setIcon(item: CatalogSet): HTMLElement {
     const icon = el('span', 'w-set-symbol', item.id.toUpperCase());
-    const base = item.logo || item.symbol;
-    if (base) {
-      try {
-        const url = new URL(base);
-        if (url.protocol === 'https:' && url.hostname === 'assets.tcgdex.net') {
-          const image = el('img');
-          image.alt = '';
-          image.loading = 'lazy';
+    // Prefer the publisher logo; try the exact set symbol before falling
+    // back to readable text. Neither source may point to arbitrary hosts.
+    const sources = [item.logo, item.symbol].filter(
+      (value): value is string => Boolean(value),
+    );
+    const image = el('img');
+    image.alt = '';
+    image.loading = 'lazy';
+    let index = 0;
+    const advance = () => {
+      while (index < sources.length) {
+        const base = sources[index++]!;
+        try {
+          const url = new URL(base);
+          if (
+            url.protocol !== 'https:' ||
+            url.hostname !== 'assets.tcgdex.net'
+          )
+            continue;
           image.src = `${base}.webp`;
-          image.addEventListener('error', () => {
-            image.remove();
-            icon.textContent = item.id.toUpperCase();
-          });
           icon.replaceChildren(image);
+          return;
+        } catch {
+          // Ignore malformed catalogue image paths.
         }
-      } catch {
-        /* A missing set symbol keeps the readable abbreviation. */
       }
-    }
+      image.remove();
+      icon.textContent = item.id.toUpperCase();
+    };
+    image.addEventListener('error', advance);
+    advance();
     return icon;
   }
   function renderSets(): void {
