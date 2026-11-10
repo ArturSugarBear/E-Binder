@@ -25,13 +25,21 @@ export function initCollectorMaterial(): void {
   optic.setAttribute('frost', '0.14');
   optic.setAttribute('saturation', '135');
   nav.prepend(optic);
-  customElements
-    .whenDefined('liquid-glass')
-    .then(() => {
-      if (nav.isConnected && optic.isConnected)
-        nav.classList.add('w-liquid-ready');
-    })
-    .catch(() => undefined);
+  // The library can deliberately fall back to blur when WebGL/SVG is
+  // unavailable. Never remove the solid dock backdrop in that case.
+  const refresh = () => {
+    const strategy = optic.getAttribute('data-glass-strategy');
+    nav.classList.toggle(
+      'w-liquid-ready',
+      strategy === 'webgl' || strategy === 'svg',
+    );
+  };
+  const watcher = new MutationObserver(refresh);
+  watcher.observe(optic, {
+    attributes: true,
+    attributeFilter: ['data-glass-strategy'],
+  });
+  customElements.whenDefined('liquid-glass').then(refresh).catch(refresh);
 }
 
 /** Navigation should feel spatial, not repaint dozens of unrelated tiles. */
