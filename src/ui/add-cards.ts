@@ -256,9 +256,7 @@ export function openAddCards(
         : 'Offene Aufnahmen entfernt',
       (state) =>
         changeState(state, (next) => {
-          next.captures = next.captures.filter(
-            (shot) => !removed.has(shot.id),
-          );
+          next.captures = next.captures.filter((shot) => !removed.has(shot.id));
         }),
     );
     if (!ok) return;
@@ -363,7 +361,11 @@ export function openAddCards(
       const history = el(
         'details',
         'w-capture-history',
-        el('summary', '', `Bereits übernommene Aufnahmen (${confirmed.length})`),
+        el(
+          'summary',
+          '',
+          `Bereits übernommene Aufnahmen (${confirmed.length})`,
+        ),
       );
       const completed = el('div', 'w-capture-list');
       for (const shot of [...confirmed].reverse().slice(0, 30)) {
