@@ -7,6 +7,7 @@ import {
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
 import { alignPhoto } from './photo-crop';
+import { openLiveScanner } from './live-scan';
 import { createCatalogBrowser } from './catalog-browser';
 import {
   changeState,
@@ -40,6 +41,7 @@ export function openAddCards(
   options: AddOptions = {},
 ): void {
   const transientPhotos = new Map<string, Blob>();
+  const alignedCaptures = new Set<string>();
   const previewUrls = new Set<string>();
   const sheet = modal(
     options.correctHoldingId ? 'Ausgabe korrigieren' : 'Karten hinzufügen',
@@ -96,6 +98,7 @@ export function openAddCards(
   sheet.onClose(() => {
     closed = true;
     transientPhotos.clear();
+    alignedCaptures.clear();
     for (const url of previewUrls) URL.revokeObjectURL(url);
     previewUrls.clear();
     browser.close();
@@ -119,9 +122,15 @@ export function openAddCards(
     'upload',
   );
   const takePhoto = action(
-    'Karte fotografieren',
-    () => camera.click(),
-    'secondary',
+    'Karte live scannen',
+    () =>
+      openLiveScanner(
+        async (file, aligned) => {
+          await addFiles([file], true, aligned);
+        },
+        () => camera.click(),
+      ),
+    'primary',
     'camera',
   );
   const scanBinder = action(
@@ -130,7 +139,7 @@ export function openAddCards(
       sheet.close();
       ctx.openPageScan();
     },
-    'primary',
+    'secondary',
     'binder',
   );
   const captureStart = el(
@@ -253,7 +262,10 @@ export function openAddCards(
         }),
     );
     if (!ok) return;
-    for (const id of removed) transientPhotos.delete(id);
+    for (const id of removed) {
+      transientPhotos.delete(id);
+      alignedCaptures.delete(id);
+    }
     if (captureId && removed.has(captureId)) {
       captureId = ctx.state.captures.find(
         (shot) => shot.status === 'pending',
@@ -374,8 +386,9 @@ export function openAddCards(
   };
 
   async function addFiles(
-    files: FileList | null,
+    files: FileList | File[] | null,
     fromCamera = false,
+    autoAligned = false,
   ): Promise<void> {
     if (!files?.length) return;
     interrupt();
@@ -404,6 +417,7 @@ export function openAddCards(
         const existing = ctx.state.captures.find((item) => item.hash === hash);
         if (existing) {
           transientPhotos.set(existing.id, file);
+          if (autoAligned) alignedCaptures.add(existing.id);
           first ??= existing.id;
           repeats++;
           continue;
@@ -419,6 +433,7 @@ export function openAddCards(
           candidates: [],
         };
         transientPhotos.set(shot.id, file);
+        if (autoAligned) alignedCaptures.add(shot.id);
         if (
           !ctx.commit('Foto zur Erfassung hinzugefügt', (state) =>
             changeState(state, (next) => {
@@ -495,7 +510,9 @@ export function openAddCards(
         throw new Error(
           'Die Aufnahme ist nicht mehr geöffnet. Fotografiere die Karte erneut; Bilder werden nicht gespeichert.',
         );
-      const aligned = await alignPhoto(photo, controller.signal);
+      const aligned = alignedCaptures.has(shot.id)
+        ? photo
+        : await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
         if (!closed && ocrController === controller)
           tell(
@@ -820,6 +837,7 @@ export function openAddCards(
       if (ok) {
         if (shot) {
           transientPhotos.delete(shot.id);
+          alignedCaptures.delete(shot.id);
           ocrController?.abort();
           ocrController = undefined;
           captureId = ctx.state.captures.find(
