@@ -17,7 +17,7 @@ export async function createVisualSearchSession(
   try {
     const response = await fetch(manifestUrl, {
       signal,
-      cache: 'force-cache',
+      cache: 'no-cache',
     });
     if (!response.ok) return null;
   } catch {
