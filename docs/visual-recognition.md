@@ -46,3 +46,19 @@ Ein öffentliches DINOv3- oder MobileCLIP-Modell darf nicht ungeprüft eingepack
 Der vorliegende Fotosatz ist eine **Testbasis, kein bereits bestandener Benchmark**. Er enthält deutsche und japanische Drucke, Duplikate, stark reflektierende Karten und leere Fächer. Die 306 Positionen müssen mit exakter Set-ID, Karten-ID, Sprache, tatsächlicher Belegung und bei Bedarf Variante annotiert werden.
 
 Erst mit Modell und freigegebenem Referenzindex werden folgende Werte vergleichbar gemessen: korrektes Top-1/Top-5 pro besetztem Fach, falsche Zuordnungen, falsche Leertaschen, Anteil manueller Korrekturen, p50/p95 je Karte und je Seite, maximaler RAM-Verbrauch und Modell-Erstladezeit auf dem echten iPhone. Die privaten Fotos dürfen **nicht** ins öffentliche GitHub-Repository hochgeladen werden.
+
+## Reproduzierbarer Weg von Referenzbildern zum lokalen Index
+
+Ein vorbereitender Offline-Schritt kann die Referenzen jetzt **aus lokal vorliegenden, rechtmäßig nutzbaren Kartenbildern** erzeugen, ohne die Fotografien zu einem Dienst hochzuladen:
+
+```sh
+python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'onnxruntime>=1.20,<2'
+python scripts/embed-card-references.py ./image-manifest.json ./approved-model.onnx ./embeddings.json
+node scripts/pack-visual-index.mjs ./embeddings.json ./approved-model.onnx ./public/assets/vision
+```
+
+Das `image-manifest.json` enthält `modelId`, `preprocessing` sowie `references` mit Karten-ID, Sprache, Set, Sammlernummer und relativem lokalen `path` zum Bild. Der Embedding-Generator akzeptiert ausschließlich Dateien unterhalb des Manifest-Verzeichnisses und validiert die Modellantwort. Anschließend packt das Node-Skript die Vektoren und Originalreferenzen in die konsistente `int8`-Datenbank. **Weder Skript noch App laden eigenständig fremde Kartenbilder massenhaft herunter.**
+
+Als technisch nachvollziehbarer, grundsätzlich offener Kandidat eignet sich `facebook/dinov2-small` (Apache-2.0-Modell, 384 Dimensionen); ONNX-Konvertierungen davon existieren unter `onnx-community/dinov2-small-ONNX`. Anders als die 14-MB-Angabe aus dem Wettbewerbsbeispiel ist das unquantisierte Modell deutlich größer; Größe, iPhone-Laufzeit, echte Bildtreffer und die Lizenz der verwendeten Bilder müssen vor der produktiven Auslieferung geprüft werden. Für DINOv2 setzt der Manifest-Vertrag `preprocessing: "imagenet-meanstd-chw-stretch"` voraus. Die Python- und Browser-Vorverarbeitung verwenden dieselben Kanalmittelwerte und Standardabweichungen, kleine Unterschiede beim Resampling sind im Realfoto-Benchmark zu messen. Der vorherige `rgb-0-1-chw-stretch`-Modus bleibt für entsprechend trainierte Modelle erhalten.
+
+Wird später ein neues Set hinzugefügt, reicht es, seine **lizenzierten Referenzbilder** mit der gleichen Modellversion einzubetten, die Kandidatenliste zu erweitern und den Index neu zu paketieren. Wird das Modell verändert, muss dagegen der **gesamte Katalog** mit neuer `modelId` neu eingebettet werden. Ein modellübergreifend gemischter Index ist nicht zulässig.
