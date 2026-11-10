@@ -1,0 +1,29 @@
+name: Temporary glass-shell formatter
+on:
+  push:
+    branches:
+      - feat/rare-room-glass-navigation-home-20261110
+permissions:
+  contents: write
+jobs:
+  prettier:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/rare-room-glass-navigation-home-20261110
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write index.html src/ui/home-view.ts src/ui/profile-view.ts src/ui/vault-tabs.ts src/ui/workspace.ts src/workspace.css tests/e2e/glass-shell.spec.ts tests/e2e/pwa.spec.ts
+      - name: Commit formatted files and remove temporary formatter
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/glass-format-temp.yml
+          git add index.html src/ui/home-view.ts src/ui/profile-view.ts src/ui/vault-tabs.ts src/ui/workspace.ts src/workspace.css tests/e2e/glass-shell.spec.ts tests/e2e/pwa.spec.ts
+          git commit -m "Format glass shell and remove temporary formatter"
+          git push origin HEAD:refs/heads/feat/rare-room-glass-navigation-home-20261110
