@@ -492,7 +492,13 @@ export async function startWorkspace(): Promise<void> {
       const remembered = localStorage.getItem('e-binder-route');
       if (
         remembered &&
-        ['sammlung', 'binder', 'portfolio', 'wunschliste', 'entdecken'].includes(remembered)
+        [
+          'sammlung',
+          'binder',
+          'portfolio',
+          'wunschliste',
+          'entdecken',
+        ].includes(remembered)
       )
         route = remembered;
     } catch {

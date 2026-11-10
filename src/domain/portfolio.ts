@@ -1,8 +1,4 @@
-import {
-  numberKey,
-  type Holding,
-  type PersonalState,
-} from './personal';
+import { numberKey, type Holding, type PersonalState } from './personal';
 
 export interface PortfolioQuote {
   amount: number;
@@ -101,9 +97,7 @@ export function summarizePortfolio(
   const holdings = state.holdings.map((holding): PortfolioHolding => {
     const key = portfolioQuoteKey(holding);
     const candidate = key ? quotes.get(key) : undefined;
-    const unitValue = isUsableQuote(candidate, key)
-      ? candidate.amount
-      : null;
+    const unitValue = isUsableQuote(candidate, key) ? candidate.amount : null;
     return {
       holding,
       quoteKey: key,
@@ -117,8 +111,7 @@ export function summarizePortfolio(
     0,
   );
   const pricedCopies = holdings.reduce(
-    (total, row) =>
-      total + (row.unitValue === null ? 0 : row.holding.quantity),
+    (total, row) => total + (row.unitValue === null ? 0 : row.holding.quantity),
     0,
   );
   const binders = state.binders.map((binder): PortfolioBinder => {

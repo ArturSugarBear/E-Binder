@@ -80,11 +80,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'w-portfolio-hero-copy',
         el('p', 'w-eyebrow', 'Rare Room / Dein Sammelwert'),
         el('h1', '', 'Dein Portfolio'),
-        el(
-          'p',
-          'w-portfolio-hero-label',
-          'Erfasster Cardmarket-Katalogtrend',
-        ),
+        el('p', 'w-portfolio-hero-label', 'Erfasster Cardmarket-Katalogtrend'),
         el('p', 'w-portfolio-balance', value),
         el(
           'p',
@@ -104,13 +100,15 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       el(
         'div',
         'w-portfolio-hero-art',
-        ...top.slice(0, 3).map((row) =>
-          el(
-            'div',
-            'w-portfolio-art-card',
-            ctx.images.artwork(row.holding.card),
+        ...top
+          .slice(0, 3)
+          .map((row) =>
+            el(
+              'div',
+              'w-portfolio-art-card',
+              ctx.images.artwork(row.holding.card),
+            ),
           ),
-        ),
       ),
     );
 
@@ -119,7 +117,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       'w-portfolio-stats',
       stat('Karten im Bestand', String(count), 'Physisch bestätigt'),
       stat('Preisreferenzen', `${priced} / ${count}`, 'Nicht geschätzt'),
-      stat('Ohne Preisreferenz', String(overview.missingCopies), 'Offen ausgewiesen'),
+      stat(
+        'Ohne Preisreferenz',
+        String(overview.missingCopies),
+        'Offen ausgewiesen',
+      ),
       stat(
         'Deine Binder',
         String(ctx.state.binders.length),
@@ -217,7 +219,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         );
         button.classList.add('w-portfolio-leader');
         button.replaceChildren(
-          el('div', 'w-portfolio-leader-image', ctx.images.artwork(holding.card)),
+          el(
+            'div',
+            'w-portfolio-leader-image',
+            ctx.images.artwork(holding.card),
+          ),
           el(
             'div',
             'w-portfolio-leader-info',
@@ -260,7 +266,12 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         message(
           'Noch kein Binder angelegt. Sobald du Karten auf Seiten platzierst, erscheint hier der Wert je Binderseite.',
         ),
-        action('Binder anlegen', () => ctx.navigate('binder'), 'secondary', 'binder'),
+        action(
+          'Binder anlegen',
+          () => ctx.navigate('binder'),
+          'secondary',
+          'binder',
+        ),
       );
     else
       for (const binder of overview.binders) {
@@ -300,21 +311,18 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           const row = pages.children[index]!;
           row.replaceChildren(
             el('span', '', page.title),
-            el(
-              'small',
-              '',
-              `${page.pricedSlots}/${page.slots} Karten`,
-            ),
-            el(
-              'strong',
-              '',
-              shownValue(page.knownValue, page.pricedSlots),
-            ),
+            el('small', '', `${page.pricedSlots}/${page.slots} Karten`),
+            el('strong', '', shownValue(page.knownValue, page.pricedSlots)),
           );
         }
         details.append(
           pages,
-          action('Binder öffnen', () => openBinder(binder.id), 'secondary', 'binder'),
+          action(
+            'Binder öffnen',
+            () => openBinder(binder.id),
+            'secondary',
+            'binder',
+          ),
         );
         book.append(details);
       }
@@ -355,7 +363,8 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             controller.signal,
             false,
           );
-          const price = holding.finish === 'holo' ? entry.holoPrice : entry.price;
+          const price =
+            holding.finish === 'holo' ? entry.holoPrice : entry.price;
           return { key, price, finish: holding.finish };
         }),
       );

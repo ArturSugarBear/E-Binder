@@ -15,9 +15,10 @@ test('portfolio opens directly without inventing a zero market price', async ({
   await expect(
     page.getByRole('heading', { name: 'Wert deiner Binder' }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Portfolio' }),
-  ).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('link', { name: 'Portfolio' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth,

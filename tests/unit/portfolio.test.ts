@@ -123,7 +123,9 @@ describe('honest portfolio calculations', () => {
     expect(portfolioQuoteKey({ ...holding('h'), finish: 'holo' })).toBe(
       'de:sv01-211:holo',
     );
-    expect(portfolioQuoteKey({ ...holding('r'), finish: 'reverse' })).toBeNull();
+    expect(
+      portfolioQuoteKey({ ...holding('r'), finish: 'reverse' }),
+    ).toBeNull();
     expect(
       portfolioQuoteKey({ ...holding('x'), variantNote: '1. Auflage' }),
     ).toBeNull();
@@ -140,10 +142,10 @@ describe('honest portfolio calculations', () => {
       }),
     ).toBeNull();
     const state = emptyState();
-    state.holdings.push(
-      holding('normal', 2),
-      { ...holding('holo', 1), finish: 'holo' },
-    );
+    state.holdings.push(holding('normal', 2), {
+      ...holding('holo', 1),
+      finish: 'holo',
+    });
     const quotes = new Map<string, PortfolioQuote>([
       ['de:sv01-211:normal', normal],
       ['de:sv01-211:holo', { ...normal, variant: 'normal' }],
