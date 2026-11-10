@@ -85,11 +85,13 @@ if (model.length < 1024)
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const directory = resolve(outputDirectory);
 await mkdir(directory, { recursive: true });
-const modelName = 'visual-model.onnx';
+const modelName = `visual-model-${parsed.modelId}.onnx`;
+const indexName = `index-${parsed.modelId}.i8`;
+const referencesName = `references-${parsed.modelId}.json`;
 await copyFile(resolve(modelFile), join(directory, modelName));
-await writeFile(join(directory, 'index.i8'), packed);
+await writeFile(join(directory, indexName), packed);
 const referencesBytes = Buffer.from(JSON.stringify(references));
-await writeFile(join(directory, 'references.json'), referencesBytes);
+await writeFile(join(directory, referencesName), referencesBytes);
 await writeFile(
   join(directory, 'manifest.json'),
   JSON.stringify(
@@ -102,9 +104,9 @@ await writeFile(
       pooling: 'cls',
       modelFile: modelName,
       modelSha256: sha256(model),
-      indexFile: 'index.i8',
+      indexFile: indexName,
       indexSha256: sha256(packed),
-      referencesFile: 'references.json',
+      referencesFile: referencesName,
       referencesSha256: sha256(referencesBytes),
       count: entries.length,
     },
