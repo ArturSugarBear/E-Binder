@@ -71,6 +71,22 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       .sort((a, b) => b.totalValue! - a.totalValue!)
       .slice(0, 6);
     const value = shownValue(overview.knownValue, priced);
+    const grouped = new Map<string, { name: string; copies: number; priced: number; total: number }>();
+    for (const row of overview.holdings) {
+      const id = `${row.holding.card.language}:${row.holding.card.setId || row.holding.card.setName}`;
+      const group = grouped.get(id) ?? {
+        name: row.holding.card.setName,
+        copies: 0,
+        priced: 0,
+        total: 0,
+      };
+      group.copies += row.holding.quantity;
+      if (row.unitValue !== null) {
+        group.priced += row.holding.quantity;
+        group.total += row.totalValue ?? 0;
+      }
+      grouped.set(id, group);
+    }
 
     const hero = el(
       'header',
@@ -180,6 +196,43 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       );
     }
 
+    const bySet = el(
+      'section',
+      'w-portfolio-section w-portfolio-by-set',
+      el('div', 'w-portfolio-section-head', el('h2', '', 'Deine Sets im Überblick')),
+    );
+    if (!count) {
+      bySet.append(message('Sobald du Karten besitzt, erscheint hier ihre Verteilung nach Sets.'));
+    } else {
+      const entries = [...grouped.values()].sort((a, b) => b.copies - a.copies).slice(0, 8);
+      const peak = entries[0]?.copies ?? 1;
+      bySet.append(
+        el('p', 'w-muted', 'Balken = Kartenanzahl. EUR-Werte werden nur bei verifizierten Preisreferenzen angezeigt.'),
+      );
+      const chart = el('div', 'w-portfolio-set-chart');
+      for (const group of entries) {
+        const fill = el('span', 'w-portfolio-set-fill');
+        fill.style.width = `${Math.round((100 * group.copies) / peak)}%`;
+        const bar = el('span', 'w-portfolio-set-track', fill);
+        bar.setAttribute('aria-label', `${group.copies} Exemplare aus ${group.name}`);
+        chart.append(
+          el(
+            'div',
+            'w-portfolio-set-row',
+            el('span', 'w-portfolio-set-label',
+              el('strong', '', group.name),
+              el('small', '', `${group.copies} Exemplare · ${group.priced} mit Preis`),
+            ),
+            bar,
+            el('strong', 'w-portfolio-set-value',
+              group.priced ? euros.format(group.total) : '—',
+            ),
+          ),
+        );
+      }
+      bySet.append(chart);
+    }
+
     const leaders = el(
       'section',
       'w-portfolio-section',
@@ -200,6 +253,15 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             'Füge Karten hinzu und bestätige die genaue Ausgabe. Die Portfolioansicht ergänzt dann passende Preisinformationen.',
           ),
           action('Karte hinzufügen', () => ctx.openAdd(), 'primary', 'plus'),
+          ...(ctx.state.mode === 'personal'
+            ? [action(
+                'Beispielportfolio ansehen',
+                () => void ctx.switchMode('demo').then(() => {
+                  if (ctx.state.mode === 'demo') ctx.navigate('portfolio');
+                }),
+                'secondary',
+              )]
+            : []),
         ),
       );
     else if (!top.length)
@@ -249,6 +311,44 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         grid.append(button);
       }
       leaders.append(grid);
+    }
+
+    const missing = el(
+      'section',
+      'w-portfolio-section w-portfolio-missing',
+      el('div', 'w-portfolio-section-head',
+        el('h2', '', 'Ohne Marktwert'),
+        el('span', 'w-portfolio-overline', `${overview.missingCopies} Exemplare`),
+      ),
+    );
+    if (overview.missingCopies) {
+      const list = el('div', 'w-portfolio-missing-grid');
+      for (const row of overview.holdings.filter((item) => item.unitValue === null).slice(0, 12)) {
+        const card = row.holding.card;
+        const reason = card.source !== 'tcgdex'
+          ? 'Nicht mit einer geprüften Katalogausgabe verknüpft'
+          : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
+            ? 'Druckvariante noch nicht eindeutig bepreist'
+            : row.holding.variantNote
+              ? 'Sonderauflage ohne gesicherten Vergleichspreis'
+              : 'Für diese Ausgabe noch keine Preisreferenz';
+        const button = action(
+          `${card.name} ansehen`,
+          () => ctx.openHolding(row.holding.id),
+          'secondary',
+        );
+        button.classList.add('w-portfolio-missing-card');
+        button.replaceChildren(
+          el('span', 'w-portfolio-missing-art', ctx.images.artwork(card)),
+          el('span', 'w-portfolio-missing-copy',
+            el('strong', '', card.name),
+            el('small', '', `${card.setName} · ${card.number}`),
+            el('small', '', reason),
+          ),
+        );
+        list.append(button);
+      }
+      missing.append(list);
     }
 
     const book = el(
@@ -332,7 +432,16 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       'w-portfolio-footnote',
       'Wichtig: Angezeigte Werte beruhen ausschließlich auf verfügbaren EUR-Katalogtrends exakt passender deutscher TCGdex-Ausgaben (Normal/Holo, soweit vorhanden). Reverse-Holo, Grading, signierte oder unbekannte Varianten bleiben unbewertet. Fehlende Preise zählen nicht als 0 €. Es handelt sich weder um eine garantierte Verkaufssumme noch um echte „Last Sold“-Daten.',
     );
-    content.replaceChildren(hero, overviewStats, source, leaders, book, foot);
+    content.replaceChildren(
+      hero,
+      overviewStats,
+      bySet,
+      source,
+      leaders,
+      ...(overview.missingCopies ? [missing] : []),
+      book,
+      foot,
+    );
   }
 
   function stat(title: string, value: string, caption: string): HTMLElement {

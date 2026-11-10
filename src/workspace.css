@@ -3599,3 +3599,25 @@ textarea.w-input,
     font-size: 10px;
   }
 }
+/* Set distribution is based on confirmed card counts, never fake market history. */
+.w-portfolio-set-chart { display: grid; gap: 12px; }
+.w-portfolio-set-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(65px, 1.2fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.w-portfolio-set-label, .w-portfolio-missing-copy { display: grid; gap: 5px; min-width: 0; }
+.w-portfolio-set-label strong, .w-portfolio-missing-copy strong { overflow-wrap: anywhere; font-size: 13px; }
+.w-portfolio-set-label small, .w-portfolio-missing-copy small { color: var(--ink-2); font-size: 11px; overflow-wrap: anywhere; }
+.w-portfolio-set-track { display: block; height: 10px; border-radius: 999px; overflow: hidden; background: var(--raised); border: 1px solid var(--glass-stroke); }
+.w-portfolio-set-fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.w-portfolio-set-value { min-width: 62px; font: 600 12px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.w-portfolio-missing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; }
+.w-portfolio-missing-card.w-button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px; border: 1px solid var(--glass-stroke); background: var(--glass-background); border-radius: 14px; }
+.w-portfolio-missing-art { width: 48px; flex: none; }
+.w-portfolio-missing-art .card-art { width: 100%; }
+@media (max-width: 600px) {
+  .w-portfolio-set-row { grid-template-columns: minmax(0, 1fr) 90px; gap: 7px; }
+  .w-portfolio-set-track { grid-column: 1 / -1; grid-row: 2; }
+}
