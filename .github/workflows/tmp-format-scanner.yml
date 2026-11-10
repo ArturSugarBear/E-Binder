@@ -1,0 +1,29 @@
+name: Temporary formatter for scanner PR
+on:
+  push:
+    branches:
+      - feat/scanner-auto-page-outline-20261110
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format only scanner PR files
+        run: |
+          npx prettier --write src/domain/page-outline.ts src/ui/photo-crop.ts tests/unit/page-outline.test.ts tests/e2e/binder-page-scan.spec.ts
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/domain/page-outline.ts src/ui/photo-crop.ts tests/unit/page-outline.test.ts tests/e2e/binder-page-scan.spec.ts
+            git commit -m "Format new scanner geometry code"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
