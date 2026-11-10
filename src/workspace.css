@@ -2427,7 +2427,7 @@ textarea.w-input,
 }
 .w-live-stage {
   position: relative;
-  width: min(100%, 400px);
+  width: min(100%, 400px, 45dvh);
   aspect-ratio: 3 / 4;
   max-height: min(60dvh, 560px);
   margin-inline: auto;
