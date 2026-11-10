@@ -46,6 +46,7 @@ type Pocket = {
   search: HTMLInputElement;
   status: HTMLElement;
   quality: HTMLElement;
+  quickChoices?: HTMLElement;
   container?: HTMLElement;
   ocrText?: string;
 };
@@ -338,6 +339,14 @@ export function openPageScanner(
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
     if (pocket.container) pocket.container.dataset.decision = pocket.decision;
+    pocket.quickChoices
+      ?.querySelectorAll<HTMLButtonElement>('.w-page-scan-candidate')
+      .forEach((button, index) =>
+        button.setAttribute(
+          'aria-pressed',
+          String(pocket.decision === 'card' && pocket.select.value === `card:${index}`),
+        ),
+      );
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -380,6 +389,28 @@ export function openPageScanner(
       pocket.select.append(choice);
     }
     pocket.select.value = value;
+    pocket.quickChoices?.replaceChildren();
+    for (const [index, card] of pocket.candidates.slice(0, 3).entries()) {
+      const choice = action(
+        `${card.name} · ${card.setName} · ${card.number}`,
+        () => {
+          pocket.select.value = `card:${index}`;
+          updatePocket(pocket);
+        },
+        'card',
+      );
+      choice.classList.add('w-page-scan-candidate');
+      choice.replaceChildren(
+        ctx.images.artwork(card),
+        el('span', 'w-page-scan-candidate-caption',
+          el('strong', '', card.name),
+          el('small', '', `${card.setName} · ${card.number}`),
+        ),
+      );
+      choice.setAttribute('aria-label',
+        `${card.name}, ${card.setName}, ${card.number} für Fach auswählen`);
+      pocket.quickChoices?.append(choice);
+    }
     updatePocket(pocket);
   };
   const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
@@ -495,7 +526,9 @@ export function openPageScanner(
         'w-muted w-page-scan-quality',
         'Bildqualität wird geprüft …',
       );
+      const quickChoices = el('div', 'w-page-scan-candidates');
       const pocket: Pocket = {
+        quickChoices,
         candidates: [],
         decision: 'pending',
         select: pick,
@@ -538,6 +571,7 @@ export function openPageScanner(
           'details',
           'w-page-scan-editor',
           el('summary', '', 'Prüfen / ändern'),
+          quickChoices,
           pick,
           finish,
           variant,
