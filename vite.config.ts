@@ -53,7 +53,12 @@ export default defineConfig({
         skipWaiting: false,
         clientsClaim: false,
         globPatterns: ['**/*.{html,js,css,json,woff2,svg,png,webmanifest}'],
-        globIgnores: ['**/assets/cards/**', '**/assets/ocr/**', '**/assets/vision/**', '**/*.map'],
+        globIgnores: [
+          '**/assets/cards/**',
+          '**/assets/ocr/**',
+          '**/assets/vision/**',
+          '**/*.map',
+        ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: base + 'index.html',
         navigateFallbackAllowlist: [
@@ -103,7 +108,9 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: new RegExp(basePattern + 'assets/vision/manifest\\.json$'),
+            urlPattern: new RegExp(
+              basePattern + 'assets/vision/manifest\\.json$',
+            ),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'e-binder-visual-manifest',
