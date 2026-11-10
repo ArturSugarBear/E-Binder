@@ -19,11 +19,11 @@ jobs:
       - run: npm ci
       - name: Format brand lab and design artifacts
         run: |
-          npx prettier --write PRODUCT.md brand/BRAND-KIT.md brand/tokens.css brand/tokens.json brand/logos/*.svg public/brand-lab.html tests/unit/brand-tokens.test.ts tests/e2e/brand-lab.spec.ts
+          npx prettier --write PRODUCT.md brand/BRAND-KIT.md brand/tokens.css brand/tokens.json public/brand-lab.html tests/unit/brand-tokens.test.ts tests/e2e/brand-lab.spec.ts
           if ! git diff --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add PRODUCT.md brand/BRAND-KIT.md brand/tokens.css brand/tokens.json brand/logos public/brand-lab.html tests/unit/brand-tokens.test.ts tests/e2e/brand-lab.spec.ts
+            git add PRODUCT.md brand/BRAND-KIT.md brand/tokens.css brand/tokens.json public/brand-lab.html tests/unit/brand-tokens.test.ts tests/e2e/brand-lab.spec.ts
             git commit -m "Format three lovebrand identities and interactive preview"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
