@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#111217" />
+    <meta
+      name="description"
+      content="Drei neue Markenwelten für E-Binder – Logo, Farben, Schrift und iPhone-Anwendung."
+    />
+    <title>E-Binder / Lovebrand Lab</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --chrome: #14151b;
+        --line: #32343e;
+        --secondary: #babac8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: var(--chrome);
+      }
+      body {
+        margin: 0;
+        color: #f7f5ed;
+        font:
+          400 16px/1.52 -apple-system,
+          BlinkMacSystemFont,
+          'Avenir Next',
+          'Segoe UI',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 3px solid #eee7ff;
+        outline-offset: 4px;
+      }
+      .lab {
+        max-width: 1300px;
+        margin: auto;
+        padding: 40px clamp(18px, 5vw, 64px) 100px;
+      }
+      .lab-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 24px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 27px;
+      }
+      .meta {
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.035em;
+        color: #e6e0f1;
+      }
+      .lab-head p {
+        max-width: 500px;
+        margin: 0;
+        color: var(--secondary);
+      }
+      h1 {
+        font-size: clamp(35px, 5.8vw, 76px);
+        line-height: 0.98;
+        letter-spacing: -0.055em;
+        margin: 40px 0 18px;
+        max-width: 850px;
+        font-weight: 750;
+      }
+      .sub {
+        max-width: 700px;
+        color: #babac8;
+        font-size: 17px;
+        margin: 0 0 32px;
+      }
+      .choice {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 28px 0 30px;
+      }
+      .choice button {
+        border: 1px solid #555463;
+        border-radius: 12px;
+        background: #20212a;
+        color: #f6f3ed;
+        padding: 12px 19px;
+        text-align: left;
+        min-width: 162px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .choice button[aria-pressed='true'] {
+        background: #efedf5;
+        color: #1b1923;
+        border-color: #efedf5;
+      }
+      .choice button span {
+        width: 13px;
+        height: 13px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .choice button[data-select='keepsake'] span {
+        background: #de5a76;
+      }
+      .choice button[data-select='rare'] span {
+        background: #ddf76b;
+      }
+      .choice button[data-select='folio'] span {
+        background: #dcebad;
+      }
+      .preview {
+        --canvas: #f8f4eb;
+        --surface: #ffffff;
+        --ink: #24222d;
+        --muted: #635e70;
+        --primary: #4b3e9c;
+        --primary-ink: #ffffff;
+        --accent: #de5a76;
+        --binder: #302c39;
+        background: var(--canvas);
+        color: var(--ink);
+        border-radius: 27px;
+        min-height: 650px;
+        padding: clamp(20px, 4vw, 50px);
+        display: grid;
+        grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.94fr);
+        gap: clamp(28px, 5vw, 84px);
+        overflow: hidden;
+        transition:
+          background-color 0.18s,
+          color 0.18s;
+      }
+      .preview[data-theme='rare'] {
+        --canvas: #18191e;
+        --surface: #272830;
+        --ink: #f8f4ed;
+        --muted: #b8b7c6;
+        --primary: #ddf76b;
+        --primary-ink: #18191e;
+        --accent: #bba7ff;
+        --binder: #121318;
+      }
+      .preview[data-theme='folio'] {
+        --canvas: #17362f;
+        --surface: #24453c;
+        --ink: #f7f5ec;
+        --muted: #c9d9ce;
+        --primary: #dcebad;
+        --primary-ink: #17362f;
+        --accent: #f0abaf;
+        --binder: #142920;
+      }
+      .brand-side {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        justify-content: space-between;
+        gap: 32px;
+      }
+      .signature {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+      .identity-mark {
+        height: 81px;
+        width: 81px;
+        flex: none;
+      }
+      .identity-mark svg {
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+      .preview[data-theme='keepsake']
+        .identity-mark
+        svg[data-symbol='keepsake'],
+      .preview[data-theme='rare'] .identity-mark svg[data-symbol='rare'],
+      .preview[data-theme='folio'] .identity-mark svg[data-symbol='folio'] {
+        display: block;
+      }
+      .wordmark {
+        font-size: clamp(29px, 3.6vw, 51px);
+        font-weight: 800;
+        letter-spacing: -0.06em;
+        line-height: 1;
+      }
+      .preview[data-theme='rare'] .wordmark {
+        letter-spacing: -0.075em;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      .preview[data-theme='folio'] .wordmark {
+        font-family: Georgia, serif;
+        font-weight: 500;
+        font-size: clamp(31px, 3.5vw, 49px);
+        letter-spacing: -0.045em;
+      }
+      .wordmark small {
+        display: block;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        margin-top: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 650;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .hero-copy {
+        padding: 0 0 4px;
+      }
+      .hero-copy h2 {
+        max-width: 12ch;
+        font-weight: 770;
+        font-size: clamp(44px, 5.1vw, 70px);
+        line-height: 1.035;
+        letter-spacing: -0.055em;
+        margin: 0;
+      }
+      .preview[data-theme='rare'] .hero-copy h2 {
+        font-weight: 900;
+        letter-spacing: -0.075em;
+      }
+      .preview[data-theme='folio'] .hero-copy h2 {
+        font:
+          500 clamp(44px, 5.1vw, 69px)/1.06 Georgia,
+          serif;
+        letter-spacing: -0.04em;
+      }
+      .hero-copy p {
+        margin: 19px 0 23px;
+        max-width: 36ch;
+        color: var(--muted);
+        font-size: 16px;
+      }
+      .cta {
+        border: 0;
+        background: var(--primary);
+        color: var(--primary-ink);
+        font-weight: 720;
+        padding: 14px 21px;
+        border-radius: 11px;
+        min-height: 48px;
+        cursor: default;
+      }
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 7px;
+      }
+      .palette-item {
+        min-width: 0;
+      }
+      .swatch {
+        height: 48px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+      }
+      .swatch-label {
+        display: block;
+        font-size: 10px;
+        margin-top: 6px;
+        color: var(--muted);
+      }
+      .type-sample {
+        color: var(--muted);
+        font-size: 13px;
+        border-top: 1px solid currentColor;
+        padding-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .type-sample strong {
+        color: var(--ink);
+        font-size: 16px;
+      }
+      .phone-side {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .device {
+        width: min(350px, 100%);
+        border: 7px solid #24232e;
+        border-radius: 45px;
+        background: var(--canvas);
+        color: var(--ink);
+        box-shadow: 0 18px 68px rgba(0, 0, 0, 0.22);
+        padding: 18px 13px 8px;
+        min-height: 665px;
+        position: relative;
+        overflow: hidden;
+      }
+      .statusbar {
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 13px 22px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .phone-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 0 9px;
+      }
+      .phone-logo {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.045em;
+      }
+      .phone-logo .mini {
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+        background: var(--primary);
+        color: var(--primary-ink);
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        font-weight: 900;
+      }
+      .avatar {
+        border-radius: 50%;
+        height: 31px;
+        width: 31px;
+        background: var(--surface);
+        border: 1px solid var(--primary);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .phone-content {
+        padding: 27px 9px 70px;
+      }
+      .phone-content h3 {
+        font-size: 26px;
+        letter-spacing: -0.045em;
+        line-height: 1.1;
+        margin: 0;
+        font-weight: 760;
+      }
+      .phone-content > p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 8px 0 24px;
+      }
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: 720;
+        font-size: 13px;
+      }
+      .section-title small {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .binder {
+        background: var(--binder);
+        border-radius: 18px;
+        padding: 14px 12px 14px 22px;
+        position: relative;
+        box-shadow: 0 12px 27px rgba(0, 0, 0, 0.15);
+      }
+      .binder:before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 9%;
+        bottom: 9%;
+        border-left: 2px dashed rgba(255, 255, 255, 0.22);
+      }
+      .pockets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+      }
+      .art {
+        height: auto;
+        aspect-ratio: 63/88;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+        background: #22283d;
+      }
+      .art:before {
+        content: '';
+        position: absolute;
+        inset: 9% 9% 45%;
+        border: 3px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        transform: rotate(-25deg);
+      }
+      .art:after {
+        content: '';
+        position: absolute;
+        inset: auto 10% 9%;
+        height: 22%;
+        border-top: 3px solid rgba(255, 255, 255, 0.55);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+        opacity: 0.8;
+      }
+      .art:nth-child(1) {
+        background: linear-gradient(135deg, #8f6fc1, #e3a0bd);
+      }
+      .art:nth-child(2) {
+        background: linear-gradient(135deg, #445b87, #9abbd1);
+      }
+      .art:nth-child(3) {
+        background: linear-gradient(135deg, #9b645d, #e5c998);
+      }
+      .art:nth-child(4) {
+        background: linear-gradient(135deg, #5a817a, #d3dfa8);
+      }
+      .art:nth-child(5) {
+        background: linear-gradient(135deg, #ba8e66, #ece0ac);
+      }
+      .art:nth-child(6) {
+        background: linear-gradient(135deg, #7d567a, #c4b0d4);
+      }
+      .art:nth-child(7) {
+        background: linear-gradient(135deg, #6875a6, #c5d3e8);
+      }
+      .art:nth-child(8) {
+        background: linear-gradient(135deg, #75596d, #bca9b6);
+      }
+      .art:nth-child(9) {
+        background: #33343c;
+      }
+      .binder-caption {
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+        margin-top: 11px;
+        color: #f8f4ed;
+        font-size: 11px;
+        font-weight: 650;
+      }
+      .phone-note {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        border-radius: 12px;
+        background: var(--surface);
+        padding: 12px;
+        margin-top: 13px;
+        font-size: 12px;
+      }
+      .phone-note b {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+      .phone-note span {
+        color: var(--muted);
+      }
+      .note-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex: none;
+      }
+      .navbar {
+        position: absolute;
+        inset: auto 0 0;
+        min-height: 67px;
+        background: var(--surface);
+        border-top: 1px solid rgba(120, 120, 140, 0.23);
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        padding: 9px 8px 14px;
+        gap: 0;
+      }
+      .navbar div {
+        text-align: center;
+        font-size: 10px;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+      }
+      .navbar .selected {
+        color: var(--primary);
+        font-weight: 750;
+      }
+      .nav-icon {
+        font-size: 18px;
+        line-height: 1.1;
+        font-weight: 650;
+      }
+      .navbar .plus {
+        height: 36px;
+        width: 36px;
+        border-radius: 12px;
+        background: var(--primary);
+        color: var(--primary-ink);
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        font-weight: 750;
+      }
+      .notes {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        margin-top: 30px;
+        color: var(--secondary);
+        font-size: 13px;
+      }
+      .notes strong {
+        color: #fff;
+      }
+      .notes > span:first-child {
+        max-width: 670px;
+      }
+      .notes > span:last-child {
+        text-align: right;
+        max-width: 320px;
+      }
+      @media (max-width: 790px) {
+        .lab {
+          padding-top: 25px;
+        }
+        .lab-head {
+          display: block;
+        }
+        .lab-head p {
+          margin-top: 12px;
+        }
+        h1 {
+          font-size: 49px;
+        }
+        .preview {
+          grid-template-columns: 1fr;
+          gap: 34px;
+          padding: 25px 18px 30px;
+        }
+        .brand-side {
+          gap: 32px;
+        }
+        .hero-copy h2 {
+          font-size: 50px;
+        }
+        .phone-side {
+          padding-bottom: 4px;
+        }
+        .notes {
+          display: block;
+        }
+        .notes > span {
+          display: block !important;
+          text-align: left !important;
+          margin-top: 10px;
+          max-width: 100% !important;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="lab">
+      <header class="lab-head">
+        <div class="meta">
+          E-Binder <span aria-hidden="true">/</span> Lovebrand Lab
+        </div>
+        <p>
+          Ein Sammlerprodukt verdient eine eigene Handschrift. Drei vollständige
+          Markenrichtungen – kein Re-Skin des bestehenden Cyan-Designs.
+        </p>
+      </header>
+      <h1>Deine Karten.<br />Deine Geschichten.</h1>
+      <p class="sub">
+        Logo, Typografie, Farben und die echte Oberfläche müssen
+        zusammengehören. Vergleiche die Richtungen direkt in einer
+        iPhone-Ansicht. Alle Entwürfe sind Vorschläge, nicht die Live-App.
+      </p>
+      <div class="choice" role="group" aria-label="Markenrichtung auswählen">
+        <button type="button" data-select="keepsake" aria-pressed="true">
+          <span></span>Keepsake
+        </button>
+        <button type="button" data-select="rare" aria-pressed="false">
+          <span></span>Rare Room
+        </button>
+        <button type="button" data-select="folio" aria-pressed="false">
+          <span></span>Folio House
+        </button>
+      </div>
+      <section
+        class="preview"
+        id="preview"
+        data-theme="keepsake"
+        aria-label="Brand Kit Vorschau"
+      >
+        <div class="brand-side">
+          <div class="signature">
+            <div class="identity-mark">
+              <svg
+                data-symbol="keepsake"
+                viewBox="0 0 80 80"
+                aria-label="Album mit einer herausgezogenen Karte"
+              >
+                <rect
+                  x="8"
+                  y="9"
+                  width="55"
+                  height="62"
+                  rx="13"
+                  fill="#4B3E9C"
+                />
+                <path
+                  d="M18 23h28v16H18zm0 24h28v15H18z"
+                  fill="none"
+                  stroke="#F8F4EB"
+                  stroke-width="3.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M39 6l23 6-9 34-23-6z"
+                  fill="#DE5A76"
+                  stroke="#F8F4EB"
+                  stroke-width="3"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M43 18l11 3"
+                  stroke="#F8F4EB"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M18 14v48"
+                  stroke="#B8A9FF"
+                  stroke-width="2.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <svg
+                data-symbol="rare"
+                viewBox="0 0 80 80"
+                aria-label="Gestapelte Sammlerhüllen"
+              >
+                <path d="M9 18h46v45H9z" fill="#DDF76B" />
+                <path d="M19 7h43v46H19z" fill="#BBA7FF" />
+                <path d="M31 23h41v46H31z" fill="#F8F4ED" />
+                <path d="M41 32h22v5H41zm0 11h22v5H41z" fill="#18191E" />
+                <path d="M41 56h8v4h-8z" fill="#18191E" />
+              </svg>
+              <svg
+                data-symbol="folio"
+                viewBox="0 0 80 80"
+                aria-label="Gefaltetes Archivblatt"
+              >
+                <path d="M12 12h38l18 18v39H12z" fill="#DCEBAD" />
+                <path d="M50 12v18h18" fill="#F0ABAF" />
+                <path d="M20 23h24v32H20z" fill="#17362F" />
+                <path d="M29 30h15v25H29z" fill="#F7F5EC" />
+                <path d="M21 63h37" stroke="#17362F" stroke-width="4" />
+              </svg>
+            </div>
+            <div class="wordmark">
+              E-Binder<small id="brand-label">Keepsake / Sammelalbum</small>
+            </div>
+          </div>
+          <div class="hero-copy">
+            <h2 id="brand-head">Das Gute bleibt.</h2>
+            <p id="brand-copy">
+              Von der ersten Karte bis zum Lieblingsbinder: Alles, was du gern
+              behältst, bekommt seinen Platz.
+            </p>
+            <button class="cta" disabled aria-disabled="true">
+              Meine Sammlung ansehen
+            </button>
+          </div>
+          <div>
+            <div class="palette" aria-label="Farbpalette">
+              <div class="palette-item">
+                <div class="swatch" id="swatch-0"></div>
+                <span class="swatch-label" id="swatch-label-0">Canvas</span>
+              </div>
+              <div class="palette-item">
+                <div class="swatch" id="swatch-1"></div>
+                <span class="swatch-label" id="swatch-label-1">Surface</span>
+              </div>
+              <div class="palette-item">
+                <div class="swatch" id="swatch-2"></div>
+                <span class="swatch-label" id="swatch-label-2">Ink</span>
+              </div>
+              <div class="palette-item">
+                <div class="swatch" id="swatch-3"></div>
+                <span class="swatch-label" id="swatch-label-3">Action</span>
+              </div>
+              <div class="palette-item">
+                <div class="swatch" id="swatch-4"></div>
+                <span class="swatch-label" id="swatch-label-4">Note</span>
+              </div>
+            </div>
+            <div class="type-sample">
+              <span
+                >Schriftstimmen
+                <strong id="font-sample">Syne · DM Sans</strong></span
+              ><span id="brand-mood">Persönlich. Warm. Modern.</span>
+            </div>
+          </div>
+        </div>
+        <div class="phone-side">
+          <div
+            class="device"
+            aria-label="Schematische iPhone-App-Vorschau; keine echten Kartendaten"
+          >
+            <div class="statusbar">
+              <span>9:41</span><span aria-hidden="true">●●● ▰</span>
+            </div>
+            <div class="phone-head">
+              <div class="phone-logo"><span class="mini">E</span>E-Binder</div>
+              <span class="avatar">A</span>
+            </div>
+            <div class="phone-content">
+              <h3>Meine Sammlung</h3>
+              <p>Ein schöner Platz für deine Lieblingskarten.</p>
+              <div class="section-title">
+                <span>Mein Binder</span><small>Seite 3 von 12</small>
+              </div>
+              <div class="binder">
+                <div class="pockets">
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                  <div class="art"></div>
+                </div>
+                <div class="binder-caption">
+                  <span>Lieblingsstücke</span><span>← wischen →</span>
+                </div>
+              </div>
+              <div class="phone-note">
+                <span class="note-dot" aria-hidden="true"></span>
+                <div>
+                  <b>Deine nächste Seite wartet.</b
+                  ><span>Ein Foto genügt. Du behältst die Kontrolle.</span>
+                </div>
+              </div>
+            </div>
+            <div class="navbar">
+              <div class="selected">
+                <span class="nav-icon">▣</span>Sammlung
+              </div>
+              <div><span class="nav-icon">◎</span>Entdecken</div>
+              <div><span class="plus">+</span>Karte</div>
+              <div><span class="nav-icon">▤</span>Binder</div>
+              <div><span class="nav-icon">◯</span>Profil</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="notes">
+        <span
+          ><strong>So soll sich E-Binder anfühlen:</strong> Eine Sammlung, die
+          du gern öffnest – und eine App, die beim Erfassen nicht im Weg steht.
+          Die Motive in der iPhone-Skizze sind abstrakte Platzhalter, keine
+          Pokémon-Karten.</span
+        ><span
+          >Brand Lab v0.1 · Reine Vorschau · Kein Konto, kein Netzwerk, kein
+          Tracking</span
+        >
+      </div>
+    </main>
+    <script>
+      const themes = {
+        keepsake: {
+          label: 'Keepsake / Sammelalbum',
+          head: 'Das Gute bleibt.',
+          copy: 'Von der ersten Karte bis zum Lieblingsbinder: Alles, was du gern behältst, bekommt seinen Platz.',
+          font: 'Syne · DM Sans',
+          mood: 'Persönlich. Warm. Modern.',
+          colors: ['#F8F4EB', '#FFFFFF', '#24222D', '#4B3E9C', '#DE5A76'],
+        },
+        rare: {
+          label: 'Rare Room / Sammlerclub',
+          head: 'Dein Fund. Dein Moment.',
+          copy: 'Die besonderen Karten verdienen einen Auftritt. Feier, was du sammelst – ohne viel Verwaltungsarbeit.',
+          font: 'Unbounded · Manrope',
+          mood: 'Kultig. Energiegeladen. Direkt.',
+          colors: ['#18191E', '#272830', '#F8F4ED', '#DDF76B', '#BBA7FF'],
+        },
+        folio: {
+          label: 'Folio House / Galerie',
+          head: 'Ein Album voller Geschichten.',
+          copy: 'Die eigene Kartensammlung wie eine kleine Galerie. Wunderbare Illustrationen, bewusst kuratiert.',
+          font: 'Newsreader · Instrument Sans',
+          mood: 'Ruhig. Kuratiert. Zeitlos.',
+          colors: ['#17362F', '#24453C', '#F7F5EC', '#DCEBAD', '#F0ABAF'],
+        },
+      };
+      const view = document.getElementById('preview');
+      const buttons = [...document.querySelectorAll('[data-select]')];
+      function choose(name) {
+        const selected = themes[name];
+        if (!selected) return;
+        view.dataset.theme = name;
+        for (const button of buttons)
+          button.setAttribute(
+            'aria-pressed',
+            String(button.dataset.select === name),
+          );
+        document.getElementById('brand-label').textContent = selected.label;
+        document.getElementById('brand-head').textContent = selected.head;
+        document.getElementById('brand-copy').textContent = selected.copy;
+        document.getElementById('font-sample').textContent = selected.font;
+        document.getElementById('brand-mood').textContent = selected.mood;
+        selected.colors.forEach((color, index) => {
+          const swatch = document.getElementById('swatch-' + index);
+          swatch.style.backgroundColor = color;
+          swatch.title = color;
+        });
+      }
+      for (const button of buttons)
+        button.addEventListener('click', () => choose(button.dataset.select));
+      choose('keepsake');
+    </script>
+  </body>
+</html>
