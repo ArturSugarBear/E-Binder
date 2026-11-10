@@ -306,13 +306,8 @@ export function openAddCards(
     const list = el('div', 'w-capture-list');
     for (const shot of [...open].reverse().slice(0, queueLimit)) {
       const button = action(
-        `${shot.name} · ${shot.status === 'confirmed' ? 'übernommen' : shot.status === 'skipped' ? 'zurückgestellt' : 'offen'}`,
+        `${shot.name} · ${shot.status === 'skipped' ? 'zurückgestellt' : 'offen'}`,
         () => {
-          if (shot.status === 'confirmed' && shot.holdingId) {
-            sheet.close();
-            ctx.openHolding(shot.holdingId);
-            return;
-          }
           interrupt();
           captureId = shot.id;
           selected = undefined;
@@ -351,7 +346,11 @@ export function openAddCards(
       const history = el(
         'details',
         'w-capture-history',
-        el('summary', '', `Bereits übernommene Aufnahmen (${confirmed.length})`),
+        el(
+          'summary',
+          '',
+          `Bereits übernommene Aufnahmen (${confirmed.length})`,
+        ),
       );
       const completed = el('div', 'w-capture-list');
       for (const shot of [...confirmed].reverse().slice(0, 30)) {
