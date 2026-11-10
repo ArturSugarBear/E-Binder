@@ -3449,3 +3449,38 @@ textarea.w-input,
     font-size: 10px;
   }
 }
+
+/* Mobile binder content must precede its secondary actions in both Chromium and WebKit. */
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-binders:has(.w-binder-layout) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .w-binders:has(.w-binder-layout) > .w-page-heading {
+    display: contents;
+  }
+  .w-binders:has(.w-binder-layout) > .w-page-heading > div:first-child {
+    order: 0;
+    width: 100%;
+    margin: 0;
+  }
+  .w-binders:has(.w-binder-layout) > .w-binder-layout {
+    order: 1;
+  }
+  .w-binders:has(.w-binder-layout) > .w-page-heading > .w-action-row {
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .w-binders:has(.w-binder-layout) > .w-page-heading > .w-action-row .w-button {
+    flex: 1 1 134px;
+    min-width: 0;
+    font-size: 12px;
+  }
+  .w-binders:has(.w-binder-layout) > .w-button {
+    order: 3;
+  }
+}
