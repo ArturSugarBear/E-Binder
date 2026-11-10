@@ -1,0 +1,29 @@
+name: Format updated collector fixes
+on:
+  push:
+    branches:
+      - fix/real-collector-flows-20261110
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.repository == 'ArturSugarBear/E-Binder'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Format final collector patch and remove formatter
+        run: |
+          npx prettier --write src/data/card-catalog.ts tests/unit/crown-zenith-artwork.test.ts
+          git rm .github/workflows/format-real-collector-final.yml
+          git add src/data/card-catalog.ts tests/unit/crown-zenith-artwork.test.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Format gallery artwork source checks"
+            git push origin HEAD:fix/real-collector-flows-20261110
+          fi
