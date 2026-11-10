@@ -22,6 +22,7 @@ import {
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import { enableSwipe } from './swipe';
+import { enableSheetDrag } from './sheet-gestures';
 
 export function renderCollection(ctx: WorkspaceContext): HTMLElement {
   const root = el('section', 'w-collection');
@@ -373,6 +374,11 @@ export function openHolding(ctx: WorkspaceContext, id: string): void {
       sheet.close();
   });
   sheet.body.append(form);
+  const cardSurface = form.querySelector<HTMLElement>('.w-holding-preview');
+  if (cardSurface) {
+    cardSurface.classList.add('w-card-swipe-zone');
+    enableSheetDrag(sheet.dialog, sheet.dialog, [cardSurface]);
+  }
   const holdingIndex = ctx.state.holdings.findIndex((item) => item.id === id);
   if (ctx.state.holdings.length > 1 && holdingIndex >= 0) {
     let modified = false;
@@ -401,11 +407,7 @@ export function openHolding(ctx: WorkspaceContext, id: string): void {
     );
     navigator.setAttribute('aria-label', 'Zwischen Karten wechseln');
     sheet.body.prepend(navigator);
-    const preview = form.querySelector<HTMLElement>('.w-holding-preview');
-    if (preview) {
-      preview.classList.add('w-card-swipe-zone');
-      enableSwipe(preview, browse);
-    }
+    if (cardSurface) enableSwipe(cardSurface, browse);
   }
   sheet.footer.append(
     action(
