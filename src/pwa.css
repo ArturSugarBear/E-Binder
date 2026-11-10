@@ -1,4 +1,4 @@
-/* PWA notices use E-Binder's existing Midnight/Cyan palette. */
+/* PWA notices use E-Binder's Rare Room V2 semantic palette. */
 .pwa-banner {
   position: relative;
   z-index: 1;
@@ -10,10 +10,10 @@
   max-width: 540px;
   margin: 14px auto;
   padding: 14px 16px;
-  border: 1px solid #38546a;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #132331;
-  color: #f2f6fa;
+  background: var(--raised);
+  color: var(--ink);
   box-shadow: 0 12px 36px rgb(0 0 0 / 0.4);
   font:
     14px/1.45 -apple-system,
@@ -34,15 +34,15 @@
 }
 .pwa-banner-primary {
   padding: 0 14px;
-  background: #6ad0e0;
-  color: #02070a;
+  background: var(--accent);
+  color: var(--desk);
   font-weight: 600;
 }
 .pwa-banner-close {
   padding: 0 8px;
-  color: #b6c5d1;
+  color: var(--ink-2);
 }
 .pwa-banner :focus-visible {
-  outline: 2px solid #6ad0e0;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

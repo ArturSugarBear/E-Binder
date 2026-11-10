@@ -10,7 +10,7 @@ test('manifest and icons are scoped to GitHub Pages', async ({ page }) => {
   expect(manifest.display).toBe('standalone');
   expect(manifest.start_url).toBe('/E-Binder/');
   expect(manifest.scope).toBe('/E-Binder/');
-  expect(manifest.background_color).toBe('#02070a');
+  expect(manifest.background_color).toBe('#141519');
   expect(manifest.icons).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ sizes: '192x192', purpose: 'any' }),
