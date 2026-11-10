@@ -307,6 +307,7 @@ export function openLiveScanner(
     stopCamera();
     const generation = cameraGeneration;
     next.hidden = true;
+    next.querySelector('span')!.textContent = 'Nächste Karte scannen';
     finish.hidden = true;
     trigger.hidden = false;
     trigger.disabled = true;
@@ -363,6 +364,7 @@ export function openLiveScanner(
         status.textContent =
           'Kamera pausiert. Tippe auf „Kamera wieder starten“.';
         next.hidden = false;
+        trigger.hidden = true;
         next.querySelector('span')!.textContent = 'Kamera wieder starten';
       }
     }
