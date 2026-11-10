@@ -30,6 +30,7 @@ import { openRecommendations } from './recommend-dialog';
 import { enableSwipe } from './swipe';
 import { enableSheetDrag } from './sheet-gestures';
 import { cloudClient } from '../data/supabase';
+import type { Chapter } from '../domain/collection';
 
 let pendingPageSwipe: -1 | 0 | 1 = 0;
 
@@ -93,6 +94,19 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
       ),
     ),
   );
+  if (ctx.state.mode === 'personal')
+    root.append(
+      action(
+        'Beispielbinder ansehen',
+        () => {
+          void ctx.switchMode('demo').then(() => {
+            if (ctx.state.mode === 'demo') ctx.navigate('binder');
+          });
+        },
+        'text',
+        'binder',
+      ),
+    );
   if (!ctx.state.binders.length) {
     root.append(
       el(
@@ -105,9 +119,15 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
           'Beginne mit einer leeren Seite oder übernimm eine Inspirationsvorlage. Vorhandene und geplante Karten bleiben klar getrennt.',
         ),
         action(
+          'Vorlagen entdecken',
+          () => openTemplates(ctx),
+          'primary',
+          'cards',
+        ),
+        action(
           'Ersten Binder anlegen',
           () => newBinder(ctx),
-          'primary',
+          'secondary',
           'binder',
         ),
       ),
@@ -804,42 +824,83 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
 }
 function normalizeSearch(value: string): string {
   return value
+    .trim()
     .toLocaleLowerCase('de')
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-function openTemplates(ctx: WorkspaceContext, pageId: string): void {
+function openTemplates(ctx: WorkspaceContext, pageId?: string): void {
   const sheet = modal('Eine Seite aus deinen Inspirationen', true);
   sheet.body.append(
     message(
-      'Vorhandene freie Exemplare werden zugeordnet. Alle anderen Motive bleiben als geplant markiert. Dein Besitz und deine Wunschliste werden nicht verändert.',
+      `${!pageId ? 'Du planst einen neuen Binder.' : findPage(ctx.state, pageId).slots.some(Boolean) ? 'Die Vorlage wird als neue Seite ergänzt. Deine aktuelle Seite bleibt erhalten.' : 'Die Vorlage füllt diese leere Seite.'} Vorhandene freie Exemplare werden zugeordnet. Alle anderen Motive bleiben geplant. Dein Besitz und deine Wunschliste werden nicht verändert.`,
     ),
   );
+  const search = input('search');
+  search.placeholder = 'Thema, Kartenname oder Illustrator';
+  const count = el('p', 'w-result-count');
+  count.setAttribute('role', 'status');
   const list = el('div', 'w-template-list');
-  for (const chapter of ctx.chapters) {
-    const preview = el('div', 'w-template-covers');
-    for (const id of chapter.covers) {
-      const card = ctx.catalog.find((item) => item.sourceId === id);
-      if (card) preview.append(ctx.images.artwork(card));
+  const render = () => {
+    list.replaceChildren();
+    const query = normalizeSearch(search.value);
+    const chapters = ctx.chapters.filter((chapter) =>
+      normalizeSearch(
+        [
+          chapter.title,
+          chapter.description,
+          ...chapter.cards.map((card) => `${card.name} ${card.facts}`),
+        ].join(' '),
+      ).includes(query),
+    );
+    count.textContent = `${chapters.length} von ${ctx.chapters.length} Vorlagen`;
+    if (!ctx.chapters.length) {
+      list.append(
+        message(
+          'Die Inspirationsvorlagen sind noch nicht verfügbar. Deine eigenen Binder bleiben nutzbar. Schließe diese Ansicht und lade die Vorlagen über den Hinweis auf der Hauptseite erneut.',
+        ),
+        action('Zurück zum Binder', sheet.close),
+      );
+      return;
     }
-    const choose = action(
-      'Diese Vorlage übernehmen',
-      () => {
-        const target = findPage(ctx.state, pageId);
+    if (!chapters.length) {
+      list.append(
+        message('Keine Vorlage passt zu deiner Suche.'),
+        action('Suche zurücksetzen', () => {
+          search.value = '';
+          render();
+          search.focus();
+        }),
+      );
+      return;
+    }
+    for (const chapter of chapters) {
+      const preview = el('div', 'w-template-covers');
+      for (const id of chapter.covers) {
+        const card = ctx.catalog.find((item) => item.sourceId === id);
+        if (card) preview.append(ctx.images.artwork(card));
+      }
+      const adopt = () => {
+        const target = pageId ? findPage(ctx.state, pageId) : undefined;
         const cards = chapter.cards
           .map((item) => ctx.catalog.find((card) => card.sourceId === item.id)!)
           .filter(Boolean);
-        const ok = ctx.commit('Vorlagenseite angelegt', (state) =>
-          changeState(state, (next) => {
-            const binder = next.binders.find((item) =>
-              item.pages.some((page) => page.id === pageId),
-            )!;
-            if (target.slots.every((slot) => !slot)) {
-              const page = findPage(next, pageId);
+        const ok = ctx.commit('Vorlagenseite angelegt', (state) => {
+          const prepared = target ? state : createBinder(state, chapter.title);
+          return changeState(prepared, (next) => {
+            const binder = target
+              ? next.binders.find((item) =>
+                  item.pages.some((page) => page.id === pageId),
+                )!
+              : next.binders.find((item) => item.id === next.lastBinderId)!;
+            const selectedPage = target ? pageId! : binder.pages[0]!.id;
+            if (!target || target.slots.every((slot) => !slot)) {
+              const page = findPage(next, selectedPage);
               page.title = chapter.title;
               page.slots = templateSlots(next, cards);
               page.assembled = false;
+              next.lastPageId = page.id;
             } else {
               const page = {
                 id: uid(),
@@ -851,25 +912,80 @@ function openTemplates(ctx: WorkspaceContext, pageId: string): void {
               next.lastPageId = page.id;
             }
             next.lastBinderId = binder.id;
-          }),
-        );
-        if (ok) sheet.close();
+          });
+        });
+        if (ok) {
+          sheet.close();
+          ctx.navigate('binder');
+        }
+      };
+      const choose = action(
+        pageId ? 'Diese Vorlage übernehmen' : 'Als neuen Binder planen',
+        adopt,
+        'secondary',
+        'plus',
+      );
+      list.append(
+        el(
+          'article',
+          'w-template',
+          preview,
+          el('h3', '', chapter.title),
+          el('p', 'w-muted', chapter.description),
+          el(
+            'div',
+            'w-action-row',
+            action(
+              'Vorschau ansehen',
+              () => previewTemplate(ctx, chapter, adopt),
+              'text',
+            ),
+            choose,
+          ),
+        ),
+      );
+    }
+  };
+  search.addEventListener('input', render);
+  sheet.body.append(field('Vorlagen durchsuchen', search), count, list);
+  render();
+}
+function previewTemplate(
+  ctx: WorkspaceContext,
+  chapter: Chapter,
+  adopt: () => void,
+): void {
+  const preview = modal(chapter.title, true);
+  const cards = chapter.cards.map((card) =>
+    ctx.catalog.find((item) => item.sourceId === card.id)!,
+  );
+  const page: PersonalPage = {
+    id: 'preview',
+    title: chapter.title,
+    assembled: false,
+    slots: cards.map((card) =>
+      card ? { kind: 'planned', card, locked: false } : null,
+    ),
+  };
+  preview.body.append(
+    message(
+      'Vorschau der ursprünglichen Binderseite. Dein Bestand und deine Binder bleiben unverändert.',
+    ),
+    el('p', 'w-muted', chapter.description),
+    el('div', 'w-binder-paper', renderPocketGrid(ctx, page, true)),
+  );
+  preview.footer.append(
+    action('Zurück zu den Vorlagen', preview.close),
+    action(
+      'Diese Seite planen',
+      () => {
+        preview.close();
+        adopt();
       },
-      'secondary',
-      'plus',
-    );
-    list.append(
-      el(
-        'article',
-        'w-template',
-        preview,
-        el('h3', '', chapter.title),
-        el('p', 'w-muted', chapter.description),
-        choose,
-      ),
-    );
-  }
-  sheet.body.append(list);
+      'primary',
+      'binder',
+    ),
+  );
 }
 function deletePage(
   ctx: WorkspaceContext,

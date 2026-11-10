@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 
@@ -111,7 +112,7 @@ test('missing provider artwork is a compact catalogue list and an honest rarity 
     .getByRole('button', { name: 'Weitere Karten', exact: true })
     .click();
   await expect(main.locator('.w-search-results')).toContainText('025/103');
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 

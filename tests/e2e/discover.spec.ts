@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
@@ -194,9 +195,15 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
     timeout: 15_000,
   });
   await expect(main.locator('.w-catalog-owned')).toHaveText('Gemerkt');
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  const discoveryURL = page.url();
+  const navigationSteps = await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await page.goBack();
+  for (let step = 0; step < navigationSteps; step++) {
+    await page.goBack();
+    if (navigationSteps === 2 && step === 0)
+      await expect(page).toHaveURL(/#binder$/);
+  }
+  await expect(page).toHaveURL(discoveryURL);
   await expect(main.locator('.w-search-results button')).toHaveCount(1, {
     timeout: 15_000,
   });
@@ -400,7 +407,7 @@ test('card details expose a dated EUR trend and an exact external listing withou
   await expect(dialog.locator('a')).toHaveCount(0);
   await expect(dialog).not.toContainText('0,00');
   await page.keyboard.press('Escape');
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
@@ -450,7 +457,7 @@ test('collection choices work directly and by keyboard while keeping cards near 
     (await new AxeBuilder({ page }).include('#workspace-main').analyze())
       .violations,
   ).toEqual([]);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await expect(
     main.getByRole('heading', { name: 'Mein Beispielbinder', exact: true }),
   ).toBeVisible();

@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 test('the scanner opens via the central add action without persisting a photo', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
     'true',
