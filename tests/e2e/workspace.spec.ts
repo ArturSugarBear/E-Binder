@@ -574,7 +574,7 @@ test('local vision model reads a printed identifier without saving the photo or 
     .getByRole('button', { name: 'Texterkennung starten', exact: true })
     .click();
   await expect(page.locator('.w-form-notices')).toContainText(
-    'Erkennungsvorschläge',
+    'Mögliche Ausgaben, noch kein bestätigter Bestand.',
     { timeout: 45000 },
   );
   await expect(page.locator('.w-ocr-text')).toContainText('211/198');
