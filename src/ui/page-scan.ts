@@ -322,6 +322,8 @@ export function openPageScanner(
       pocket.status.textContent = 'Vermutlich leer · antippen zum Ändern';
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
+    if (pocket.container)
+      pocket.container.dataset.decision = pocket.decision;
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -426,7 +428,7 @@ export function openPageScanner(
       displayCandidates(pocket, [...online, ...existing]);
       pocket.status.textContent =
         online.length + existing.length
-          ? 'Wähle die genaue Ausgabe und bestätige ihre Variante.'
+          ? 'Wähle die genaue Kartenausgabe. Druckdetails sind optional.'
           : 'Keine passende Ausgabe. Diese Position kann ungeklärt bleiben.';
     } catch {
       if (!closed && !lifetime.signal.aborted)
@@ -522,6 +524,7 @@ export function openPageScanner(
         ),
       );
       pocket.container = container;
+      container.dataset.decision = 'pending';
       grid.append(container);
     }
     updateSave();
