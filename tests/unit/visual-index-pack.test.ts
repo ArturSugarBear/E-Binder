@@ -1,12 +1,7 @@
 import { expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import {
-  mkdtempSync,
-  readFileSync,
-  writeFileSync,
-  rmSync,
-} from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -28,9 +23,7 @@ it('packs a model-versioned int8 corpus with verifiable checksums', () => {
             language: 'de',
             setId: 'sv01',
             number: '211/198',
-            vector: Array.from({ length: 384 }, (_, i) =>
-              i % 2 ? -0.5 : 0.5,
-            ),
+            vector: Array.from({ length: 384 }, (_, i) => (i % 2 ? -0.5 : 0.5)),
           },
           {
             id: 'ja:SV2a-001',
@@ -46,7 +39,12 @@ it('packs a model-versioned int8 corpus with verifiable checksums', () => {
     );
     const result = spawnSync(
       process.execPath,
-      [resolve('scripts/pack-visual-index.mjs'), source, modelFile, destination],
+      [
+        resolve('scripts/pack-visual-index.mjs'),
+        source,
+        modelFile,
+        destination,
+      ],
       { encoding: 'utf8' },
     );
     expect(result.status).toBe(0);
@@ -63,13 +61,13 @@ it('packs a model-versioned int8 corpus with verifiable checksums', () => {
     expect(manifest.indexFile).toContain('test-model-1');
     const bytes = readFileSync(join(destination, manifest.indexFile));
     expect(bytes).toHaveLength(768);
-    expect(
-      createHash('sha256').update(bytes).digest('hex'),
-    ).toBe(manifest.indexSha256);
+    expect(createHash('sha256').update(bytes).digest('hex')).toBe(
+      manifest.indexSha256,
+    );
     const references = readFileSync(join(destination, manifest.referencesFile));
-    expect(
-      createHash('sha256').update(references).digest('hex'),
-    ).toBe(manifest.referencesSha256);
+    expect(createHash('sha256').update(references).digest('hex')).toBe(
+      manifest.referencesSha256,
+    );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
