@@ -38,6 +38,7 @@ import {
   select,
 } from './workspace-dom';
 import { alignPhoto } from './photo-crop';
+import { openLivePageScanner } from './live-page-scan';
 import type { WorkspaceContext } from './workspace-context';
 
 type Decision = 'pending' | 'card' | 'empty' | 'skip';
@@ -293,16 +294,33 @@ export function openPageScanner(
   });
   sheet.body.append(
     message(
-      'Ein Foto pro physischer 9-Pocket-Seite. E-Binder schneidet neun Positionen lokal aus und schlägt Karten vor. Erst deine Prüfung trägt Exemplare in den Bestand ein; identische Fotos können nicht zweimal importiert werden.',
+      'Richte die vollständige 3×3-Seite in der Live-Kamera aus oder nutze ein Foto. E-Binder zerlegt sie anschließend in neun Positionen. Keine Karte zählt vor deiner Prüfung als Besitz.',
+    ),
+    el(
+      'ol',
+      'w-page-scan-steps',
+      el('li', '', '1 · Ganze Seite aufnehmen'),
+      el('li', '', '2 · Neun Fächer prüfen'),
+      el('li', '', '3 · Binder übernehmen'),
     ),
     el('div', 'w-form-grid', field('Zielbinder', binder), binderNameField),
     el(
       'div',
-      'w-action-row',
+      'w-action-row w-page-scan-entry',
       action(
-        'Binderseite fotografieren',
-        () => camera.click(),
+        'Binderseite live scannen',
+        () =>
+          openLivePageScanner(
+            (file) => enqueue([file]),
+            () => camera.click(),
+          ),
         'primary',
+        'camera',
+      ),
+      action(
+        'Kamerafoto verwenden',
+        () => camera.click(),
+        'secondary',
         'camera',
       ),
       action(
@@ -898,7 +916,7 @@ export function openPageScanner(
       }
     }
   };
-  const enqueue = (files: FileList | null) => {
+  const enqueue = (files: FileList | File[] | null) => {
     if (!files?.length) return;
     for (const file of files) {
       if (

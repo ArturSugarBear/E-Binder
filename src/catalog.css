@@ -709,3 +709,20 @@
     padding: 10px;
   }
 }
+.w-catalog-set-suggestions {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  margin-top: 9px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 14px;
+  background: var(--glass-background);
+}
+.w-catalog-set-suggestions strong {
+  font-size: 13px;
+}
+.w-catalog-set-suggestions > .w-button {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}

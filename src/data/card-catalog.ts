@@ -30,6 +30,11 @@ const verifiedArtists: Record<string, string> = {
   'pal-209': 'Tomokazu Komiya',
   'pal-210': 'Tomokazu Komiya',
 };
+const canonicalGermanSetNames: Record<string, string> = {
+  'swsh12.5': 'Zenit der Könige',
+  'swsh12.5gg': 'Zenit der Könige Galar-Galerie',
+};
+
 const setIds: Record<string, string> = {
   svi: 'sv01',
   pal: 'sv02',
@@ -240,6 +245,19 @@ export async function catalogValues(
       ),
     );
 }
+function exactGalleryArtwork(
+  id: string,
+  localId: string,
+  language: string,
+  image?: string,
+): string | undefined {
+  // In TCGdex this gallery's images share the *same* numbered parent
+  // folder. This maps the exact GG printing, not a similarly named card.
+  if (id.startsWith('swsh12.5gg-GG') && /^GG\d{1,2}$/i.test(localId))
+    return `https://assets.tcgdex.net/${language}/swsh/swsh12.5/${localId}`;
+  return image;
+}
+
 export function catalogResumeCard(result: CatalogResult): PersonalCard {
   const split = result.id.lastIndexOf('-');
   const setId = result.id.slice(0, split);
@@ -250,7 +268,14 @@ export function catalogResumeCard(result: CatalogResult): PersonalCard {
     setId,
     number: result.number ?? result.localId,
     language: result.language,
-    image: result.image ? `${result.image}/high.webp` : '',
+    image: exactGalleryArtwork(
+      result.id,
+      result.localId,
+      result.language,
+      result.image,
+    )
+      ? `${exactGalleryArtwork(result.id, result.localId, result.language, result.image)}/high.webp`
+      : '',
     source: 'tcgdex',
     sourceId: result.id,
     artist: '',
@@ -265,8 +290,17 @@ export async function fillCatalogImages(
   cards: CatalogResult[],
   signal?: AbortSignal,
 ): Promise<CatalogResult[]> {
-  const missing = cards.filter((card) => !card.image && card.language === 'de');
-  if (!missing.length) return cards;
+  const exact = cards.map((card) => ({
+    ...card,
+    image: exactGalleryArtwork(
+      card.id,
+      card.localId,
+      card.language,
+      card.image,
+    ),
+  }));
+  const missing = exact.filter((card) => !card.image && card.language === 'de');
+  if (!missing.length) return exact;
   const params = new URLSearchParams({
     id: `eq:${missing.map((card) => card.id).join('|')}`,
     'pagination:page': '1',
@@ -281,10 +315,10 @@ export async function fillCatalogImages(
           signal,
         ),
       );
-    return pairCatalogImages(cards, alternatives);
+    return pairCatalogImages(exact, alternatives);
   } catch (error) {
     if (signal?.aborted) throw error;
-    return cards;
+    return exact;
   }
 }
 /** Preserve the requested printing/language; only replace artwork for an exact paired ID. */
@@ -445,14 +479,22 @@ function personalFromApi(
   return personalCardSchema.parse({
     key: `tcgdex:${language}:${raw.id}`,
     name: raw.name,
-    setName: raw.set.name,
+    setName:
+      language === 'de'
+        ? (canonicalGermanSetNames[raw.set.id] ?? raw.set.name)
+        : raw.set.name,
     setId: raw.set.id,
     number:
       raw.set.cardCount.official > 0
         ? `${raw.localId}/${raw.set.cardCount.official}`
         : raw.localId,
     language,
-    image: raw.image ? `${raw.image}/high.webp` : '',
+    // TCGdex's Galarian Gallery artwork lives in the parent Crown Zenith
+    // asset directory, even though its physical set ID is swsh12.5gg.
+    // The printed GG number is unchanged: never use another card's artwork.
+    image: exactGalleryArtwork(raw.id, raw.localId, language, raw.image)
+      ? `${exactGalleryArtwork(raw.id, raw.localId, language, raw.image)}/high.webp`
+      : '',
     source: 'tcgdex',
     sourceId: raw.id,
     artist: raw.illustrator ?? '',

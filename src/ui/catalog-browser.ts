@@ -366,17 +366,26 @@ export function createCatalogBrowser(options: Options) {
         .map((holding) => holding.card.sourceId || holding.card.key),
     ).size;
   }
+  function setSearchKey(value: string): string {
+    // German collectors frequently type "Zenith" rather than official "Zenit".
+    // Handle both forms, including keyboard-transliterated umlauts, without
+    // substituting a different physical set.
+    return normalize(value)
+      .replaceAll('zenith', 'zenit')
+      .replaceAll('koenige', 'konige');
+  }
+  function setMatches(item: CatalogSet, query: string): boolean {
+    return setSearchKey(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
+      setSearchKey(query),
+    );
+  }
   function renderSets(): void {
     sets.replaceChildren();
-    const query = normalize(setSearch.value);
+    const query = setSearch.value.trim();
     const matching = [...inventory]
       .reverse()
       .filter((item) => !seriesMembers || seriesMembers.has(item.id))
-      .filter((item) =>
-        normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
-          query,
-        ),
-      );
+      .filter((item) => setMatches(item, query));
     for (const item of matching.slice(0, setLimit)) {
       const button = action(
         item.name,
@@ -838,6 +847,31 @@ export function createCatalogBrowser(options: Options) {
     if (signal.aborted || closed || active !== signal) return;
     rarityGuide.update(setFacets, rarity.value);
     updateFilterSummary();
+    if (!set.value && search.value.trim().length >= 4) {
+      const matchingSets = inventory
+        .filter((item) => setMatches(item, search.value))
+        .slice(0, 3);
+      if (matchingSets.length) {
+        const suggestions = el('div', 'w-catalog-set-suggestions');
+        suggestions.append(el('strong', '', 'Meintest du ein Kartenset?'));
+        for (const foundSet of matchingSets)
+          suggestions.append(
+            action(
+              `${foundSet.name} · ${foundSet.id.toUpperCase()}`,
+              () => {
+                set.value = foundSet.id;
+                search.value = '';
+                setSearch.value = '';
+                browse.open = false;
+                updateSet();
+                options.onSearch();
+              },
+              'secondary',
+            ),
+          );
+        scopeStatus.append(suggestions);
+      }
+    }
     options.onStateChange?.(state());
     let found: CatalogResult[];
     let prices: CatalogEntry[] | undefined;
