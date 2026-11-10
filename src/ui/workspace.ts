@@ -20,6 +20,9 @@ import { renderCollection, renderWishes, openHolding } from './collection-view';
 import { createDiscoverView } from './discover-view';
 import { renderBinders } from './binder-view';
 import { createPortfolioView } from './portfolio-view';
+import { renderHome } from './home-view';
+import { renderProfile } from './profile-view';
+import { vaultTabs } from './vault-tabs';
 import { openBackup } from './backup-dialog';
 import { action, el, errorText, message } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
@@ -163,14 +166,17 @@ export async function startWorkspace(): Promise<void> {
           : undefined;
       const focus =
         active && root.contains(active) ? active.dataset.focus : undefined;
-      const route = location.hash.slice(1).split(/[/?]/)[0] || 'sammlung';
+      const route = location.hash.slice(1).split(/[/?]/)[0] || 'home';
       for (const link of document.querySelectorAll<HTMLAnchorElement>(
         '[data-workspace-route]',
-      ))
-        link.setAttribute(
-          'aria-current',
-          link.dataset.workspaceRoute === route ? 'page' : 'false',
-        );
+      )) {
+        const destination = link.dataset.workspaceRoute;
+        const inVault = ['binder', 'sammlung', 'portfolio'].includes(route);
+        const active =
+          destination === route ||
+          (destination === 'binder' && inVault && link.closest('.w-mobile-nav'));
+        link.setAttribute('aria-current', active ? 'page' : 'false');
+      }
       if (
         discovery &&
         (route !== 'entdecken' || discovery.currentHash !== location.hash)
@@ -186,23 +192,32 @@ export async function startWorkspace(): Promise<void> {
         portfolio ??= createPortfolioView(ctx);
         if (root.firstElementChild !== portfolio.element)
           root.replaceChildren(portfolio.element);
+        if (!portfolio.element.querySelector('.w-vault-tabs'))
+          portfolio.element.prepend(vaultTabs(ctx, 'portfolio'));
         portfolio.refresh();
       } else if (route === 'entdecken') {
         discovery ??= createDiscoverView(ctx);
         if (root.firstElementChild !== discovery.element)
           root.replaceChildren(discovery.element);
         discovery.refresh();
-      } else
-        root.replaceChildren(
-          route === 'geteilt'
-            ? renderSharedBinder(location.hash.split('/')[1] ?? '', ctx)
-            : route === 'binder'
-              ? renderBinders(ctx)
-              : route === 'wunschliste'
-                ? renderWishes(ctx)
-                : renderCollection(ctx),
-        );
-      document.title = `${route === 'portfolio' ? 'Dein Portfolio' : route === 'entdecken' ? 'Karten entdecken' : route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
+      } else {
+        const view =
+          route === 'home'
+            ? renderHome(ctx)
+            : route === 'profil'
+              ? renderProfile(ctx)
+              : route === 'geteilt'
+                ? renderSharedBinder(location.hash.split('/')[1] ?? '', ctx)
+                : route === 'binder'
+                  ? renderBinders(ctx)
+                  : route === 'wunschliste'
+                    ? renderWishes(ctx)
+                    : renderCollection(ctx);
+        if (route === 'binder' || route === 'sammlung')
+          view.prepend(vaultTabs(ctx, route));
+        root.replaceChildren(view);
+      }
+      document.title = `${route === 'home' ? 'Home' : route === 'profil' ? 'Dein Profil' : route === 'portfolio' ? 'Dein Portfolio' : route === 'entdecken' ? 'Karten entdecken' : route === 'binder' ? 'Deine Binder' : route === 'wunschliste' ? 'Deine Wunschkarten' : 'Deine Sammlung'} · E-Binder`;
       demo.hidden = ctx.state.mode !== 'demo';
       undoButton.hidden = !history.length;
       undoButton.disabled = !history.length;
@@ -461,10 +476,10 @@ export async function startWorkspace(): Promise<void> {
     .addEventListener('click', () => ctx.openAdd());
   document
     .querySelector('#workspace-mobile-add')!
-    .addEventListener('click', () => ctx.openAdd());
+    .addEventListener('click', () => ctx.openAdd({ live: true }));
   document
     .querySelector('#workspace-mobile-account')!
-    .addEventListener('click', () => accountButton.click());
+    .addEventListener('click', () => ctx.navigate('profil'));
   document
     .querySelector('#workspace-backup')!
     .addEventListener('click', ctx.openBackup);
@@ -487,12 +502,14 @@ export async function startWorkspace(): Promise<void> {
   addEventListener('hashchange', () => ctx.render());
   addEventListener('popstate', () => ctx.render());
   if (!location.hash) {
-    let route = 'sammlung';
+    let route = 'home';
     try {
       const remembered = localStorage.getItem('e-binder-route');
       if (
         remembered &&
         [
+          'home',
+          'profil',
           'sammlung',
           'binder',
           'portfolio',
