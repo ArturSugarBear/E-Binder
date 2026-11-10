@@ -253,10 +253,7 @@ function exactGalleryArtwork(
 ): string | undefined {
   // In TCGdex this gallery's images share the *same* numbered parent
   // folder. This maps the exact GG printing, not a similarly named card.
-  if (
-    id.startsWith('swsh12.5gg-GG') &&
-    /^GG\d{1,2}$/i.test(localId)
-  )
+  if (id.startsWith('swsh12.5gg-GG') && /^GG\d{1,2}$/i.test(localId))
     return `https://assets.tcgdex.net/${language}/swsh/swsh12.5/${localId}`;
   return image;
 }
@@ -495,12 +492,7 @@ function personalFromApi(
     // TCGdex's Galarian Gallery artwork lives in the parent Crown Zenith
     // asset directory, even though its physical set ID is swsh12.5gg.
     // The printed GG number is unchanged: never use another card's artwork.
-    image: exactGalleryArtwork(
-      raw.id,
-      raw.localId,
-      language,
-      raw.image,
-    )
+    image: exactGalleryArtwork(raw.id, raw.localId, language, raw.image)
       ? `${exactGalleryArtwork(raw.id, raw.localId, language, raw.image)}/high.webp`
       : '',
     source: 'tcgdex',
