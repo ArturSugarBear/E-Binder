@@ -18,7 +18,7 @@
  * 224px RGB/255 CHW, stretch resize and CLS-token pooling.
  */
 import { readFile, mkdir, writeFile, copyFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const [sourceFile, modelFile, outputDirectory] = process.argv.slice(2);
