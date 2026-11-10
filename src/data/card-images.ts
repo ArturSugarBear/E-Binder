@@ -1,6 +1,12 @@
 import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
 import type { PersonalStore } from './personal-store';
-import { catalogEntry, fillCatalogImages, imageLanguage } from './card-catalog';
+import {
+  catalogEntry,
+  fillCatalogImages,
+  imageLanguage,
+  catalogArtworkUrl,
+} from './card-catalog';
+import { secondaryCardArt } from './artwork-fallbacks';
 import { verifiedLocalArt } from './verified-images';
 
 export class CardImages {
@@ -61,13 +67,34 @@ export class CardImages {
     };
     let retried = false;
     let triedLocal = false;
+    let triedSecondary = false;
+    const secondaryFallback = () => {
+      if (triedSecondary) {
+        missing();
+        return;
+      }
+      triedSecondary = true;
+      void secondaryCardArt(card)
+        .then((art) => {
+          if (!art) {
+            missing();
+            return;
+          }
+          frame.dataset.imageSource = 'secondary';
+          image.src = art.url;
+          language.hidden = art.language === card.language;
+          language.textContent = `Bild: ${art.language.toUpperCase()}`;
+        })
+        .catch(missing);
+    };
     const localFallback = () => {
       const local = verifiedLocalArt({ ...card, image: '' });
       if (local && !triedLocal) {
         triedLocal = true;
         image.src = `${import.meta.env.BASE_URL}${local}`;
         language.hidden = true;
-      } else missing();
+        frame.dataset.imageSource = 'local';
+      } else secondaryFallback();
     };
     const image = document.createElement('img');
     image.alt = `${card.name}, ${card.setName} ${card.number}`;
@@ -104,21 +131,24 @@ export class CardImages {
             localFallback();
             return;
           }
-          image.src = `${url}/high.webp`;
+          image.src = catalogArtworkUrl(url);
           labelLanguage(image.src);
         })
         .catch(localFallback);
     });
     frame.append(fallback, image, language);
     frame.dataset.imageState = 'loading';
+    frame.dataset.imageSource = 'primary';
     void this.url(card)
       .then((url) => {
         if (url) {
+          if (/^https:\/\/images\.(pokemontcg\.io|scrydex\.com)\//.test(url))
+            frame.dataset.imageSource = 'secondary';
           image.src = url;
           labelLanguage(url);
-        } else missing();
+        } else localFallback();
       })
-      .catch(missing);
+      .catch(localFallback);
     return frame;
   }
   palette(card: PersonalCard): Promise<Palette | undefined> {

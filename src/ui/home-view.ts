@@ -1,9 +1,10 @@
-import { action, el } from './workspace-dom';
+import { action, el, icon } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 
 /** Home is intentionally derived from confirmed state; it never invents market history. */
 export function renderHome(ctx: WorkspaceContext): HTMLElement {
   const root = el('section', 'w-home');
+  root.classList.toggle('is-first-visit', !ctx.state.holdings.length);
   const owned = ctx.state.holdings;
   const copies = owned.reduce((sum, holding) => sum + holding.quantity, 0);
   const pages = ctx.state.binders.reduce(
@@ -57,11 +58,19 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     preview.append(art);
   }
   if (!preview.childElementCount) {
-    preview.append(
-      el('div', 'w-home-art-placeholder', '01'),
-      el('div', 'w-home-art-placeholder', '02'),
-      el('div', 'w-home-art-placeholder', '03'),
-    );
+    for (const [index, card] of ctx.catalog.slice(0, 3).entries()) {
+      const art = el('div', 'w-home-art-card', ctx.images.artwork(card));
+      art.dataset.position = String(index);
+      preview.append(art);
+    }
+    if (preview.childElementCount) {
+      const note = el(
+        'small',
+        'w-home-art-note',
+        'Inspiration · kein eigener Bestand',
+      );
+      preview.append(note);
+    }
   }
   root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
 
@@ -147,12 +156,6 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
             'Ordne deine Karten auf echten 9-Pocket-Seiten an.',
           ),
         ),
-      ),
-      action(
-        'Mit der ersten Karte starten',
-        () => ctx.openAdd({ live: true }),
-        'primary',
-        'camera',
       ),
     );
     return root;
@@ -279,7 +282,7 @@ function quickAction(
   button.replaceChildren(
     el('strong', '', title),
     el('small', '', description),
-    el('span', 'w-home-quick-arrow', '↗'),
+    el('span', 'w-home-quick-arrow', icon('arrow')),
   );
   return button;
 }

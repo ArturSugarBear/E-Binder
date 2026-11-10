@@ -49,7 +49,13 @@ function showBanner(
   box.setAttribute('role', 'status');
   const body = document.createElement('p');
   body.textContent = message;
-  box.append(body);
+  if (kind === 'install' && !action) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = 'E-Binder als App nutzen';
+    details.append(summary, body);
+    box.append(details);
+  } else box.append(body);
   if (action) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -61,7 +67,7 @@ function showBanner(
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'pwa-banner-close';
-  close.textContent = 'Schließen';
+  close.textContent = '×';
   close.setAttribute('aria-label', 'Hinweis schließen');
   close.addEventListener('click', () => {
     box.remove();
