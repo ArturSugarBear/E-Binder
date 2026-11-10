@@ -1,3 +1,4 @@
+import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
   recognitionClues,
@@ -90,6 +91,7 @@ export function openPageScanner(
   const queueStatus = el('p', 'w-muted');
   const grid = el('div', 'w-page-scan-grid');
   const reviewSummary = el('p', 'w-muted w-page-scan-summary');
+  const journey = scanProgress(9);
   const progress = el('progress', 'w-progress');
   progress.max = 9;
   progress.hidden = true;
@@ -341,6 +343,7 @@ export function openPageScanner(
     el('div', 'w-action-row', manualAlign, skipPage),
     queueStatus,
     status,
+    journey.element,
     progress,
     grid,
     reviewSummary,
@@ -645,6 +648,7 @@ export function openPageScanner(
     processing = true;
     progress.hidden = false;
     progress.value = 0;
+    journey.update('recognize', 'Fächer werden einzeln geprüft …', 0);
     stop.hidden = false;
     updateSave();
     try {
@@ -691,6 +695,11 @@ export function openPageScanner(
             animateResolvedPocket(pocket.container, 'empty');
             pocket.container?.classList.add('is-processed');
             progress.value = index + 1;
+            journey.update(
+              'recognize',
+              `${index + 1} von 9 Fächern geprüft`,
+              index + 1,
+            );
             status.textContent = `${index + 1} von 9 Fächern geprüft.`;
             continue;
           }
@@ -858,6 +867,11 @@ export function openPageScanner(
           }
         }
         progress.value = index + 1;
+        journey.update(
+          'recognize',
+          `${index + 1} von 9 Fächern geprüft`,
+          index + 1,
+        );
         status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;
       }
     } finally {
@@ -873,6 +887,13 @@ export function openPageScanner(
       processing = false;
       stop.hidden = true;
       progress.hidden = true;
+      journey.update(
+        abort.signal.aborted ? 'cancelled' : 'review',
+        abort.signal.aborted
+          ? 'Angehalten · vorhandene Ergebnisse bleiben prüfbar'
+          : 'Verarbeitung abgeschlossen · Ausgaben prüfen',
+        progress.value,
+      );
       updateSave();
       if (!closed)
         status.textContent = abort.signal.aborted

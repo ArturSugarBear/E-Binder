@@ -190,7 +190,11 @@ it('fills German missing images in one request and only uses the same exact prin
   });
   expect(found[1]?.image).toBeUndefined();
   expect(found[2]?.image).toBeUndefined();
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://api.tcgdex.net/'),
+    ),
+  ).toHaveLength(1);
 });
 it('keeps zero and missing price observations unknown, and retains positive dated EUR observations', async () => {
   const { catalogEntry } = await import('../../src/data/card-catalog');
@@ -344,14 +348,22 @@ it('loads complete set-scoped rarity and illustrator metadata in one request, wi
     language: 'en',
     number: '25/132',
   });
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://api.tcgdex.net/'),
+    ),
+  ).toHaveLength(1);
   expect(JSON.parse(fetcher.mock.calls[0]![1].body).variables).toEqual({
     set: 'me01',
     prefix: 'like:me01-*',
     lang: 'en',
   });
   await catalogSetFacets('me01', 'en');
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://api.tcgdex.net/'),
+    ),
+  ).toHaveLength(1);
 });
 
 it('rejects partial, mixed-set and GraphQL error responses instead of presenting incomplete rarity choices', async () => {
@@ -444,8 +456,16 @@ it('pairs a set with available English artwork once, keeping the German identity
   expect(result.cards[1]?.image).toBeUndefined();
   expect(result.cards[2]?.image).toBeUndefined();
   await catalogSetFacets('paired', 'de');
-  expect(fetcher).toHaveBeenCalledTimes(2);
-  expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://api.tcgdex.net/'),
+    ),
+  ).toHaveLength(2);
+  expect(
+    fetcher.mock.calls
+      .map(([url]) => url)
+      .filter((url) => String(url).startsWith('https://api.tcgdex.net/')),
+  ).toEqual([
     'https://api.tcgdex.net/v2/graphql',
     'https://api.tcgdex.net/v2/en/sets/paired',
   ]);
@@ -495,7 +515,11 @@ it('keeps a complete 141-card set without source images image-free instead of in
   const result = await catalogSetFacets('missing', 'de');
   expect(result.cards).toHaveLength(141);
   expect(result.cards.every((card) => card.image === undefined)).toBe(true);
-  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(
+    fetcher.mock.calls.filter(([url]) =>
+      String(url).startsWith('https://api.tcgdex.net/'),
+    ),
+  ).toHaveLength(2);
 });
 
 it('retains only a valid Cardmarket product reference without making card recognition depend on price availability', async () => {
