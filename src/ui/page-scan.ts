@@ -41,6 +41,7 @@ type Pocket = {
   search: HTMLInputElement;
   status: HTMLElement;
   quality: HTMLElement;
+  container?: HTMLElement;
 };
 
 /** Import a physical binder as repeated, explicitly reviewed 3x3 page captures. */
@@ -408,7 +409,7 @@ export function openPageScanner(
         'section',
         'w-page-scan-pocket',
         el('h3', '', `Fach ${index + 1}`),
-        photo,
+        el('div', 'w-page-scan-photo-frame', photo),
         info,
         quality,
         pick,
@@ -416,6 +417,7 @@ export function openPageScanner(
         variant,
         el('div', 'w-page-scan-search', query, searchButton),
       );
+      pocket.container = container;
       grid.append(container);
     }
     approved.row.hidden = false;
@@ -463,6 +465,8 @@ export function openPageScanner(
         if (closed || abort.signal.aborted) break;
         const pocket = pockets[index]!;
         pocket.status.textContent = 'Lese Karte …';
+        pocket.container?.classList.remove('is-processed');
+        pocket.container?.classList.add('is-scanning');
         try {
           const text = await session.recognize(tiles[index]!);
           if (closed || abort.signal.aborted) break;
@@ -491,6 +495,10 @@ export function openPageScanner(
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent =
             'Keine Erkennung – manuell suchen oder überspringen';
+        } finally {
+          pocket.container?.classList.remove('is-scanning');
+          if (!closed && !abort.signal.aborted)
+            pocket.container?.classList.add('is-processed');
         }
         progress.value = index + 1;
         status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;

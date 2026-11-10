@@ -79,12 +79,15 @@ test('a distorted photo is split into nine reviewable positions without changing
     timeout: 20_000,
   });
   await expect(dialog.locator('.w-page-scan-pocket img')).toHaveCount(9);
+  await expect(dialog.locator('.w-page-scan-photo-frame')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-quality')).toHaveCount(9);
   await expect(
     dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
   ).toBeDisabled();
   const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
   if (await stop.isVisible()) await stop.click();
+  const active = dialog.locator('.w-page-scan-pocket.is-scanning');
+  await expect(active).toHaveCount(0, { timeout: 20_000 });
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })
     .click();

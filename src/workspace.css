@@ -1969,6 +1969,47 @@ textarea.w-input,
   border: 1px solid var(--line);
   border-radius: 12px;
 }
+.w-page-scan-pocket.is-scanning {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgb(106 208 224 / 0.25);
+}
+.w-page-scan-pocket.is-processed {
+  border-color: rgb(106 208 224 / 0.3);
+}
+.w-page-scan-photo-frame {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  border-radius: 6px;
+}
+.w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    transparent 42%,
+    rgb(106 208 224 / 0.05) 49%,
+    rgb(106 208 224 / 0.72) 50%,
+    rgb(106 208 224 / 0.05) 51%,
+    transparent 58%
+  );
+  animation: w-pocket-scan-sweep 1.8s ease-in-out infinite alternate;
+}
+@keyframes w-pocket-scan-sweep {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+    animation: none;
+    transform: none;
+  }
+}
 .w-page-scan-pocket h3 {
   margin: 0;
   font-size: 13px;
@@ -2014,7 +2055,7 @@ textarea.w-input,
   .w-page-scan-pocket h3 {
     grid-column: 1 / -1;
   }
-  .w-page-scan-pocket-image {
+  .w-page-scan-photo-frame {
     grid-row: span 6;
     align-self: start;
   }
