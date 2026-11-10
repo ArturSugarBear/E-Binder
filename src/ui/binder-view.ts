@@ -28,6 +28,7 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import { openRecommendations } from './recommend-dialog';
 import { enableSwipe } from './swipe';
+import { enableSheetDrag } from './sheet-gestures';
 import { cloudClient } from '../data/supabase';
 
 let pendingPageSwipe: -1 | 0 | 1 = 0;
@@ -603,6 +604,11 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
         ),
       ),
     );
+  const slotPreview = sheet.body.querySelector<HTMLElement>('.w-holding-preview');
+  if (slotPreview) {
+    slotPreview.classList.add('w-card-touch-surface');
+    enableSheetDrag(sheet.dialog, sheet.dialog, [slotPreview]);
+  }
   if (slot) {
     const lock = action(
       slot.locked ? 'Fixierung lösen' : 'Platz festhalten',
