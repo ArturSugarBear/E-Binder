@@ -1,3 +1,6 @@
+import { test, expect } from './fixtures';
+import AxeBuilder from '@axe-core/playwright';
+
 test('stale captures can be removed individually or together without changing owned cards', async ({
   page,
 }) => {
@@ -9,12 +12,10 @@ test('stale captures can be removed individually or together without changing ow
     name: 'Karten hinzufügen',
     exact: true,
   });
-  await add
-    .locator('input[type=file][multiple]')
-    .setInputFiles([
-      'public/assets/cards/svi-211.webp',
-      'public/assets/cards/obf-207.webp',
-    ]);
+  await add.locator('input[type=file][multiple]').setInputFiles([
+    'public/assets/cards/svi-211.webp',
+    'public/assets/cards/obf-207.webp',
+  ]);
   await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
   await add
     .getByRole('button', { name: 'Aufnahme svi-211.webp entfernen' })
@@ -24,16 +25,17 @@ test('stale captures can be removed individually or together without changing ow
     'svi-211.webp',
   );
   page.once('dialog', (dialog) => dialog.accept());
-  await add.getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ }).click();
+  await add
+    .getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ })
+    .click();
   await expect(add.locator('.w-capture-queue')).not.toContainText('1 offen');
   await expect(add.locator('.w-photo-review')).toBeEmpty();
-  await add.getByRole('button', { name: 'Karten hinzufügen schließen' }).click();
+  await add
+    .getByRole('button', { name: 'Karten hinzufügen schließen' })
+    .click();
   await page.reload();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
-
-import { test, expect } from './fixtures';
-import AxeBuilder from '@axe-core/playwright';
 
 test('camera photo offers alignment, rotation and recoverable cancellation without adding ownership', async ({
   page,
