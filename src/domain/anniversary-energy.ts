@@ -56,6 +56,6 @@ export function anniversaryEnergyFromText(
         evolvesFrom: '',
         stage: '',
         finishes: ['holo'],
-    });
+      });
     });
 }
