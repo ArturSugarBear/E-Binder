@@ -606,7 +606,7 @@ it('keeps an exact market listing available when the EUR observation is undated 
   }
 });
 
-it('retains separate normal and holo Cardmarket EUR trends for portfolio quoting', async () => {
+it('does not confuse an ambiguous foil market series with a verified holo print', async () => {
   const { catalogEntry } = await import('../../src/data/card-catalog');
   vi.stubGlobal(
     'fetch',
@@ -630,6 +630,6 @@ it('retains separate normal and holo Cardmarket EUR trends for portfolio quoting
   );
   const result = await catalogEntry('sv01-209', 'de', undefined, false);
   expect(result.price?.amount).toBe(8.5);
-  expect(result.holoPrice?.amount).toBe(23.75);
+  expect(result.holoPrice).toBeUndefined();
   expect(result.price?.updated).toBe('2026-11-09T12:00:00Z');
 });
