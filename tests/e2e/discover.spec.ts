@@ -338,11 +338,16 @@ test('Discover card opens centered with a hero-sized card, including on narrow i
     () => matchMedia('(max-width: 720px) and (pointer: coarse)').matches,
   );
   if (isBottomSheet) {
-    const mobileSheet = await dialog.boundingBox();
-    expect(mobileSheet).not.toBeNull();
-    expect(
-      Math.abs(mobileSheet!.y + mobileSheet!.height - 844),
-    ).toBeLessThanOrEqual(3);
+    // The iOS sheet enters with a 24px rise; wait for that real animation
+    // to settle before asserting its anchored bottom edge.
+    await expect
+      .poll(async () => {
+        const bounds = await dialog.boundingBox();
+        return bounds
+          ? Math.abs(bounds.y + bounds.height - 844)
+          : Number.POSITIVE_INFINITY;
+      })
+      .toBeLessThanOrEqual(3);
   }
 
   await page.keyboard.press('Escape');
