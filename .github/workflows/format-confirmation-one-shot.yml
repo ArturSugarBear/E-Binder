@@ -1,0 +1,25 @@
+name: Format confirmation regression
+on:
+  push:
+    branches: [release/rare-room-liquid-collector-20261110]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Prettier validation and remove transient workflow
+        run: |
+          npx prettier --write tests/e2e/confirmation-validation.spec.ts
+          git rm .github/workflows/format-confirmation-one-shot.yml
+          git add tests/e2e/confirmation-validation.spec.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Format real collector confirmation regression"
+          git push origin HEAD:release/rare-room-liquid-collector-20261110
