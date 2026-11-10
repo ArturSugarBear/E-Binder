@@ -178,10 +178,17 @@ export async function catalogSets(
   }
   return own
     .filter((set) => !digitalSets.get(language)?.has(set.id))
-    .map((set) => ({
-      ...set,
-      alias: english.find((other) => other.id === set.id)?.name,
-    }));
+    .map((set) => {
+      const paired = english.find((other) => other.id === set.id);
+      return {
+        ...set,
+        // A set logo/symbol may be shared across languages for the SAME set,
+        // never across sets with similar names or artwork.
+        logo: set.logo || paired?.logo,
+        symbol: set.symbol || paired?.symbol,
+        alias: paired?.name,
+      };
+    });
 }
 const seriesSchema = z.object({
   id: z.string().regex(/^[\w.+-]+$/),
