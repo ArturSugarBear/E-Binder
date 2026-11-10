@@ -1,6 +1,7 @@
 import {
   candidatesFromText,
   recognitionClues,
+  visualNumberClues,
   fetchCatalogCard,
   fetchRecognizedCards,
   fetchNameHintCandidates,
@@ -684,7 +685,7 @@ export function openPageScanner(
           pocket.ocrText = text;
           const visualReview = reviewVisualCandidates(
             visualHits,
-            recognitionClues(text),
+            visualNumberClues(text),
           );
           const existingCards = [
             ...ctx.catalog,
