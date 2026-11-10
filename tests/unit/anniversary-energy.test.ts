@@ -28,7 +28,7 @@ describe('30th-anniversary printed energy codes', () => {
   });
 
   it('supports printed leading-zero OCR substitutions without fabricating Japanese editions', () => {
-    const found = anniversaryEnergyFromText('MEE O16', 'en');
+    const found = anniversaryEnergyFromText('MEE OI6', 'en');
     expect(found[0]).toMatchObject({
       name: 'Basic Metal Energy',
       number: 'MEE 016',
