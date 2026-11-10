@@ -12,6 +12,7 @@ const scope = self as unknown as {
     | ((
         event: MessageEvent<{
           photo: Blob;
+          numberOnly?: boolean;
           modelUrl: string;
           dictionaryUrl: string;
           id?: number;
@@ -78,11 +79,13 @@ scope.onmessage = (event) => {
 };
 async function recognize({
   photo,
+  numberOnly,
   modelUrl,
   dictionaryUrl,
   id,
 }: {
   photo: Blob;
+  numberOnly?: boolean;
   modelUrl: string;
   dictionaryUrl: string;
   id?: number;
@@ -178,6 +181,10 @@ async function recognize({
     }
     if (!hasPrintedCollectorFraction(texts)) {
       texts.push(await read([0.7, 0.9, 0.27, 0.045]));
+    }
+    if (numberOnly) {
+      scope.postMessage({ type: 'done', id, text: texts.join('\n') });
+      return;
     }
     report('Kartenname wird gegengeprüft …', id);
     // Real sleeve photos often shift the title well outside the narrow
