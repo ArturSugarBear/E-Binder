@@ -780,7 +780,8 @@ export function openAddCards(
             : 'unknown',
         evolvesFrom: '',
         stage: '',
-        finishes: [...finishes],
+        // Unverified is an inventory state, not a catalog print type.
+        finishes: finishes.filter((finish) => finish !== 'unverified'),
       };
       choose(manual);
     });
