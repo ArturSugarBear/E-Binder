@@ -10,7 +10,7 @@ export function openLivePageScanner(
   onSwitchToCard?: () => void,
 ): void {
   const sheet = modal('Binderseite live scannen', true);
-  sheet.dialog.classList.add('w-live-scan-dialog w-live-page-dialog');
+  sheet.dialog.classList.add('w-live-scan-dialog', 'w-live-page-dialog');
   const video = el('video', 'w-live-video');
   video.autoplay = true;
   video.playsInline = true;
