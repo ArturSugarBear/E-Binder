@@ -52,3 +52,7 @@ Vollständige Ground Truth umfasst neun Positionen. Getrennt messen:
 ## Noch offene Genauigkeitsarbeit
 
 Automatische Erkennung der äußeren Seitenkante (statt manueller Vierpunkt-Auswahl), Facherkennung bei stark ungleichmäßigem Raster, Bild-Fingerprint-Abgleich, Holo-Varianten-Erkennung und kalibrierte Confidence-Scores sind noch **nicht** gelöst. Bei kleineren/dunkleren Originalen führt OCR zu einer manuellen Prüfung. Der Scanner speichert keine ungeprüften Zuordnungen. Mehrere Fotos einer identischen Seite mit unterschiedlichem Hash lassen sich nicht sicher automatisch als Duplikat erkennen.
+
+## OCR-Suche bei verschobener Sammlernummer (10. November 2026)
+
+Wenn die beiden ursprünglichen Bildausschnitte keine plausible gedruckte Sammlernummer enthalten, durchsucht der lokale OCR-Worker vier benachbarte untere Zeilen und den unteren rechten Bereich. Bei einem Treffer werden weitere teure OCR-Durchläufe übersprungen. Erst wenn das nicht reicht, werden Kontrastvarianten geprüft. Eine gefundene Nummernfraktion ist nur ein Hinweis, keine verifizierte Kartenidentität: Set, Sprache und Druckvariante müssen weiterhin explizit bestätigt werden. Die Heuristik ist durch Unit-Tests abgesichert; ihre reale Erkennungsquote ist bis zum Benchmark mit eigenen oder rechtmäßig nutzbaren Binderfotos unbekannt.
