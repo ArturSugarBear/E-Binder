@@ -3,6 +3,9 @@ import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 
 async function catalogue(page: Page, englishImages: boolean) {
+  await page.route('**/catalog-art/**', (route) =>
+    route.fulfill({ json: { version: 1, sets: {} } }),
+  );
   const details: string[] = [];
   const assets: string[] = [];
   const set = {
@@ -148,4 +151,91 @@ test('paired English set artwork appears in both results and rarity examples wit
     /w-text-results/,
   );
   expect(api.details).toEqual([]);
+});
+
+async function secondaryArtwork(page: Page) {
+  await page.route('**/catalog-art/index.json', (route) =>
+    route.fulfill({
+      json: {
+        version: 1,
+        sets: {
+          me06: {
+            cards: 'me06.json',
+            logo: ['https://images.pokemontcg.io/me6/logo.png'],
+            symbol: [],
+          },
+        },
+      },
+    }),
+  );
+  await page.route('**/catalog-art/me06.json', (route) =>
+    route.fulfill({
+      json: {
+        setId: 'me06',
+        cards: {
+          '001': {
+            url: 'https://images.pokemontcg.io/me6/1_hires.png',
+            language: 'en',
+            providerId: 'me6-1',
+          },
+        },
+      },
+    }),
+  );
+  await page.route('https://images.pokemontcg.io/**', (route) =>
+    route.fulfill({ path: 'public/assets/cards/svi-211.webp' }),
+  );
+}
+
+test('missing primary metadata uses an exact secondary printing and labels English art', async ({
+  page,
+}) => {
+  await catalogue(page, false);
+  await secondaryArtwork(page);
+  await page.goto('./#entdecken?setId=me06');
+  const art = page.locator('.w-search-results .card-art').first();
+  await art.scrollIntoViewIfNeeded();
+  await expect(art.locator('img')).toHaveAttribute(
+    'src',
+    'https://images.pokemontcg.io/me6/1_hires.png',
+  );
+  await expect(art).toHaveAttribute('data-image-state', 'loaded');
+  await expect(art.locator('.w-art-language')).toHaveText('Bild: EN');
+  await expect(
+    page.getByRole('radio', { name: 'Deutsch', exact: true }),
+  ).toBeChecked();
+});
+
+test('HTTP-failed primary artwork falls back without changing the requested card', async ({
+  page,
+}) => {
+  await catalogue(page, true);
+  await secondaryArtwork(page);
+  await page.route('https://assets.tcgdex.net/**', (route) =>
+    route.fulfill({ status: 404, body: 'missing image' }),
+  );
+  await page.goto('./#entdecken?setId=me06');
+  const art = page.locator('.w-search-results .card-art').first();
+  await art.scrollIntoViewIfNeeded();
+  await expect(art).toHaveAttribute('data-image-source', 'secondary');
+  await expect(art).toHaveAttribute('data-image-state', 'loaded');
+  await expect(art.locator('img')).toHaveAttribute(
+    'src',
+    'https://images.pokemontcg.io/me6/1_hires.png',
+  );
+  await expect(page.locator('.w-search-results button').first()).toContainText(
+    'Skaraborn',
+  );
+});
+
+test('set galleries resolve a secondary logo when the primary has none', async ({
+  page,
+}) => {
+  await catalogue(page, false);
+  await secondaryArtwork(page);
+  await page.goto('./#entdecken');
+  await expect(page.locator('.w-set-symbol img').first()).toHaveAttribute(
+    'src',
+    'https://images.pokemontcg.io/me6/logo.png',
+  );
 });

@@ -1,3 +1,4 @@
+import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
   fetchRecognizedCards,
@@ -528,6 +529,8 @@ export function openAddCards(
     results.dataset.scanState = 'running';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
+    const journey = scanProgress();
+    journey.update('recognize', 'Karte wird vorbereitet …', 0);
     const progress = el('progress', 'w-progress');
     progress.max = 1;
     progress.setAttribute('aria-label', 'Fortschritt der Kartenerkennung');
@@ -536,7 +539,7 @@ export function openAddCards(
       () => controller.abort(),
       'text',
     );
-    notices.replaceChildren(status, progress, stop);
+    notices.replaceChildren(journey.element, status, progress, stop);
     try {
       const photo = transientPhotos.get(shot.id);
       if (!photo)
@@ -559,6 +562,7 @@ export function openAddCards(
         (label, fraction) => {
           if (!closed && ocrController === controller) {
             status.textContent = label;
+            journey.update('recognize', label);
             if (fraction !== undefined) progress.value = fraction;
             else progress.removeAttribute('value');
           }

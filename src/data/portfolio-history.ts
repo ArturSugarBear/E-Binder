@@ -10,7 +10,7 @@ export interface PortfolioObservation {
   signature: string;
 }
 const key = (mode: PersonalState['mode']) =>
-  `e-binder-portfolio-history-v1:${mode}`;
+  `e-binder-portfolio-history-v2:${mode}`;
 
 /** Compare only the same quantities and exact printings; adding a card starts
  * a new series instead of faking a market gain. */
@@ -34,6 +34,21 @@ export function portfolioSignature(state: PersonalState): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+/** Equal counts do not mean equal price coverage. Compare the actual prints. */
+function observationSignature(
+  state: PersonalState,
+  summary: PortfolioSummary,
+): string {
+  const coverage = summary.holdings
+    .filter((row) => row.unitValue !== null)
+    .map((row) => `${row.quoteKey}:${row.holding.quantity}`)
+    .sort()
+    .join('|');
+  let hash = 2166136261;
+  for (const c of coverage) hash = Math.imul(hash ^ c.charCodeAt(0), 16777619);
+  return `${portfolioSignature(state)}:${(hash >>> 0).toString(16).padStart(8, '0')}`;
+}
+
 export function readPortfolioHistory(
   mode: PersonalState['mode'],
 ): PortfolioObservation[] {
@@ -50,7 +65,7 @@ export function readPortfolioHistory(
           typeof x.day === 'string' &&
           /^\d{4}-\d{2}-\d{2}$/.test(x.day) &&
           typeof x.signature === 'string' &&
-          /^[0-9a-f]{8}$/.test(x.signature) &&
+          /^[0-9a-f]{8}:[0-9a-f]{8}$/.test(x.signature) &&
           typeof x.knownValue === 'number' &&
           Number.isFinite(x.knownValue) &&
           x.knownValue > 0 &&
@@ -87,7 +102,7 @@ export function recordPortfolioObservation(
     knownValue: Math.round(summary.knownValue * 100) / 100,
     ownedCopies: summary.ownedCopies,
     pricedCopies: summary.pricedCopies,
-    signature: portfolioSignature(state),
+    signature: observationSignature(state, summary),
   };
   const merged = current
     .filter(
@@ -114,7 +129,7 @@ export function comparableHistory(
   windowDays = 90,
   current = readPortfolioHistory(state.mode),
 ): PortfolioObservation[] {
-  const baseline = portfolioSignature(state);
+  const baseline = observationSignature(state, summary);
   const cutoff = new Date();
   cutoff.setUTCDate(cutoff.getUTCDate() - windowDays);
   const from = cutoff.toISOString().slice(0, 10);

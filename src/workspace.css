@@ -4015,3 +4015,284 @@ textarea.w-input,
     min-height: 64px;
   }
 }
+
+/* Collector composition: artwork first, one clear next action, quiet context. */
+.w-home.is-first-visit {
+  gap: 24px;
+}
+.w-home.is-first-visit .w-home-hero {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  padding-inline: 8px;
+}
+.w-home.is-first-visit .w-home-hero-copy {
+  gap: 4px;
+}
+.w-home.is-first-visit .w-home-intro {
+  margin-top: 12px !important;
+  line-height: 1.5;
+}
+.w-home-art {
+  overflow: visible;
+}
+.w-home-art-note {
+  position: absolute;
+  bottom: -14px;
+  width: 100%;
+  text-align: center;
+  color: var(--ink-2);
+  font-size: 11px;
+}
+.w-home-onboarding .w-home-steps {
+  gap: 0;
+  border-block: 1px solid var(--line);
+}
+.w-home-onboarding .w-home-step {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  padding: 18px 12px;
+}
+.w-home-onboarding .w-home-step p {
+  margin: 0;
+}
+.w-home-quick-tile {
+  box-shadow: none;
+}
+.w-portfolio-content.is-empty .w-portfolio-hero {
+  border: 0;
+  background: none;
+  min-height: 0;
+  padding: 20px 4px 8px;
+  box-shadow: none;
+}
+.w-portfolio-content.is-empty .w-portfolio-disclaimer {
+  display: none;
+}
+.w-portfolio-content.is-empty .w-portfolio-hero-art {
+  display: none;
+}
+.w-portfolio-content.is-empty .w-portfolio-hero {
+  grid-template-columns: 1fr;
+}
+.w-portfolio-content.is-empty .w-portfolio-empty {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+@media (max-width: 700px) {
+  .w-home.is-first-visit .w-home-hero {
+    padding-top: 10px;
+    padding-bottom: 16px;
+  }
+  .w-home.is-first-visit .w-home-hero h1 {
+    font-size: clamp(30px, 8.5vw, 38px);
+    max-width: 15ch;
+  }
+  .w-home.is-first-visit .w-home-art {
+    height: 185px;
+    margin-top: 25px;
+    overflow: visible;
+  }
+  .w-home.is-first-visit .w-home-art-card {
+    width: 114px;
+  }
+  .w-home.is-first-visit .w-home-art-card[data-position='0'] {
+    transform: translate(-70%, 8px) rotate(-12deg);
+    z-index: 1;
+  }
+  .w-home.is-first-visit .w-home-art-card[data-position='1'] {
+    transform: translate(0, -5px);
+    z-index: 3;
+  }
+  .w-home.is-first-visit .w-home-art-card[data-position='2'] {
+    transform: translate(70%, 8px) rotate(12deg);
+    z-index: 1;
+  }
+  .w-home-onboarding .w-home-step {
+    grid-template-columns: 30px 1fr;
+    gap: 4px 12px;
+    padding: 14px 4px;
+  }
+  .w-home-onboarding .w-home-step-count {
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: 15px;
+  }
+  .w-home-onboarding .w-home-step h3 {
+    font-size: 16px;
+  }
+  .w-home-onboarding .w-home-step p {
+    grid-column: 2;
+  }
+  .w-home-quick-grid {
+    gap: 8px;
+  }
+  .w-home-quick-tile {
+    min-height: 64px;
+    padding: 14px 16px;
+  }
+}
+
+.w-scan-progress {
+  display: grid;
+  gap: 10px;
+  margin-block: 12px;
+  padding: 16px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.w-scan-progress-track {
+  display: flex;
+  gap: 5px;
+}
+.w-scan-progress-cell {
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--line);
+  color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+.w-scan-progress-cell[data-state='done'] {
+  background: var(--accent);
+}
+.w-scan-progress-cell[data-state='active']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  animation: scan-activity 1.4s ease-in-out infinite;
+  transform-origin: left;
+}
+.w-scan-progress-label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.w-scan-progress-steps {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--ink-2);
+  font-size: 11px;
+}
+.w-scan-progress-steps li {
+  flex: 1;
+}
+.w-scan-progress-steps [aria-current='step'] {
+  color: var(--accent);
+  font-weight: 700;
+}
+.w-scan-progress[data-phase='error'] .w-scan-progress-label {
+  color: var(--danger);
+}
+.w-live-stage[data-scan-phase='recognize']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 42%,
+    rgb(216 242 90 / 0.25) 50%,
+    transparent 58%
+  );
+  animation: scan-sweep 2.4s ease-in-out infinite;
+}
+.w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 35%,
+    rgb(216 242 90 / 0.25) 50%,
+    transparent 65%
+  );
+  animation: scan-sweep 2s ease-in-out infinite;
+}
+.w-page-scan-photo-frame {
+  position: relative;
+  overflow: hidden;
+}
+@keyframes scan-activity {
+  0%,
+  100% {
+    transform: scaleX(0.15);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+@keyframes scan-sweep {
+  0%,
+  100% {
+    transform: translateY(-45%);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(45%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-scan-progress-cell[data-state='active']::after {
+    animation: none;
+    transform: none;
+    opacity: 0.65;
+  }
+  .w-live-stage[data-scan-phase='recognize']::after,
+  .w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+    animation: none;
+    transform: none;
+    background: rgb(216 242 90 / 0.08);
+  }
+}
+.w-home-quick-arrow svg,
+.w-profile-option-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+.w-mobile-nav.w-liquid-ready::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: rgb(20 21 25 / 0.34);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
+}
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-brand-logo {
+    width: 145px;
+    height: 36px;
+  }
+  .w-brand small {
+    display: none;
+  }
+  .w-header {
+    min-height: 58px;
+  }
+  .w-home-section-heading h2 {
+    font-size: 21px;
+  }
+  .w-home.is-first-visit .w-home-intro {
+    font-size: 14px;
+  }
+}

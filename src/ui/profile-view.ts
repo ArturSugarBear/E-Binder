@@ -1,4 +1,4 @@
-import { action, el } from './workspace-dom';
+import { action, el, icon } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import {
   betaDiagnosticsAuthorized,
@@ -132,7 +132,7 @@ function option(
       el('strong', '', title),
       el('small', '', description),
     ),
-    el('span', 'w-profile-option-arrow', '↗'),
+    el('span', 'w-profile-option-arrow', icon('arrow')),
   );
   return control;
 }
