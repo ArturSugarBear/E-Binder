@@ -3,6 +3,7 @@ import {
   recognitionClues,
   fetchCatalogCard,
   fetchRecognizedCards,
+  fetchNameHintCandidates,
   searchCatalog,
 } from '../data/card-catalog';
 import { extractPagePockets } from '../data/page-pockets';
@@ -627,29 +628,62 @@ export function openPageScanner(
             ...ctx.state.holdings.map((holding) => holding.card),
           ]);
           let online: PersonalCard[] = [];
+          let catalogFailed = false;
+          // Never make one bad TCGdex request stall a whole 9-pocket page.
+          const lookupSignal = AbortSignal.any([
+            abort.signal,
+            AbortSignal.timeout(11000),
+          ]);
           if (navigator.onLine && text.trim()) {
             try {
               online = await fetchRecognizedCards(
                 text,
                 preferredLanguage(text),
-                abort.signal,
+                lookupSignal,
               );
             } catch {
-              // Manual lookup and local matches remain available.
+              catalogFailed = true;
+              // OCR and local cards remain available without a connection.
+            }
+          }
+          if (closed || abort.signal.aborted) break;
+          let titleHint = '';
+          if (navigator.onLine && text.trim() && !online.length) {
+            try {
+              pocket.status.textContent =
+                'Kartenname wird im Katalog gesucht …';
+              const hint = await fetchNameHintCandidates(
+                text,
+                preferredLanguage(text),
+                lookupSignal,
+              );
+              online = hint.candidates;
+              titleHint = hint.query;
+            } catch {
+              catalogFailed = true;
+              // Never substitute a guessed printing for an unavailable lookup.
             }
           }
           if (closed || abort.signal.aborted) break;
           displayCandidates(pocket, [...online, ...local]);
+          if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
-            : pocket.candidates.length
-              ? `${pocket.candidates.length} Vorschläge · prüfen`
-              : 'Noch nicht erkannt · prüfen';
-        } catch {
+            : pocket.candidates.length && titleHint
+              ? `„${titleHint}“ erkannt · Ausgabe wählen`
+              : pocket.candidates.length
+                ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
+                : !navigator.onLine
+                  ? 'Offline · Katalogabgleich benötigt Internet'
+                  : catalogFailed
+                    ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
+                    : text.trim()
+                      ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                      : 'Kein lesbarer Kartenname · Foto prüfen';
+        } catch (error) {
           if (closed || abort.signal.aborted) break;
-          pocket.status.textContent =
-            'Keine Erkennung – manuell suchen oder überspringen';
+          pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
           if (!closed && !abort.signal.aborted)

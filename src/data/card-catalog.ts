@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Collection } from '../domain/collection';
+import { recognizedNameHints } from '../domain/recognition-names';
 import {
   normalize,
   numberKey,
@@ -671,6 +672,40 @@ export async function fetchRecognizedCards(
   if (!candidates.length && failure?.status === 'rejected')
     throw failure.reason;
   return candidates;
+}
+
+/**
+ * When the collector fraction is illegible, search by the OCR title only.
+ * These are unverified candidates: a name (especially "Energie") never proves
+ * a particular set, language, finish or owned copy.
+ *
+ * Keep API work bounded; the scanner has up to nine pockets per page.
+ */
+export async function fetchNameHintCandidates(
+  text: string,
+  language: string,
+  signal?: AbortSignal,
+): Promise<{ query: string; candidates: PersonalCard[] }> {
+  const query = recognizedNameHints(text)[0] ?? '';
+  if (!query || !['de', 'en', 'ja'].includes(language))
+    return { query, candidates: [] };
+  const searchSignal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(10000)])
+    : AbortSignal.timeout(10000);
+  const names = await searchCatalog(query, language, searchSignal);
+  const normalized = normalize(query);
+  const matching = names
+    .filter((item) => normalize(item.name).includes(normalized))
+    .slice(0, 6);
+  const checked = await Promise.allSettled(
+    matching.map((item) => fetchCatalogCard(item.id, language, searchSignal)),
+  );
+  return {
+    query,
+    candidates: checked.flatMap((result) =>
+      result.status === 'fulfilled' ? [result.value] : [],
+    ),
+  };
 }
 
 /** One text-only request for complete set facets, independent of the visible result page. */

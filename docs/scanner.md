@@ -78,3 +78,11 @@ Für den Qualitätsnachweis fehlen insbesondere annotierte exakte Set-IDs je Pos
 Wenn die vier Außenkanten nicht ausreichend deutlich sind, untersucht E-Binder als zweiten lokalen Schritt die beiden inneren Spalten- und Reihenfugen der 3×3-Taschen. Dafür wertet es in einer temporären, verkleinerten Kopie Kantenenergie über die gesamte jeweils andere Bildachse aus. Zwei ungefähr gleichmäßig verteilte, durchgehende Nähte pro Richtung ergeben einen plausiblen Seitenrahmen; sonst bleibt der konservative Vollbildzuschnitt samt optionalem „Zuschnitt korrigieren“.
 
 Ein privater **Offline-Prototyp** lieferte bei 30 von 34 bereitgestellten Fotos geometrisch plausible Kandidaten. Das ist **keine bestätigte Ausrichtungsgenauigkeit** und kein Nachweis für korrekte Kartenerkennung: Die vollständige manuelle Ground Truth und Browsermessungen stehen aus. Die Fotos bleiben privat und sind nicht Bestandteil des öffentlichen Repositories.
+
+## Erfassung ohne Demo-Vorauswahl und OCR-Titel-Fallback
+
+„Karten hinzufügen“ startet mit Foto-Aktionen und einer gezielten, optionalen Katalogsuche. Die ersten zwölf Inspirationskarten werden **nicht mehr ungefragt als Suchergebnisse angezeigt**. Erweiterte Set-/Illustrator-/Seltenheitsfilter bleiben eingeklappt, bis die Person sie benötigt. Beim Öffnen wird auf dem iPhone nicht automatisch das Suchfeld fokussiert.
+
+Wenn bei einer fotografierten Karte die Sammlernummer fehlt oder unleserlich ist, liest der lokale OCR-Worker einen breiteren Ausschnitt der Namenszeile. Der Katalog sucht danach bei Bedarf **begrenzt nach dem erkannten Namen** (maximal sechs Detailtreffer, 11 Sekunden Gesamtbudget pro Fach). Solche Treffer sind **Vorschläge ohne bestätigte Kartenausgabe**: Name allein belegt weder Set noch Druckvariante, Sprachfassung oder Besitz. Eine „Basis-Energie“ ergibt deshalb nur eine allgemeine Energiesuche – keine automatische Zuordnung zu einer beliebigen Energieauflage.
+
+Das Fach unterscheidet nun zwischen unlesbarem Text, fehlendem Kartentreffer, offline fehlendem Abgleich und einer fehlgeschlagenen Online-Anfrage. Dies erleichtert die Fehlersuche, beweist aber keine OCR-Gesamtgenauigkeit. Die 34 privaten Binderfotos bleiben die Grundlage für spätere, manuell annotierte Top-1-/Top-3-Messungen; sie werden nicht ins öffentliche Repository gestellt.

@@ -27,6 +27,7 @@ async function addFirst(page: Page, quantity = '1'): Promise<void> {
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
   const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Karte suchen', { exact: true }).fill('Floink');
   await dialog.locator('.w-search-results button').first().click();
   await dialog
     .getByLabel('Druckvariante', { exact: true })
