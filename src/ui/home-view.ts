@@ -15,8 +15,8 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
   ).length;
 
   const hero = el(
-    'header',
-    'w-home-hero w-glass-panel',
+    'div',
+    'w-home-hero-copy',
     el('p', 'w-eyebrow', 'Rare Room · Dein Sammelraum'),
     el(
       'h1',
@@ -63,8 +63,7 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       el('div', 'w-home-art-placeholder', '03'),
     );
   }
-  hero.append(preview);
-  root.append(hero);
+  root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
 
   if (!copies) {
     root.append(
