@@ -83,7 +83,9 @@ const appBuild =
 export function betaArea(value: string): Area {
   return routes.has(value as Area) ? (value as Area) : 'other';
 }
-export function safeCatalogueKey(value: string | undefined): string | undefined {
+export function safeCatalogueKey(
+  value: string | undefined,
+): string | undefined {
   // Product codes can contain colons and slashes. Never transmit URLs,
   // photo references or arbitrary free-form strings.
   return value &&
@@ -113,7 +115,10 @@ export function setBetaDiagnosticsPaused(next: boolean): void {
   if (!authorized) return;
   paused = next;
   try {
-    localStorage.setItem('e-binder-beta-diagnostics-paused', next ? 'yes' : 'no');
+    localStorage.setItem(
+      'e-binder-beta-diagnostics-paused',
+      next ? 'yes' : 'no',
+    );
   } catch {
     // Browser storage restrictions cannot block the application.
   }
@@ -197,7 +202,12 @@ export function startBetaDiagnostics(
     recordBetaEvent('runtime_error', currentArea(), 'uncaught_script', 'error'),
   );
   window.addEventListener('unhandledrejection', () =>
-    recordBetaEvent('runtime_error', currentArea(), 'unhandled_promise', 'error'),
+    recordBetaEvent(
+      'runtime_error',
+      currentArea(),
+      'unhandled_promise',
+      'error',
+    ),
   );
   document.addEventListener(
     'click',
