@@ -7,6 +7,11 @@ const basePattern = base.replace(/[\\.*+?^$()|[\]{}]/g, '\\$&');
 
 export default defineConfig({
   base,
+  define: {
+    __E_BINDER_BUILD__: JSON.stringify(
+      process.env.GITHUB_SHA?.slice(0, 12) ?? 'local',
+    ),
+  },
   server: { allowedHosts: ['terminal.local'] },
   preview: { allowedHosts: ['terminal.local'] },
   plugins: [

@@ -1,5 +1,10 @@
 import { action, el } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
+import {
+  betaDiagnosticsAuthorized,
+  betaDiagnosticsPaused,
+  setBetaDiagnosticsPaused,
+} from '../data/beta-diagnostics';
 
 /** Profile keeps existing account, backup and privacy workflows intact. */
 export function renderProfile(ctx: WorkspaceContext): HTMLElement {
@@ -70,6 +75,29 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
     ),
   );
   root.append(account, scanner);
+  if (betaDiagnosticsAuthorized()) {
+    const suspended = betaDiagnosticsPaused();
+    root.append(
+      el(
+        'section',
+        'w-profile-group',
+        el('h2', '', 'Beta-Diagnostik · Entwicklerkonto'),
+        el(
+          'p',
+          'w-muted',
+          'Nur auf diesem Testkonto: Bedienaktionen, technische Fehler und Erkennungs-Korrekturen. Keine Fotos, OCR-Texte, Suchbegriffe oder privaten Notizen.',
+        ),
+        action(
+          suspended ? 'Diagnose fortsetzen' : 'Diagnose pausieren',
+          () => {
+            setBetaDiagnosticsPaused(!suspended);
+            ctx.render();
+          },
+          'secondary',
+        ),
+      ),
+    );
+  }
   root.append(
     el(
       'p',
