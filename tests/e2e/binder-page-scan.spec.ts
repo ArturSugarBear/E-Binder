@@ -20,11 +20,12 @@ test('the scanner opens via the central add action without persisting a photo', 
   await dialog
     .locator('input[type=file][multiple]')
     .setInputFiles('public/assets/cards/svi-211.webp');
-  const crop = page.getByRole('dialog', {
-    name: 'Binderseite ausrichten',
+  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
+    timeout: 30_000,
   });
-  await expect(crop).toBeVisible();
-  await crop.getByRole('button', { name: 'Zurück zum Foto' }).click();
+  await expect(
+    page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
+  ).toHaveCount(0);
   await dialog
     .getByRole('button', { name: 'Binderseiten scannen schließen' })
     .click();
@@ -60,6 +61,14 @@ test('proposes editable binder corners only for a clear page outline', async ({
     mimeType: 'image/png',
     buffer: Buffer.from(image, 'base64'),
   });
+  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
+    timeout: 30_000,
+  });
+  const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
+  if (await stop.isVisible()) await stop.click();
+  const correct = dialog.getByRole('button', { name: 'Zuschnitt korrigieren' });
+  await expect(correct).toBeEnabled({ timeout: 15_000 });
+  await correct.click();
   const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
   await expect(
     crop.getByText('Ecken automatisch vorgeschlagen.', {
@@ -127,17 +136,17 @@ test('a distorted photo is split into nine reviewable positions without changing
     mimeType: 'image/jpeg',
     buffer: Buffer.from(image, 'base64'),
   });
-  const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
-  await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
-  await expect(crop.locator('.w-crop-review')).toBeVisible();
-  await expect(crop.locator('.w-page-crop-guides span')).toHaveCount(9);
-  await crop.getByRole('button', { name: 'Neun Fächer auswerten' }).click();
   await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
-    timeout: 20_000,
+    timeout: 30_000,
   });
+  await expect(dialog.locator('.w-page-scan-editor')).toHaveCount(9);
+  await expect(dialog.locator('.w-page-scan-editor[open]')).toHaveCount(0);
   await expect(dialog.locator('.w-page-scan-pocket img')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-photo-frame')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-quality')).toHaveCount(9);
+  await expect(
+    page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
+  ).toHaveCount(0);
   await expect(
     dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
   ).toBeDisabled();
