@@ -982,7 +982,8 @@ export function openAddCards(
   if (selected) renderConfirmation();
   else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
   else results.replaceChildren();
-  if (options.photos) gallery.click();
+  if (options.live) takePhoto.click();
+  else if (options.photos) gallery.click();
   else if (options.browse || options.setId || options.artist) search.focus();
   else if (!options.card) scanBinder.focus({ preventScroll: true });
 }
