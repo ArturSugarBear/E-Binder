@@ -194,6 +194,21 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     );
     pages.append(button);
   }
+  const addEmptyPage = () =>
+    ctx.commit('Seite hinzugefügt', (state) =>
+      changeState(state, (next) => {
+        const target = next.binders.find((item) => item.id === binder.id)!;
+        const added = {
+          id: uid(),
+          title: `Seite ${target.pages.length + 1}`,
+          slots: emptySlots(),
+          assembled: false,
+        };
+        target.pages.push(added);
+        next.lastBinderId = target.id;
+        next.lastPageId = added.id;
+      }),
+    );
   const controls = el('details', 'w-page-controls');
   controls.open = !matchMedia('(max-width: 640px)').matches;
   controls.append(
@@ -205,26 +220,7 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
   );
   controls.append(
     pages,
-    action(
-      'Leere Seite hinzufügen',
-      () =>
-        ctx.commit('Seite hinzugefügt', (state) =>
-          changeState(state, (next) => {
-            const target = next.binders.find((item) => item.id === binder.id)!;
-            const added = {
-              id: uid(),
-              title: `Seite ${target.pages.length + 1}`,
-              slots: emptySlots(),
-              assembled: false,
-            };
-            target.pages.push(added);
-            next.lastBinderId = target.id;
-            next.lastPageId = added.id;
-          }),
-        ),
-      'text',
-      'plus',
-    ),
+    action('Leere Seite hinzufügen', addEmptyPage, 'text', 'plus'),
     action(
       'Binder umbenennen',
       () =>
@@ -465,11 +461,58 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'text',
   );
   next.disabled = pageIndex === binder.pages.length - 1;
+  const pageRail = el('nav', 'w-binder-page-rail');
+  pageRail.setAttribute('aria-label', 'Binderseiten durchblättern');
+  for (const [itemIndex, item] of binder.pages.entries()) {
+    const ownedCount = item.slots.filter(
+      (slot) => slot?.kind === 'owned',
+    ).length;
+    const plannedCount = item.slots.filter(
+      (slot) => slot?.kind === 'planned',
+    ).length;
+    const thumb = action(
+      `Seite ${itemIndex + 1}: ${item.title}`,
+      () => choosePage(item.id),
+      'page',
+    );
+    thumb.classList.add('w-binder-page-thumb');
+    thumb.setAttribute('aria-label', `Seite ${itemIndex + 1}: ${item.title}`);
+    thumb.setAttribute('aria-current', item.id === page.id ? 'page' : 'false');
+    const mosaic = el('span', 'w-binder-page-mosaic');
+    mosaic.setAttribute('aria-hidden', 'true');
+    for (const slot of item.slots)
+      mosaic.append(
+        el(
+          'i',
+          slot?.kind === 'owned'
+            ? 'is-owned'
+            : slot?.kind === 'planned'
+              ? 'is-planned'
+              : '',
+        ),
+      );
+    thumb.replaceChildren(
+      mosaic,
+      el(
+        'span',
+        'w-binder-page-thumb-caption',
+        el('strong', '', `Seite ${String(itemIndex + 1).padStart(2, '0')}`),
+        el(
+          'small',
+          '',
+          `${ownedCount} belegt${plannedCount ? ` · ${plannedCount} geplant` : ''}`,
+        ),
+      ),
+    );
+    pageRail.append(thumb);
+  }
+  const createPage = action('Neue Seite', addEmptyPage, 'secondary', 'plus');
+  createPage.classList.add('w-binder-page-create');
+  pageRail.append(createPage);
   const workspace = el(
     'div',
     'w-binder-workspace',
     title,
-    toolbar,
     paper,
     el(
       'nav',
@@ -478,6 +521,8 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
       el('span', 'w-mono', `${pageIndex + 1} / ${binder.pages.length}`),
       next,
     ),
+    pageRail,
+    toolbar,
     info,
   );
   const inventory = el(
