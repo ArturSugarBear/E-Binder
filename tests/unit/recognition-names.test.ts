@@ -21,9 +21,7 @@ describe('OCR card-title fallback', () => {
     expect(recognizedNameHints('001/024\nBasis-Metall-Energie')).toEqual([
       'Metall-Energie',
     ]);
-    expect(recognizedNameHints('Basic Metal Energy')).toEqual([
-      'Metal Energy',
-    ]);
+    expect(recognizedNameHints('Basic Metal Energy')).toEqual(['Metal Energy']);
     expect(recognizedNameHints('Basis-Pflanze-Energie')).toEqual([
       'Pflanze-Energie',
     ]);
