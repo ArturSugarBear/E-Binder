@@ -79,10 +79,8 @@ test('Home and Profile actions reach the named task and cancellation preserves a
   });
   await page.goto('./#home');
   const main = page.getByRole('main');
-  for (const caption of [
-    'Karte live scannen',
-    'Mit der ersten Karte starten',
-  ]) {
+  // The streamlined Home has one primary live-scan CTA, plus a dedicated page-scan tile.
+  for (const caption of ['Karte live scannen']) {
     await main.getByRole('button', { name: caption, exact: true }).click();
     const live = page.getByRole('dialog', {
       name: 'Karte live scannen',
@@ -105,6 +103,15 @@ test('Home and Profile actions reach the named task and cancellation preserves a
       main.getByRole('button', { name: caption, exact: true }),
     ).toBeFocused();
   }
+  await main.getByRole('button', { name: /^Binderseite scannen/ }).click();
+  const pageScan = page.getByRole('dialog', {
+    name: 'Binderseiten scannen',
+    exact: true,
+  });
+  await expect(pageScan).toBeVisible();
+  await pageScan
+    .getByRole('button', { name: 'Binderseiten scannen schließen', exact: true })
+    .click();
   await main.getByRole('button', { name: 'Meine Binder', exact: true }).click();
   await expect(page).toHaveURL(/#binder$/);
   await expect(
