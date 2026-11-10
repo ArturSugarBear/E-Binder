@@ -9,7 +9,7 @@ layers explicitly:
 2. **Image geometry and synthetic stream** (automated, commit gate):
    stable three-frame detection, jitter, missing corners, square/landscape
    false positives, two consecutive scans, short-lived photo storage,
-   persistence of *metadata only* after reload.
+   persistence of _metadata only_ after reload.
 3. **Real image recognition** (benchmark, local private dataset): actual
    photographed cards under variable light, sleeves, glare, tilt, rotation,
    cropped corners, foreign languages, trainer/energy/normal/full-art/holo.
@@ -73,13 +73,13 @@ CARD_SCAN_BENCHMARK_OUT=~/private/scan-results.json \
 
 **Measures:** successful OCR runs, exact printing top-1/top-3 rate, no-card
 false candidate count, duration and condition-specific breakdown. Records
-photo *basename*, ground-truth keys and conditions but never photo pixels.
+photo _basename_, ground-truth keys and conditions but never photo pixels.
 Run in a fresh private browser context for every sample.
 
 **Caveats:** a photo-gallery benchmark uses the manual alignment/review path,
 not the real-time camera autofocus/edge detector. Evaluation of recognition
-must use *actual* OCR, not the stubs in camera lifecycle tests. Distinguish a
-local OCR text result from a correct card *printing*. Service availability
+must use _actual_ OCR, not the stubs in camera lifecycle tests. Distinguish a
+local OCR text result from a correct card _printing_. Service availability
 influences catalogue matching; record online/offline status and run time.
 
 ## Minimum realistic test campaign for a release decision
@@ -91,7 +91,7 @@ influences catalogue matching; record online/offline status and run time.
   overlap; always report exact counts.
 - **At least 20 full 9-pocket binder pages**, including partly empty pages,
   different binder layouts, glossy pockets, nonstandard spacing and tilt.
-  Report top-1, top-3 and empty-pocket errors by *slot*. A false auto-empty
+  Report top-1, top-3 and empty-pocket errors by _slot_. A false auto-empty
   must never silently commit ownership changes.
 - **At least 30 negative/non-card photos** (table, book, hand, card back,
   rectangular packaging, too-close crop, blank paper) to evaluate automatic

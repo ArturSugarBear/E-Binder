@@ -264,11 +264,7 @@ export function openLiveScanner(
       const pixels = sample
         .getContext('2d', { willReadFrequently: true })!
         .getImageData(0, 0, sample.width, sample.height);
-      corners = suggestPageCorners(
-        pixels.data,
-        sample.width,
-        sample.height,
-      );
+      corners = suggestPageCorners(pixels.data, sample.width, sample.height);
     } catch {
       // A temporarily missing camera frame must never trigger a shutter.
     }
@@ -293,7 +289,9 @@ export function openLiveScanner(
     reliable = observations >= 2 ? lock.corners : null;
     polygon.setAttribute(
       'points',
-      lock.corners.map((point) => `${point.x * 100},${point.y * 100}`).join(' '),
+      lock.corners
+        .map((point) => `${point.x * 100},${point.y * 100}`)
+        .join(' '),
     );
     stage.classList.add('has-card-outline');
     progress.value = observations;

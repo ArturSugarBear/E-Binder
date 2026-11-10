@@ -65,7 +65,9 @@ async function installCameraRig(page: Page): Promise<void> {
     const NativeWorker = window.Worker;
     class StubOCR {
       onmessage:
-        | ((event: MessageEvent<{ type: string; id: number; text: string }>) => void)
+        | ((
+            event: MessageEvent<{ type: string; id: number; text: string }>,
+          ) => void)
         | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id: number }) {
@@ -136,13 +138,17 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   );
   await mode(page, 'square');
   await page.waitForTimeout(1300);
-  await expect(live.getByRole('button', { name: 'Jetzt aufnehmen' })).toBeVisible();
+  await expect(
+    live.getByRole('button', { name: 'Jetzt aufnehmen' }),
+  ).toBeVisible();
   await expect(live.locator('.w-live-progress')).toHaveJSProperty('value', 0);
   await expect(add.locator('.w-capture-queue')).toBeEmpty();
   await mode(page, 'landscape');
   await page.waitForTimeout(1200);
   await expect(add.locator('.w-capture-queue')).toBeEmpty();
-  await live.getByRole('button', { name: 'Karte live scannen schließen' }).click();
+  await live
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
   const trackStates = await page.evaluate(() => {
     const rig = (
       window as typeof window & { __scanRig: { trackStates: () => string[] } }
@@ -179,7 +185,9 @@ test('three stable video observations create a reviewable scan but never ownersh
     /Scan abgeschlossen|Scan fehlgeschlagen/,
     { timeout: 35_000 },
   );
-  await expect(live.locator('.w-live-status')).toContainText('Scan abgeschlossen');
+  await expect(live.locator('.w-live-status')).toContainText(
+    'Scan abgeschlossen',
+  );
   await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await mode(page, 'blank');
@@ -189,9 +197,12 @@ test('three stable video observations create a reviewable scan but never ownersh
     { timeout: 10_000 },
   );
   await mode(page, 'card2');
-  await expect(live.locator('.w-live-status')).toContainText('Scan abgeschlossen', {
-    timeout: 35_000,
-  });
+  await expect(live.locator('.w-live-status')).toContainText(
+    'Scan abgeschlossen',
+    {
+      timeout: 35_000,
+    },
+  );
   await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
   await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
   const states = await page.evaluate(() =>
@@ -201,11 +212,11 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   expect(states.every((state) => state === 'ended')).toBe(true);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await add.getByRole('button', { name: 'Karten hinzufügen schließen' }).click();
-  await page.reload();
-  await page
-    .getByRole('button', { name: 'Erfassung fortsetzen' })
+  await add
+    .getByRole('button', { name: 'Karten hinzufügen schließen' })
     .click();
+  await page.reload();
+  await page.getByRole('button', { name: 'Erfassung fortsetzen' }).click();
   await expect(page.locator('.w-photo-review img')).toHaveCount(0);
   await expect(page.locator('.w-capture-queue')).toContainText('2 offen');
 });
@@ -254,8 +265,12 @@ test('closing the scanner while camera permission is pending releases late track
   const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
   await add.getByRole('button', { name: 'Karte live scannen' }).click();
   const live = page.getByRole('dialog', { name: 'Karte live scannen' });
-  await expect(live.locator('.w-live-status')).toContainText('Kamera wird gestartet');
-  await live.getByRole('button', { name: 'Karte live scannen schließen' }).click();
+  await expect(live.locator('.w-live-status')).toContainText(
+    'Kamera wird gestartet',
+  );
+  await live
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
   await page.evaluate(() =>
     (
       window as typeof window & { __lateCamera: { release: () => void } }

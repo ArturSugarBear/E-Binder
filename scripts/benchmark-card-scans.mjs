@@ -15,7 +15,9 @@ import { performance } from 'node:perf_hooks';
 
 const input = process.argv[2];
 if (!input) {
-  console.error('Usage: node scripts/benchmark-card-scans.mjs <private-ground-truth.json>');
+  console.error(
+    'Usage: node scripts/benchmark-card-scans.mjs <private-ground-truth.json>',
+  );
   process.exitCode = 2;
 } else {
   await benchmark(resolve(input));
@@ -35,9 +37,11 @@ async function benchmark(manifestPath) {
       !sample.photo.trim() ||
       typeof sample.rights !== 'string' ||
       !sample.rights.trim() ||
-      !(sample.expectedKey === null ||
+      !(
+        sample.expectedKey === null ||
         (typeof sample.expectedKey === 'string' &&
-          sample.expectedKey.length > 3)) ||
+          sample.expectedKey.length > 3)
+      ) ||
       (sample.conditions !== undefined &&
         (!Array.isArray(sample.conditions) ||
           sample.conditions.some((tag) => typeof tag !== 'string'))) ||
@@ -51,17 +55,20 @@ async function benchmark(manifestPath) {
               !Array.isArray(point) ||
               point.length !== 2 ||
               point.some(
-                (part) =>
-                  !Number.isFinite(part) || part < 0 || part > 1,
+                (part) => !Number.isFinite(part) || part < 0 || part > 1,
               ),
           )))
     )
       throw new Error(`Invalid ground truth at photo #${index + 1}.`);
     const photoPath = resolve(dirname(manifestPath), sample.photo);
-    if (!['.jpg', '.jpeg', '.png', '.webp'].includes(extname(photoPath).toLowerCase()))
+    if (
+      !['.jpg', '.jpeg', '.png', '.webp'].includes(
+        extname(photoPath).toLowerCase(),
+      )
+    )
       throw new Error('Benchmark photos must be JPG, PNG or WebP.');
     if ((await stat(photoPath)).size > 12_000_000)
-      throw new Error('Single photo exceeds the app\'s 12 MB capture limit.');
+      throw new Error("Single photo exceeds the app's 12 MB capture limit.");
   }
   const browser = await chromium.launch({ headless: true });
   const reports = [];
@@ -89,7 +96,9 @@ async function benchmark(manifestPath) {
         });
         if (sample.language)
           await add.getByLabel('Katalogsprache').selectOption(sample.language);
-        await add.locator('input[type=file][multiple]').setInputFiles(photoPath);
+        await add
+          .locator('input[type=file][multiple]')
+          .setInputFiles(photoPath);
         await add.locator('.w-photo-review img').waitFor();
         await add
           .getByRole('button', { name: 'Foto ausrichten und erkennen' })
@@ -119,21 +128,29 @@ async function benchmark(manifestPath) {
           .waitFor({ timeout: 180_000 });
         const ranked = await add
           .locator('.w-search-results button[data-card-key]')
-          .evaluateAll((nodes) => nodes.map((element) => element.dataset.cardKey));
+          .evaluateAll((nodes) =>
+            nodes.map((element) => element.dataset.cardKey),
+          );
         const owned = await page.locator('.w-owned-grid button').count();
         if (owned !== 0)
-          throw new Error('Safety regression: recognition added inventory without confirmation.');
+          throw new Error(
+            'Safety regression: recognition added inventory without confirmation.',
+          );
         reports.push({
           photo: basename(photoPath),
           conditions: sample.conditions ?? [],
           rights: sample.rights,
           expectedKey: sample.expectedKey,
-          top1: sample.expectedKey === null ? null : ranked[0] === sample.expectedKey,
+          top1:
+            sample.expectedKey === null
+              ? null
+              : ranked[0] === sample.expectedKey,
           top3:
             sample.expectedKey === null
               ? null
               : ranked.slice(0, 3).includes(sample.expectedKey),
-          unexpectedSuggestions: sample.expectedKey === null ? ranked.length : null,
+          unexpectedSuggestions:
+            sample.expectedKey === null ? ranked.length : null,
           candidates: ranked.length,
           durationMs: Math.round(performance.now() - start),
         });
@@ -159,7 +176,9 @@ async function benchmark(manifestPath) {
   const top1 = scored.filter((r) => r.top1).length;
   const top3 = scored.filter((r) => r.top3).length;
   const mean = (list) =>
-    list.length ? Math.round(list.reduce((sum, v) => sum + v, 0) / list.length) : null;
+    list.length
+      ? Math.round(list.reduce((sum, v) => sum + v, 0) / list.length)
+      : null;
   const byCondition = Object.fromEntries(
     [...new Set(completed.flatMap((r) => r.conditions))].map((condition) => {
       const subset = scored.filter((r) => r.conditions.includes(condition));

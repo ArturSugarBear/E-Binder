@@ -22,7 +22,7 @@ describe('live camera: safety-critical automatic shutter gating', () => {
   it('accepts a centered portrait TCG-card outline with perspective skew', () => {
     expect(plausibleCardQuad(card, WIDTH, HEIGHT)).toBe(true);
     const skewed: Quad = [
-      { x: 0.20, y: 0.13 },
+      { x: 0.2, y: 0.13 },
       { x: 0.82, y: 0.09 },
       { x: 0.88, y: 0.86 },
       { x: 0.13, y: 0.91 },
@@ -71,7 +71,12 @@ describe('live camera: safety-critical automatic shutter gating', () => {
   it('only locks after three consecutive stable frames', () => {
     const first = nextCardLock(blank, card, WIDTH, HEIGHT);
     expect(first.stableFrames).toBe(1);
-    const second = nextCardLock(first, shifted(card, 0.009, 0.005), WIDTH, HEIGHT);
+    const second = nextCardLock(
+      first,
+      shifted(card, 0.009, 0.005),
+      WIDTH,
+      HEIGHT,
+    );
     expect(second.stableFrames).toBe(2);
     const third = nextCardLock(second, card, WIDTH, HEIGHT);
     expect(third.stableFrames).toBe(3);
@@ -80,7 +85,12 @@ describe('live camera: safety-critical automatic shutter gating', () => {
 
   it('clears the auto-shutter lock when corners disappear, jump or are not card-shaped', () => {
     const locked = nextCardLock(
-      nextCardLock(nextCardLock(blank, card, WIDTH, HEIGHT), card, WIDTH, HEIGHT),
+      nextCardLock(
+        nextCardLock(blank, card, WIDTH, HEIGHT),
+        card,
+        WIDTH,
+        HEIGHT,
+      ),
       card,
       WIDTH,
       HEIGHT,

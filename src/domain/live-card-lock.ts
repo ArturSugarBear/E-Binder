@@ -86,8 +86,6 @@ export function nextCardLock(
     );
   return {
     corners: candidate,
-    stableFrames: stable
-      ? Math.min(3, previous.stableFrames + 1)
-      : 1,
+    stableFrames: stable ? Math.min(3, previous.stableFrames + 1) : 1,
   };
 }
