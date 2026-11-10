@@ -101,9 +101,11 @@ export function createDiscoverView(ctx: WorkspaceContext) {
   const setGallery = browser.element.querySelector<HTMLDetailsElement>(
     '.w-catalog-discovery',
   )!;
+  let explicitlySelectedMode = false;
   const setsMode = action(
     'Sets entdecken',
     () => {
+      explicitlySelectedMode = true;
       setGallery.open = true;
       setGallery.scrollIntoView({ block: 'start', behavior: 'smooth' });
     },
@@ -112,6 +114,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
   const cardsMode = action(
     'Karten suchen',
     () => {
+      explicitlySelectedMode = true;
       setGallery.open = false;
       status.replaceChildren(
         message(
@@ -175,7 +178,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     browser.pager.replaceChildren();
     // Arrive in the set catalogue instead of requesting arbitrary global cards.
     if (!search.value.trim() && !browser.hasFilters()) {
-      browser.element.querySelector<HTMLDetailsElement>('details')!.open = true;
+      if (!explicitlySelectedMode) setGallery.open = true;
       status.replaceChildren(
         message('Wähle ein Set oder suche nach Karte oder Illustrator.'),
       );
