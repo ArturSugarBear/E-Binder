@@ -52,9 +52,14 @@ test('Zenith spelling finds the real Zenit der Könige set, even in card search'
   ).toBeVisible();
 });
 
-test('portfolio gives actual collection composition without inventing market value', async ({
+test('portfolio shows the demo collection without inventing values when the price API fails', async ({
   page,
 }) => {
+  // Deliberate failure-path regression: valid prints still have no value
+  // when their actual pricing source is unavailable.
+  await page.route('https://api.tcgdex.net/v2/de/cards/**', (route) =>
+    route.fulfill({ status: 503, body: 'Price source unavailable' }),
+  );
   await page.goto('./#sammlung');
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await openVault(page, 'portfolio');
