@@ -59,3 +59,16 @@ Gerenderte Prüfung dieser Farb-/Layoutänderung: Chromium bei 1405, 900, 641, 4
 Kleine Formauswahlen mit zwei bis vier stabilen Alternativen verwenden `choices` aus `workspace-dom.ts`: native Radio-Gruppen mit sichtbaren Auswahlflächen. Keine kopierten Einzelkomponenten und keine ARIA-Tabs für Formwerte. Lange oder wechselnde Listen wie Sets, Karten und Illustratoren bleiben Suchfelder beziehungsweise native Listen. Sortierung darf unter einer klar bezeichneten aufklappbaren Zeile liegen, wenn der aktuelle Wert sichtbar bleibt. Für einen einzigen vorhandenen Binder genügt sein Titel.
 
 Die Sammlung priorisiert ihre Karten statt doppelter Kennzahlkacheln. Offene Erfassungen bleiben handlungsfähig sichtbar. Kartendetails in „Entdecken“ zeigen vorhandene Katalogpreise mit Quelle, Währung und Datum und verlinken ausschließlich auf eine validierte Cardmarket-Produkt-ID. Fehlende Preis-/Bezugsdaten werden benannt. Das ist keine Bestandsbewertung. [Prüfgrundlage und Grenzen](research/ui-usability.md).
+
+## Native iPhone-Gesten: Cards & Sheets (10. November 2026)
+
+Die mobile App verwendet konsistente, unaufdringliche Gesten statt isolierter Klickpfade:
+
+- Ein Bottom-Sheet ist mit einem sichtbaren Ziehgriff erkennbar und lässt sich **am Kopf nach unten ziehen**, sobald die Bewegung eindeutig vertikal und lang oder schnell genug ist. Ein Tap auf X, Escape und die Fokus-Rückgabe funktionieren weiter. Bei Kartenansichten lässt sich auch die Artwork-Fläche nach unten ziehen.
+- In einem persönlichen Binder kann man **innerhalb der physischen Binderseite links/rechts wischen**, um zur nächsten/vorherigen Seite zu gelangen. Die Schaltflächen und der Seitenzähler bleiben als Tastatur- und Assistive-Technologie-Alternativen erhalten.
+- Kartendetails in der eigenen Sammlung unterstützen **links/rechts wischen** über dem Artwork; dieselbe Reihenfolge wie die aktuell gefilterte und sortierte Sammlung wird verwendet. Bei nicht gespeicherten Formularänderungen wird der Kartenwechsel abgewiesen und erklärt.
+- Im Inspirationsarchiv bleibt das bekannte seitliche Wischen der Karte erhalten; zusätzlich schließt eine Abwärtsbewegung am Artwork oder am Sheet-Griff die Ansicht.
+- Touch-Gesten werden nur auf schmalen Geräten mit grobem Pointer aktiviert. Die empfindlichen Zonen sind Artwork, Seitenfläche oder Sheet-Kopf, **nicht** Textfelder, Scroll-Listen, Buttons oder Systemränder. Vertikales Scrollen langer Dialoge bleibt dem Browser überlassen.
+- Unter `prefers-reduced-motion: reduce` entfallen Slide- und Ziehanimationen, nicht aber die semantischen Navigationsmöglichkeiten.
+
+Ein Button zum Schließen bleibt immer vorhanden. Keine Nutzeraktion wird heimlich in einen Kauf, eine Besitzänderung oder eine Löschung umgewandelt. Native `<dialog>`-Semantik, Fokusbegrenzung und Fokus-Rückgabe bleiben Grundlage.
