@@ -2,6 +2,10 @@ import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm';
 import wasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.wasm?url';
 import runtimeUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url';
 import { decodeRecognition, recognitionTensor } from '../domain/vision-codec';
+import {
+  collectorNumberFallbackRegions,
+  hasPrintedCollectorFraction,
+} from '../domain/ocr-number-search';
 
 const scope = self as unknown as {
   onmessage:
@@ -157,13 +161,22 @@ async function recognize({
     const number = await read([0.155, 0.94, 0.13, 0.032]);
     const identifier = await read([0.07, 0.94, 0.38, 0.032]);
     const texts = [number, identifier];
-    const fraction = /\d{1,3}\s*\/\s*\d{1,3}/;
-    if (!fraction.test(number) || !fraction.test(identifier)) {
+    // The original OR condition repeated contrast OCR even after an initial hit.
+    if (!hasPrintedCollectorFraction(texts)) {
+      report('Nummernzeile im unteren Bildbereich wird gesucht …', id);
+      for (const region of collectorNumberFallbackRegions) {
+        texts.push(await read(region));
+        if (hasPrintedCollectorFraction(texts)) break;
+      }
+    }
+    if (!hasPrintedCollectorFraction(texts)) {
       report('Unterer Rand wird mit höherem Kontrast gegengeprüft …', id);
       for (const variant of ['gray', 'inverted', 'binary'] as const) {
-        texts.push(await read([0.155, 0.94, 0.13, 0.032], variant));
         texts.push(await read([0.07, 0.94, 0.38, 0.032], variant));
+        if (hasPrintedCollectorFraction(texts)) break;
       }
+    }
+    if (!hasPrintedCollectorFraction(texts)) {
       texts.push(await read([0.7, 0.9, 0.27, 0.045]));
     }
     report('Kartenname wird gegengeprüft …', id);
