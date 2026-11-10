@@ -59,8 +59,12 @@ export function betaArea(value: string): Area {
   return routes.has(value as Area) ? value as Area : 'other';
 }
 export function safeCatalogueKey(value: string | undefined): string | undefined {
-  return value && /^[a-z0-9][a-z0-9_.:/-]{0,119}$/i.test(value)
-    ? value : undefined;
+  return value &&
+    /^[a-z0-9][a-z0-9_.:/-]{0,119}$/i.test(value) &&
+    !value.includes('://') &&
+    !/^(?:photo|data|blob):/i.test(value)
+    ? value
+    : undefined;
 }
 export function betaCommitAction(label: string): string {
   return commits[label] ?? 'state_changed';
