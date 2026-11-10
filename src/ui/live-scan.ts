@@ -112,6 +112,7 @@ async function snapshot(
 export function openLiveScanner(
   onCapture: CaptureHandler,
   onFileCamera: () => void,
+  pendingCaptures: () => number,
 ): void {
   const sheet = modal('Karte live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog');
@@ -142,11 +143,11 @@ export function openLiveScanner(
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
   progress.value = 0;
-  progress.setAttribute('aria-label', 'Stabile Kartenerkennung');
+  progress.setAttribute('aria-label', 'Stabile Kartenausrichtung');
   const help = el(
     'p',
     'w-muted w-live-help',
-    'Halte die ganze Karte aufrecht in den Rahmen. Leuchtet die Umrandung grün, werden die Ecken live erkannt. Das Foto bleibt lokal.',
+    'Halte die ganze Karte aufrecht in den Rahmen. Vermeide Spiegelungen auf der Folie und sorge für gleichmäßiges Licht. Die grüne Umrandung zeigt erkannte Ecken, noch keine bestätigte Kartenausgabe.',
   );
   const trigger = action(
     'Jetzt aufnehmen',
@@ -172,6 +173,17 @@ export function openLiveScanner(
     'check',
   );
   finish.hidden = true;
+  const reviewSummary = el('p', 'w-live-review-summary');
+  reviewSummary.setAttribute('role', 'status');
+  reviewSummary.hidden = true;
+  function refreshReview(): void {
+    const pending = pendingCaptures();
+    reviewSummary.hidden = pending === 0;
+    finish.hidden = pending === 0;
+    reviewSummary.textContent = `${pending} ${pending === 1 ? 'offene Aufnahme' : 'offene Aufnahmen'} · erst nach deiner Bestätigung im Bestand.`;
+    finish.querySelector('span')!.textContent =
+      `Ergebnisse prüfen (${pending})`;
+  }
   const fallback = action(
     'Stattdessen Kamerafoto verwenden',
     () => {
@@ -181,8 +193,8 @@ export function openLiveScanner(
     'secondary',
     'camera',
   );
-  sheet.body.append(stage, status, progress, help);
-  sheet.footer.append(trigger, next, finish, fallback);
+  sheet.body.append(stage, progress, help);
+  sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
   let stream: MediaStream | null = null;
   let cameraGeneration = 0;
   let frameId = 0;
@@ -232,9 +244,9 @@ export function openLiveScanner(
       );
       if (!closed) {
         status.textContent =
-          'Scan abgeschlossen. Wähle „Ergebnisse prüfen“ oder scanne die nächste Karte.';
+          'Aufnahme verarbeitet. Prüfe die Kartenausgabe oder scanne die nächste Karte.';
         next.hidden = false;
-        finish.hidden = false;
+        refreshReview();
         trigger.hidden = true;
         progress.value = 0;
       }
@@ -243,7 +255,7 @@ export function openLiveScanner(
         stopCamera();
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
-        finish.hidden = false;
+        refreshReview();
         trigger.hidden = true;
       }
     } finally {
@@ -308,7 +320,7 @@ export function openLiveScanner(
     const generation = cameraGeneration;
     next.hidden = true;
     next.querySelector('span')!.textContent = 'Nächste Karte scannen';
-    finish.hidden = true;
+    refreshReview();
     trigger.hidden = false;
     trigger.disabled = true;
     observations = 0;
