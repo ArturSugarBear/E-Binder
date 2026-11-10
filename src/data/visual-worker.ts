@@ -12,7 +12,7 @@ type Manifest = {
   modelId: string;
   dimensions: number;
   size: number;
-  preprocessing: 'rgb-0-1-chw-stretch';
+  preprocessing: 'rgb-0-1-chw-stretch' | 'imagenet-meanstd-chw-stretch';
   pooling: 'cls';
   modelFile: string;
   modelSha256: string;
@@ -49,7 +49,7 @@ function parseManifest(value: unknown): Manifest {
     entry.format !== 'e-binder-visual-v1' ||
     typeof entry.modelId !== 'string' ||
     !/^[a-zA-Z0-9_.-]{3,100}$/.test(entry.modelId) ||
-    entry.preprocessing !== 'rgb-0-1-chw-stretch' ||
+    !['rgb-0-1-chw-stretch', 'imagenet-meanstd-chw-stretch'].includes(String(entry.preprocessing)) ||
     entry.pooling !== 'cls' ||
     entry.size !== 224 ||
     !Number.isInteger(entry.dimensions) ||
@@ -116,7 +116,7 @@ function parseReferences(input: unknown, expected: number): VisualReference[] {
 }
 
 let cached:
-  | Promise<{ session: InferenceSession; index: VisualIndex; size: number }>
+  | Promise<{ session: InferenceSession; index: VisualIndex; size: number; preprocessing: Manifest['preprocessing'] }>
   | undefined;
 
 function load(manifestUrl: string) {
@@ -159,7 +159,7 @@ function load(manifestUrl: string) {
         references,
         vectors: new Int8Array(indexBytes),
       };
-      return { session, index, size: manifest.size };
+      return { session, index, size: manifest.size, preprocessing: manifest.preprocessing };
     })().catch((error: unknown) => {
       cached = undefined;
       throw error;
@@ -168,7 +168,7 @@ function load(manifestUrl: string) {
 }
 
 async function match({ id, photo, manifestUrl }: MatchRequest): Promise<void> {
-  const { session, index, size } = await load(manifestUrl);
+  const { session, index, size, preprocessing } = await load(manifestUrl);
   if (typeof OffscreenCanvas === 'undefined')
     throw new Error('Bildverarbeitung im Worker nicht verfügbar.');
   const bitmap = await createImageBitmap(photo);
@@ -182,9 +182,13 @@ async function match({ id, photo, manifestUrl }: MatchRequest): Promise<void> {
     const plane = size * size;
     const values = new Float32Array(plane * 3);
     for (let i = 0; i < plane; i++) {
-      values[i] = rgba[i * 4]! / 255;
-      values[i + plane] = rgba[i * 4 + 1]! / 255;
-      values[i + plane * 2] = rgba[i * 4 + 2]! / 255;
+      const red = rgba[i * 4]! / 255;
+      const green = rgba[i * 4 + 1]! / 255;
+      const blue = rgba[i * 4 + 2]! / 255;
+      const imagenet = preprocessing === 'imagenet-meanstd-chw-stretch';
+      values[i] = imagenet ? (red - 0.485) / 0.229 : red;
+      values[i + plane] = imagenet ? (green - 0.456) / 0.224 : green;
+      values[i + plane * 2] = imagenet ? (blue - 0.406) / 0.225 : blue;
     }
     tensor = new Tensor('float32', values, [1, 3, size, size]);
     const outputs = await session.run({ [session.inputNames[0]!]: tensor });
