@@ -29,7 +29,7 @@ test('portfolio opens directly without inventing a zero market price', async ({
 test('portfolio retains unpriced demo collection and links to binder pages', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await page.getByRole('link', { name: 'Portfolio' }).click();
   await expect(page.locator('.w-portfolio-balance')).toHaveText('—');
