@@ -198,35 +198,32 @@ export function createDiscoverView(ctx: WorkspaceContext) {
         ? 'Auf deiner Wunschliste'
         : 'Auf die Wunschliste';
     };
-    view.body.append(
+    // The card is the hero, as in the physical demo binder's detail sheet.
+    // Keep prices and ownership clearly separate from the artwork.
+    const stage = el('div', 'w-discover-stage', ctx.images.artwork(card));
+    const detail = el(
+      'div',
+      'w-discover-info',
+      el('p', 'w-discover-overline', card.language.toUpperCase()),
+      el('h3', '', card.name),
+      el('p', 'w-discover-set-name', card.setName),
+      el('p', 'w-discover-collector', card.number),
       el(
-        'div',
-        'w-discover-card',
-        ctx.images.artwork(card),
-        el(
-          'div',
-          '',
-          el('h3', '', card.setName),
-          el('p', '', `${card.number} · ${card.language.toUpperCase()}`),
-          el(
-            'p',
-            'w-muted',
-            card.artist
-              ? `Illustration: ${card.artist} · ${card.artistSource === 'publisher' ? 'Verlagsangabe' : 'Katalogangabe'}`
-              : 'Illustration nicht bekannt',
-          ),
-          entry.rarity ? el('p', 'w-card-rarity', entry.rarity) : null,
-          owned,
-        ),
+        'p',
+        'w-muted',
+        card.artist
+          ? `Illustration: ${card.artist} · ${card.artistSource === 'publisher' ? 'Verlagsangabe' : 'Katalogangabe'}`
+          : 'Illustration nicht bekannt',
       ),
+      entry.rarity ? el('p', 'w-card-rarity', entry.rarity) : null,
+      owned,
       cardMarket(entry),
     );
-    const cardSurface =
-      view.body.querySelector<HTMLElement>('.w-discover-card');
-    if (cardSurface) {
-      cardSurface.classList.add('w-card-touch-surface');
-      enableSheetDrag(view.dialog, view.dialog, [cardSurface]);
-    }
+    view.body.append(el('div', 'w-discover-card', stage, detail));
+    // A downward drag on the card closes the sheet, while the information
+    // column remains scrollable and its links remain normally clickable.
+    stage.classList.add('w-card-touch-surface');
+    enableSheetDrag(view.dialog, view.dialog, [stage]);
     view.footer.append(
       action(
         'Zum Bestand hinzufügen',
