@@ -34,6 +34,7 @@ Ein öffentliches DINOv3- oder MobileCLIP-Modell darf nicht ungeprüft eingepack
 
 ## Betrieb und Grenzen
 
+- **Offline-Modellcache:** Das installierte PWA-Service-Worker-Paket hält Modell, int8-Index und Referenzmetadaten nach erfolgreichem Erstabruf getrennt von den OCR-Daten im Cache. Das Manifest wird bei einer Verbindung neu validiert und bei Offlinebetrieb aus dem Cache geladen. Verfügbarkeit hängt von Browser-Speicherquoten und einer tatsächlich installierten PWA ab; die App garantiert keine dauerhafte Speicherung, wenn iOS den Cache löscht.
 - **iOS als PWA:** ONNX Runtime Web/WASM als verlässlichstes Backend; die direkten Apple-Vision- und Core-ML-APIs stehen Browser-JavaScript nicht zur Verfügung. Weder eine NPU-Inferenz im Millisekundenbereich noch eine feste Scanzeit ist aktuell nachgewiesen.
 - Top-K-Vergleich ist bewusst linear und auf maximal 20 Kandidaten begrenzt, ohne vollständige Sortierung oder einen zusätzlichen ANN-Index. Erst echte iPhone-Laufzeiten entscheiden, ob Shards, WebGPU auf anderen Plattformen oder Index-Optimierungen notwendig sind.
 - **Ein Binderfoto entspricht keiner Live-Kamerafolge:** Das wiederholte Einbetten desselben Standbilds darf nicht als Mehrbild-Abstimmung behandelt werden. Der vorbereitete Konsenshelfer verlangt mehrere aufeinanderfolgende echte Frames und wird erst in einem späteren Live-Scan aktiviert.
