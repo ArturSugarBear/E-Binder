@@ -226,9 +226,9 @@
   color: var(--ink);
 }
 .w-button-icon {
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 10px;
   border-color: var(--w-border);
   flex: none;
@@ -362,6 +362,10 @@ select.w-input {
 }
 .w-demo-banner p {
   max-width: 720px;
+  flex: 1 1 160px;
+}
+.w-demo-banner {
+  flex-wrap: wrap;
 }
 .w-demo-banner .w-button {
   flex: none;
