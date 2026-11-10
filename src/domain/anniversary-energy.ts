@@ -33,27 +33,29 @@ export function anniversaryEnergyFromText(
     if (Number.isInteger(number) && number >= 9 && number <= 16)
       numbers.add(number);
   }
-  return [...numbers].sort((a, b) => a - b).map((number) => {
-    const [german, english] = energyNames[number - 9]!;
-    const printed = String(number).padStart(3, '0');
-    return personalCardSchema.parse({
-      key: `manual:30th-energy:mee-${printed}:${language}`,
-      name:
-        language === 'de'
-          ? `Basis-${german}-Energie`
-          : `Basic ${english} Energy`,
-      setName: language === 'de' ? '30 Jahre' : '30th Celebration',
-      setId: '',
-      number: `MEE ${printed}`,
-      language,
-      image: '',
-      source: 'manual',
-      sourceId: '',
-      artist: '',
-      artistSource: 'unknown',
-      evolvesFrom: '',
-      stage: '',
-      finishes: ['holo'],
+  return [...numbers]
+    .sort((a, b) => a - b)
+    .map((number) => {
+      const [german, english] = energyNames[number - 9]!;
+      const printed = String(number).padStart(3, '0');
+      return personalCardSchema.parse({
+        key: `manual:30th-energy:mee-${printed}:${language}`,
+        name:
+          language === 'de'
+            ? `Basis-${german}-Energie`
+            : `Basic ${english} Energy`,
+        setName: language === 'de' ? '30 Jahre' : '30th Celebration',
+        setId: '',
+        number: `MEE ${printed}`,
+        language,
+        image: '',
+        source: 'manual',
+        sourceId: '',
+        artist: '',
+        artistSource: 'unknown',
+        evolvesFrom: '',
+        stage: '',
+        finishes: ['holo'],
     });
-  });
+    });
 }
