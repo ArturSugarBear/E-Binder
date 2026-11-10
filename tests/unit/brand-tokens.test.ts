@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vitest';
 
 const kit = JSON.parse(readFileSync('brand/tokens.json', 'utf8')) as {
   status: string;
-  concepts: Record<string, {
-    color: Record<string,string>;
-    type: {display: string; body: string};
-  }>;
+  concepts: Record<
+    string,
+    {
+      color: Record<string, string>;
+      type: { display: string; body: string };
+    }
+  >;
 };
 
 function luminance(hex: string): number {
@@ -24,12 +27,22 @@ function ratio(a: string, b: string): number {
 describe('Lovebrand kit proposals', () => {
   it('contains three complete but non-live identities', () => {
     expect(kit.status).toBe('candidate-not-live');
-    expect(Object.keys(kit.concepts)).toEqual(['keepsake','rare','folio']);
+    expect(Object.keys(kit.concepts)).toEqual(['keepsake', 'rare', 'folio']);
     for (const theme of Object.values(kit.concepts)) {
       expect(theme.type.display).not.toBe(theme.type.body);
       expect(Object.keys(theme.color)).toEqual([
-        'canvas','surface','ink','muted','action','actionInk',
-        'accent','sleeve','focus','success','error','border',
+        'canvas',
+        'surface',
+        'ink',
+        'muted',
+        'action',
+        'actionInk',
+        'accent',
+        'sleeve',
+        'focus',
+        'success',
+        'error',
+        'border',
       ]);
     }
   });
@@ -37,16 +50,25 @@ describe('Lovebrand kit proposals', () => {
     for (const [name, concept] of Object.entries(kit.concepts)) {
       const c = concept.color;
       for (const [front, back] of [
-        ['ink','canvas'],['muted','canvas'],['ink','surface'],
-        ['muted','surface'],['actionInk','action'],
+        ['ink', 'canvas'],
+        ['muted', 'canvas'],
+        ['ink', 'surface'],
+        ['muted', 'surface'],
+        ['actionInk', 'action'],
       ]) {
-        expect(ratio(c[front]!, c[back]!), name + ':' + front).toBeGreaterThanOrEqual(4.5);
+        expect(
+          ratio(c[front]!, c[back]!),
+          name + ':' + front,
+        ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(ratio(c.focus!, c.canvas!), name + ':focus').toBeGreaterThanOrEqual(3);
+      expect(
+        ratio(c.focus!, c.canvas!),
+        name + ':focus',
+      ).toBeGreaterThanOrEqual(3);
     }
   });
   it('keeps logos SVG-only, with no script, external images or brand confusion', () => {
-    for (const name of ['keepsake','rare-room','folio-house']) {
+    for (const name of ['keepsake', 'rare-room', 'folio-house']) {
       const svg = readFileSync('brand/logos/' + name + '.svg', 'utf8');
       expect(svg).toContain('<svg');
       expect(svg).toContain('viewBox="0 0 80 80"');

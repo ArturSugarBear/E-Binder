@@ -16,7 +16,7 @@ Bestehenden Produktnamen **E-Binder** erhalten. Keine Pokémon-Markenbestandteil
 - **Charakter:** sanft, selbstbewusst, persönlich, warm, modern; eher Designboutique als Dashboard.
 - **Logo:** eine einzelne Karte wird aus einer gefassten Albumtasche herausgezogen. Flaches, bewusst asymmetrisches Zeichen, keine Sterne und keine 9-Kachel-Grafik.
 - **Farbsystem:** Canvas Porcelain `#F8F4EB`; Fläche White `#FFFFFF`; Text Album Ink `#24222D`; Sekundärtext `#635E70`; Primäraktion Plum Iris `#4B3E9C` mit Weiß; Akzent Berry Note `#DE5A76`; Detail Lavender Label `#B8A9FF`.
-- **Typografie:** *Syne* 600–700 für Marke und persönliche Albumüberschriften; *DM Sans* 400/500/700 für App-Bedienung. Erlaubte freie Schriftfamilien (SIL OFL); konkrete Self-Hosted-Font-Dateien samt Lizenz werden erst nach Identitätsfreigabe eingebunden. Systemschriften als Fallback.
+- **Typografie:** _Syne_ 600–700 für Marke und persönliche Albumüberschriften; _DM Sans_ 400/500/700 für App-Bedienung. Erlaubte freie Schriftfamilien (SIL OFL); konkrete Self-Hosted-Font-Dateien samt Lizenz werden erst nach Identitätsfreigabe eingebunden. Systemschriften als Fallback.
 - **Brand Voice:** „Deine Karten. Deine Geschichten.“ / „Jede Lieblingskarte hat ihren Platz.“ / „Ein Album für alles, was du gern behältst.“
 - **UI-Signatur:** leichter warmer Untergrund; die physische Binderseite als dunkler, ruhiger Fremdkörper; einzelne Beerenmarkierung nur für Favoriten und emotionale Momente; Aktionen in Plum Iris.
 - **Risiko:** Zu viel Papierbeige kann wie eine Lifestyle-App aussehen. Die Kartenvisuals müssen die Bühne dominieren, nicht Dekoration.
@@ -27,7 +27,7 @@ Bestehenden Produktnamen **E-Binder** erhalten. Keine Pokémon-Markenbestandteil
 - **Charakter:** energiegeladen, eigenständig, dynamisch, stolz auf ungewöhnliche Funde.
 - **Logo:** drei gegeneinander versetzte Archivhüllen, letzte Karte in hellem Papier. Eine klare Form ohne Glows.
 - **Farbsystem:** Canvas Night Ink `#18191E`; Fläche Charcoal Sleeve `#272830`; Text Paper `#F8F4ED`; Sekundärtext `#B8B7C6`; Primäraktion Acid Lime `#DDF76B` mit Night Ink; Sekundärsignal Lilac `#BBA7FF`.
-- **Typografie:** *Unbounded* 600–700 ausschließlich für das Brand-/Editorial-Display, *Manrope* 400/600 für alle nativen Bedienelemente. Beide SIL OFL; erst nach Freigabe selbst hosten.
+- **Typografie:** _Unbounded_ 600–700 ausschließlich für das Brand-/Editorial-Display, _Manrope_ 400/600 für alle nativen Bedienelemente. Beide SIL OFL; erst nach Freigabe selbst hosten.
 - **Brand Voice:** „Dein Fund. Dein Moment.“ / „Nicht nur sammeln. Lieben.“ / „Zeig die Karten, die dir etwas bedeuten.“
 - **UI-Signatur:** dunkle, matte Sammelhüllen ohne neonartige Hintergrundverläufe; kräftiger Lime-Aktionspunkt, markante plakative Seitentitel.
 - **Risiko:** Das plakative Display darf Scanner, Kartenmetadaten und Einhandbedienung nicht übertönen.
@@ -38,7 +38,7 @@ Bestehenden Produktnamen **E-Binder** erhalten. Keine Pokémon-Markenbestandteil
 - **Charakter:** langlebig, kultiviert, bewusst leise, kunstorientiert, weniger verspielt.
 - **Logo:** gefaltetes Blatt mit sichtbarer Archivkarte – klarer Papierausschnitt, keine abstrakte generische 9.
 - **Farbsystem:** Canvas Forest Ink `#17362F`; Fläche Deep Folio `#24453C`; Text Warm Ivory `#F7F5EC`; Sekundärtext `#C9D9CE`; Primäraktion Fresh Parchment `#DCEBAD` mit Forest Ink; Sondermarkierung Dusty Rose `#F0ABAF`.
-- **Typografie:** *Newsreader* 500 für Editorial-Titel, *Instrument Sans* 400/600 für UI und Zahlen. Beide über die Google-Fonts-OFL-Sammlung zu verifizieren; Produktionsdateien separat lizenzieren und selbst hosten.
+- **Typografie:** _Newsreader_ 500 für Editorial-Titel, _Instrument Sans_ 400/600 für UI und Zahlen. Beide über die Google-Fonts-OFL-Sammlung zu verifizieren; Produktionsdateien separat lizenzieren und selbst hosten.
 - **Brand Voice:** „Jede Karte erzählt etwas.“ / „Deine Sammlung verdient eine Bühne.“ / „Gesammelt mit Gefühl.“
 - **UI-Signatur:** großzügige Bildräume, mattschwarze Taschen auf tiefgrüner Bühne, klare kleine Inventarangaben, galerieartige Binderansichten.
 - **Risiko:** Zu gediegen für Nutzer, die dynamische Anime- und TCG-Fankultur lieben.
@@ -51,11 +51,11 @@ Eine Wahl gilt für Logo, Palette, Typografie und Sprache gemeinsam. Die Marken 
 
 ## Token-Rollen und Kontrast (sRGB/WCAG 2.x, berechnete Werte)
 
-| Konzept | Vordergrund / Canvas | Sekundär / Canvas | CTA-Text / CTA | Vordergrund / Fläche |
-|---|---:|---:|---:|---:|
-| Keepsake | 14.26:1 | 5.68:1 | 8.51:1 | 15.65:1 |
-| Rare Room | 16.01:1 | 8.88:1 | 14.70:1 | 13.37:1 |
-| Folio House | 11.98:1 | 8.91:1 | 10.30:1 | 9.65:1 |
+| Konzept     | Vordergrund / Canvas | Sekundär / Canvas | CTA-Text / CTA | Vordergrund / Fläche |
+| ----------- | -------------------: | ----------------: | -------------: | -------------------: |
+| Keepsake    |              14.26:1 |            5.68:1 |         8.51:1 |              15.65:1 |
+| Rare Room   |              16.01:1 |            8.88:1 |        14.70:1 |              13.37:1 |
+| Folio House |              11.98:1 |            8.91:1 |        10.30:1 |               9.65:1 |
 
 Diese Werte prüfen **nur fest definierte Tokenpaare**, keine gesamte WCAG-Konformität, keine Fokus- oder Disabled-Zustände. Vor Produktion: rendered contrast, normale und große iPhone-Darstellung, dynamischer Text, Farbsinnvarianten, 16-/32-px-Zeichen, SVG-Sicherheitsprüfung und alte PWA-Icons ersetzen.
 
