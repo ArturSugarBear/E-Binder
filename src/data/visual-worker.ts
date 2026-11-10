@@ -19,6 +19,7 @@ type Manifest = {
   indexFile: string;
   indexSha256: string;
   referencesFile: string;
+  referencesSha256: string;
   count: number;
 };
 
@@ -61,7 +62,8 @@ function parseManifest(value: unknown): Manifest {
     !isFile(entry.indexFile) ||
     !isFile(entry.referencesFile) ||
     !validSha(entry.modelSha256) ||
-    !validSha(entry.indexSha256)
+    !validSha(entry.indexSha256) ||
+    !validSha(entry.referencesSha256)
   )
     throw new Error('Bildmodell und Indexmanifest sind nicht kompatibel.');
   return entry as Manifest;
@@ -133,7 +135,7 @@ function load(manifestUrl: string) {
       const [modelBytes, indexBytes, referenceBytes] = await Promise.all([
         checkedResource(file(manifest.modelFile), manifest.modelSha256),
         checkedResource(file(manifest.indexFile), manifest.indexSha256),
-        localResource(file(manifest.referencesFile)),
+        checkedResource(file(manifest.referencesFile), manifest.referencesSha256),
       ]);
       const references = parseReferences(
         JSON.parse(new TextDecoder().decode(referenceBytes)) as unknown,
