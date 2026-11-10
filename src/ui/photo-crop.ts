@@ -1,4 +1,5 @@
 import { cardProjection, type Quad } from '../domain/photo-geometry';
+import { suggestPageCorners } from '../domain/page-outline';
 import {
   action,
   el,
@@ -59,6 +60,8 @@ export async function alignPhoto(
       }
       const error = message('', 'error');
       error.hidden = true;
+      const geometryHint = el('p', 'w-muted');
+      geometryHint.hidden = mode !== 'page';
       let points: Quad;
       let dragging = -1;
       let result: Blob | undefined;
@@ -136,7 +139,32 @@ export async function alignPhoto(
         );
         canvas.width = Math.round(400 * Math.min(1, width / height));
         canvas.height = Math.round(400 * Math.min(1, height / width));
-        points = [
+        let proposed: Quad | null = null;
+        if (mode === 'page') {
+          // The detector sees a small temporary image, never the full photo.
+          const small = document.createElement('canvas');
+          const reduction = Math.min(
+            1,
+            256 / Math.max(source.width, source.height),
+          );
+          small.width = Math.max(48, Math.round(source.width * reduction));
+          small.height = Math.max(48, Math.round(source.height * reduction));
+          const smallContext = small.getContext('2d', {
+            willReadFrequently: true,
+          });
+          if (smallContext) {
+            smallContext.drawImage(source, 0, 0, small.width, small.height);
+            proposed = suggestPageCorners(
+              smallContext.getImageData(0, 0, small.width, small.height).data,
+              small.width,
+              small.height,
+            );
+          }
+          geometryHint.textContent = proposed
+            ? 'Ecken automatisch vorgeschlagen. Kontrolliere alle neun Fächer und korrigiere die Punkte bei Bedarf.'
+            : 'Außenkante nicht eindeutig erkannt. Verschiebe die vier Punkte manuell an die Binderseiten-Ecken.';
+        }
+        points = proposed ?? [
           { x: 0, y: 0 },
           { x: 1, y: 0 },
           { x: 1, y: 1 },
@@ -172,6 +200,8 @@ export async function alignPhoto(
         }
         if (dragging < 0) return;
         points[dragging] = p;
+        if (mode === 'page')
+          geometryHint.textContent = 'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
         invalidate();
         controls();
       }
@@ -191,6 +221,8 @@ export async function alignPhoto(
             x: Number(x.value) / 1000,
             y: Number(y.value) / 1000,
           };
+          if (mode === 'page')
+            geometryHint.textContent = 'Ecken manuell angepasst. Prüfe die neun Fächer in der Vorschau.';
           draw();
         });
       orientation.addEventListener('change', reset);
@@ -356,6 +388,7 @@ export async function alignPhoto(
             : 'Drehe die Karte aufrecht. Ziehe die vier nummerierten Punkte genau auf die Ecken der gedruckten Karte – nicht auf die Schutzhülle. Name und unterer Kartenrand müssen vollständig innerhalb der Punkte liegen.',
         ),
         field('Ausrichtung', orientation),
+        geometryHint,
         canvas,
         field('Ecke auswählen', corner),
         field('Position waagerecht', x),
