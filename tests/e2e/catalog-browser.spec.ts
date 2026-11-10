@@ -140,7 +140,7 @@ test('capture opens without demo catalogue cards or overwhelming set filters', a
     dialog.getByRole('button', { name: 'Ganze Binderseite scannen' }),
   ).toBeVisible();
   await expect(
-    dialog.getByRole('button', { name: 'Karte fotografieren' }),
+    dialog.getByRole('button', { name: 'Karte live scannen' }),
   ).toBeVisible();
   await expect(dialog.locator('.w-search-results button')).toHaveCount(0);
   await expect(dialog.locator('.w-add-catalog-advanced')).not.toHaveAttribute(
