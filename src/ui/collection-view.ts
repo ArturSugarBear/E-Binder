@@ -173,7 +173,9 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
     );
     result.replaceChildren();
     count.textContent = `${rows.length} ${rows.length === 1 ? 'Ausgabe' : 'Ausgaben'}`;
-    for (const holding of rows) result.append(holdingCard(ctx, holding));
+    const visibleOrder = rows.map((holding) => holding.id);
+    for (const holding of rows)
+      result.append(holdingCard(ctx, holding, visibleOrder));
     if (!rows.length)
       result.append(
         message(
@@ -224,10 +226,10 @@ function pending(ctx: WorkspaceContext): HTMLElement {
     ),
   );
 }
-function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
+function holdingCard(ctx: WorkspaceContext, holding: Holding, order: string[]): HTMLElement {
   const button = action(
     holding.card.name,
-    () => ctx.openHolding(holding.id),
+    () => openHolding(ctx, holding.id, order),
     'card',
   );
   button.dataset.focus = `holding-${holding.id}`;
@@ -261,7 +263,7 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding): HTMLElement {
   return button;
 }
 
-export function openHolding(ctx: WorkspaceContext, id: string): void {
+export function openHolding(ctx: WorkspaceContext, id: string, order?: readonly string[]): void {
   const holding = ctx.state.holdings.find((item) => item.id === id);
   if (!holding) return;
   const sheet = modal(holding.card.name);
@@ -379,30 +381,33 @@ export function openHolding(ctx: WorkspaceContext, id: string): void {
     cardSurface.classList.add('w-card-swipe-zone');
     enableSheetDrag(sheet.dialog, sheet.dialog, [cardSurface]);
   }
-  const holdingIndex = ctx.state.holdings.findIndex((item) => item.id === id);
-  if (ctx.state.holdings.length > 1 && holdingIndex >= 0) {
+  const visibleOrder =
+    order?.filter((itemId) => ctx.state.holdings.some((item) => item.id === itemId)) ??
+    ctx.state.holdings.map((item) => item.id);
+  const holdingIndex = visibleOrder.indexOf(id);
+  if (visibleOrder.length > 1 && holdingIndex >= 0) {
     let modified = false;
     form.addEventListener('input', () => { modified = true; });
     form.addEventListener('change', () => { modified = true; });
     const browse = (step: number) => {
-      const adjacent = ctx.state.holdings[holdingIndex + step];
-      if (!adjacent) return;
+      const adjacentId = visibleOrder[holdingIndex + step];
+      if (!adjacentId) return;
       if (modified) {
         ctx.notify('Speichere zuerst deine Änderungen, bevor du zur nächsten Karte wechselst.', true);
         return;
       }
       sheet.close();
-      requestAnimationFrame(() => openHolding(ctx, adjacent.id));
+      requestAnimationFrame(() => openHolding(ctx, adjacentId, visibleOrder));
     };
     const previous = action('Vorherige Karte', () => browse(-1), 'text');
     const next = action('Nächste Karte', () => browse(1), 'text');
     previous.disabled = holdingIndex === 0;
-    next.disabled = holdingIndex === ctx.state.holdings.length - 1;
+    next.disabled = holdingIndex === visibleOrder.length - 1;
     const navigator = el(
       'nav',
       'w-card-browse',
       previous,
-      el('span', 'w-mono', `${holdingIndex + 1} / ${ctx.state.holdings.length}`),
+      el('span', 'w-mono', `${holdingIndex + 1} / ${visibleOrder.length}`),
       next,
     );
     navigator.setAttribute('aria-label', 'Zwischen Karten wechseln');
