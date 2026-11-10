@@ -364,7 +364,9 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
   );
   if (pendingPageSwipe) {
     paper.classList.add(
-      pendingPageSwipe > 0 ? 'is-page-arriving-next' : 'is-page-arriving-previous',
+      pendingPageSwipe > 0
+        ? 'is-page-arriving-next'
+        : 'is-page-arriving-previous',
     );
     pendingPageSwipe = 0;
   }
@@ -604,7 +606,8 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
         ),
       ),
     );
-  const slotPreview = sheet.body.querySelector<HTMLElement>('.w-holding-preview');
+  const slotPreview =
+    sheet.body.querySelector<HTMLElement>('.w-holding-preview');
   if (slotPreview) {
     slotPreview.classList.add('w-card-touch-surface');
     enableSheetDrag(sheet.dialog, sheet.dialog, [slotPreview]);

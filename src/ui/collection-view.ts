@@ -226,7 +226,11 @@ function pending(ctx: WorkspaceContext): HTMLElement {
     ),
   );
 }
-function holdingCard(ctx: WorkspaceContext, holding: Holding, order: string[]): HTMLElement {
+function holdingCard(
+  ctx: WorkspaceContext,
+  holding: Holding,
+  order: string[],
+): HTMLElement {
   const button = action(
     holding.card.name,
     () => openHolding(ctx, holding.id, order),
@@ -263,7 +267,11 @@ function holdingCard(ctx: WorkspaceContext, holding: Holding, order: string[]): 
   return button;
 }
 
-export function openHolding(ctx: WorkspaceContext, id: string, order?: readonly string[]): void {
+export function openHolding(
+  ctx: WorkspaceContext,
+  id: string,
+  order?: readonly string[],
+): void {
   const holding = ctx.state.holdings.find((item) => item.id === id);
   if (!holding) return;
   const sheet = modal(holding.card.name);
@@ -382,18 +390,26 @@ export function openHolding(ctx: WorkspaceContext, id: string, order?: readonly 
     enableSheetDrag(sheet.dialog, sheet.dialog, [cardSurface]);
   }
   const visibleOrder =
-    order?.filter((itemId) => ctx.state.holdings.some((item) => item.id === itemId)) ??
-    ctx.state.holdings.map((item) => item.id);
+    order?.filter((itemId) =>
+      ctx.state.holdings.some((item) => item.id === itemId),
+    ) ?? ctx.state.holdings.map((item) => item.id);
   const holdingIndex = visibleOrder.indexOf(id);
   if (visibleOrder.length > 1 && holdingIndex >= 0) {
     let modified = false;
-    form.addEventListener('input', () => { modified = true; });
-    form.addEventListener('change', () => { modified = true; });
+    form.addEventListener('input', () => {
+      modified = true;
+    });
+    form.addEventListener('change', () => {
+      modified = true;
+    });
     const browse = (step: number) => {
       const adjacentId = visibleOrder[holdingIndex + step];
       if (!adjacentId) return;
       if (modified) {
-        ctx.notify('Speichere zuerst deine Änderungen, bevor du zur nächsten Karte wechselst.', true);
+        ctx.notify(
+          'Speichere zuerst deine Änderungen, bevor du zur nächsten Karte wechselst.',
+          true,
+        );
         return;
       }
       sheet.close();

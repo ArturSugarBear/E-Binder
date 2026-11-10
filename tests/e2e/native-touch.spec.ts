@@ -2,12 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 
 /** Real mobile touch input, not a synthetic click or a fake PointerEvent. */
-async function drag(
-  page: Page,
-  target: Locator,
-  dx: number,
-  dy: number,
-) {
+async function drag(page: Page, target: Locator, dx: number, dy: number) {
   const rect = await target.boundingBox();
   if (!rect) throw new Error('Touch target is not visible');
   const x = rect.x + rect.width * 0.48;
@@ -41,14 +36,19 @@ test('a card-related bottom sheet closes with a downward drag and still has its 
   page,
 }) => {
   await page.goto('./#sammlung');
-  await expect(page.locator('#workspace-main')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .first()
     .click();
   const sheet = page.getByRole('dialog', { name: 'Karten hinzufügen' });
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByRole('button', { name: 'Karten hinzufügen schließen' })).toBeVisible();
+  await expect(
+    sheet.getByRole('button', { name: 'Karten hinzufügen schließen' }),
+  ).toBeVisible();
   await drag(page, sheet.locator('.w-dialog-head'), 0, 166);
   await expect(sheet).toHaveCount(0);
 });
@@ -57,7 +57,10 @@ test('real horizontal swipes turn personal binder pages without opening a pocket
   page,
 }) => {
   await page.goto('./#binder');
-  await expect(page.locator('#workspace-main')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
   const setup = page.getByRole('dialog', { name: 'Neuen Binder anlegen' });
   await setup.getByLabel('Name deines Binders').fill('Swipe-Test');
@@ -93,7 +96,10 @@ test('the collection preview browses cards with swipes but protects unsaved edit
   page,
 }) => {
   await page.goto('./#sammlung');
-  await expect(page.locator('#workspace-main')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
   await expect(page.locator('.w-welcome-art .card-art')).toHaveCount(3, {
     timeout: 15_000,
   });
@@ -106,12 +112,28 @@ test('the collection preview browses cards with swipes but protects unsaved edit
   const pager = sheet.locator('.w-card-browse .w-mono');
   await expect(pager).toBeVisible();
   const before = (await pager.textContent())?.trim();
-  const nextEnabled = await sheet.getByRole('button', { name: 'Nächste Karte' }).isEnabled();
-  await drag(page, sheet.locator('.w-card-swipe-zone'), nextEnabled ? -120 : 120, 3);
-  await expect.poll(async () => (await pager.textContent())?.trim()).not.toBe(before);
+  const nextEnabled = await sheet
+    .getByRole('button', { name: 'Nächste Karte' })
+    .isEnabled();
+  await drag(
+    page,
+    sheet.locator('.w-card-swipe-zone'),
+    nextEnabled ? -120 : 120,
+    3,
+  );
+  await expect
+    .poll(async () => (await pager.textContent())?.trim())
+    .not.toBe(before);
   await sheet.getByLabel('Deine Notiz').fill('Vorläufige Notiz');
   const current = (await pager.textContent())?.trim();
-  const backEnabled = await sheet.getByRole('button', { name: 'Vorherige Karte' }).isEnabled();
-  await drag(page, sheet.locator('.w-card-swipe-zone'), backEnabled ? 120 : -120, 3);
+  const backEnabled = await sheet
+    .getByRole('button', { name: 'Vorherige Karte' })
+    .isEnabled();
+  await drag(
+    page,
+    sheet.locator('.w-card-swipe-zone'),
+    backEnabled ? 120 : -120,
+    3,
+  );
   await expect(pager).toHaveText(current!);
 });

@@ -221,7 +221,8 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       ),
       cardMarket(entry),
     );
-    const cardSurface = view.body.querySelector<HTMLElement>('.w-discover-card');
+    const cardSurface =
+      view.body.querySelector<HTMLElement>('.w-discover-card');
     if (cardSurface) {
       cardSurface.classList.add('w-card-touch-surface');
       enableSheetDrag(view.dialog, view.dialog, [cardSurface]);

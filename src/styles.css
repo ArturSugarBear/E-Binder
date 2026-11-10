@@ -1076,7 +1076,6 @@ svg {
   color: var(--ink);
 }
 
-
 /* Touch surfaces on the archive card sheet: X and Escape remain available. */
 .sheet-top {
   position: relative;

@@ -59,9 +59,11 @@ export function createCardDialog(sheet: HTMLDialogElement) {
     cardControls[1]!.disabled = position === entry.cards.length - 1;
     if (!sheet.open) {
       sheet.showModal();
-      enableSheetDrag(sheet, query('.sheet-body', sheet), [top, query('.stage', sheet)]);
-    }
-    else if (
+      enableSheetDrag(sheet, query('.sheet-body', sheet), [
+        top,
+        query('.stage', sheet),
+      ]);
+    } else if (
       focused instanceof HTMLButtonElement &&
       cardControls.includes(focused) &&
       focused.disabled

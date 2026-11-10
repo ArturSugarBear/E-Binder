@@ -5,9 +5,15 @@
  * artwork). Forms and scrolling content remain native, including Safari
  * rubber-banding and the operating system's back gesture.
  */
-export function shouldDismissSheet(distance: number, elapsedMs: number): boolean {
+export function shouldDismissSheet(
+  distance: number,
+  elapsedMs: number,
+): boolean {
   if (distance < 0) return false;
-  return distance >= 110 || (distance >= 55 && elapsedMs > 0 && distance / elapsedMs > 0.65);
+  return (
+    distance >= 110 ||
+    (distance >= 55 && elapsedMs > 0 && distance / elapsedMs > 0.65)
+  );
 }
 
 export function enableSheetDrag(
@@ -22,7 +28,8 @@ export function enableSheetDrag(
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const mobile = matchMedia('(max-width: 720px) and (pointer: coarse)');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  const ignore = 'button, a, input, textarea, select, label, summary, [contenteditable="true"]';
+  const ignore =
+    'button, a, input, textarea, select, label, summary, [contenteditable="true"]';
 
   const reset = () => {
     start = undefined;
@@ -39,7 +46,8 @@ export function enableSheetDrag(
       !event.isPrimary ||
       event.pointerType !== 'touch' ||
       (event.target instanceof Element && event.target.closest(ignore))
-    ) return;
+    )
+      return;
     start = {
       id: event.pointerId,
       x: event.clientX,
@@ -58,7 +66,10 @@ export function enableSheetDrag(
     if (!dragging && (dy < 8 || dy < Math.abs(dx) * 1.25)) return;
     dragging = true;
     surface.classList.add('is-sheet-dragging');
-    surface.style.setProperty('--sheet-drag-y', `${Math.min(460, Math.max(0, dy))}px`);
+    surface.style.setProperty(
+      '--sheet-drag-y',
+      `${Math.min(460, Math.max(0, dy))}px`,
+    );
   };
 
   const end = (event: PointerEvent) => {
