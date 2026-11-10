@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -15,7 +16,7 @@ test.afterEach(async ({ page }, info) => {
 });
 
 async function ready(page: Page): Promise<void> {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
     'true',
@@ -45,7 +46,7 @@ async function addFirst(page: Page, quantity = '1'): Promise<void> {
   );
 }
 async function newBinder(page: Page): Promise<void> {
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
   await page
     .getByRole('dialog')
@@ -96,7 +97,7 @@ test('confirmed totals, edition corrections, wishes and undo survive reload', as
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Wunschliste', exact: true }).click();
   await expect(page.locator('.w-wish-card')).toHaveCount(1);
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-quantity-badge')).toHaveText('2×');
   await page.locator('.w-owned-grid button').click();
   await page
@@ -155,7 +156,7 @@ test('templates create planned slots without possession, owned copies cannot be 
     'Keine freie Karte passt.',
   );
   await page.keyboard.press('Escape');
-  await page.getByRole('link', { name: 'Sammlung', exact: true }).click();
+  await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
   await page.locator('.w-owned-grid button').click();
   await page
@@ -177,7 +178,7 @@ test('artist shortage, fixed anchor and independent demo survive proposal adopti
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await expect(page.locator('#workspace-demo')).toBeVisible();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(18);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page
     .getByRole('button', { name: 'Seiten vorschlagen', exact: true })
     .click();
@@ -450,7 +451,7 @@ test('personal screens, native dialogs and narrow binder pages remain accessible
   ).toBeFocused();
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await audit();
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await audit();
   expect(
     await page.evaluate(

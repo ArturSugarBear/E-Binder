@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 
@@ -124,7 +125,7 @@ async function catalogue(page: Page): Promise<string[]> {
   return requests;
 }
 async function open(page: Page): Promise<void> {
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('.w-welcome-art img')).toHaveCount(3);
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
@@ -262,9 +263,9 @@ test('empty artist recommendations explain missing inventory and open the global
   page,
 }) => {
   await catalogue(page);
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await expect(page.locator('.w-welcome-art img')).toHaveCount(3);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page
     .getByRole('button', { name: 'Ersten Binder anlegen', exact: true })
     .click();

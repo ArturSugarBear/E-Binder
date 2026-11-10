@@ -1,3 +1,4 @@
+import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 
 test.use({ serviceWorkers: 'allow' });
@@ -53,7 +54,7 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   await expect
     .poll(async () => page.evaluate(() => !!navigator.serviceWorker.controller))
     .toBe(true);
-  await page.getByRole('link', { name: 'Meine Binder', exact: true }).click();
+  await openVault(page, 'binder');
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
   await page
     .getByRole('dialog')
@@ -86,34 +87,52 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   const navigation = page.getByRole('navigation', { name: 'App-Navigation' });
   test.skip(!(await navigation.isVisible()), 'Mobile navigation only.');
 
-  await expect(navigation.locator(':scope > *')).toHaveCount(6);
-  await expect(navigation.locator(':scope > *').nth(0)).toContainText(
-    'Sammlung',
-  );
+  await expect(navigation.locator(':scope > *')).toHaveCount(5);
+  await expect(navigation.locator(':scope > *').nth(0)).toContainText('Home');
   await expect(navigation.locator(':scope > *').nth(2)).toHaveAttribute(
     'id',
     'workspace-mobile-add',
   );
-  await expect(navigation.locator(':scope > *').nth(4)).toContainText(
-    'Portfolio',
+  await expect(navigation.locator(':scope > *').nth(3)).toContainText(
+    'Sammlung',
   );
-  await expect(navigation.locator(':scope > *').nth(5)).toContainText('Profil');
-  await navigation.getByRole('button', { name: 'Karte hinzufügen' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.keyboard.press('Escape');
-
-  await navigation.getByRole('link', { name: 'Meine Binder' }).click();
+  await expect(navigation.locator(':scope > *').nth(4)).toContainText('Profil');
+  await navigation.getByRole('button', { name: 'Karte scannen' }).click();
   await expect(
-    navigation.getByRole('link', { name: 'Meine Binder' }),
+    page.getByRole('dialog', { name: 'Karten hinzufügen' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Karte live scannen' }),
+  ).toBeVisible();
+  await page
+    .getByRole('dialog', { name: 'Karte live scannen' })
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Karten hinzufügen' })
+    .getByRole('button', { name: 'Karten hinzufügen schließen' })
+    .click();
+
+  await navigation.getByRole('link', { name: 'Sammlung' }).click();
+  await expect(
+    navigation.getByRole('link', { name: 'Sammlung' }),
   ).toHaveAttribute('aria-current', 'page');
-  await navigation.getByRole('link', { name: 'Portfolio' }).click();
+  await expect(
+    page.getByRole('link', { name: 'Portfolio', exact: true }),
+  ).toBeVisible();
+  await openVault(page, 'portfolio');
   await expect(
     page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
   ).toBeVisible();
-  await navigation.getByRole('button', { name: 'Profil und Konto' }).click();
+  await navigation
+    .getByRole('button', { name: 'Profil und Einstellungen' })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Dein Profil', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Konto verwalten' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
-
   await page.getByRole('link', { name: 'Wunschliste' }).click();
   await expect(page).toHaveURL(/#wunschliste$/);
   await expect(

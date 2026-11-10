@@ -125,7 +125,7 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   );
   await installCameraRig(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
@@ -171,7 +171,7 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   await installCameraRig(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
@@ -272,7 +272,7 @@ test('closing the scanner while camera permission is pending releases late track
       state: () => created?.getTracks()[0]?.readyState ?? 'missing',
     };
   });
-  await page.goto('./');
+  await page.goto('./#sammlung');
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
