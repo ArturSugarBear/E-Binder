@@ -3449,3 +3449,26 @@ textarea.w-input,
     font-size: 10px;
   }
 }
+
+/* Mobile binder first-fold correction: keep the page controls reachable
+ * while exposing meaningful card artwork above the floating dock at 320px.
+ * Preserve 44px touch targets and the actual 3x3 physical page. */
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-binders > .w-vault-tabs {
+    margin: 0 0 2px;
+    padding: 3px;
+  }
+  #workspace-demo:not([hidden]) {
+    margin-top: 0;
+    padding-block: 4px;
+  }
+  .w-binders > .w-page-heading {
+    margin: 0 0 3px;
+  }
+  .w-binders .w-binder-title {
+    padding-bottom: 1px;
+  }
+  .w-binders .w-binder-toolbar {
+    padding-bottom: 0;
+  }
+}
