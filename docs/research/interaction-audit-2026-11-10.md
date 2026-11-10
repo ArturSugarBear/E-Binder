@@ -33,4 +33,8 @@ Nicht als vollständig getestet ausgeben:
 7. Archiv, Browser-Zurück, Tastatur, Fokus, Touch-Alternativen, Installation/Update und Offlinezustände durchgehen. Die vorhandenen plattformspezifischen Skips offen ausweisen. WebKit-Emulation ist kein physischer iPhone-Nachweis.
 8. Frühes Öffnen der Vorlagengalerie bei noch ladendem oder fehlgeschlagenem Inspirationskatalog gesondert prüfen; derzeit gibt es einen Rückweg und einen Wiederholhinweis, keinen belegten automatischen Aktualisierungsnachweis.
 
-Keine Konkurrenz-Markenassets in Produkt oder Build übernehmen. Keine ungeprüften Merges; #37 und #38 müssen auf den ausgelieferten Stand aktualisiert und gemeinsam geprüft werden.
+## Integration von #37 und #38
+
+Beide Zweige enthalten jetzt den aktuellen `master` nach #39 und die geprüften Binderkorrekturen. In #37 wurden zusätzlich der fehlende Desktop-Einstieg zur Wunschliste, die nicht zum sichtbaren Scan-Text passende zugängliche Beschriftung und der Kontrast inaktiver Docktexte über hellen Inhalten korrigiert. Die Home-/Profil-Aufgabenprüfung bedient Scanner, Binder, Konto, Backup, Seitenscan, Wunschliste und Katalog; Abbrechen erhält Fokus und null Besitz. Browser-Zurück prüft die tatsächlich angeklickten mobilen Zwischenschritte. In #38 behalten bildlose Katalogergebnisse kompakte Textzeilen; die sechs gezielten Bildprüfungen bestanden über alle drei Browserprojekte. Die gemeinsame vollständige CI-Prüfung ist Voraussetzung des Merges; Links und endgültiger Auslieferungsstand stehen im Übergabeprompt.
+
+Keine Konkurrenz-Markenassets in Produkt oder Build übernehmen. Keine ungeprüften Merges.
