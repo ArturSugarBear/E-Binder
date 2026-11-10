@@ -22,7 +22,7 @@ function image(
 it('can propose a dark neutral pocket as empty', () => {
   expect(
     looksLikeEmptyPocket(
-      image(64, 64, () => [40, 43, 48]),
+      image(64, 64, () => [40, 41, 44]),
       64,
       64,
     ),
