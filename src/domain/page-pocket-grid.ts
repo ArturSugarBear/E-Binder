@@ -28,10 +28,7 @@ export function suggestPocketGridCorners(
   const gray = new Float32Array(width * height);
   for (let i = 0; i < gray.length; i++) {
     const p = i * 4;
-    gray[i] =
-      0.2126 * rgba[p]! +
-      0.7152 * rgba[p + 1]! +
-      0.0722 * rgba[p + 2]!;
+    gray[i] = 0.2126 * rgba[p]! + 0.7152 * rgba[p + 1]! + 0.0722 * rgba[p + 2]!;
   }
 
   // A cheap two-pass Gaussian approximation suppresses sleeve microtexture.
@@ -93,12 +90,7 @@ export function suggestPocketGridCorners(
     const a = peak(near);
     const b = peak(far);
     const spacing = b.pos - a.pos;
-    if (
-      a.strength < 8 ||
-      b.strength < 8 ||
-      spacing < 0.27 ||
-      spacing > 0.395
-    )
+    if (a.strength < 8 || b.strength < 8 || spacing < 0.27 || spacing > 0.395)
       return null;
     return [a.pos, b.pos];
   };

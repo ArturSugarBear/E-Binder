@@ -27,8 +27,7 @@ describe('private binder grid seam alignment', () => {
         Math.abs(y - Math.round(HEIGHT * 0.65)) < 3;
       if (vertical || horizontal) return 140;
       // Partly filled pages: the bottom-right pockets are still empty.
-      if (x < WIDTH * 0.6 && y < HEIGHT * 0.31)
-        return (x + y) % 3 ? 44 : 70;
+      if (x < WIDTH * 0.6 && y < HEIGHT * 0.31) return (x + y) % 3 ? 44 : 70;
       return 28;
     });
     const result = suggestPocketGridCorners(pixels, WIDTH, HEIGHT);
@@ -41,7 +40,11 @@ describe('private binder grid seam alignment', () => {
 
   it('rejects a featureless image or separators along only one axis', () => {
     expect(
-      suggestPocketGridCorners(image(() => 38), WIDTH, HEIGHT),
+      suggestPocketGridCorners(
+        image(() => 38),
+        WIDTH,
+        HEIGHT,
+      ),
     ).toBeNull();
     expect(
       suggestPocketGridCorners(

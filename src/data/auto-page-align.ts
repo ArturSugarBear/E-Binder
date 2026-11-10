@@ -60,12 +60,12 @@ export async function autoAlignPage(
       : suggestPocketGridCorners(pixels, small.width, small.height);
     const corners: Quad = wideEnough
       ? proposed
-      : gridCorners ?? [
+      : (gridCorners ?? [
           { x: 0, y: 0 },
           { x: 1, y: 0 },
           { x: 1, y: 1 },
           { x: 0, y: 1 },
-        ];
+        ]);
     const mapping = cardProjection(corners);
     const input = context.getImageData(0, 0, source.width, source.height);
     const output = document.createElement('canvas');
@@ -130,11 +130,7 @@ export async function autoAlignPage(
     );
     return {
       blob,
-      method: wideEnough
-        ? 'detected'
-        : gridCorners
-          ? 'grid'
-          : 'full-photo',
+      method: wideEnough ? 'detected' : gridCorners ? 'grid' : 'full-photo',
     };
   } finally {
     URL.revokeObjectURL(url);
