@@ -247,9 +247,7 @@ export function openAddCards(
         : 'Offene Aufnahmen entfernt',
       (state) =>
         changeState(state, (next) => {
-          next.captures = next.captures.filter(
-            (shot) => !removed.has(shot.id),
-          );
+          next.captures = next.captures.filter((shot) => !removed.has(shot.id));
         }),
     );
     if (!ok) return;
