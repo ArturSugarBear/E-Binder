@@ -45,7 +45,8 @@ export async function autoAlignPage(
     if (!thumb) throw new Error('Fotoverarbeitung ist nicht verfügbar.');
     thumb.drawImage(source, 0, 0, small.width, small.height);
 
-    const thumbPixels = thumb.getImageData(0, 0, small.width, small.height).data;
+    const thumbData = thumb.getImageData(0, 0, small.width, small.height);
+    const thumbPixels = thumbData.data;
     const proposed = suggestPageCorners(thumbPixels, small.width, small.height);
     // A partly occupied page still occupies the whole 3x3 sheet. Never crop
     // to only the visible cards or silently discard empty pockets.
