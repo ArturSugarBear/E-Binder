@@ -803,10 +803,8 @@ export function openPageScanner(
           );
           if (titleHint) pocket.search.value = titleHint;
           const matched = selectExactPrintedMatch(pocket, text);
-          pocket.status.textContent = printedEnergy.length
-            ? `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`
-            : matched
-              ? `${pocket.card!.name} · ${pocket.card!.number}`
+          pocket.status.textContent = matched
+            ? `${pocket.card!.name} · ${pocket.card!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
               : pocket.candidates.length && titleHint
@@ -820,6 +818,8 @@ export function openPageScanner(
                       : text.trim()
                         ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
                         : 'Kein lesbarer Kartenname · Foto prüfen';
+          if (printedEnergy.length)
+            pocket.status.textContent = `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`;
         } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
