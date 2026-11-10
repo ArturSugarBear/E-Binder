@@ -51,7 +51,7 @@ describe('Lovebrand kit proposals', () => {
       expect(svg).toContain('<svg');
       expect(svg).toContain('viewBox="0 0 80 80"');
       expect(svg).toContain('<title');
-      expect(svg).not.toMatch(/<script|<image|<foreignObject|http:|href=/i);
+      expect(svg).not.toMatch(/<script|<image|<foreignObject|href=|onload=/i);
     }
   });
 });
