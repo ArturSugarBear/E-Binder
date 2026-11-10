@@ -509,6 +509,18 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
   const createPage = action('Neue Seite', addEmptyPage, 'secondary', 'plus');
   createPage.classList.add('w-binder-page-create');
   pageRail.append(createPage);
+  // A rerender replaces the rail. Recenter the active thumb after page changes
+  // so the current page remains visible even in binders with many pages.
+  queueMicrotask(() => {
+    const active = pageRail.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active || !pageRail.isConnected) return;
+    const rail = pageRail.getBoundingClientRect();
+    const thumb = active.getBoundingClientRect();
+    pageRail.scrollLeft = Math.max(
+      0,
+      pageRail.scrollLeft + thumb.left - rail.left - (rail.width - thumb.width) / 2,
+    );
+  });
   const workspace = el(
     'div',
     'w-binder-workspace',
@@ -530,6 +542,14 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'w-page-inspector',
     el('p', 'w-eyebrow', 'Auf dieser Seite'),
   );
+  const inspectorDetails = el(
+    'details',
+    'w-page-inspector-details',
+    el('summary', '', 'Alle neun Plätze verwalten'),
+  );
+  inspectorDetails.open = !matchMedia(
+    '(max-width: 640px), (max-width: 950px) and (pointer: coarse)',
+  ).matches;
   for (const [slotIndex, slot] of page.slots.entries()) {
     const card = cardForSlot(ctx.state, slot);
     const button = action(
@@ -550,13 +570,14 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
               : 'Karte auswählen',
       ),
     );
-    inventory.append(button);
+    inspectorDetails.append(button);
   }
-  inventory.append(
+  inspectorDetails.append(
     message(
-      'Klicke einen Platz zum Belegen, Fixieren oder Tauschen. Ziehen funktioniert zusätzlich mit der Maus.',
+      'Tippe einen Platz zum Belegen, Fixieren oder Tauschen. Ziehen funktioniert zusätzlich mit der Maus.',
     ),
   );
+  inventory.append(inspectorDetails);
   root.append(el('div', 'w-binder-layout', sidebar, workspace, inventory));
   return root;
 }
@@ -652,6 +673,7 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
   const slot = page.slots[index] ?? null;
   const card = cardForSlot(ctx.state, slot);
   const sheet = modal(`Platz ${index + 1}${card ? ` · ${card.name}` : ''}`);
+  sheet.dialog.classList.add('w-slot-dialog');
   if (card)
     sheet.body.append(
       el(
@@ -740,6 +762,11 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
       );
       move.disabled = slot.locked;
       sheet.body.append(
+        el(
+          'p',
+          'w-muted',
+          'Belegter Zielplatz: Karten tauschen. Freier Zielplatz: Karte verschieben.',
+        ),
         el('div', 'w-move-control', field('Zielplatz', target), move),
       );
     }
@@ -860,11 +887,18 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
       );
   };
   search.addEventListener('input', render);
-  sheet.body.append(
-    el('h3', '', 'Eigenes Exemplar zuordnen'),
-    field('Im verfügbaren Bestand suchen', search),
-    choices,
+  const assignment = el(
+    'details',
+    'w-slot-assignment',
+    el(
+      'summary',
+      '',
+      slot ? 'Anderes Exemplar zuordnen' : 'Eigenes Exemplar zuordnen',
+    ),
   );
+  assignment.open = !slot;
+  assignment.append(field('Im verfügbaren Bestand suchen', search), choices);
+  sheet.body.append(assignment);
   render();
 }
 function normalizeSearch(value: string): string {

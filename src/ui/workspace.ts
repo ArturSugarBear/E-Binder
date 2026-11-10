@@ -5,6 +5,7 @@ import {
   createBinder,
   emptyState,
   templateSlots,
+  uid,
   validateState,
   type PersonalState,
 } from '../domain/personal';
@@ -630,6 +631,17 @@ function demoState(chapters: Collection): PersonalState {
     if (chapter) {
       page.title = chapter.title;
       page.slots = templateSlots(next, cards.slice(0, 9));
+    }
+    // Keep the themed first page, but expose a second real 3x3 demo page.
+    // These nine verified editorial prints let visitors exercise page navigation
+    // and see partial, sourced market references without touching their data.
+    if (cards.length >= 18) {
+      next.binders[0]!.pages.push({
+        id: uid(),
+        title: 'Illustrator-Trilogien',
+        slots: templateSlots(next, cards.slice(9, 18)),
+        assembled: false,
+      });
     }
   });
 }

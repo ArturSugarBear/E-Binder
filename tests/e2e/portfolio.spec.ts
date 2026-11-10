@@ -27,13 +27,13 @@ test('portfolio opens directly without inventing a zero market price', async ({
   ).toBe(false);
 });
 
-test('portfolio retains unpriced demo collection and links to binder pages', async ({
+test('portfolio reports partial coverage in demo and links to binder pages', async ({
   page,
 }) => {
   await page.goto('./#sammlung');
   await page.getByRole('button', { name: 'Mit Demo ausprobieren' }).click();
   await openVault(page, 'portfolio');
-  await expect(page.locator('.w-portfolio-balance')).toHaveText('—');
+  await expect(page.locator('.w-portfolio-balance')).toBeVisible();
   await expect(page.locator('.w-portfolio-binder')).toHaveCount(1);
   await page.locator('.w-portfolio-binder summary').click();
   await expect(

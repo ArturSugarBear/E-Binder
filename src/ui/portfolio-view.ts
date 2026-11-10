@@ -19,6 +19,12 @@ const euros = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const quoteBasisLabel: Record<NonNullable<PortfolioQuote['basis']>, string> = {
+  trend: 'Trendpreis',
+  avg7: '7-Tage-Durchschnitt',
+  avg30: '30-Tage-Durchschnitt',
+  avg: 'Verkaufsdurchschnitt',
+};
 
 function shownValue(value: number, covered: number): string {
   return covered ? euros.format(value) : '—';
@@ -407,6 +413,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       const grid = el('div', 'w-portfolio-leaders');
       for (const row of top) {
         const { holding } = row;
+        const quote = row.quoteKey ? quotes.get(row.quoteKey) : undefined;
         const button = action(
           `${holding.card.name} anzeigen`,
           () => ctx.openHolding(holding.id),
@@ -437,7 +444,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el(
               'small',
               '',
-              `${euros.format(row.unitValue!)} je Exemplar · ${({ trend: 'Trendpreis', avg7: '7-Tage-Durchschnitt', avg30: '30-Tage-Durchschnitt', avg: 'Verkaufsdurchschnitt' } as const)[row.quoteKey ? quotes.get(row.quoteKey)?.basis ?? 'trend' : 'trend']}`,
+              `${euros.format(row.unitValue!)} je Exemplar · ${quote?.basis ? quoteBasisLabel[quote.basis] : 'Preisreferenz'}`,
             ),
           ),
         );

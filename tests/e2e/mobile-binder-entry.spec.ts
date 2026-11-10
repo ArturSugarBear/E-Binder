@@ -30,6 +30,10 @@ for (const width of [320, 390]) {
     await pockets.first().click();
     const detail = page.getByRole('dialog', { name: /^Platz 1/ });
     await expect(detail).toBeVisible();
+    const assignment = detail.locator('.w-slot-assignment');
+    await expect(assignment).not.toHaveAttribute('open', '');
+    await assignment.locator('summary').click();
+    await expect(assignment).toHaveAttribute('open', '');
     await detail.getByRole('button', { name: /schließen/i }).click();
     await expect(detail).toHaveCount(0);
     await expect(page.locator('.w-binder-paper img')).toHaveCount(9);
