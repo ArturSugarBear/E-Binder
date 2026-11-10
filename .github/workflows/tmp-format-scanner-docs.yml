@@ -1,0 +1,29 @@
+name: Temporary scanner docs formatter
+on:
+  push:
+    branches:
+      - feat/scanner-auto-page-outline-20261110
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format scanner docs
+        run: |
+          npx prettier --write docs/scanner.md
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/scanner.md
+            git commit -m "Format scanner documentation"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
