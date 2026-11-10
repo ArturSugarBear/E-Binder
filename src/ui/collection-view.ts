@@ -21,6 +21,7 @@ import {
   select,
 } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
+import { enableSwipe } from './swipe';
 
 export function renderCollection(ctx: WorkspaceContext): HTMLElement {
   const root = el('section', 'w-collection');
@@ -372,6 +373,40 @@ export function openHolding(ctx: WorkspaceContext, id: string): void {
       sheet.close();
   });
   sheet.body.append(form);
+  const holdingIndex = ctx.state.holdings.findIndex((item) => item.id === id);
+  if (ctx.state.holdings.length > 1 && holdingIndex >= 0) {
+    let modified = false;
+    form.addEventListener('input', () => { modified = true; });
+    form.addEventListener('change', () => { modified = true; });
+    const browse = (step: number) => {
+      const adjacent = ctx.state.holdings[holdingIndex + step];
+      if (!adjacent) return;
+      if (modified) {
+        ctx.notify('Speichere zuerst deine Änderungen, bevor du zur nächsten Karte wechselst.', true);
+        return;
+      }
+      sheet.close();
+      requestAnimationFrame(() => openHolding(ctx, adjacent.id));
+    };
+    const previous = action('Vorherige Karte', () => browse(-1), 'text');
+    const next = action('Nächste Karte', () => browse(1), 'text');
+    previous.disabled = holdingIndex === 0;
+    next.disabled = holdingIndex === ctx.state.holdings.length - 1;
+    const navigator = el(
+      'nav',
+      'w-card-browse',
+      previous,
+      el('span', 'w-mono', `${holdingIndex + 1} / ${ctx.state.holdings.length}`),
+      next,
+    );
+    navigator.setAttribute('aria-label', 'Zwischen Karten wechseln');
+    sheet.body.prepend(navigator);
+    const preview = form.querySelector<HTMLElement>('.w-holding-preview');
+    if (preview) {
+      preview.classList.add('w-card-swipe-zone');
+      enableSwipe(preview, browse);
+    }
+  }
   sheet.footer.append(
     action(
       'Ausgabe korrigieren',
