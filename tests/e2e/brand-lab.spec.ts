@@ -33,8 +33,15 @@ test('lovebrand lab has no sideways overflow at 320px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('./brand-lab.html');
   await expect(page.locator('#preview')).toBeVisible();
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(1);
+  for (const theme of ['Keepsake', 'Rare Room', 'Folio House']) {
+    await page.getByRole('button', { name: theme, exact: true }).click();
+    const overflow = await page.evaluate(() => ({
+      pixels: document.documentElement.scrollWidth - window.innerWidth,
+      offenders: [...document.querySelectorAll('body *')]
+        .filter((element) => element.getBoundingClientRect().right > window.innerWidth + 1)
+        .slice(0, 6)
+        .map((element) => element.tagName.toLowerCase() + '.' + element.className),
+    }));
+    expect(overflow.pixels, theme + ': ' + overflow.offenders.join(', ')).toBeLessThanOrEqual(1);
+  }
 });
