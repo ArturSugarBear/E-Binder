@@ -269,6 +269,19 @@ export async function alignPhoto(
                   .getContext('2d')!
                   .drawImage(output, 252, 748, 378, 132, 0, 0, 378, 132);
                 output.className = 'w-crop-card-preview';
+                const preview =
+                  mode === 'page'
+                    ? el('div', 'w-page-crop-preview', output)
+                    : output;
+                if (mode === 'page') {
+                  const guides = el('div', 'w-page-crop-guides');
+                  guides.setAttribute('aria-hidden', 'true');
+                  for (let slot = 0; slot < 9; slot++)
+                    guides.append(
+                      el('span', '', String(slot + 1).padStart(2, '0')),
+                    );
+                  preview.append(guides);
+                }
                 output.setAttribute(
                   'aria-label',
                   'Der ausgerichtete Ausschnitt für die Erkennung',
@@ -286,7 +299,7 @@ export async function alignPhoto(
                       ? 'Der Ausschnitt soll genau die komplette 3×3-Seite umfassen, ohne die Buchringe. Prüfe, ob alle neun Karten vollständig sichtbar sind. Starke Reflexionen und unleserliche Nummern erfordern eine neue Aufnahme.'
                       : 'Siehst du nur die gedruckte Karte? Kunststoffrand, Etikett und Hintergrund gehören außerhalb des Ausschnitts. Prüfe besonders Name und Sammlernummer. Wenn sie verschwommen oder von Reflexionen verdeckt sind, hilft eine neue Aufnahme.',
                   ),
-                  output,
+                  preview,
                   ...(mode === 'page'
                     ? []
                     : [
