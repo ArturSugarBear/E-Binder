@@ -709,7 +709,9 @@ export function openPageScanner(
       status.textContent =
         aligned.method === 'detected'
           ? 'Seitenränder erkannt. Neun Kartenfächer werden gelesen …'
-          : 'Foto automatisch auf neun Fächer aufgeteilt. Falls nötig, „Zuschnitt korrigieren“ wählen.';
+          : aligned.method === 'grid'
+            ? 'Binderfächer automatisch ausgerichtet. Prüfe die neun Vorschaubilder.'
+            : 'Foto auf neun Fächer aufgeteilt. Prüfe die Vorschau; bei Bedarf „Zuschnitt korrigieren“.';
       const tiles = await extractPagePockets(aligned.blob, lifetime.signal);
       if (closed || lifetime.signal.aborted) return;
       buildGrid(tiles);
