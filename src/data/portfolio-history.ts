@@ -42,26 +42,28 @@ export function readPortfolioHistory(
     if (!raw || raw.length > 80000) return [];
     const values: unknown = JSON.parse(raw);
     if (!Array.isArray(values)) return [];
-    return values.filter((row): row is PortfolioObservation => {
-      if (!row || typeof row !== 'object') return false;
-      const x = row as Partial<PortfolioObservation>;
-      return (
-        typeof x.day === 'string' &&
-        /^\d{4}-\d{2}-\d{2}$/.test(x.day) &&
-        typeof x.signature === 'string' &&
-        /^[0-9a-f]{8}$/.test(x.signature) &&
-        typeof x.knownValue === 'number' &&
-        Number.isFinite(x.knownValue) &&
-        x.knownValue > 0 &&
-        typeof x.ownedCopies === 'number' &&
-        Number.isInteger(x.ownedCopies) &&
-        x.ownedCopies > 0 &&
-        typeof x.pricedCopies === 'number' &&
-        Number.isInteger(x.pricedCopies) &&
-        x.pricedCopies > 0 &&
-        x.pricedCopies <= x.ownedCopies
-      );
-    }).slice(-365);
+    return values
+      .filter((row): row is PortfolioObservation => {
+        if (!row || typeof row !== 'object') return false;
+        const x = row as Partial<PortfolioObservation>;
+        return (
+          typeof x.day === 'string' &&
+          /^\d{4}-\d{2}-\d{2}$/.test(x.day) &&
+          typeof x.signature === 'string' &&
+          /^[0-9a-f]{8}$/.test(x.signature) &&
+          typeof x.knownValue === 'number' &&
+          Number.isFinite(x.knownValue) &&
+          x.knownValue > 0 &&
+          typeof x.ownedCopies === 'number' &&
+          Number.isInteger(x.ownedCopies) &&
+          x.ownedCopies > 0 &&
+          typeof x.pricedCopies === 'number' &&
+          Number.isInteger(x.pricedCopies) &&
+          x.pricedCopies > 0 &&
+          x.pricedCopies <= x.ownedCopies
+        );
+      })
+      .slice(-365);
   } catch {
     // Disabled/blocked browser storage must never block collection management.
     return [];
@@ -88,10 +90,11 @@ export function recordPortfolioObservation(
     signature: portfolioSignature(state),
   };
   const merged = current
-    .filter((entry) =>
-      entry.day !== day ||
-      entry.signature !== point.signature ||
-      entry.pricedCopies !== point.pricedCopies,
+    .filter(
+      (entry) =>
+        entry.day !== day ||
+        entry.signature !== point.signature ||
+        entry.pricedCopies !== point.pricedCopies,
     )
     .concat(point)
     .sort((a, b) => a.day.localeCompare(b.day))

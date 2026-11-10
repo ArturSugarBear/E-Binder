@@ -83,12 +83,15 @@ describe('real, comparable portfolio history', () => {
     const modified = summarizePortfolio(
       state,
       new Map([
-        ['de:sv01-001:normal', {
-          source: 'cardmarket' as const,
-          variant: 'normal' as const,
-          amount: 15.5,
-          updated: '2026-11-09T12:00:00.000Z',
-        }],
+        [
+          'de:sv01-001:normal',
+          {
+            source: 'cardmarket' as const,
+            variant: 'normal' as const,
+            amount: 15.5,
+            updated: '2026-11-09T12:00:00.000Z',
+          },
+        ],
       ]),
     );
     recordPortfolioObservation(state, modified, '2026-11-10');
@@ -100,7 +103,11 @@ describe('real, comparable portfolio history', () => {
 
   it('keeps missing prices as missing, never writes a zero observation', () => {
     const { state } = stateWithPricedCard();
-    recordPortfolioObservation(state, summarizePortfolio(state, new Map()), '2026-11-09');
+    recordPortfolioObservation(
+      state,
+      summarizePortfolio(state, new Map()),
+      '2026-11-09',
+    );
     expect(readPortfolioHistory('personal')).toEqual([]);
   });
 });

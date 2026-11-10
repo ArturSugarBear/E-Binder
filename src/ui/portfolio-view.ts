@@ -142,19 +142,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       ),
     );
 
-    const historyPoints = comparableHistory(
-      ctx.state,
-      overview,
-      historyRange,
-    );
+    const historyPoints = comparableHistory(ctx.state, overview, historyRange);
     const historyChart = el(
       'section',
       'w-portfolio-section w-portfolio-history',
-      el(
-        'div',
-        'w-portfolio-section-head',
-        el('h2', '', 'Wertentwicklung'),
-      ),
+      el('div', 'w-portfolio-section-head', el('h2', '', 'Wertentwicklung')),
     );
     const periods = el('div', 'w-portfolio-periods');
     periods.setAttribute('role', 'group');
@@ -195,10 +187,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       const points = historyPoints.map(
         (point) => `${x(point.day)},${y(point.knownValue)}`,
       );
-      const svg = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'svg',
-      );
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('viewBox', '0 0 560 220');
       svg.setAttribute('role', 'img');
       svg.setAttribute(
