@@ -108,6 +108,14 @@ export function openPageScanner(
     ['ja', 'Japanisch'],
   ]);
   language.value = 'auto';
+  const preferredLanguage = (text: string) => {
+    if (language.value !== 'auto') return language.value;
+    const printed = recognitionClues(text).find((clue) => clue.language)?.language;
+    if (printed) return printed;
+    if (/[\u3040-\u30ff]/.test(text)) return 'ja';
+    if (/\b(BASIC|ABILITY|WEAKNESS|RETREAT)\b/i.test(text)) return 'en';
+    return 'de';
+  };
   const scanOptions = el(
     'details',
     'w-page-scan-options',
@@ -308,6 +316,12 @@ export function openPageScanner(
       pocket.card = undefined;
       pocket.decision = 'pending';
     }
+    if (pocket.decision === 'card' && pocket.card)
+      pocket.status.textContent = `${pocket.card.name} · ${pocket.card.number}`;
+    else if (pocket.decision === 'empty')
+      pocket.status.textContent = 'Vermutlich leer · antippen zum Ändern';
+    else if (pocket.decision === 'skip')
+      pocket.status.textContent = 'Nicht zugeordnet';
     pocket.finish.hidden = pocket.decision !== 'card';
     pocket.variant.hidden =
       pocket.decision !== 'card' || pocket.finish.value !== 'other';
@@ -352,6 +366,24 @@ export function openPageScanner(
     pocket.select.value = value;
     updatePocket(pocket);
   };
+  const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
+    const number = (value: string) =>
+      value.replace(/\s/g, '').replace(/(^|\/)0+(?=\d)/g, '$1').toLowerCase();
+    const clues = recognitionClues(text).filter((clue) => clue.setId);
+    const exact = pocket.candidates.filter((card) =>
+      clues.some(
+        (clue) =>
+          clue.setId === card.setId &&
+          number(clue.number) === number(card.number) &&
+          (!clue.language || clue.language === card.language),
+      ),
+    );
+    // A name or an unqualified number cannot establish a printing.
+    if (pocket.decision !== 'pending' || exact.length !== 1) return false;
+    pocket.select.value = `card:${pocket.candidates.indexOf(exact[0]!)}`;
+    updatePocket(pocket);
+    return true;
+  };
   const searchPocket = async (pocket: Pocket) => {
     const query = pocket.search.value.trim();
     if (query.length < 2) {
@@ -370,20 +402,24 @@ export function openPageScanner(
       );
       let online: PersonalCard[] = [];
       if (navigator.onLine) {
-        const found = await searchCatalog(
-          query,
-          language.value,
-          lifetime.signal,
+        const locales = language.value === 'auto'
+          ? ['de', 'en', 'ja']
+          : [language.value];
+        const batches = await Promise.allSettled(
+          locales.map(async (locale) => {
+            const found = await searchCatalog(query, locale, lifetime.signal);
+            const resolved = await Promise.allSettled(
+              found.slice(0, 6).map((item) =>
+                fetchCatalogCard(item.id, locale, lifetime.signal),
+              ),
+            );
+            return resolved.flatMap((result) =>
+              result.status === 'fulfilled' ? [result.value] : [],
+            );
+          }),
         );
-        const resolved = await Promise.allSettled(
-          found
-            .slice(0, 6)
-            .map((item) =>
-              fetchCatalogCard(item.id, language.value, lifetime.signal),
-            ),
-        );
-        online = resolved.flatMap((result) =>
-          result.status === 'fulfilled' ? [result.value] : [],
+        online = batches.flatMap((result) =>
+          result.status === 'fulfilled' ? result.value : [],
         );
       }
       if (closed || lifetime.signal.aborted) return;
@@ -516,6 +552,7 @@ export function openPageScanner(
           );
           if (closed || abort.signal.aborted) break;
           const quality = pockets[index]!.quality;
+          quality.hidden = inspection.warnings.length === 0;
           quality.textContent = inspection.warnings.length
             ? `Aufnahmehinweis: ${inspection.warnings.join(' · ')}`
             : 'Keine deutlichen Belichtungsprobleme erkannt';
@@ -524,6 +561,7 @@ export function openPageScanner(
             : 'false';
         } catch {
           if (closed || abort.signal.aborted) break;
+          pockets[index]!.quality.hidden = false;
           pockets[index]!.quality.textContent =
             'Fotoqualität konnte nicht geprüft werden. Bitte selbst kontrollieren.';
         }
@@ -531,12 +569,27 @@ export function openPageScanner(
       for (let index = 0; index < tiles.length; index++) {
         if (closed || abort.signal.aborted) break;
         const pocket = pockets[index]!;
+        try {
+          if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
+            if (closed || abort.signal.aborted) break;
+            pocket.select.value = 'empty';
+            updatePocket(pocket);
+            pocket.container?.classList.add('is-processed');
+            progress.value = index + 1;
+            status.textContent = `${index + 1} von 9 Fächern geprüft.`;
+            continue;
+          }
+        } catch {
+          if (closed || abort.signal.aborted) break;
+          // If occupancy cannot be determined, try OCR instead.
+        }
         pocket.status.textContent = 'Lese Karte …';
         pocket.container?.classList.remove('is-processed');
         pocket.container?.classList.add('is-scanning');
         try {
           const text = await session.recognize(tiles[index]!);
           if (closed || abort.signal.aborted) break;
+          pocket.ocrText = text;
           const local = candidatesFromText(text, [
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
@@ -546,7 +599,7 @@ export function openPageScanner(
             try {
               online = await fetchRecognizedCards(
                 text,
-                language.value,
+                preferredLanguage(text),
                 abort.signal,
               );
             } catch {
@@ -555,9 +608,12 @@ export function openPageScanner(
           }
           if (closed || abort.signal.aborted) break;
           displayCandidates(pocket, [...online, ...local]);
-          pocket.status.textContent = pocket.candidates.length
-            ? `${pocket.candidates.length} Vorschläge · Bitte selbst prüfen`
-            : 'Keine sichere Zuordnung – manuell suchen oder überspringen';
+          const matched = selectExactPrintedMatch(pocket, text);
+          pocket.status.textContent = matched
+            ? `${pocket.card!.name} · ${pocket.card!.number}`
+            : pocket.candidates.length
+              ? `${pocket.candidates.length} Vorschläge · prüfen`
+              : 'Noch nicht erkannt · prüfen';
         } catch {
           if (closed || abort.signal.aborted) break;
           pocket.status.textContent =
@@ -580,7 +636,7 @@ export function openPageScanner(
       if (!closed)
         status.textContent = abort.signal.aborted
           ? 'Erkennung angehalten. Prüfe die vorhandenen Vorschläge oder suche fehlende Karten manuell.'
-          : 'Erkennung abgeschlossen. Prüfe alle neun Fächer und bestätige die Druckvarianten.';
+          : 'Erkennung abgeschlossen. Prüfe die offenen Fächer oder übernimm die ausgewählten Karten.';
     }
   };
   const nextPage = async () => {
