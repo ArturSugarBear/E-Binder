@@ -1,0 +1,31 @@
+/* Candidate-only tokens — never loaded by the live E-Binder UI until approval. */
+.brand-keepsake {
+  --brand-canvas: #F8F4EB; --brand-surface: #FFFFFF;
+  --brand-ink: #24222D; --brand-muted: #635E70;
+  --brand-action: #4B3E9C; --brand-action-ink: #FFFFFF;
+  --brand-accent: #DE5A76; --brand-sleeve: #302C39;
+  --brand-focus: #4B3E9C; --brand-success: #286449;
+  --brand-error: #A12947; --brand-border: #C7C2D0;
+  --brand-display: 'Syne', 'Avenir Next', system-ui, sans-serif;
+  --brand-body: 'DM Sans', 'Avenir Next', system-ui, sans-serif;
+}
+.brand-rare-room {
+  --brand-canvas: #18191E; --brand-surface: #272830;
+  --brand-ink: #F8F4ED; --brand-muted: #B8B7C6;
+  --brand-action: #DDF76B; --brand-action-ink: #18191E;
+  --brand-accent: #BBA7FF; --brand-sleeve: #121318;
+  --brand-focus: #DDF76B; --brand-success: #A4E9C9;
+  --brand-error: #FFC0CB; --brand-border: #5C5E6B;
+  --brand-display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --brand-body: 'Manrope', system-ui, sans-serif;
+}
+.brand-folio-house {
+  --brand-canvas: #17362F; --brand-surface: #24453C;
+  --brand-ink: #F7F5EC; --brand-muted: #C9D9CE;
+  --brand-action: #DCEBAD; --brand-action-ink: #17362F;
+  --brand-accent: #F0ABAF; --brand-sleeve: #142920;
+  --brand-focus: #DCEBAD; --brand-success: #B9EEC5;
+  --brand-error: #FFC4CA; --brand-border: #54756C;
+  --brand-display: 'Newsreader', Georgia, serif;
+  --brand-body: 'Instrument Sans', 'Avenir Next', system-ui, sans-serif;
+}
