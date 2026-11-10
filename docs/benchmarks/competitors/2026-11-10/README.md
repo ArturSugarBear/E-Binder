@@ -4,18 +4,20 @@
 
 ## Reference library
 
-The owner supplied a companion ZIP named `E-Binder_Competitive_Benchmark_Collectr_HoloGem_2026-11-10.zip`, containing **six complete compressed MP4 recordings, six original screenshots, six 6-frame video contact sheets, a SHA-256 media manifest, and an import/verification script**. All 18 assets have been verified locally (about 16.5 MiB of video and images). Videos are 24 fps H.264 and retain the full captured sequences, without audio.
+The original handoff describes a companion ZIP named `E-Binder_Competitive_Benchmark_Collectr_HoloGem_2026-11-10.zip`, containing **six complete compressed MP4 recordings, six original screenshots, six 6-frame video contact sheets, a SHA-256 media manifest, and an import/verification script**. It reports about 16.5 MiB of media, 24 fps H.264 video, full captured sequences and no audio. These properties and the reported prior hash verification have **not been independently verified in this checkout**: neither the archive nor its media manifest is available in the current session.
 
 **Note:** The current GitHub connector only writes UTF-8 files. This PR contains the analysis/reference instructions; the actual binary media must be imported from the companion ZIP into this directory. Never claim to have viewed media based solely on the filename or this note.
 
-| App | Recording in companion ZIP | Examine |
-| --- | --- | --- |
-| Collectr | `collectr/01-intro.mp4` | Entry and first-run navigation, complete 16.7 s |
-| Collectr | `collectr/02-search-catalog.mp4` | ~12 s card detail / Raw–Graded–POP; ~21 s search; ~30–39 s set logos; ~47 s sort sheet |
-| Collectr | `collectr/03-scanning-and-portfolio.mp4` | ~29–71 s framed photo scan; ~93 s editable multi-match review; ~112 s portfolio result |
-| HoloGem | `hologem/01-onboarding.mp4` | First-run empty state, camera call to action, product promises |
-| HoloGem | `hologem/02-scan-experience.mp4` | ~3 s permissions; ~11 s live rectangle/hold still; ~20–36 s recognized-card queue; ~44 s vault |
-| HoloGem | `hologem/03-vault-and-home.mp4` | ~4 s portfolio; ~15 s set discovery; ~26 s filters; ~37 s card grid; ~48 s add-to-vault sheet; ~58 s vault |
+**Current verification:** `node scripts/verify-competitor-media.mjs` exits with code 1 because `media-manifest.json` is absent. No media has been reviewed in this checkout. The timecodes below are handoff pointers, not fresh observations. See [integration status](INTEGRATION.md) for the inspected PR boundaries and pending checks.
+
+| App      | Recording in companion ZIP               | Examine                                                                                                    |
+| -------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Collectr | `collectr/01-intro.mp4`                  | Entry and first-run navigation, complete 16.7 s                                                            |
+| Collectr | `collectr/02-search-catalog.mp4`         | ~12 s card detail / Raw–Graded–POP; ~21 s search; ~30–39 s set logos; ~47 s sort sheet                     |
+| Collectr | `collectr/03-scanning-and-portfolio.mp4` | ~29–71 s framed photo scan; ~93 s editable multi-match review; ~112 s portfolio result                     |
+| HoloGem  | `hologem/01-onboarding.mp4`              | First-run empty state, camera call to action, product promises                                             |
+| HoloGem  | `hologem/02-scan-experience.mp4`         | ~3 s permissions; ~11 s live rectangle/hold still; ~20–36 s recognized-card queue; ~44 s vault             |
+| HoloGem  | `hologem/03-vault-and-home.mp4`          | ~4 s portfolio; ~15 s set discovery; ~26 s filters; ~37 s card grid; ~48 s add-to-vault sheet; ~58 s vault |
 
 Contact sheets: replace `.mp4` with `-contact.jpg`. Original screenshots are in the corresponding app folders. Exact duration, filenames and hashes are in `media-manifest.json` from the companion ZIP.
 
