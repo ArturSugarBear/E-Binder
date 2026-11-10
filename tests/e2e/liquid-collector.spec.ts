@@ -10,7 +10,10 @@ test('liquid shell remains usable and supports reduce-motion/reduce-transparency
   );
   await expect(page.locator('.w-mobile-nav .w-liquid-optic')).toHaveCount(1);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.getByRole('link', { name: 'Entdecken' }).first().click();
+  await page
+    .locator('a[data-workspace-route="entdecken"]:visible')
+    .first()
+    .click();
   await expect(page).toHaveURL(/#entdecken$/);
   await expect(
     page.getByRole('main').locator('.w-discover-mode'),
