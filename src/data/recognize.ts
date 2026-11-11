@@ -101,8 +101,23 @@ export function createRecognitionSession(
         );
       }
     });
+  const warmup = () => {
+    if (disposed || signal.aborted) return;
+    try {
+      // Preload the same local 10.8 MB ONNX model while the collector
+      // positions the first card. The worker serializes this ahead of OCR.
+      worker.postMessage({
+        warmup: true,
+        photo: new Blob(),
+        modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
+        dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
+      });
+    } catch {
+      // First real scan will retry normal model loading.
+    }
+  };
   if (signal.aborted) close();
-  return { recognize, close };
+  return { recognize, warmup, close };
 }
 
 /** Compatible with the original single-card flow; worker is disposed after use. */
