@@ -1,5 +1,7 @@
 import { test, expect } from './fixtures';
 
+// Preserve the explicit catalogue fixture's line layout for this regression.
+// prettier-ignore
 test('collection prices match exact cards', async ({ page }) => {
   let exactRequests = 0;
   await page.route('https://api.tcgdex.net/**', async (route) => {
