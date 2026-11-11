@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-10T21:22:42.770Z",
+  "checkedAt": "2026-11-11T08:25:24.183Z",
   "scope": "Bundled cards and all DE/EN set logos/symbols; dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.",
   "sets": [
     {
@@ -2138,11 +2138,11 @@
         "logo": [
           {
             "url": "https://assets.tcgdex.net/de/me/me03/logo.webp",
-            "available": false
+            "available": true
           },
           {
             "url": "https://assets.tcgdex.net/en/me/me03/logo.webp",
-            "available": false
+            "available": true
           }
         ],
         "symbol": [
@@ -2158,7 +2158,7 @@
       },
       "unresolved": [],
       "indexedCards": 124,
-      "displayFallback": "https://images.scrydex.com/pokemon/me3-logo/logo"
+      "displayFallback": "https://assets.tcgdex.net/de/me/me03/logo.webp"
     },
     {
       "id": "me04",
@@ -2167,11 +2167,11 @@
         "logo": [
           {
             "url": "https://assets.tcgdex.net/de/me/me04/logo.webp",
-            "available": false
+            "available": true
           },
           {
             "url": "https://assets.tcgdex.net/en/me/me04/logo.webp",
-            "available": false
+            "available": true
           }
         ],
         "symbol": [
@@ -2187,7 +2187,7 @@
       },
       "unresolved": [],
       "indexedCards": 122,
-      "displayFallback": "https://images.scrydex.com/pokemon/me4-logo/logo"
+      "displayFallback": "https://assets.tcgdex.net/de/me/me04/logo.webp"
     },
     {
       "id": "me05",
@@ -2200,7 +2200,7 @@
           },
           {
             "url": "https://assets.tcgdex.net/en/me/me05/logo.webp",
-            "available": false
+            "available": true
           }
         ],
         "symbol": [
@@ -2216,7 +2216,7 @@
       },
       "unresolved": [],
       "indexedCards": 120,
-      "displayFallback": "https://images.scrydex.com/pokemon/me5-logo/logo"
+      "displayFallback": "https://assets.tcgdex.net/en/me/me05/logo.webp"
     },
     {
       "id": "me06",

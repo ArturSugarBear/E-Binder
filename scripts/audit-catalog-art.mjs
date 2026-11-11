@@ -16,9 +16,20 @@ const report = {
   errors: [],
 };
 async function json(url) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
-  if (!response.ok) throw new Error(`${response.status}: ${url}`);
-  return response.json();
+  for (let attempt = 0; ; attempt++) {
+    let retryable = true;
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      if (!response.ok) {
+        retryable = response.status === 429 || response.status >= 500;
+        throw new Error(`${response.status}: ${url}`);
+      }
+      return await response.json();
+    } catch (error) {
+      if (!retryable || attempt === 2) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+    }
+  }
 }
 const allowed = (value) => {
   try {
@@ -88,6 +99,14 @@ await pool(english, async (set) => {
     json(`https://api.tcgdex.net/v2/en/sets/${set.id}`),
     ...(de ? [json(`https://api.tcgdex.net/v2/de/sets/${set.id}`)] : []),
   ]);
+  // An unavailable metadata request is not evidence of missing artwork. Keep
+  // the release gate closed instead of silently publishing neutral set icons.
+  details.forEach((detail, position) => {
+    if (detail.status === 'rejected')
+      report.errors.push(
+        `Set metadata unavailable (${position === 0 ? 'en' : 'de'}:${set.id}): ${String(detail.reason)}`,
+      );
+  });
   if (details[0]?.status === 'fulfilled') full = details[0].value;
   if (details[1]?.status === 'fulfilled') de = details[1].value;
 
@@ -134,7 +153,7 @@ await pool(english, async (set) => {
         )
           continue;
         // Only unique collector numbers in the verified corresponding set.
-        if (entries[card.number]) entries[card.number] = null;
+        if (Object.hasOwn(entries, card.number)) entries[card.number] = null;
         else
           entries[card.number] = {
             url: card.images.large,

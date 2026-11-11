@@ -9,8 +9,10 @@ export interface PortfolioObservation {
   pricedCopies: number;
   signature: string;
 }
-const key = (mode: PersonalState['mode']) =>
-  `e-binder-portfolio-history-v2:${mode}`;
+// Unscoped v2 observations cannot safely be assigned to an account. Start a
+// fresh series rather than importing another collector's history on this device.
+const key = (mode: PersonalState['mode'], accountId: string | undefined) =>
+  `e-binder-portfolio-history-v3:${accountId ? `account:${accountId}` : 'local'}:${mode}`;
 
 /** Compare only the same quantities and exact printings; adding a card starts
  * a new series instead of faking a market gain. */
@@ -41,7 +43,10 @@ function observationSignature(
 ): string {
   const coverage = summary.holdings
     .filter((row) => row.unitValue !== null)
-    .map((row) => `${row.quoteKey}:${row.holding.quantity}`)
+    .map(
+      (row) =>
+        `${row.quoteKey}:${row.holding.quantity}:${row.priceBasis ?? 'unknown'}`,
+    )
     .sort()
     .join('|');
   let hash = 2166136261;
@@ -51,9 +56,10 @@ function observationSignature(
 
 export function readPortfolioHistory(
   mode: PersonalState['mode'],
+  accountId: string | undefined,
 ): PortfolioObservation[] {
   try {
-    const raw = localStorage.getItem(key(mode));
+    const raw = localStorage.getItem(key(mode, accountId));
     if (!raw || raw.length > 80000) return [];
     const values: unknown = JSON.parse(raw);
     if (!Array.isArray(values)) return [];
@@ -87,9 +93,10 @@ export function readPortfolioHistory(
 export function recordPortfolioObservation(
   state: PersonalState,
   summary: PortfolioSummary,
+  accountId: string | undefined,
   day = new Date().toISOString().slice(0, 10),
 ): PortfolioObservation[] {
-  const current = readPortfolioHistory(state.mode);
+  const current = readPortfolioHistory(state.mode, accountId);
   if (
     summary.pricedCopies === 0 ||
     !Number.isFinite(summary.knownValue) ||
@@ -115,7 +122,7 @@ export function recordPortfolioObservation(
     .sort((a, b) => a.day.localeCompare(b.day))
     .slice(-365);
   try {
-    localStorage.setItem(key(state.mode), JSON.stringify(merged));
+    localStorage.setItem(key(state.mode, accountId), JSON.stringify(merged));
   } catch {
     // Read-only browser sessions can still see the current portfolio.
   }
@@ -126,8 +133,9 @@ export function recordPortfolioObservation(
 export function comparableHistory(
   state: PersonalState,
   summary: PortfolioSummary,
+  accountId: string | undefined,
   windowDays = 90,
-  current = readPortfolioHistory(state.mode),
+  current = readPortfolioHistory(state.mode, accountId),
 ): PortfolioObservation[] {
   const baseline = observationSignature(state, summary);
   const cutoff = new Date();

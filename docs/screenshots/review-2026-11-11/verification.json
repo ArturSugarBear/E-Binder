@@ -1,0 +1,133 @@
+{
+  "checkedAt": "2026-11-11T08:34:37.564Z",
+  "homeAfterFinalSpacing": [
+    {
+      "width": 320,
+      "content": 320,
+      "captionTop": 651.171875,
+      "cardsBottom": 643.8923950195312
+    },
+    {
+      "width": 390,
+      "content": 390,
+      "captionTop": 637.734375,
+      "cardsBottom": 630.4548950195312
+    },
+    {
+      "width": 1440,
+      "content": 1440,
+      "captionTop": 547.5,
+      "cardsBottom": 536.5236358642578
+    }
+  ],
+  "axe": [
+    {
+      "width": 320,
+      "route": "home",
+      "layout": {
+        "viewport": 320,
+        "content": 320
+      },
+      "violations": []
+    },
+    {
+      "width": 320,
+      "route": "binder",
+      "layout": {
+        "viewport": 320,
+        "content": 320
+      },
+      "violations": []
+    },
+    {
+      "width": 320,
+      "route": "portfolio",
+      "layout": {
+        "viewport": 320,
+        "content": 320
+      },
+      "violations": []
+    },
+    {
+      "width": 320,
+      "route": "profil",
+      "layout": {
+        "viewport": 320,
+        "content": 320
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "home",
+      "layout": {
+        "viewport": 390,
+        "content": 390
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "binder",
+      "layout": {
+        "viewport": 390,
+        "content": 390
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "portfolio",
+      "layout": {
+        "viewport": 390,
+        "content": 390
+      },
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "profil",
+      "layout": {
+        "viewport": 390,
+        "content": 390
+      },
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "home",
+      "layout": {
+        "viewport": 1440,
+        "content": 1440
+      },
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "binder",
+      "layout": {
+        "viewport": 1440,
+        "content": 1440
+      },
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "portfolio",
+      "layout": {
+        "viewport": 1440,
+        "content": 1440
+      },
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "profil",
+      "layout": {
+        "viewport": 1440,
+        "content": 1440
+      },
+      "violations": []
+    }
+  ]
+}

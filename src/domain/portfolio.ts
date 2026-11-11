@@ -13,6 +13,7 @@ export interface PortfolioHolding {
   quoteKey: string | null;
   unitValue: number | null;
   totalValue: number | null;
+  priceBasis?: PortfolioQuote['basis'];
 }
 
 export interface PortfolioPage {
@@ -113,6 +114,7 @@ export function summarizePortfolio(
       quoteKey: key,
       unitValue,
       totalValue: unitValue === null ? null : unitValue * holding.quantity,
+      priceBasis: unitValue === null ? undefined : candidate?.basis,
     };
   });
   const lookup = new Map(holdings.map((row) => [row.holding.id, row]));

@@ -130,7 +130,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     page.getByRole('heading', { name: 'Dein Portfolio', exact: true }),
   ).toBeVisible();
   await navigation
-    .getByRole('button', { name: 'Profil und Einstellungen' })
+    .getByRole('link', { name: 'Profil und Einstellungen' })
     .click();
   await expect(
     page.getByRole('heading', { name: 'Dein Profil', exact: true }),

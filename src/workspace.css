@@ -4030,6 +4030,10 @@ textarea.w-input,
 .w-home.is-first-visit .w-home-hero-copy {
   gap: 4px;
 }
+.w-home.is-first-visit .w-home-art {
+  /* Leave room below the rotated cards for the ownership disclaimer. */
+  height: 340px;
+}
 .w-home.is-first-visit .w-home-intro {
   margin-top: 12px !important;
   line-height: 1.5;
@@ -4092,7 +4096,7 @@ textarea.w-input,
     max-width: 15ch;
   }
   .w-home.is-first-visit .w-home-art {
-    height: 185px;
+    height: 215px;
     margin-top: 25px;
     overflow: visible;
   }

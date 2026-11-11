@@ -15,7 +15,7 @@ export interface AddOptions {
   correctHoldingId?: string;
 }
 export interface WorkspaceContext {
-  account?: { username: string };
+  account?: { id: string; username: string };
   state: PersonalState;
   catalog: PersonalCard[];
   chapters: Collection;

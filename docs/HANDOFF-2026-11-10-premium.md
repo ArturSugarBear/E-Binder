@@ -1,5 +1,10 @@
 # Übergabe: Collector Premium und Bild-Fallbacks
 
+**Aktualisierung 11. November 2026:** Die PR-Integration ist inzwischen abgeschlossen.
+Aktueller Reviewstand und Korrekturen stehen im
+[abschließenden Produktreview](reviews/2026-11-11-product-review.md).
+Die folgenden Angaben dokumentieren den damaligen Zwischenstand.
+
 Der Inhaber hat zuerst alle offenen PRs und eine Fehler-/Designprüfung beauftragt, danach ausdrücklich alle gefundenen Fehler, ein an HoloGem orientiertes hochwertiges Design, einfache Navigation, Liquid Glass, echte Scan-Fortschrittsanimationen und Bild-Fallbacks vor PR/Deployment. Zuletzt: **alles pushen, der nächste Chat setzt wegen Nutzungslimit fort**. Deshalb ist dies ein gesicherter Zwischenstand, keine abgeschlossene Produktionsfreigabe.
 
 ## Remote und Integration

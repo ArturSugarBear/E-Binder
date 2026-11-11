@@ -54,7 +54,10 @@ export async function startWorkspace(): Promise<void> {
   const session = sessionData.session;
   startBetaDiagnostics(session?.user ?? null);
   const account = session
-    ? { username: session.user.email?.split('@')[0] ?? 'Konto' }
+    ? {
+        id: session.user.id,
+        username: session.user.email?.split('@')[0] ?? 'Konto',
+      }
     : undefined;
   const store =
     session && cloudClient
@@ -527,9 +530,6 @@ export async function startWorkspace(): Promise<void> {
   document
     .querySelector('#workspace-mobile-add')!
     .addEventListener('click', () => ctx.openAdd({ live: true }));
-  document
-    .querySelector('#workspace-mobile-account')!
-    .addEventListener('click', () => ctx.navigate('profil'));
   document
     .querySelector('#workspace-backup')!
     .addEventListener('click', ctx.openBackup);

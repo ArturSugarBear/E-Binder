@@ -152,7 +152,12 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       ),
     );
 
-    const historyPoints = comparableHistory(ctx.state, overview, historyRange);
+    const historyPoints = comparableHistory(
+      ctx.state,
+      overview,
+      ctx.account?.id,
+      historyRange,
+    );
     const historyChart = el(
       'section',
       'w-portfolio-section w-portfolio-history',
@@ -679,6 +684,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         recordPortfolioObservation(
           ctx.state,
           summarizePortfolio(ctx.state, quotes),
+          ctx.account?.id,
         );
     }
     render();

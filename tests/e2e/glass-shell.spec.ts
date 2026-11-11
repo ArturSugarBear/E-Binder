@@ -60,8 +60,24 @@ test('profile links lead to real account and backup operations', async ({
   await expect(
     page.getByRole('heading', { name: 'Dein Profil' }),
   ).toBeVisible();
+  await expect(page.locator('#workspace-mobile-account')).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(page.locator('.w-mobile-nav [aria-current="page"]')).toHaveCount(
+    1,
+  );
   await page.getByRole('button', { name: 'Sammlung sichern' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.goto('./#home');
+  await expect(page.locator('#workspace-mobile-account')).toHaveAttribute(
+    'aria-current',
+    'false',
+  );
+  await expect(
+    page.locator('.w-mobile-nav [aria-current="page"]'),
+  ).toHaveAttribute('data-workspace-route', 'home');
 });
 
 test('Home and Profile actions reach the named task and cancellation preserves an empty collection', async ({
