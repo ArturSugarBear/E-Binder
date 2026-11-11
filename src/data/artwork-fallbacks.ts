@@ -80,10 +80,9 @@ export async function secondarySetArt(setId: string): Promise<string[]> {
     const index = (await load('index.json')) as Index;
     const set = index.sets[setId];
     if (!set) return [];
-    const urls = [...set.logo, ...set.symbol].filter(trustedArtwork);
-    if (set.placeholder === `set-${setId}.svg` && /^[a-z0-9.+-]+$/i.test(setId))
-      urls.push(`${import.meta.env.BASE_URL}catalog-art/${set.placeholder}`);
-    return urls;
+    // Generated neutral SVGs are not logos. The UI renders a branded,
+    // accessible text identifier if no verified provider image exists.
+    return [...set.logo, ...set.symbol].filter(trustedArtwork);
   } catch {
     return [];
   }

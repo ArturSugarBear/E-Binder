@@ -326,7 +326,26 @@ export function createCatalogBrowser(options: Options) {
     }
   }
   function setIcon(item: CatalogSet): HTMLElement {
-    const icon = el('span', 'w-set-symbol', item.id.toUpperCase());
+    const icon = el('span', 'w-set-symbol');
+    icon.setAttribute('aria-hidden', 'true');
+    const showFallback = () => {
+      // These sets have no verified provider logo. A typographic identifier is
+      // deliberately NOT presented as official artwork.
+      const [mark, subtitle] =
+        item.id === '30th-c'
+          ? ['30', 'KLASSIK']
+          : item.id === 'mep'
+            ? ['MEP', 'PROMO']
+            : item.id === 'mee'
+              ? ['MEE', 'ENERGIE']
+              : [item.id.toUpperCase().slice(0, 10), 'SET'];
+      icon.classList.add('w-set-fallback');
+      icon.dataset.imageState = 'unavailable';
+      icon.replaceChildren(
+        el('span', 'w-set-fallback-mark', mark),
+        el('span', 'w-set-fallback-caption', subtitle),
+      );
+    };
     const sources = [item.logo, item.symbol].filter((value): value is string =>
       Boolean(value),
     );
@@ -365,12 +384,11 @@ export function createCatalogBrowser(options: Options) {
         return;
       }
       image.remove();
-      icon.dataset.imageState = 'unavailable';
-      icon.textContent = item.id.toUpperCase();
-      if (item.id === 'me06') icon.classList.add('w-set-me06-identity');
+      showFallback();
     };
     image.addEventListener('error', next);
     image.addEventListener('load', () => {
+      icon.classList.remove('w-set-fallback');
       icon.dataset.imageState = 'loaded';
     });
     next();
