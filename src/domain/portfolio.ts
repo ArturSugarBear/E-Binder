@@ -6,7 +6,7 @@ export interface PortfolioQuote {
   source: 'cardmarket';
   variant: 'normal' | 'holo';
   basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
-  provenance?: 'verified-snapshot';
+  provenance?: 'verified-snapshot' | 'official-export';
   productUrl?: string;
 }
 
