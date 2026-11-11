@@ -90,6 +90,19 @@ export function openAddCards(
   const scanSetChoice = el('section', 'w-scan-set-choice');
   const details = el('div', 'w-add-details');
   const queue = el('div', 'w-capture-queue');
+  queue.id = `w-capture-queue-${uid()}`;
+  const queueToggle = action(
+    'Weitere Aufnahmen anzeigen',
+    () => {
+      const expanded = queue.classList.toggle('is-expanded');
+      queueToggle.setAttribute('aria-expanded', String(expanded));
+    },
+    'secondary',
+  );
+  queueToggle.classList.add('w-scan-queue-toggle');
+  queueToggle.setAttribute('aria-controls', queue.id);
+  queueToggle.setAttribute('aria-expanded', 'false');
+  queueToggle.hidden = true;
   const photoArea = el('div', 'w-photo-review');
   const language = choices(
     'Katalogsprache',
@@ -220,6 +233,7 @@ export function openAddCards(
     advancedCatalog,
     notices,
     photoArea,
+    queueToggle,
     scanSetChoice,
     results,
     browser.pager,
@@ -336,6 +350,14 @@ export function openAddCards(
   const showQueue = () => {
     queue.replaceChildren();
     const shots = ctx.state.captures;
+    const pending = shots.filter((shot) => shot.status !== 'confirmed');
+    queueToggle.hidden = pending.length < 2;
+    queueToggle.textContent = `Aufnahmen wechseln (${pending.length} offen)`;
+    if (pending.length < 2) queue.classList.remove('is-expanded');
+    queueToggle.setAttribute(
+      'aria-expanded',
+      String(queue.classList.contains('is-expanded')),
+    );
     if (!shots.length) return;
     queue.append(
       el('p', 'w-eyebrow', 'Deine Erfassungssitzung'),
@@ -368,6 +390,9 @@ export function openAddCards(
         `${shot.name} · ${shot.status === 'skipped' ? 'zurückgestellt' : 'offen'}`,
         () => {
           interrupt();
+          queue.classList.remove('is-expanded');
+          queueToggle.setAttribute('aria-expanded', 'false');
+          sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
           captureId = shot.id;
           selected = undefined;
           details.replaceChildren();
@@ -824,6 +849,9 @@ export function openAddCards(
       ranked.map((card) => card.key),
     );
     const knownNumber = recognitionClues(text)[0]?.number ?? '';
+    const matchCard = el('div', 'w-scan-match-card');
+    matchCard.setAttribute('aria-live', 'polite');
+    let activeCardKey = '';
 
     const showPrint = (card: PersonalCard, explanation: string) => {
       if (closed || request !== setChoiceRequest) return;
@@ -869,9 +897,20 @@ export function openAddCards(
           'secondary',
         ),
       );
-      results.replaceChildren(
-        el('div', 'w-scan-match-card', ctx.images.artwork(card), copy),
-      );
+      activeCardKey = card.key;
+      matchCard.dataset.cardKey = card.key;
+      matchCard.replaceChildren(ctx.images.artwork(card), copy);
+      // Keep the alternatives mounted (and the disclosure expanded) when
+      // the collector selects a different print for comparison.
+      if (!results.contains(matchCard)) results.replaceChildren(matchCard);
+      results
+        .querySelectorAll<HTMLButtonElement>('.w-scan-alternative-grid button')
+        .forEach((button) =>
+          button.setAttribute(
+            'aria-pressed',
+            String(button.dataset.cardKey === activeCardKey),
+          ),
+        );
     };
 
     const showSetChooser = async () => {
@@ -1068,6 +1107,8 @@ export function openAddCards(
             ),
           'card',
         );
+        button.dataset.cardKey = card.key;
+        button.setAttribute('aria-pressed', String(card.key === activeCardKey));
         button.replaceChildren(
           ctx.images.artwork(card),
           el(
