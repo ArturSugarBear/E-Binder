@@ -1,4 +1,5 @@
 /** Reusable local PaddleOCR worker. All photos stay on the device. */
+import type { LiveHotZone } from '../domain/live-ocr-policy';
 export interface RecognitionOptions {
   /** A limited hot-zone pass for responsive live capture; no accuracy claim. */
   fast?: boolean;
@@ -67,7 +68,12 @@ export function createRecognitionSession(
       );
     }
   };
-  const recognize = (photo: Blob, numberOnly = false): Promise<string> =>
+  const recognize = (
+    photo: Blob,
+    numberOnly = false,
+    hotZone?: LiveHotZone,
+    timeoutMs?: number,
+  ): Promise<string> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -83,7 +89,7 @@ export function createRecognitionSession(
           new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'),
         );
         close();
-      }, options.timeoutMs ?? 90000);
+      }, Math.max(1, Math.min(options.timeoutMs ?? 90000, timeoutMs ?? Infinity)));
       pending = { id, timer, resolve, reject };
       progress('Lokale Erkennung wird vorbereitet …');
       try {
@@ -91,6 +97,7 @@ export function createRecognitionSession(
           id,
           photo,
           numberOnly,
+          hotZone,
           fast: options.fast === true,
           modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
           dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
