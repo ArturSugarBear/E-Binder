@@ -15,6 +15,26 @@ for (const width of [320, 390]) {
       .click();
     await expect(page.locator('.w-binder-paper img')).toHaveCount(9);
 
+    // The full-width mobile title must sit ABOVE, not beside, the actions.
+    const title = await page
+      .getByRole('heading', { name: 'Deine Binder', exact: true })
+      .boundingBox();
+    const actions = await page
+      .locator('.w-binders > .w-page-heading > .w-action-row')
+      .boundingBox();
+    expect(title).not.toBeNull();
+    expect(actions).not.toBeNull();
+    expect(actions!.y).toBeGreaterThanOrEqual(title!.y + title!.height);
+    for (const button of await page
+      .locator('.w-binders > .w-page-heading > .w-action-row .w-button')
+      .all()) {
+      const box = await button.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
+
     const pockets = page.locator('.w-binder-paper .w-pocket');
     const first = await pockets.first().boundingBox();
     const dock = await page.locator('.w-mobile-nav').boundingBox();

@@ -20,3 +20,13 @@ export function hasPrintedCollectorFraction(texts: readonly string[]): boolean {
     /(?<!\d)\d{1,3}\s*[/|]\s*\d{1,3}(?!\d)/.test(text),
   );
 }
+
+/** A footer set code makes the normalized collector fraction useful as a
+ * specific printing lookup instead of an arbitrary same-numbered card. */
+export function hasPrintedSetCode(texts: readonly string[]): boolean {
+  return texts.some((text) =>
+    /(?:^|[^A-Z])(?:SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(?:DE|EN)?(?=[^A-Z]|$)/i.test(
+      text,
+    ),
+  );
+}

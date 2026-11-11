@@ -9,6 +9,8 @@ import {
   type Holding,
 } from '../domain/personal';
 import { matchesCard } from '../data/card-catalog';
+import { holdingPrice, type HoldingPriceResult } from '../data/holding-prices';
+import { portfolioQuoteKey, type PortfolioQuote } from '../domain/portfolio';
 import {
   action,
   choices,
@@ -23,6 +25,65 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import { enableSwipe } from './swipe';
 import { enableSheetDrag } from './sheet-gestures';
+
+const euro = new Intl.NumberFormat('de-DE', {
+  style: 'currency',
+  currency: 'EUR',
+});
+const priceBasisLabels: Record<NonNullable<PortfolioQuote['basis']>, string> = {
+  trend: 'Trendpreis',
+  avg7: '7-Tage-Durchschnitt',
+  avg30: '30-Tage-Durchschnitt',
+  avg: 'Verkaufsdurchschnitt',
+};
+
+interface PriceBadge {
+  element: HTMLElement;
+  load: () => Promise<void>;
+}
+
+function priceBadge(holding: Holding, detail = false): PriceBadge {
+  const comparable = portfolioQuoteKey(holding) !== null;
+  const value = el(
+    'strong',
+    'w-price-value',
+    comparable ? 'Wird geladen …' : '—',
+  );
+  const note = el(
+    'small',
+    'w-price-note',
+    comparable ? 'Cardmarket · Preisreferenz' : 'Keine sichere Preisreferenz',
+  );
+  const element = el(
+    'span',
+    detail ? 'w-price-reference w-holding-price' : 'w-price-reference',
+    detail ? el('span', 'w-label', 'Cardmarket · Preisreferenz') : null,
+    value,
+    note,
+  );
+  const render = (result: HoldingPriceResult) => {
+    if (!element.isConnected) return;
+    if (result.status === 'priced') {
+      value.textContent = euro.format(result.quote.amount);
+      const basis = result.quote.basis
+        ? priceBasisLabels[result.quote.basis]
+        : 'Preisreferenz';
+      note.textContent = `${basis} · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+    } else {
+      value.textContent = '—';
+      note.textContent =
+        result.status === 'error'
+          ? 'Preis momentan nicht erreichbar'
+          : 'Keine datierte EUR-Preisreferenz';
+    }
+  };
+  return {
+    element,
+    load: async () => {
+      if (comparable) render(await holdingPrice(holding));
+    },
+  };
+}
 
 export function renderCollection(ctx: WorkspaceContext): HTMLElement {
   const root = el('section', 'w-collection');
@@ -214,8 +275,24 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
     result.replaceChildren();
     count.textContent = `${rows.length} ${rows.length === 1 ? 'Ausgabe' : 'Ausgaben'}`;
     const visibleOrder = rows.map((holding) => holding.id);
-    for (const holding of rows)
-      result.append(holdingCard(ctx, holding, visibleOrder));
+    const prices: PriceBadge[] = [];
+    for (const holding of rows) {
+      const tile = holdingCard(ctx, holding, visibleOrder);
+      result.append(tile.element);
+      prices.push(tile.price);
+    }
+    // Keep the page interactive: load at most four public catalogue quotes at
+    // once, updating only card tiles still present after a filter change.
+    queueMicrotask(() => {
+      void (async () => {
+        for (let index = 0; index < prices.length; index += 4) {
+          if (!root.isConnected) return;
+          await Promise.all(
+            prices.slice(index, index + 4).map((item) => item.load()),
+          );
+        }
+      })();
+    });
     if (!rows.length)
       result.append(
         message(
@@ -270,7 +347,8 @@ function holdingCard(
   ctx: WorkspaceContext,
   holding: Holding,
   order: string[],
-): HTMLElement {
+): { element: HTMLElement; price: PriceBadge } {
+  const price = priceBadge(holding);
   const button = action(
     holding.card.name,
     () => openHolding(ctx, holding.id, order),
@@ -295,6 +373,7 @@ function holdingCard(
         `${holding.card.number} · ${holding.card.language.toUpperCase()}`,
       ),
       el('small', 'w-muted', holding.card.artist || 'Illustrator unbekannt'),
+      price.element,
     ),
     el(
       'span',
@@ -304,7 +383,7 @@ function holdingCard(
   );
   // The visible caption names the button; a separate hint must not replace it.
   button.setAttribute('aria-description', 'Kartendetails öffnen');
-  return button;
+  return { element: button, price };
 }
 
 export function openHolding(
@@ -315,6 +394,7 @@ export function openHolding(
   const holding = ctx.state.holdings.find((item) => item.id === id);
   if (!holding) return;
   const sheet = modal(holding.card.name);
+  const price = priceBadge(holding, true);
   const quantity = input('number', String(holding.quantity));
   quantity.min = '1';
   quantity.max = '999';
@@ -392,6 +472,7 @@ export function openHolding(
         holding.card.artistUrl ? sourceLink(holding.card.artistUrl) : null,
       ),
     ),
+    price.element,
     el(
       'div',
       'w-form-grid',
@@ -424,6 +505,7 @@ export function openHolding(
       sheet.close();
   });
   sheet.body.append(form);
+  void price.load();
   const cardSurface = form.querySelector<HTMLElement>('.w-holding-preview');
   if (cardSurface) {
     cardSurface.classList.add('w-card-swipe-zone');

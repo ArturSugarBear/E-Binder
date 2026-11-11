@@ -47,6 +47,9 @@ const setIds: Record<string, string> = {
   ssp: 'sv08',
   jtg: 'sv09',
   dri: 'sv10',
+  // Printed set codes differ from the TCGdex catalogue IDs.
+  pbl: 'me05', // Dunkelnacht / Pitch Black (084 cards in the main set)
+  dlr: 'me06', // Delta-Herrschaft / Delta Reign (103 main-set cards)
 };
 const evolution: Record<string, string> = {
   'svi-212': 'Trasla',
@@ -680,18 +683,26 @@ export function candidatesFromText(
 export interface RecognitionClue {
   number: string;
   setId?: string;
-  language?: 'de' | 'en';
+  language?: 'de' | 'en' | 'ja';
   observations: number;
 }
 /** Printed codes narrow candidates; an OCR string never confirms ownership. */
 export function recognitionClues(text: string): RecognitionClue[] {
   const code = text.match(
-    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI)\s*(DE|EN)?(?=[^A-Z]|$)/i,
+    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/i,
+  );
+  // Japanese set identifiers (e.g. M2a, SV8a, S12a) can be read even
+  // when the current Latin OCR cannot transcribe the Japanese card title.
+  // The set code is only a clue, never sufficient evidence on its own.
+  const japaneseCode = text.match(
+    /(?:^|[^A-Za-z0-9])((?:SV|SM|XY|BW|S|M)\d{1,2}[a-z]?)(?![A-Za-z0-9])/i,
   );
   const setId = code
     ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
-    : undefined;
-  const language = code?.[2]?.toLowerCase() as 'de' | 'en' | undefined;
+    : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase());
+  const language: 'de' | 'en' | 'ja' | undefined =
+    (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
+    (japaneseCode ? 'ja' : undefined);
   const counts = new Map<string, number>();
   for (const match of text.matchAll(
     /(?<![0-9])((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\s*[/|]\s*((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\b/gi,
@@ -767,20 +778,38 @@ export async function fetchRecognizedCards(
     recognitionClues(text).map(async (clue) => {
       const language = clue.language ?? fallbackLanguage;
       const [number, total] = clue.number.split('/');
-      if (clue.setId && language !== 'ja') {
-        const card = await fetchCatalogCard(
-          `${clue.setId}-${number}`,
-          language,
-          signal,
+      if (clue.setId) {
+        // A printed 089/084 is stored as me05-089, not me05-89.
+        // Resolve the actual TCGdex ID from the set manifest instead of
+        // constructing an unpadded ID from the normalized OCR fraction.
+        const editions = await catalogSetCards(clue.setId, language, signal);
+        const exact = editions.find(
+          (entry) => numberKey(entry.localId) === number,
         );
+        if (!exact) return [];
+        const card = await fetchCatalogCard(exact.id, language, signal);
         return numberKey(card.number) === clue.number ? [card] : [];
       }
       // Old frames and Japanese prints have different set codes. Match actual set counts and local IDs.
-      const sets = (await setsFor(language, signal)).filter(
-        (set) => String(set.cardCount.official) === total,
-      );
+      const sets = (await setsFor(language, signal))
+        .filter((set) => String(set.cardCount.official) === total)
+        // Set lists contain decades of printings. Prioritize recent sets
+        // rather than arbitrarily taking the provider's first eight results.
+        // This only orders review candidates; it never confirms ownership.
+        .sort((a, b) => {
+          const recency = (id: string) => {
+            const match = id.toLowerCase().match(/^(me|sv|swsh|sm)(\d+)/);
+            if (!match) return 0;
+            const era = { me: 4, sv: 3, swsh: 2, sm: 1 }[
+              match[1] as 'me' | 'sv' | 'swsh' | 'sm'
+            ];
+            return era * 1000 + Number(match[2]);
+          };
+          return recency(b.id) - recency(a.id);
+        });
       const matches: PersonalCard[] = [];
-      // shortcut: cap ambiguous denominators at eight sets, use manual search for broader matches.
+      // Cap ambiguous denominators at eight sets; no name-only guess becomes
+      // an accepted printing, and older sets remain searchable manually.
       for (const set of sets.slice(0, 8)) {
         const detail = setDetails.parse(
           await getJson(

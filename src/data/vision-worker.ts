@@ -5,6 +5,7 @@ import { decodeRecognition, recognitionTensor } from '../domain/vision-codec';
 import {
   collectorNumberFallbackRegions,
   hasPrintedCollectorFraction,
+  hasPrintedSetCode,
 } from '../domain/ocr-number-search';
 
 const scope = self as unknown as {
@@ -164,6 +165,12 @@ async function recognize({
     const number = await read([0.155, 0.94, 0.13, 0.032]);
     const identifier = await read([0.07, 0.94, 0.38, 0.032]);
     const texts = [number, identifier];
+    // The card number alone is shared by many sets. Re-read the wider footer
+    // if the narrow crop missed PBL, DLR or another printed set code.
+    if (!hasPrintedSetCode(texts)) {
+      report('Gedrucktes Setkürzel wird gegengeprüft …', id);
+      texts.push(await read([0.06, 0.905, 0.56, 0.075], 'gray'));
+    }
     // The original OR condition repeated contrast OCR even after an initial hit.
     if (!hasPrintedCollectorFraction(texts)) {
       report('Nummernzeile im unteren Bildbereich wird gesucht …', id);
