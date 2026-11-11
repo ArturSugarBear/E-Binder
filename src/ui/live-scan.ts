@@ -423,6 +423,7 @@ export function openLiveScanner(
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
       options.open = true;
+      trigger.hidden = true;
       showCameraAlert();
       status.textContent =
         'Der Browser bietet keine Live-Kamera. Nutze stattdessen ein Kamerafoto.';
@@ -459,6 +460,7 @@ export function openLiveScanner(
       stopCamera();
       recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
       options.open = true;
+      trigger.hidden = true;
       stageLabel.textContent = 'Kamera nicht verfügbar';
       showCameraAlert();
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
