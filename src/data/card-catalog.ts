@@ -771,11 +771,15 @@ export async function fetchRecognizedCards(
       const language = clue.language ?? fallbackLanguage;
       const [number, total] = clue.number.split('/');
       if (clue.setId && language !== 'ja') {
-        const card = await fetchCatalogCard(
-          `${clue.setId}-${number}`,
-          language,
-          signal,
+        // A printed 089/084 is stored as me05-089, not me05-89.
+        // Resolve the actual TCGdex ID from the set manifest instead of
+        // constructing an unpadded ID from the normalized OCR fraction.
+        const editions = await catalogSetCards(clue.setId, language, signal);
+        const exact = editions.find(
+          (entry) => numberKey(entry.localId) === number,
         );
+        if (!exact) return [];
+        const card = await fetchCatalogCard(exact.id, language, signal);
         return numberKey(card.number) === clue.number ? [card] : [];
       }
       // Old frames and Japanese prints have different set codes. Match actual set counts and local IDs.
