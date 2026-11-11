@@ -6,7 +6,7 @@ on:
       - .github/workflows/cardmarket-audit.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -16,5 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node scripts/audit-cardmarket-source.mjs
+      - run: node scripts/build-cardmarket-verified.mjs
+      - name: Commit verified derived reference (never collector data)
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/prices/cardmarket-verified.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Generate independently verified public Cardmarket print references'
+            git push origin HEAD:fix/p08-cardmarket-verified-price-pipeline
+          fi
       # Check numbered-print order before permitting automatic product mapping.
