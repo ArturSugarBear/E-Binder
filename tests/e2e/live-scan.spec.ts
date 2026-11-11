@@ -185,3 +185,73 @@ test('upload picker and manual entry allow returning to the scanner', async ({
   ).toHaveCount(0);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
+
+test('P09 pauses a full batch before requesting camera and keeps reviewable captures', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let permissions = 0;
+    (
+      window as typeof window & { __cameraRequests?: () => number }
+    ).__cameraRequests = () => permissions;
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: async () => {
+          permissions++;
+          throw new Error('Camera must not be requested for a full queue');
+        },
+      },
+    });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
+  const images = Array.from({ length: 24 }, (_, index) => ({
+    name: `batch-${index + 1}.jpg`,
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from([0xff, 0xd8, 0xff, index + 1, 0xff, 0xd9]),
+  }));
+  await add.locator('input[type=file][multiple]').setInputFiles(images);
+  await expect(add.locator('.w-capture-queue')).toContainText('24 offen', {
+    timeout: 30_000,
+  });
+  await add.getByRole('button', { name: 'Karte live scannen' }).click();
+  const live = page.getByRole('dialog', { name: 'Karte live scannen' });
+  await expect(live.locator('.w-live-status')).toContainText(
+    'Scan-Puffer ist voll',
+  );
+  await expect(live.locator('.w-live-stage')).toHaveAttribute(
+    'data-scan-phase',
+    'queue-full',
+  );
+  await expect(
+    live.getByRole('button', { name: 'Jetzt aufnehmen' }),
+  ).toBeHidden();
+  await expect(
+    live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() =>
+      (
+        window as typeof window & { __cameraRequests: () => number }
+      ).__cameraRequests(),
+    ),
+  ).toBe(0);
+  await live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }).click();
+  await expect(live).toHaveCount(0);
+  await expect(add.locator('.w-capture-queue')).toContainText('24 offen');
+  await add.locator('input[type=file][multiple]').setInputFiles({
+    name: 'batch-overflow.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from([0xff, 0xd8, 0xff, 99, 0xff, 0xd9]),
+  });
+  await expect(add.locator('.w-form-notices')).toContainText(
+    'Scan-Puffer ist voll',
+  );
+  await expect(add.locator('.w-capture-queue')).toContainText('24 offen');
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});

@@ -4,13 +4,17 @@ import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestPageCorners } from '../domain/page-outline';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
+import {
+  MAX_PENDING_SCAN_CAPTURES,
+  type LiveCaptureOutcome,
+} from '../domain/scan-session-guardrails';
 import { action, el, errorText, modal } from './workspace-dom';
 
 type CaptureHandler = (
   file: File,
   aligned: boolean,
-  onAnalysisState: (active: boolean) => void,
-) => Promise<void>;
+  onAnalysisState: (active: boolean, detail?: string) => void,
+) => Promise<LiveCaptureOutcome>;
 
 function visibleCrop(video: HTMLVideoElement, width: number, height: number) {
   const ratio = width / height;
@@ -251,6 +255,20 @@ export function openLiveScanner(
     finish.querySelector('span')!.textContent =
       `Ergebnisse prüfen (${pending})`;
   }
+  function pauseForReview(): void {
+    // Stop camera tracks rather than recording a photo that the bounded
+    // queue would reject. Existing captures and their OCR remain intact.
+    stopCamera();
+    refreshReview();
+    stage.dataset.scanPhase = 'queue-full';
+    stageLabel.textContent = 'Aufnahmen jetzt prüfen';
+    status.textContent =
+      'Der Scan-Puffer ist voll. Prüfe deine Aufnahmen und starte danach eine neue Scanrunde.';
+    trigger.hidden = true;
+    next.hidden = true;
+    journey.update('review', 'Aufnahme-Puffer voll · Prüfung erforderlich');
+    recordBetaEvent('scan_result', 'scan', 'scan_queue_full', 'unknown');
+  }
   const fallback = action(
     'Stattdessen Kamerafoto verwenden',
     () => {
@@ -380,6 +398,10 @@ export function openLiveScanner(
       !video.videoHeight
     )
       return;
+    if (pendingCaptures() >= MAX_PENDING_SCAN_CAPTURES) {
+      pauseForReview();
+      return;
+    }
     busy = true;
     trigger.disabled = true;
     journey.update('capture', 'Aufnahme wird ausgerichtet …', 0);
@@ -391,20 +413,29 @@ export function openLiveScanner(
       : 'Foto wird aufgenommen · Ecken anschließend prüfen …';
     try {
       const blob = await snapshot(video, chosen);
-      if (closed) return;
+      if (closed || !running || document.hidden) return;
       status.textContent = 'Foto wird lokal vorgemerkt …';
       progress.value = 3;
       journey.update('capture', 'Foto erfasst · Identität später prüfen');
       stage.dataset.scanPhase = 'capture';
       stageLabel.textContent = 'Foto erfasst';
-      await onCapture(
+      const outcome = await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
           type: 'image/jpeg',
         }),
         aligned,
         onAnalysisState,
       );
-      if (!closed) {
+      if (closed) return;
+      if (outcome === 'limit') {
+        pauseForReview();
+        return;
+      }
+      if (outcome === 'error')
+        throw new Error(
+          'Foto konnte nicht zur Scan-Sitzung hinzugefügt werden.',
+        );
+      if (!closed && running) {
         // The image is queued WITHOUT waiting for OCR, model loads or
         // TCGdex network requests. Continue from the same MediaStream
         // once the physical card is removed, HoloGem-style.
@@ -416,13 +447,20 @@ export function openLiveScanner(
         polygon.removeAttribute('points');
         stage.classList.remove('has-card-outline');
         status.textContent =
-          'Aufnahme vorgemerkt · Karte wechseln oder Ergebnisse prüfen';
+          outcome === 'duplicate'
+            ? 'Diese Aufnahme ist bereits vorhanden · Karte wechseln'
+            : 'Aufnahme vorgemerkt · Karte wechseln oder Ergebnisse prüfen';
         journey.update('review', 'Foto vorgemerkt · noch nicht hinzugefügt', 1);
         stage.dataset.scanPhase = 'queued';
-        stageLabel.textContent = 'Karte wechseln';
+        stageLabel.textContent =
+          outcome === 'duplicate' ? 'Bereits erfasst' : 'Karte wechseln';
         next.hidden = false;
         refreshReview();
         trigger.hidden = true;
+        if (pendingCaptures() >= MAX_PENDING_SCAN_CAPTURES) {
+          pauseForReview();
+          return;
+        }
         progress.value = 0;
       }
     } catch (error) {
@@ -521,6 +559,10 @@ export function openLiveScanner(
 
   async function startCamera(): Promise<void> {
     if (closed || busy) return;
+    if (pendingCaptures() >= MAX_PENDING_SCAN_CAPTURES) {
+      pauseForReview();
+      return;
+    }
     restoreCameraStatus();
     stopCamera();
     const generation = cameraGeneration;
