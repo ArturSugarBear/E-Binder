@@ -844,6 +844,7 @@ export function openAddCards(
     results.classList.remove('w-text-results');
     results.classList.add('w-scan-result-stack');
     results.replaceChildren();
+    results.hidden = false;
     scanSetChoice.replaceChildren();
     browser.pager.replaceChildren();
 
@@ -875,6 +876,7 @@ export function openAddCards(
     const showPrint = (card: PersonalCard, explanation: string) => {
       if (closed || request !== setChoiceRequest) return;
       scanSetChoice.replaceChildren();
+      results.hidden = false;
       const copy = el(
         'div',
         'w-scan-match-copy',
@@ -934,7 +936,10 @@ export function openAddCards(
 
     const showSetChooser = async () => {
       if (closed || request !== setChoiceRequest) return;
-      results.replaceChildren();
+      // Keep the existing matched print and alternatives mounted while
+      // the collector verifies set/number. A correction must be reversible,
+      // not restart OCR or erase already-present candidate choices.
+      results.hidden = true;
       const currentLanguage = language.value;
       const size = recognitionClues(text)[0]?.number.split('/')[1] ?? '';
       const numberField = input('text', knownNumber);
@@ -1040,11 +1045,24 @@ export function openAddCards(
           field('Set auswählen', setList),
           verify,
           feedback,
+          activeCardKey
+            ? action(
+                'Zurück zu den Treffern',
+                () => {
+                  scanSetChoice.replaceChildren();
+                  results.hidden = false;
+                  results.scrollIntoView({ block: 'nearest' });
+                },
+                'secondary',
+              )
+            : null,
           action(
             'Stattdessen Karte manuell suchen',
             () => {
               sheet.dialog.classList.remove('w-guided-scan');
               scanSetChoice.replaceChildren();
+              results.hidden = false;
+              results.replaceChildren();
               results.classList.remove('w-scan-result-stack');
               searchLine.scrollIntoView({ block: 'start' });
               search.focus();
@@ -1139,7 +1157,16 @@ export function openAddCards(
         );
         grid.append(button);
       }
-      other.append(grid);
+      other.append(
+        grid,
+        action(
+          'Anderes Set oder andere Nummer prüfen',
+          () => {
+            void showSetChooser();
+          },
+          'secondary',
+        ),
+      );
       results.append(other);
     };
 
