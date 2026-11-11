@@ -194,7 +194,7 @@ export function openAddCards(
           // Only local photo queueing blocks capture; model inference does not.
           await addFiles([file], false, aligned, true);
           const shot = capture();
-          if (shot && !existing.has(shot.id) && aligned)
+          if (shot && !existing.has(shot.id))
             startLiveOcr(shot.id, file, onAnalysisState);
         },
         () => camera.click(),
@@ -212,7 +212,10 @@ export function openAddCards(
           showQueue();
           showCapture();
           const shot = capture();
-          if (shot?.status === 'pending') void runOcr();
+          if (shot?.status === 'pending') {
+            if (shot.text) void renderScanReview(shot.text, shot.candidates);
+            else void runOcr();
+          }
         },
       ),
     'primary',
@@ -657,7 +660,11 @@ export function openAddCards(
       const liveJob = liveOcrJobs.get(shot.id);
       if (liveJob) {
         tell('Karte wird bereits geprüft · Ergebnis wird vorbereitet …');
-        await liveJob;
+        try {
+          await liveJob;
+        } catch {
+          // Recover with the full, foreground OCR path on worker failure.
+        }
       }
       if (closed || shot.id !== captureId || shot.status === 'confirmed')
         return;
@@ -695,7 +702,12 @@ export function openAddCards(
         throw new Error(
           'Die Aufnahme ist nicht mehr geöffnet. Fotografiere die Karte erneut; Bilder werden nicht gespeichert.',
         );
-      const prefilled = liveOcrEvidence.get(shot.id);
+      // A raw camera photo without four trusted card edges still needs the
+      // explicit alignment step; never treat its background text as a
+      // verified exact printing.
+      const prefilled = alignedCaptures.has(shot.id)
+        ? liveOcrEvidence.get(shot.id)
+        : undefined;
       const aligned = alignedCaptures.has(shot.id) || prefilled !== undefined
         ? photo
         : await alignPhoto(photo, controller.signal);
