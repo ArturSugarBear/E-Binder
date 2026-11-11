@@ -4902,7 +4902,9 @@ textarea.w-input,
   padding: 0;
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px var(--accent);
+  box-shadow:
+    0 0 0 4px var(--paper),
+    0 0 0 6px var(--accent);
 }
 .w-live-scan-minimal .w-live-shutter svg {
   width: 25px;
