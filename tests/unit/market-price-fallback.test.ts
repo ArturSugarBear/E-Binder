@@ -111,33 +111,34 @@ it('withholds misassigned Delta Reign illustration rare Cardmarket price and lin
     const id = `me06-${localId}`;
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () =>
-        new Response(
-          JSON.stringify({
-            id,
-            localId,
-            name,
-            rarity: 'Illustration Rare',
-            set: {
-              id: 'me06',
-              name: 'Delta-Herrschaft',
-              cardCount: { official: 103 },
-            },
-            variants: { normal: false, holo: true, reverse: false },
-            pricing: {
-              cardmarket: {
-                unit: 'EUR',
-                updated: '2026-11-09T12:00:00Z',
-                idProduct: 234567,
-                trend: 0.04,
-                avg7: 0.07,
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id,
+              localId,
+              name,
+              rarity: 'Illustration Rare',
+              set: {
+                id: 'me06',
+                name: 'Delta-Herrschaft',
+                cardCount: { official: 103 },
               },
-              tcgplayer: {
-                holofoil: { marketPrice: usd },
+              variants: { normal: false, holo: true, reverse: false },
+              pricing: {
+                cardmarket: {
+                  unit: 'EUR',
+                  updated: '2026-11-09T12:00:00Z',
+                  idProduct: 234567,
+                  trend: 0.04,
+                  avg7: 0.07,
+                },
+                tcgplayer: {
+                  holofoil: { marketPrice: usd },
+                },
               },
-            },
-          }),
-        ),
+            }),
+          ),
       ),
     );
     const entry = await catalogEntry(id, 'de', undefined, false);
@@ -151,27 +152,28 @@ it('withholds misassigned Delta Reign illustration rare Cardmarket price and lin
 it('does not block normal low priced cards in the same set', async () => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          id: 'me06-053',
-          localId: '053',
-          name: 'Groudon',
-          set: {
-            id: 'me06',
-            name: 'Delta-Herrschaft',
-            cardCount: { official: 103 },
-          },
-          variants: { normal: true, holo: false, reverse: true },
-          pricing: {
-            cardmarket: {
-              unit: 'EUR',
-              updated: '2026-11-09T12:00:00Z',
-              trend: 0.04,
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'me06-053',
+            localId: '053',
+            name: 'Groudon',
+            set: {
+              id: 'me06',
+              name: 'Delta-Herrschaft',
+              cardCount: { official: 103 },
             },
-          },
-        }),
-      ),
+            variants: { normal: true, holo: false, reverse: true },
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-09T12:00:00Z',
+                trend: 0.04,
+              },
+            },
+          }),
+        ),
     ),
   );
   const entry = await catalogEntry('me06-053', 'de', undefined, false);

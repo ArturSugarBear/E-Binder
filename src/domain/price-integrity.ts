@@ -27,7 +27,8 @@ export function priceLooksMisassigned(input: PriceIntegrityInput): boolean {
     setOfficialCount > 0 &&
     numeric > setOfficialCount &&
     amountEur < 0.5
-  ) return true;
+  )
+    return true;
 
   // The independent US feed only flags gross contradictions. USD is NEVER
   // converted to EUR or presented as a Cardmarket / NM price.
@@ -36,7 +37,8 @@ export function priceLooksMisassigned(input: PriceIntegrityInput): boolean {
     Number.isFinite(tcgplayerMarketUsd) &&
     tcgplayerMarketUsd >= 5 &&
     amountEur * 15 < tcgplayerMarketUsd
-  ) return true;
+  )
+    return true;
 
   return false;
 }

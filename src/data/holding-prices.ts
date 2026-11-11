@@ -68,11 +68,12 @@ export async function holdingPrice(
             basis: price.basis,
           }
         : undefined;
-      const value: HoldingPriceResult = entry.priceIssue === 'suspect'
-        ? { status: 'suspect' }
-        : isUsableQuote(quote, key)
-          ? { status: 'priced', quote }
-          : { status: 'unavailable' };
+      const value: HoldingPriceResult =
+        entry.priceIssue === 'suspect'
+          ? { status: 'suspect' }
+          : isUsableQuote(quote, key)
+            ? { status: 'priced', quote }
+            : { status: 'unavailable' };
       results.set(key, { until: Date.now() + CACHE_MS, value });
       return value;
     })

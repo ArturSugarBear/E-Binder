@@ -4,7 +4,12 @@ import type { Holding } from '../../src/domain/personal';
 
 afterEach(() => vi.unstubAllGlobals());
 
-const holding = (id: string, name: string, number: string, finish: 'normal' | 'holo'): Holding => ({
+const holding = (
+  id: string,
+  name: string,
+  number: string,
+  finish: 'normal' | 'holo',
+): Holding => ({
   id,
   card: {
     key: `tcgdex:de:${id}`,
@@ -36,28 +41,33 @@ const holding = (id: string, name: string, number: string, finish: 'normal' | 'h
 it('refuses a suspicious illustration rare quote for all views', async () => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      new Response(JSON.stringify({
-        id: 'me06-111',
-        localId: '111',
-        name: 'Groudon',
-        variants: { normal: false, holo: true },
-        set: {
-          id: 'me06',
-          name: 'Delta-Herrschaft',
-          cardCount: { official: 103 },
-        },
-        pricing: {
-          cardmarket: {
-            unit: 'EUR',
-            updated: '2026-11-09T12:00:00Z',
-            trend: 0.04,
-          },
-        },
-      })),
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'me06-111',
+            localId: '111',
+            name: 'Groudon',
+            variants: { normal: false, holo: true },
+            set: {
+              id: 'me06',
+              name: 'Delta-Herrschaft',
+              cardCount: { official: 103 },
+            },
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-09T12:00:00Z',
+                trend: 0.04,
+              },
+            },
+          }),
+        ),
     ),
   );
-  expect(await holdingPrice(holding('me06-111', 'Groudon', '111/103', 'holo'))).toEqual({
+  expect(
+    await holdingPrice(holding('me06-111', 'Groudon', '111/103', 'holo')),
+  ).toEqual({
     status: 'suspect',
   });
 });
@@ -65,28 +75,33 @@ it('refuses a suspicious illustration rare quote for all views', async () => {
 it('does not value a holding whose stored finish is not offered by its catalogue printing', async () => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      new Response(JSON.stringify({
-        id: 'me06-106',
-        localId: '106',
-        name: 'Fukano',
-        variants: { normal: false, holo: true },
-        set: {
-          id: 'me06',
-          name: 'Delta-Herrschaft',
-          cardCount: { official: 103 },
-        },
-        pricing: {
-          cardmarket: {
-            unit: 'EUR',
-            updated: '2026-11-09T12:00:00Z',
-            trend: 15.95,
-          },
-        },
-      })),
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'me06-106',
+            localId: '106',
+            name: 'Fukano',
+            variants: { normal: false, holo: true },
+            set: {
+              id: 'me06',
+              name: 'Delta-Herrschaft',
+              cardCount: { official: 103 },
+            },
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-09T12:00:00Z',
+                trend: 15.95,
+              },
+            },
+          }),
+        ),
     ),
   );
-  expect(await holdingPrice(holding('me06-106', 'Fukano', '106/103', 'normal'))).toEqual({
+  expect(
+    await holdingPrice(holding('me06-106', 'Fukano', '106/103', 'normal')),
+  ).toEqual({
     status: 'unavailable',
   });
 });

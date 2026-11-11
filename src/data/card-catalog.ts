@@ -577,7 +577,8 @@ async function hasSiblingCardmarketCollision(
     !productId ||
     !/^\d+$/.test(card.localId) ||
     Number(card.localId) <= card.set.cardCount.official
-  ) return false;
+  )
+    return false;
   try {
     const cards = await catalogSetCards(card.set.id, language, signal);
     const siblings = cards
@@ -682,9 +683,10 @@ export async function catalogEntry(
       ? price
       : undefined;
   // Never route the user to a known-suspect Cardmarket product ID either.
-  const cardmarketUrl = !suspect && quote?.idProduct
-    ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
-    : undefined;
+  const cardmarketUrl =
+    !suspect && quote?.idProduct
+      ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
+      : undefined;
   return {
     card,
     rarity: raw.rarity ?? '',
