@@ -659,7 +659,7 @@ export function openAddCards(
           automatic = await resolvePhotoScan(
             aligned,
             text,
-            local,
+            known,
             language.value,
             controller.signal,
             visual,
