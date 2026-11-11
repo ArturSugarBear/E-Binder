@@ -23,6 +23,7 @@ Eine Dataset-Lizenz gilt nicht automatisch für fremde Rechte an abgebildeten Po
       "photo": "./bilder/meine-binderseite.jpg",
       "rights": "Eigene Aufnahme; nicht zur Veröffentlichung",
       "conditions": ["low-light", "glare", "perspective"],
+      "geometryMode": "manual",
       "corners": [
         [0.08, 0.05],
         [0.92, 0.06],
@@ -52,3 +53,11 @@ Der Schlüssel muss mit dem vom TCGdex-Katalog ausgegebenen `PersonalCard.key` d
 Das Skript öffnet die lokale Produktions-PWA in Chromium, reicht Bilder über den lokalen Datei-Dialog ein, führt neun OCR-/Katalogabgleiche durch und protokolliert **Top-1/Top-3 exakt passende Kartenschlüssel** und Warnungen pro Position. Es klickt niemals auf „Geprüfte Binderseite übernehmen“. Ohne bekannte Karten ist die Erkennungsquote `null`, nicht 100 %.
 
 **Grenzen:** Das Skript prüft keine tatsächliche iPhone-Kamera, keine iOS-PWA-Installation und keine exakte Facherkennung ohne vorher korrekt gewählte Seitenecken. Offline-Benchmarking testet die lokalen Treffer und Katalog-Caches, nicht einen vollständigen Pokémon-Katalog. Erkennungsquote darf nur mit Datensatzgröße, Bedingungen und Korrekturaufwand gemeinsam angegeben werden. Die gemessenen Metadaten enthalten Dateinamen und Kartenschlüssel; Berichte vor Weitergabe prüfen. Fotos werden nicht exportiert.
+
+## Auswertungsvertrag ab P00
+
+Der Benchmark folgt dem aktuellen Ablauf mit **automatischer Ausrichtung** ohne vorgeschalteten Ausrichtungsdialog. Mit `"geometryMode": "automatic"` werden die Ergebnisse der automatischen Geometrie gemessen. `"geometryMode": "manual"` erfordert vier normalisierte `corners` und löst nach dem ersten automatischen Durchlauf eine separate manuelle Korrektur und erneute Erkennung aus. Wenn `corners` ohne Modus angegeben sind, bleibt der alte Manifeststil als `manual` gültig. Diese Ergebnisse dürfen nicht als Erkennungsquote der Automatik erscheinen; die gemessene Gesamtdauer enthält beide Durchläufe.
+
+Das JSON-Ergebnis verwendet `schemaVersion: 2`, stabile exakte Kandidatenschlüssel in Rangfolge und getrennte technische Fehler, leere Trefferlisten, fehlklassifizierte belegte Fächer (`falseEmptySuggestions`), Top-1/Top-3/Top-5 sowie p50/p95. Fehlerhafte Seiten bleiben im Ground-Truth-Nenner. Die Browserkennung wird erfasst. Die Commitkennung kann mit `GIT_COMMIT_SHA=<sha>` gesetzt werden. Modell- und Indexversionen bleiben `null`, solange sie nicht belastbar aus dem Build ermittelt werden können.
+
+Benchmarkberichte mit Dateinamen und Kartenschlüsseln bleiben privat. Die Regressionstests für das Auswerteschema verwenden synthetische Daten; sie belegen keine reale Scanqualität.
