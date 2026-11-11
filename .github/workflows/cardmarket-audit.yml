@@ -1,0 +1,19 @@
+name: Cardmarket upstream schema audit (temporary)
+on:
+  push:
+    branches: [fix/p08-cardmarket-verified-price-pipeline]
+    paths:
+      - .github/workflows/cardmarket-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/audit-cardmarket-source.mjs
