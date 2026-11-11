@@ -1,7 +1,10 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { catalogEntry } from '../../src/data/card-catalog';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 function mockCard(
   id: string,
@@ -239,6 +242,10 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
 });
 
 it('uses Groudon DLR111 only with the separately verified Cardmarket product', async () => {
+  // The direct-market snapshot expires in production. This test must
+  // remain deterministic once it has expired.
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
   const fetcher = vi.fn(
     async () =>
       new Response(
