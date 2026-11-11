@@ -10,7 +10,12 @@ export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
   | { status: 'unavailable' | 'error' };
 
-const results = new Map<string, { until: number; value: HoldingPriceResult }>();
+interface CachedPrice {
+  until: number;
+  value: HoldingPriceResult;
+}
+
+const results = new Map<string, CachedPrice>();
 const pending = new Map<string, Promise<HoldingPriceResult>>();
 const CACHE_MS = 5 * 60 * 1000;
 
