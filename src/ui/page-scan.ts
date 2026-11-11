@@ -1028,10 +1028,11 @@ export function openPageScanner(
           const exactIndex = preferred
             ? pocket.candidates.findIndex((card) => card.key === preferred.key)
             : -1;
-          const matched = pocket.decision === 'pending' && exactIndex >= 0;
+          // Even strong OCR evidence is only a recommendation. Explicitly
+          // tapping/selecting the printing is required before page import.
+          const matched = exactIndex >= 0;
           if (matched) {
-            pocket.select.value = `card:${exactIndex}`;
-            updatePocket(pocket);
+            pocket.container!.dataset.suggestedCardKey = preferred!.key;
           }
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
@@ -1062,7 +1063,7 @@ export function openPageScanner(
                 : pocket.candidates.length
                   ? 'page_pocket_candidates'
                   : 'page_pocket_no_candidate',
-            matched ? 'ok' : 'unknown',
+            'unknown',
             {
               candidate:
                 pocket.candidates[0]?.source === 'tcgdex'
