@@ -183,13 +183,13 @@ it('does not block normal low priced cards in the same set', async () => {
 
 it('rejects a secretly numbered printing sharing the base card Cardmarket product ID', async () => {
   const set = {
-    id: 'me06',
+    id: 'testprice',
     name: 'Delta-Herrschaft',
     cardCount: { official: 103 },
   };
   const products = {
-    'me06-053': {
-      id: 'me06-053',
+    'testprice-053': {
+      id: 'testprice-053',
       localId: '053',
       name: 'Groudon',
       set,
@@ -202,8 +202,8 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
         },
       },
     },
-    'me06-111': {
-      id: 'me06-111',
+    'testprice-150': {
+      id: 'testprice-150',
       localId: '111',
       name: 'Groudon',
       set,
@@ -219,13 +219,13 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
   };
   const fetcher = vi.fn(async (url: string) => {
     const last = decodeURIComponent(url.split('/').at(-1)!);
-    if (last === 'me06') {
+    if (last === 'testprice') {
       return new Response(
         JSON.stringify({
           ...set,
           cards: [
-            { id: 'me06-053', localId: '053', name: 'Groudon' },
-            { id: 'me06-111', localId: '111', name: 'Groudon' },
+            { id: 'testprice-053', localId: '053', name: 'Groudon' },
+            { id: 'testprice-150', localId: '111', name: 'Groudon' },
           ],
         }),
       );
@@ -235,10 +235,10 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
     );
   });
   vi.stubGlobal('fetch', fetcher);
-  const entry = await catalogEntry('me06-111', 'de', undefined, false);
+  const entry = await catalogEntry('testprice-150', 'de', undefined, false);
   expect(entry.price).toBeUndefined();
   expect(entry.priceIssue).toBe('suspect');
-  expect(fetcher.mock.calls.some(([url]) => url.endsWith('/sets/me06'))).toBe(
+  expect(fetcher.mock.calls.some(([url]) => url.endsWith('/sets/testprice'))).toBe(
     true,
   );
 });
