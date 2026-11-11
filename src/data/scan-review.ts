@@ -1,20 +1,43 @@
 import { recognitionClues } from './card-catalog';
-import { numberKey, type PersonalCard } from '../domain/personal';
+import { recognizedNameHints } from '../domain/recognition-names';
+import { normalize, numberKey, type PersonalCard } from '../domain/personal';
 
 export type ScanEvidence =
-  | { kind: 'exact'; card: PersonalCard; number: string }
-  | { kind: 'number-only'; number: string; count: number }
+  | {
+      kind: 'set-number';
+      card: PersonalCard;
+      title: 'matching' | 'unreadable' | 'conflicting';
+    }
+  | { kind: 'name-number'; card: PersonalCard }
+  | { kind: 'set-required'; number: string; count: number }
   | { kind: 'name-only'; count: number }
   | { kind: 'none' };
 
 /**
- * An OCR collector fraction is shared by different sets. It is not evidence
- * of an exact printing unless a printed set code matches a single candidate.
- * No branch of this function confirms that the collector owns a card.
+ * Retain printed identity qualifiers such as Mega, ex, GX, VSTAR or regional
+ * prefixes. "Lucario" must not match "Mega Lucario ex" as a full title.
  */
-export function scanEvidence(text: string, candidates: PersonalCard[]): ScanEvidence {
+export function fullCardNameMatches(a: string, b: string): boolean {
+  const left = normalize(a);
+  const right = normalize(b);
+  return left.length >= 3 && left === right;
+}
+
+/**
+ * Ranking must be evidence-driven: printed set + collector fraction first,
+ * then exact full name + collector fraction. A fraction alone is ambiguous.
+ * The user still confirms the physical printing and finish.
+ */
+export function scanEvidence(
+  text: string,
+  candidates: PersonalCard[],
+): ScanEvidence {
   const clues = recognitionClues(text);
-  const exact = candidates.filter((card) =>
+  const title = recognizedNameHints(text)[0];
+  const unique = [
+    ...new Map(candidates.map((card) => [card.key, card])).values(),
+  ];
+  const printed = unique.filter((card) =>
     clues.some(
       (clue) =>
         Boolean(clue.setId) &&
@@ -23,13 +46,38 @@ export function scanEvidence(text: string, candidates: PersonalCard[]): ScanEvid
         (!clue.language || clue.language === card.language),
     ),
   );
-  if (exact.length === 1) {
-    const card = exact[0]!;
-    return { kind: 'exact', card, number: card.number };
+  if (printed.length === 1) {
+    const card = printed[0]!;
+    return {
+      kind: 'set-number',
+      card,
+      title: !title
+        ? 'unreadable'
+        : fullCardNameMatches(title, card.name)
+          ? 'matching'
+          : 'conflicting',
+    };
   }
-  const numbered = clues[0]?.number;
-  if (numbered)
-    return { kind: 'number-only', number: numbered, count: candidates.length };
-  if (candidates.length) return { kind: 'name-only', count: candidates.length };
+  const nameAndNumber = title
+    ? unique.filter(
+        (card) =>
+          fullCardNameMatches(title, card.name) &&
+          clues.some(
+            (clue) =>
+              numberKey(clue.number) === numberKey(card.number) &&
+              (!clue.language || clue.language === card.language),
+          ),
+      )
+    : [];
+  if (nameAndNumber.length === 1) {
+    return { kind: 'name-number', card: nameAndNumber[0]! };
+  }
+  if (clues.length)
+    return {
+      kind: 'set-required',
+      number: clues[0]!.number,
+      count: unique.length,
+    };
+  if (unique.length) return { kind: 'name-only', count: unique.length };
   return { kind: 'none' };
 }
