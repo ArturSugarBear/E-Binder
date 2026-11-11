@@ -81,3 +81,44 @@ export function scanEvidence(
   if (unique.length) return { kind: 'name-only', count: unique.length };
   return { kind: 'none' };
 }
+
+/**
+ * Single-card and binder-page scans must apply the same evidence policy.
+ * The suggestion is a printing to review, never proof of ownership/finish.
+ * A contradictory full name (for example Lucario vs Mega Lucario ex) must
+ * not silently become an accepted printing.
+ */
+export function rankScanCandidates(
+  text: string,
+  candidates: PersonalCard[],
+): {
+  candidates: PersonalCard[];
+  suggested?: PersonalCard;
+  basis: 'printed-set' | 'full-name' | 'review';
+  conflictingName: boolean;
+} {
+  const unique = [
+    ...new Map(candidates.map((card) => [card.key, card])).values(),
+  ];
+  const evidence = scanEvidence(text, unique);
+  const conflictingName =
+    evidence.kind === 'set-number' && evidence.title === 'conflicting';
+  const suggested =
+    evidence.kind === 'set-number' && !conflictingName
+      ? evidence.card
+      : evidence.kind === 'name-number'
+        ? evidence.card
+        : undefined;
+  return {
+    candidates: suggested
+      ? [suggested, ...unique.filter((card) => card.key !== suggested.key)]
+      : unique,
+    suggested,
+    basis: suggested
+      ? evidence.kind === 'set-number'
+        ? 'printed-set'
+        : 'full-name'
+      : 'review',
+    conflictingName,
+  };
+}

@@ -41,9 +41,12 @@ import {
 import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
+import { rankScanCandidates } from '../data/scan-review';
+import { binderReviewComplete } from '../domain/binder-scan-review';
 import type { WorkspaceContext } from './workspace-context';
 
-type Decision = 'pending' | 'card' | 'empty' | 'skip';
+import type { PocketDecision } from '../domain/binder-scan-review';
+type Decision = PocketDecision;
 type Pocket = {
   decision: Decision;
   candidates: PersonalCard[];
@@ -56,6 +59,10 @@ type Pocket = {
   quality: HTMLElement;
   quickChoices?: HTMLElement;
   container?: HTMLElement;
+  editor?: HTMLDetailsElement;
+  tileButton?: HTMLButtonElement;
+  previewUrl?: string;
+  emptySuggested?: boolean;
   ocrText?: string;
 };
 
@@ -91,6 +98,23 @@ export function openPageScanner(
   const queueStatus = el('p', 'w-muted');
   const grid = el('div', 'w-page-scan-grid');
   const reviewSummary = el('p', 'w-muted w-page-scan-summary');
+  const editorHost = el('div', 'w-page-scan-editor-host');
+  const reviewHeading = el('h3', '', 'Fach prüfen');
+  const reviewHint = el('p', 'w-muted');
+  const reviewPhoto = el('img', 'w-page-scan-review-photo');
+  reviewPhoto.alt = 'Vergrößerte Karte im ausgewählten Binderfach';
+  const reviewPanel = el(
+    'section',
+    'w-page-scan-review-panel',
+    reviewHeading,
+    reviewHint,
+    reviewPhoto,
+    editorHost,
+  );
+  reviewPanel.tabIndex = -1;
+  reviewPanel.setAttribute('aria-label', 'Ausgewähltes Binderfach prüfen');
+  reviewPanel.hidden = true;
+  let activePocket = -1;
   const journey = scanProgress(9);
   const progress = el('progress', 'w-progress');
   progress.max = 9;
@@ -184,6 +208,9 @@ export function openPageScanner(
       if (!current || processing || reAligning) return;
       releasePreviews();
       grid.replaceChildren();
+      editorHost.replaceChildren();
+      reviewPanel.hidden = true;
+      activePocket = -1;
       pockets = [];
       current = undefined;
       manualAlign.hidden = true;
@@ -245,6 +272,9 @@ export function openPageScanner(
       skipPage.hidden = true;
       pockets = [];
       grid.replaceChildren();
+      editorHost.replaceChildren();
+      reviewPanel.hidden = true;
+      activePocket = -1;
       if (queued.length) {
         void nextPage();
       } else {
@@ -256,6 +286,38 @@ export function openPageScanner(
     'check',
   );
   save.disabled = true;
+  const skipUnresolved = action(
+    'Offene Fächer ungeklärt lassen',
+    () => {
+      if (processing || reAligning || pockets.length !== 9) return;
+      for (const pocket of pockets)
+        if (pocket.decision === 'pending') {
+          pocket.select.value = 'skip';
+          updatePocket(pocket);
+        }
+    },
+    'secondary',
+  );
+  skipUnresolved.hidden = true;
+  const confirmEmptyHints = action(
+    'Als leer erkannte Fächer bestätigen',
+    () => {
+      if (processing || reAligning || pockets.length !== 9) return;
+      for (const pocket of pockets)
+        if (pocket.emptySuggested && pocket.decision === 'pending') {
+          pocket.select.value = 'empty';
+          updatePocket(pocket);
+        }
+    },
+    'secondary',
+  );
+  confirmEmptyHints.hidden = true;
+  const reviewBulk = el(
+    'div',
+    'w-action-row w-page-scan-bulk-actions',
+    confirmEmptyHints,
+    skipUnresolved,
+  );
   const updateSave = () => {
     manualAlign.disabled = !current || processing || reAligning;
     skipPage.disabled = !current || processing || reAligning;
@@ -263,8 +325,7 @@ export function openPageScanner(
       !current ||
       processing ||
       reAligning ||
-      pockets.length !== 9 ||
-      !pockets.some((pocket) => pocket.decision === 'card') ||
+      !binderReviewComplete(pockets.map((pocket) => pocket.decision)) ||
       pockets.some(
         (pocket) =>
           pocket.decision === 'card' &&
@@ -278,11 +339,24 @@ export function openPageScanner(
       (pocket) => pocket.decision === 'empty',
     ).length;
     const open = pockets.filter(
-      (pocket) => pocket.decision === 'pending' || pocket.decision === 'skip',
+      (pocket) => pocket.decision === 'pending',
+    ).length;
+    const skipped = pockets.filter(
+      (pocket) => pocket.decision === 'skip',
     ).length;
     reviewSummary.textContent = pockets.length
-      ? `${matches} ausgewählt · ${empty} vermutlich leer · ${open} offen. Du kannst nur die ausgewählten Karten übernehmen.`
+      ? `${matches} ausgewählt · ${empty} bestätigt leer · ${skipped} ungeklärt · ${open} noch zu prüfen. Nur ausgewählte Karten werden übernommen.`
       : 'Noch keine Binderseite eingelesen.';
+    skipUnresolved.hidden = open === 0;
+    skipUnresolved.disabled = processing || reAligning || open === 0;
+    const emptyHints = pockets.filter(
+      (pocket) => pocket.decision === 'pending' && pocket.emptySuggested,
+    ).length;
+    confirmEmptyHints.hidden = emptyHints === 0;
+    confirmEmptyHints.disabled = processing || reAligning || emptyHints === 0;
+    const selected = pockets[activePocket];
+    if (selected && !reviewPanel.hidden)
+      reviewHint.textContent = selected.status.textContent ?? '';
   };
   const reportQueue = () => {
     queueStatus.textContent = `${current ? 'Eine Seite in Prüfung. ' : ''}${queued.length} weitere Seiten vorgemerkt.`;
@@ -350,6 +424,8 @@ export function openPageScanner(
     progress,
     grid,
     reviewSummary,
+    reviewBulk,
+    reviewPanel,
   );
   sheet.footer.append(stop, save);
   reportQueue();
@@ -374,6 +450,10 @@ export function openPageScanner(
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
     if (pocket.container) pocket.container.dataset.decision = pocket.decision;
+    pocket.tileButton?.setAttribute(
+      'aria-label',
+      `Fach ${pockets.indexOf(pocket) + 1} prüfen · ${pocket.decision === 'card' ? 'Karte ausgewählt' : pocket.decision === 'empty' ? 'Leer bestätigt' : pocket.decision === 'skip' ? 'Ungeklärt' : 'Offen'}`,
+    );
     pocket.quickChoices
       ?.querySelectorAll<HTMLButtonElement>('.w-page-scan-candidate')
       .forEach((button, index) =>
@@ -459,27 +539,75 @@ export function openPageScanner(
     }
     updatePocket(pocket);
   };
-  const selectExactPrintedMatch = (pocket: Pocket, text: string) => {
-    const number = (value: string) =>
-      value
-        .replace(/\s/g, '')
-        .replace(/(^|\/)0+(?=\d)/g, '$1')
-        .toLowerCase();
-    const clues = recognitionClues(text).filter((clue) => clue.setId);
-    const exact = pocket.candidates.filter((card) =>
-      clues.some(
-        (clue) =>
-          clue.setId === card.setId &&
-          number(clue.number) === number(card.number) &&
-          (!clue.language || clue.language === card.language),
-      ),
-    );
-    // A name or an unqualified number cannot establish a printing.
-    if (pocket.decision !== 'pending' || exact.length !== 1) return false;
-    pocket.select.value = `card:${pocket.candidates.indexOf(exact[0]!)}`;
-    updatePocket(pocket);
-    return true;
+  const showPocket = (index: number) => {
+    const pocket = pockets[index];
+    if (!pocket?.editor || !pocket.previewUrl) return;
+    activePocket = index;
+    reviewPanel.hidden = false;
+    reviewHeading.textContent = `Fach ${index + 1} von 9 prüfen`;
+    reviewHint.textContent = pocket.status.textContent ?? '';
+    reviewPhoto.src = pocket.previewUrl;
+    pockets.forEach((item, position) => {
+      if (!item.editor) return;
+      item.editor.hidden = position !== index;
+      item.editor.open = position === index;
+      item.tileButton?.setAttribute(
+        'aria-pressed',
+        String(position === index),
+      );
+    });
+    reviewPanel.scrollIntoView({ block: 'nearest' });
   };
+  const nextPocket = () => {
+    if (!pockets.length) return;
+    const next = pockets.findIndex(
+      (pocket, index) => index > activePocket && pocket.decision === 'pending',
+    );
+    const first = pockets.findIndex(
+      (pocket) => pocket.decision === 'pending',
+    );
+    showPocket(next >= 0 ? next : first >= 0 ? first : (activePocket + 1) % 9);
+  };
+  const reviewButtons = el(
+    'div',
+    'w-action-row w-page-scan-review-buttons',
+    action(
+      'Fach als leer bestätigen',
+      () => {
+        const pocket = pockets[activePocket];
+        if (!pocket) return;
+        pocket.select.value = 'empty';
+        updatePocket(pocket);
+        nextPocket();
+      },
+      'secondary',
+    ),
+    action(
+      'Fach ungeklärt lassen',
+      () => {
+        const pocket = pockets[activePocket];
+        if (!pocket) return;
+        pocket.select.value = 'skip';
+        updatePocket(pocket);
+        nextPocket();
+      },
+      'secondary',
+    ),
+    action('Nächstes Fach prüfen', nextPocket, 'primary'),
+    action(
+      'Zur 3×3-Übersicht',
+      () => {
+        reviewPanel.hidden = true;
+        activePocket = -1;
+        pockets.forEach((pocket) => {
+          if (pocket.editor) pocket.editor.open = false;
+          pocket.tileButton?.setAttribute('aria-pressed', 'false');
+        });
+      },
+      'secondary',
+    ),
+  );
+  reviewPanel.append(reviewButtons);
   const searchPocket = async (pocket: Pocket) => {
     const query = pocket.search.value.trim();
     if (query.length < 2) {
@@ -533,6 +661,9 @@ export function openPageScanner(
   };
   const buildGrid = (tiles: Blob[]) => {
     grid.replaceChildren();
+    editorHost.replaceChildren();
+    reviewPanel.hidden = true;
+    activePocket = -1;
     pockets = [];
     for (const [index, tile] of tiles.entries()) {
       const url = URL.createObjectURL(tile);
@@ -574,6 +705,7 @@ export function openPageScanner(
       );
       const quickChoices = el('div', 'w-page-scan-candidates');
       const pocket: Pocket = {
+        previewUrl: url,
         quickChoices,
         candidates: [],
         decision: 'pending',
@@ -606,24 +738,38 @@ export function openPageScanner(
           void searchPocket(pocket);
         }
       });
+      const tileButton = action(
+        `Fach ${index + 1} prüfen`,
+        () => showPocket(index),
+        'card',
+      );
+      tileButton.classList.add('w-page-scan-open-pocket');
+      tileButton.setAttribute('aria-pressed', 'false');
+      tileButton.replaceChildren(
+        el('div', 'w-page-scan-photo-frame', photo),
+        el('strong', 'w-page-scan-pocket-label', `Fach ${index + 1}`),
+      );
+      const editor = el(
+        'details',
+        'w-page-scan-editor',
+        el('summary', '', 'Kartenausgabe prüfen oder korrigieren'),
+        quickChoices,
+        pick,
+        finish,
+        variant,
+        el('div', 'w-page-scan-search', query, searchButton),
+      );
+      editor.hidden = true;
+      editorHost.append(editor);
       const container = el(
         'section',
         'w-page-scan-pocket',
-        el('h3', '', `Fach ${index + 1}`),
-        el('div', 'w-page-scan-photo-frame', photo),
+        tileButton,
         info,
         quality,
-        el(
-          'details',
-          'w-page-scan-editor',
-          el('summary', '', 'Prüfen / ändern'),
-          quickChoices,
-          pick,
-          finish,
-          variant,
-          el('div', 'w-page-scan-search', query, searchButton),
-        ),
       );
+      pocket.editor = editor;
+      pocket.tileButton = tileButton;
       pocket.container = container;
       container.dataset.decision = 'pending';
       container.dataset.recognitionState = 'pending';
@@ -702,10 +848,13 @@ export function openPageScanner(
         try {
           if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
             if (closed || abort.signal.aborted) break;
-            pocket.select.value = 'empty';
+            // This is a hint, not a decision: a dark or reflective card
+            // must not silently disappear from the collector's binder.
+            pocket.emptySuggested = true;
             pocket.container!.dataset.recognitionState = 'empty-suggested';
-            updatePocket(pocket);
-            animateResolvedPocket(pocket.container, 'empty');
+            pocket.status.textContent = 'Vermutlich leer · bitte bestätigen';
+            animateResolvedPocket(pocket.container, 'unknown');
+            updateSave();
             pocket.container?.classList.add('is-processed');
             progress.value = index + 1;
             journey.update(
@@ -841,12 +990,15 @@ export function openPageScanner(
             }
           }
           if (closed || abort.signal.aborted) break;
-          displayCandidates(
-            pocket,
+          // One set+number+full-name policy for single-card and binder scans.
+          // A contradictory OCR title cannot become an automatic match.
+          const ranked = rankScanCandidates(
+            text,
             printedEnergy.length
               ? printedEnergy
               : [...resolvedVisual, ...online, ...local],
           );
+          displayCandidates(pocket, ranked.candidates);
           if (titleHint) pocket.search.value = titleHint;
           pocket.container!.dataset.recognitionState = pocket.candidates.length
             ? catalogFailed
@@ -857,12 +1009,22 @@ export function openPageScanner(
               : catalogFailed
                 ? 'catalog-error'
                 : 'no-candidates';
-          const matched = selectExactPrintedMatch(pocket, text);
+          const preferred = ranked.suggested;
+          const exactIndex = preferred
+            ? pocket.candidates.findIndex((card) => card.key === preferred.key)
+            : -1;
+          const matched = pocket.decision === 'pending' && exactIndex >= 0;
+          if (matched) {
+            pocket.select.value = `card:${exactIndex}`;
+            updatePocket(pocket);
+          }
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
-              : pocket.candidates.length && titleHint
+              : ranked.conflictingName
+                ? 'Kartennamen widersprechen sich · Ausgabe genau prüfen'
+                : pocket.candidates.length && titleHint
                 ? `„${titleHint}“ erkannt · Ausgabe wählen`
                 : pocket.candidates.length
                   ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
@@ -931,6 +1093,9 @@ export function openPageScanner(
     reportQueue();
     fingerprint = '';
     grid.replaceChildren();
+    editorHost.replaceChildren();
+    reviewPanel.hidden = true;
+    activePocket = -1;
     delete grid.dataset.scanState;
     delete grid.dataset.scanAdjustment;
     delete grid.dataset.scanGeometry;
