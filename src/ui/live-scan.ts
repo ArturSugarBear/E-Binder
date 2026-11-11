@@ -141,6 +141,12 @@ export function openLiveScanner(
   polygon.setAttribute('vector-effect', 'non-scaling-stroke');
   outline.append(polygon);
   const stage = el('div', 'w-live-stage', video, frame, outline);
+  const stageLabel = el(
+    'span',
+    'w-live-stage-label',
+    'Karte mittig ausrichten',
+  );
+  stage.append(stageLabel);
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
@@ -214,8 +220,21 @@ export function openLiveScanner(
   mode.setAttribute('aria-label', 'Scanmodus wählen');
   mode.firstElementChild!.setAttribute('aria-pressed', 'true');
   mode.lastElementChild!.setAttribute('aria-pressed', 'false');
-  sheet.body.append(mode, stage, journey.element, progress, help);
-  sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
+  const options = el(
+    'details',
+    'w-live-options',
+    el('summary', '', 'Tipps & Kamerafoto'),
+    help,
+    fallback,
+  );
+  // Camera, status, shutter, review: everything else is optional.
+  stage.append(status);
+  trigger.classList.add('w-live-shutter');
+  next.classList.add('w-live-next');
+  finish.classList.add('w-live-review');
+  sheet.dialog.classList.add('w-live-scan-minimal');
+  sheet.body.append(mode, stage, journey.element, progress, options);
+  sheet.footer.append(reviewSummary, trigger, next, finish);
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races
   // with closing or restarting the scanner.
@@ -271,6 +290,7 @@ export function openLiveScanner(
         'Karte wird erkannt · noch nicht gespeichert',
       );
       stage.dataset.scanPhase = 'recognize';
+      stageLabel.textContent = 'Karte wird erkannt';
       await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
           type: 'image/jpeg',
@@ -282,6 +302,7 @@ export function openLiveScanner(
           'Aufnahme verarbeitet. Prüfe die Kartenausgabe oder scanne die nächste Karte.';
         journey.update('review', 'Aufnahme bereit · Ausgabe jetzt prüfen', 1);
         stage.dataset.scanPhase = 'review';
+        stageLabel.textContent = 'Aufnahme bereit';
         next.hidden = false;
         refreshReview();
         trigger.hidden = true;
@@ -298,6 +319,8 @@ export function openLiveScanner(
         );
         journey.update('error', 'Scan nicht abgeschlossen · erneut versuchen');
         stage.dataset.scanPhase = 'error';
+        stageLabel.textContent = 'Scan bitte wiederholen';
+        options.open = true;
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
         refreshReview();
@@ -338,6 +361,7 @@ export function openLiveScanner(
       stage.classList.remove('has-card-outline');
       polygon.removeAttribute('points');
       progress.value = 0;
+      stageLabel.textContent = 'Karte ausrichten';
       status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
@@ -352,6 +376,8 @@ export function openLiveScanner(
     );
     stage.classList.add('has-card-outline');
     progress.value = observations;
+    stageLabel.textContent =
+      observations >= 2 ? 'Kurz ruhig halten' : 'Karte gefunden';
     status.textContent =
       observations >= 2
         ? 'Kartenecken erkannt · bitte kurz ruhig halten'
@@ -377,9 +403,11 @@ export function openLiveScanner(
     polygon.removeAttribute('points');
     journey.update('ready', 'Karte in den Rahmen halten', 0);
     stage.dataset.scanPhase = 'ready';
+    stageLabel.textContent = 'Karte mittig ausrichten';
     status.textContent = 'Kamera wird gestartet …';
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
+      options.open = true;
       status.textContent =
         'Der Browser bietet keine Live-Kamera. Nutze stattdessen ein Kamerafoto.';
       return;
@@ -414,6 +442,8 @@ export function openLiveScanner(
       if (closed || generation !== cameraGeneration) return;
       stopCamera();
       recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
+      options.open = true;
+      stageLabel.textContent = 'Kamera nicht verfügbar';
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
       help.textContent =
         'Prüfe die Kameraberechtigung in Safari oder verwende die Fotoaufnahme als Rückfallmöglichkeit.';
