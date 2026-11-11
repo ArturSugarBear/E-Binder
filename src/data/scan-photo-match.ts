@@ -50,10 +50,10 @@ export function spatialColourSignature(
               : (r - g) / delta + 4;
         colour = Math.floor((hue * 60) / 30) % 12;
       }
-      const region = Math.min(3, Math.floor(y / (height / 4))) * 4 +
+      const region =
+        Math.min(3, Math.floor(y / (height / 4))) * 4 +
         Math.min(3, Math.floor(x / (width / 4)));
-      result[region * 14 + colour] +=
-        saturation > 0.14 ? 1 : 0.3;
+      result[region * 14 + colour] += saturation > 0.14 ? 1 : 0.3;
     }
   }
   // Normalise every region: a brighter sleeve reflection should not dominate.
@@ -131,9 +131,7 @@ export async function compareCandidateArtwork(
   }
   const results: AppearanceResult[] = [];
   // Small, bounded public image lookup: do not send the private photo away.
-  const usable = cards
-    .filter((card) => allowedUrl(card.image))
-    .slice(0, 24);
+  const usable = cards.filter((card) => allowedUrl(card.image)).slice(0, 24);
   for (let start = 0; start < usable.length; start += 4) {
     if (signal.aborted) break;
     const batch = await Promise.allSettled(
@@ -146,7 +144,10 @@ export async function compareCandidateArtwork(
         if (!response.ok) throw new Error('Kartenbild nicht erreichbar');
         const image = await createImageBitmap(await response.blob());
         try {
-          return { card, similarity: cosineSimilarity(reference, await signature(image)) };
+          return {
+            card,
+            similarity: cosineSimilarity(reference, await signature(image)),
+          };
         } finally {
           image.close();
         }
@@ -158,8 +159,7 @@ export async function compareCandidateArtwork(
   }
   return results.sort(
     (a, b) =>
-      b.similarity - a.similarity ||
-      a.card.key.localeCompare(b.card.key),
+      b.similarity - a.similarity || a.card.key.localeCompare(b.card.key),
   );
 }
 
@@ -169,8 +169,9 @@ export function strongAppearanceAgreement(
   const first = sorted[0];
   const second = sorted[1];
   // Conservative evidence gate, not a claim of a calibrated model accuracy.
-  return first && first.similarity >= 0.90 &&
-    (!second || first.similarity - second.similarity >= 0.10)
+  return first &&
+    first.similarity >= 0.9 &&
+    (!second || first.similarity - second.similarity >= 0.1)
     ? first.card
     : undefined;
 }

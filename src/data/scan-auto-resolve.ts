@@ -4,7 +4,10 @@ import {
   fetchCatalogCard,
   recognitionClues,
 } from './card-catalog';
-import { compareCandidateArtwork, strongAppearanceAgreement } from './scan-photo-match';
+import {
+  compareCandidateArtwork,
+  strongAppearanceAgreement,
+} from './scan-photo-match';
 import { scanEvidence } from './scan-review';
 import { recognizedNameHints } from '../domain/recognition-names';
 import { normalize, numberKey, type PersonalCard } from '../domain/personal';
@@ -87,9 +90,9 @@ export async function discoverNumberedCards(
   if (!fraction || signal.aborted) return [];
   const [number, denominator] = fraction.split('/');
   if (!number || !denominator || !/^\d+$/.test(denominator)) return [];
-  const langs = [
-    ...new Set([preferredLanguage, ...locales]),
-  ].filter((locale) => locales.some((supported) => supported === locale));
+  const langs = [...new Set([preferredLanguage, ...locales])].filter((locale) =>
+    locales.some((supported) => supported === locale),
+  );
   const variants = await Promise.allSettled(
     langs.map(async (language) => {
       const [sets, previews] = await Promise.all([
@@ -113,14 +116,19 @@ export async function discoverNumberedCards(
       // is a printing or query every global card in a large collection.
       if (!matching.length && eligible.size) {
         const priority = (id: string) =>
-          /^(M\d|ME\d)/i.test(id) ? 5 :
-            /^SV\d/i.test(id) ? 4 :
-              /^S\d/i.test(id) ? 3 :
-                /^SM\d/i.test(id) ? 2 : 1;
+          /^(M\d|ME\d)/i.test(id)
+            ? 5
+            : /^SV\d/i.test(id)
+              ? 4
+              : /^S\d/i.test(id)
+                ? 3
+                : /^SM\d/i.test(id)
+                  ? 2
+                  : 1;
         const likely = [...eligible.values()]
-          .sort((a, b) =>
-            priority(b.id) - priority(a.id) ||
-            b.id.localeCompare(a.id),
+          .sort(
+            (a, b) =>
+              priority(b.id) - priority(a.id) || b.id.localeCompare(a.id),
           )
           .slice(0, 12);
         const attempts = await Promise.allSettled(
@@ -129,8 +137,7 @@ export async function discoverNumberedCards(
         matching = attempts.flatMap((result) =>
           result.status === 'fulfilled'
             ? result.value.filter(
-                (item) =>
-                  numberKey(item.number ?? '') === fraction,
+                (item) => numberKey(item.number ?? '') === fraction,
               )
             : [],
         );
@@ -139,9 +146,9 @@ export async function discoverNumberedCards(
       for (let i = 0; i < matching.length && i < 24; i += 6) {
         if (signal.aborted) break;
         const batch = await Promise.allSettled(
-          matching.slice(i, i + 6).map((item) =>
-            fetchCatalogCard(item.id, language, signal),
-          ),
+          matching
+            .slice(i, i + 6)
+            .map((item) => fetchCatalogCard(item.id, language, signal)),
         );
         for (const entry of batch) {
           if (
@@ -178,21 +185,29 @@ export async function resolvePhotoScan(
   const evidence = scanEvidence(text, candidates);
   if (evidence.kind === 'set-number' && evidence.title !== 'conflicting')
     return {
-      candidates: [evidence.card, ...candidates.filter((card) => card.key !== evidence.card.key)],
+      candidates: [
+        evidence.card,
+        ...candidates.filter((card) => card.key !== evidence.card.key),
+      ],
       suggested: evidence.card,
       basis: 'printed-set',
       visualChecked: 0,
     };
   if (evidence.kind === 'name-number')
     return {
-      candidates: [evidence.card, ...candidates.filter((card) => card.key !== evidence.card.key)],
+      candidates: [
+        evidence.card,
+        ...candidates.filter((card) => card.key !== evidence.card.key),
+      ],
       suggested: evidence.card,
       basis: 'full-name',
       visualChecked: 0,
     };
   const inspected = await compareCandidateArtwork(photo, candidates, signal);
   const strong = strongAppearanceAgreement(inspected);
-  const scores = new Map(inspected.map((entry) => [entry.card.key, entry.similarity]));
+  const scores = new Map(
+    inspected.map((entry) => [entry.card.key, entry.similarity]),
+  );
   const title = recognizedNameHints(text)[0];
   const ranked = [...candidates].sort((a, b) => {
     const nameA = title && normalize(title) === normalize(a.name) ? 1 : 0;

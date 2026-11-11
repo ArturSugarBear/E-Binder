@@ -590,7 +590,8 @@ export function openAddCards(
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
       const local = candidatesFromText(text, known);
-      status.textContent = 'Set, Sammlernummer und Kartenbild werden abgeglichen …';
+      status.textContent =
+        'Set, Sammlernummer und Kartenbild werden abgeglichen …';
       let automatic: AutomaticScanResult | undefined;
       let catalogUnavailable = false;
       if (!printedEnergy.length) {
@@ -682,9 +683,13 @@ export function openAddCards(
         return;
       photoArea.scrollIntoView({ block: 'start' });
       if (catalogUnavailable)
-        tell('Der Katalog war teilweise nicht erreichbar. Prüfe den angezeigten Vorschlag oder nutze die Korrektursuche.');
+        tell(
+          'Der Katalog war teilweise nicht erreichbar. Prüfe den angezeigten Vorschlag oder nutze die Korrektursuche.',
+        );
       else if (titleHint && !automatic?.suggested)
-        tell(`Der Kartenname „${titleHint}“ wurde gelesen. Die genaue Ausgabe muss noch bestätigt werden.`);
+        tell(
+          `Der Kartenname „${titleHint}“ wurde gelesen. Die genaue Ausgabe muss noch bestätigt werden.`,
+        );
       else notices.replaceChildren();
     } catch (error) {
       if (closed || ocrController !== controller) return;
@@ -743,7 +748,11 @@ export function openAddCards(
         'w-scan-match-copy',
         el('p', 'w-eyebrow', 'Ausgabe mit deinem Foto vergleichen'),
         el('h3', '', card.name),
-        el('p', 'w-muted', `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`),
+        el(
+          'p',
+          'w-muted',
+          `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`,
+        ),
         el('p', 'w-scan-match-reason', explanation),
         action('Diese Ausgabe prüfen', () => choose(card), 'primary', 'check'),
         action(
@@ -790,8 +799,13 @@ export function openAddCards(
               feedback.textContent = 'Wähle zuerst das Set deiner Karte.';
               return;
             }
-            if (!/^[a-z]{0,2}[0-9]{1,3}\s*\/\s*[a-z]{0,2}[0-9]{1,3}$/i.test(fraction)) {
-              feedback.textContent = 'Gib die vollständige Sammlernummer wie 088/063 ein.';
+            if (
+              !/^[a-z]{0,2}[0-9]{1,3}\s*\/\s*[a-z]{0,2}[0-9]{1,3}$/i.test(
+                fraction,
+              )
+            ) {
+              feedback.textContent =
+                'Gib die vollständige Sammlernummer wie 088/063 ein.';
               numberField.focus();
               return;
             }
@@ -808,7 +822,10 @@ export function openAddCards(
                   'Diese Nummer wurde in dem gewählten Set nicht eindeutig gefunden. Prüfe die Nummer und den Setcode auf der Karte.';
                 return;
               }
-              const card = await fetchCatalogCard(matched[0]!.id, currentLanguage);
+              const card = await fetchCatalogCard(
+                matched[0]!.id,
+                currentLanguage,
+              );
               if (closed || request !== setChoiceRequest) return;
               const title = recognizedNameHints(text)[0];
               const consistent =
@@ -883,18 +900,24 @@ export function openAddCards(
       let allSets: Awaited<ReturnType<typeof catalogSets>> = [];
       const fill = () => {
         const query = normalize(setQuery.value);
-        const denominator =
-          numberField.value.trim().split('/')[1] ?? size;
+        const denominator = numberField.value.trim().split('/')[1] ?? size;
         const appropriate = allSets.filter(
           (item) =>
             (!query ||
-              normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(query)) &&
-            (query || !denominator ||
+              normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
+                query,
+              )) &&
+            (query ||
+              !denominator ||
               Number(denominator) === item.cardCount.official),
         );
         setList.replaceChildren(el('option', '', 'Set auswählen'));
         for (const item of appropriate.slice(0, 45)) {
-          const option = el('option', '', `${item.id.toUpperCase()} · ${item.name}`);
+          const option = el(
+            'option',
+            '',
+            `${item.id.toUpperCase()} · ${item.name}`,
+          );
           option.value = item.id;
           setList.append(option);
         }
@@ -906,7 +929,11 @@ export function openAddCards(
       numberField.addEventListener('input', fill);
       try {
         allSets = await catalogSets(currentLanguage);
-        if (closed || request !== setChoiceRequest || !scanSetChoice.isConnected)
+        if (
+          closed ||
+          request !== setChoiceRequest ||
+          !scanSetChoice.isConnected
+        )
           return;
         fill();
       } catch {

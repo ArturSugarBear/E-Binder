@@ -47,18 +47,21 @@ describe('set-first card identification', () => {
   });
 
   it('can match a single print from an exact full name plus collector number', () => {
-    expect(scanEvidence('088/063\nメガルカリオex', [wrong, lucario])).toEqual(
-      { kind: 'name-number', card: lucario },
-    );
+    expect(scanEvidence('088/063\nメガルカリオex', [wrong, lucario])).toEqual({
+      kind: 'name-number',
+      card: lucario,
+    });
   });
 
   it('distinguishes Lucario, Lucario ex, Mega Lucario ex and Mega Lucario Z ex', () => {
     expect(fullCardNameMatches('Lucario', 'Mega Lucario ex')).toBe(false);
     expect(fullCardNameMatches('Lucario ex', 'Mega Lucario ex')).toBe(false);
-    expect(
-      fullCardNameMatches('Mega Lucario Z ex', 'Mega Lucario ex'),
-    ).toBe(false);
-    expect(fullCardNameMatches('Mega-Lucario ex', 'Mega Lucario EX')).toBe(true);
+    expect(fullCardNameMatches('Mega Lucario Z ex', 'Mega Lucario ex')).toBe(
+      false,
+    );
+    expect(fullCardNameMatches('Mega-Lucario ex', 'Mega Lucario EX')).toBe(
+      true,
+    );
     const mega = card('M1L-088', 'Mega Lucario ex', 'M1L', '088/063', 'en');
     expect(scanEvidence('088/063\nLucario', [mega])).toMatchObject({
       kind: 'set-required',

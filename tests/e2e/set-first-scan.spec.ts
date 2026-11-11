@@ -8,7 +8,9 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
     const NativeWorker = window.Worker;
     class FakeOCR {
       onmessage:
-        | ((event: MessageEvent<{ type: string; id: number; text: string }>) => void)
+        | ((
+            event: MessageEvent<{ type: string; id: number; text: string }>,
+          ) => void)
         | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id: number }) {
@@ -47,8 +49,7 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
       localId: '088',
       name: 'メガルカリオex',
     };
-    if (path.endsWith('/ja/sets'))
-      return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/sets')) return route.fulfill({ json: [set] });
     if (path.endsWith('/ja/cards') && url.searchParams.has('localId'))
       return route.fulfill({ json: [resume] });
     if (path.endsWith('/ja/sets/M1L'))
@@ -80,7 +81,9 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
     timeout: 30_000,
   });
   await expect(add.locator('.w-scan-set-panel')).toHaveCount(0);
-  await expect(add.locator('.w-scan-match-card')).toContainText('メガルカリオex');
+  await expect(add.locator('.w-scan-match-card')).toContainText(
+    'メガルカリオex',
+  );
   await expect(add.locator('.w-scan-match-card')).toContainText('088/63');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await add
