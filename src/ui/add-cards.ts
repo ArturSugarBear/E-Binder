@@ -135,6 +135,7 @@ export function openAddCards(
   });
   let selected = options.card;
   let captureId = options.captureId;
+  let reviewingLiveQueue = false;
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
@@ -179,7 +180,9 @@ export function openAddCards(
     () =>
       openLiveScanner(
         async (file, aligned) => {
-          await addFiles([file], true, aligned);
+          // Do not block the live camera on OCR/model loading or network
+          // catalogue calls. The scan cart is processed on Review.
+          await addFiles([file], false, aligned, true);
         },
         () => camera.click(),
         () =>
@@ -187,6 +190,15 @@ export function openAddCards(
         () => {
           sheet.close();
           ctx.openPageScan();
+        },
+        () => {
+          reviewingLiveQueue = true;
+          captureStart.hidden = true;
+          const shot = capture();
+          if (shot?.status === 'pending' && !shot.text)
+            void runOcr();
+          else if (shot?.status === 'pending' && shot.text)
+            void renderScanReview(shot.text, shot.candidates);
         },
       ),
     'primary',
@@ -460,6 +472,7 @@ export function openAddCards(
     files: FileList | File[] | null,
     fromCamera = false,
     autoAligned = false,
+    queuedLive = false,
   ): Promise<void> {
     if (!files?.length) return;
     interrupt();
@@ -523,10 +536,12 @@ export function openAddCards(
         results.replaceChildren();
         showQueue();
         showCapture();
-        photoArea.scrollIntoView({ block: 'start' });
-        tell(
-          `${added} Aufnahmen geöffnet.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
-        );
+        if (!queuedLive) {
+          photoArea.scrollIntoView({ block: 'start' });
+          tell(
+            `${added} Aufnahmen geöffnet.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
+          );
+        }
       }
     } catch (error) {
       if (!closed) {
@@ -823,6 +838,8 @@ export function openAddCards(
         ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
         : 'Karte hinzugefügt. Scanne die nächste Karte.',
     );
+    if (reviewingLiveQueue && captureId && transientPhotos.has(captureId))
+      void runOcr();
   }
 
   /**
@@ -1564,6 +1581,8 @@ export function openAddCards(
               ? 'Foto übernommen. Das nächste offene Foto ist ausgewählt.'
               : 'Foto übernommen. Du kannst die nächste Karte fotografieren oder weitere Fotos auswählen.',
           );
+          if (reviewingLiveQueue && captureId && transientPhotos.has(captureId))
+            void runOcr();
         } else sheet.close();
       }
     });
@@ -1594,6 +1613,22 @@ export function openAddCards(
     const form = el(
       'form',
       'w-manual-form',
+      action(
+        'Zurück zu den Scanoptionen',
+        () => {
+          details.replaceChildren();
+          results.replaceChildren();
+          sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+          captureStart.hidden = false;
+          setFlowStage(0);
+          showQueue();
+          showCapture();
+          captureStart.scrollIntoView({ block: 'nearest' });
+          takePhoto.focus({ preventScroll: true });
+        },
+        'secondary',
+        'undo',
+      ),
       el('h3', '', 'Ausgabe manuell erfassen'),
       message(
         'Unbekannte Angaben bleiben offen. Ein Illustrator wird nur mit deiner Bestätigung für Artist-Vorschläge verwendet.',
