@@ -1,13 +1,13 @@
 # P08 — Visual retrieval for individual cards (2026-11-11)
 
-**Implemented path:** optional local ONNX retrieval in the *single-card* workflow, complementing the already-present binder-page image search. **Not yet activated on production**, because a sufficiently complete, rights-cleared, model-matched card-image corpus is not bundled.
+**Implemented path:** optional local ONNX retrieval in the _single-card_ workflow, complementing the already-present binder-page image search. **Not yet activated on production**, because a sufficiently complete, rights-cleared, model-matched card-image corpus is not bundled.
 
 ## What is implemented
 
 - Individual card review now opens **one reusable, same-origin ONNX visual-search session per add-card dialog** (only when `assets/vision/manifest.json` is installed).
 - The worker computes a private photo embedding, compares it to a SHA-256-verified, versioned, quantized card index, and returns its best five printing references. **No photo bytes are sent to Supabase or the remote model provider.**
 - Existing TCGdex card metadata is resolved only for those five image candidates, in parallel with OCR's existing set/number catalogue search. A remote response must agree with the reference's source ID, set, collector fraction **and language**; a neighboring or swapped record is rejected.
-- Even with totally unreadable OCR, the app can present *image candidate alternatives* when a licensed index exists. The UI explicitly says the exact printing and language are **unverified**.
+- Even with totally unreadable OCR, the app can present _image candidate alternatives_ when a licensed index exists. The UI explicitly says the exact printing and language are **unverified**.
 - Partial OCR digits must not discard visual top-five matches. Full set and printed fraction can establish an exact proposal according to the shared P04/P05 evidence policy, but never automatically add inventory.
 - The lightweight color-signature comparison is only a bounded **ranking signal**; a high similarity score or a large margin **cannot be taken as confidence that a specific print is owned**.
 - Missing manifest, model mismatch, bad hash, slow inference, offline metadata or unavailable catalogue: keep the prior OCR/search/manual correction path.

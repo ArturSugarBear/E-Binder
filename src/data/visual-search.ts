@@ -72,10 +72,7 @@ export async function createVisualSearchSession(
       close();
     }
   };
-  const match = (
-    photo: Blob,
-    timeoutMs = 45000,
-  ): Promise<VisualHit[]> =>
+  const match = (photo: Blob, timeoutMs = 45000): Promise<VisualHit[]> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -86,14 +83,17 @@ export async function createVisualSearchSession(
         return;
       }
       const id = ++nextId;
-      const timer = setTimeout(() => {
-        finish(
-          new Error(
-            'Die Bildsuche wurde wegen Zeitüberschreitung abgebrochen.',
-          ),
-        );
-        close();
-      }, Math.max(1, Math.min(45000, timeoutMs)));
+      const timer = setTimeout(
+        () => {
+          finish(
+            new Error(
+              'Die Bildsuche wurde wegen Zeitüberschreitung abgebrochen.',
+            ),
+          );
+          close();
+        },
+        Math.max(1, Math.min(45000, timeoutMs)),
+      );
       current = { id, resolve, reject, timer };
       worker.postMessage({ id, photo, manifestUrl });
     });

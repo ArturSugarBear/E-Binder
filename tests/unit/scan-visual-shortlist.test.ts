@@ -4,7 +4,11 @@ import { resolvePhotoScan } from '../../src/data/scan-auto-resolve';
 import type { VisualHit } from '../../src/domain/visual-retrieval';
 import type { PersonalCard } from '../../src/domain/personal';
 
-function card(language: 'de' | 'en' | 'ja', id: string, number: string): PersonalCard {
+function card(
+  language: 'de' | 'en' | 'ja',
+  id: string,
+  number: string,
+): PersonalCard {
   return {
     key: `tcgdex:${language}:${id}`,
     source: 'tcgdex',
@@ -23,7 +27,12 @@ function card(language: 'de' | 'en' | 'ja', id: string, number: string): Persona
   };
 }
 
-function hit(language: 'de' | 'en' | 'ja', id: string, number: string, rank: number): VisualHit {
+function hit(
+  language: 'de' | 'en' | 'ja',
+  id: string,
+  number: string,
+  rank: number,
+): VisualHit {
   return {
     reference: {
       id: `${language}:${id}`,
@@ -40,11 +49,19 @@ describe('P08 visual print resolution', () => {
   it('returns DE and EN printings separately when artwork is identical', async () => {
     const de = card('de', 'me06-111', '111/103');
     const en = card('en', 'me06-111', '111/103');
-    const matches = [hit('de', 'me06-111', '111/103', 1), hit('en', 'me06-111', '111/103', 2)];
+    const matches = [
+      hit('de', 'me06-111', '111/103', 1),
+      hit('en', 'me06-111', '111/103', 2),
+    ];
     const fetchCard = vi.fn();
-    const resolved = await resolveVisualPrintings(matches, [de, en], new AbortController().signal, {
-      readCard: fetchCard,
-    });
+    const resolved = await resolveVisualPrintings(
+      matches,
+      [de, en],
+      new AbortController().signal,
+      {
+        readCard: fetchCard,
+      },
+    );
     expect(resolved.map((item) => item.key)).toEqual([de.key, en.key]);
     expect(fetchCard).not.toHaveBeenCalled();
   });
@@ -59,7 +76,11 @@ describe('P08 visual print resolution', () => {
       new AbortController().signal,
       { readCard: seen },
     );
-    expect(seen).toHaveBeenCalledWith('me06-111', 'de', expect.any(AbortSignal));
+    expect(seen).toHaveBeenCalledWith(
+      'me06-111',
+      'de',
+      expect.any(AbortSignal),
+    );
     expect(resolved).toEqual([]);
   });
 

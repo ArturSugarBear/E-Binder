@@ -17,7 +17,13 @@ import { normalize, numberKey, type PersonalCard } from '../domain/personal';
 export interface AutomaticScanResult {
   candidates: PersonalCard[];
   suggested?: PersonalCard;
-  basis: 'printed-set' | 'full-name' | 'image' | 'visual-review' | 'review' | 'no-match';
+  basis:
+    | 'printed-set'
+    | 'full-name'
+    | 'image'
+    | 'visual-review'
+    | 'review'
+    | 'no-match';
   visualChecked: number;
   /** Validated local-model candidate count, not confidence or accuracy. */
   visualModelCandidates: number;
@@ -183,14 +189,13 @@ export async function resolvePhotoScan(
   // when set/name OCR is unreadable. Start it beside catalogue discovery,
   // not after a potentially long network lookup. Missing licensed assets,
   // expired manifests or visual timeouts leave ordinary OCR functional.
-  const visualBudget = AbortSignal.any([
-    signal,
-    AbortSignal.timeout(4800),
-  ]);
+  const visualBudget = AbortSignal.any([signal, AbortSignal.timeout(4800)]);
   const visualCards = visualSession
     ? visualSession
         .match(photo, 4700)
-        .then((hits) => reviewVisualCandidates(hits, visualNumberClues(text), 5))
+        .then((hits) =>
+          reviewVisualCandidates(hits, visualNumberClues(text), 5),
+        )
         .then((review) =>
           resolveVisualPrintings(review.choices, known, visualBudget, {
             online: typeof navigator === 'undefined' || navigator.onLine,
@@ -213,10 +218,9 @@ export async function resolvePhotoScan(
   // Partial numbers (e.g. '088' without '/063') cannot discard otherwise
   // valid image candidates or prove a printing by themselves.
   const number = recognitionClues(text)[0]?.number;
-  const candidates =
-    number?.includes('/')
-      ? all.filter((card) => numberKey(card.number) === numberKey(number))
-      : all;
+  const candidates = number?.includes('/')
+    ? all.filter((card) => numberKey(card.number) === numberKey(number))
+    : all;
   const exact = rankScanCandidates(text, candidates);
   if (exact.suggested)
     return {
@@ -229,10 +233,7 @@ export async function resolvePhotoScan(
   // Lightweight artwork colour signatures can rank OCR candidates, but
   // neither cosine similarity nor a dominant colour margin proves a
   // particular language, collector number or foil.
-  const appearanceSignal = AbortSignal.any([
-    signal,
-    AbortSignal.timeout(1800),
-  ]);
+  const appearanceSignal = AbortSignal.any([signal, AbortSignal.timeout(1800)]);
   const inspected = fromVisual.length
     ? []
     : await compareCandidateArtwork(
@@ -264,7 +265,11 @@ export async function resolvePhotoScan(
     // Only a separate printed-identity match can suggest an exact
     // printing. Images alone cannot distinguish identical DE/EN artwork
     // or different foil treatments.
-    basis: fromVisual.length ? 'visual-review' : candidates.length ? 'review' : 'no-match',
+    basis: fromVisual.length
+      ? 'visual-review'
+      : candidates.length
+        ? 'review'
+        : 'no-match',
     visualChecked: fromVisual.length + inspected.length,
     visualModelCandidates: fromVisual.length,
   };
