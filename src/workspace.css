@@ -4966,3 +4966,11 @@ textarea.w-input,
   position: relative;
   z-index: 9;
 }
+
+/* Explicit market destination on an identified holding, never a guess. */
+.w-holding-price .w-price-source-link:not([hidden]) {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 8px;
+}
