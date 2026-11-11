@@ -726,3 +726,53 @@
   text-align: left;
   justify-content: flex-start;
 }
+
+/* Missing publisher art is a deliberate Rare Room typographic identity,
+   never the generic generated pseudo-logo from the catalogue audit. */
+.w-set-symbol.w-set-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 70px;
+  height: 48px;
+  max-width: 100%;
+  padding: 6px;
+  border: 1px solid rgb(216 242 90 / 0.22);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 85% 12%, rgb(216 242 90 / 0.12), transparent 70%),
+    rgb(21 23 27 / 0.65);
+  text-align: center;
+  overflow: hidden;
+}
+.w-set-fallback-mark {
+  color: var(--accent);
+  font: 750 17px/1 var(--sans);
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+.w-set-fallback-caption {
+  color: var(--ink-2);
+  font: 700 8px/1.2 var(--sans);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+.w-discover .w-set-symbol.w-set-fallback {
+  width: min(100%, 194px);
+  height: 72px;
+  padding: 10px;
+  border-radius: 15px;
+}
+.w-discover .w-set-fallback-mark {
+  font-size: clamp(20px, 3vw, 29px);
+}
+.w-discover .w-set-fallback-caption {
+  font-size: 10px;
+}
+@media (max-width: 700px) {
+  .w-discover .w-set-symbol.w-set-fallback {
+    height: 64px;
+  }
+}
