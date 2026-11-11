@@ -83,8 +83,14 @@ export function cardSummary(reports) {
     ).length,
     noCandidates: completed.filter((r) => r.resultStatus === 'no-candidates')
       .length,
-    p50DurationMs: percentile(completed.map((r) => r.durationMs), 0.5),
-    p95DurationMs: percentile(completed.map((r) => r.durationMs), 0.95),
+    p50DurationMs: percentile(
+      completed.map((r) => r.durationMs),
+      0.5,
+    ),
+    p95DurationMs: percentile(
+      completed.map((r) => r.durationMs),
+      0.95,
+    ),
     byCondition,
   };
 }
