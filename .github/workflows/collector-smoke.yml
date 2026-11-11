@@ -1,14 +1,8 @@
 name: Collector UX smoke
+# The main Pages workflow already executes the complete browser suite.
+# Keep this targeted cross-engine smoke available manually without
+# running npm ci/check/Playwright installation twice on each PR.
 on:
-  pull_request:
-    paths:
-      - 'src/ui/**'
-      - 'src/data/**'
-      - 'src/domain/**'
-      - 'src/workspace.css'
-      - 'tests/e2e/**'
-      - 'tests/unit/**'
-      - 'package*.json'
   workflow_dispatch:
 permissions:
   contents: read

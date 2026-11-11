@@ -907,6 +907,9 @@ export function openPageScanner(
     reportQueue();
     fingerprint = '';
     grid.replaceChildren();
+    delete grid.dataset.scanState;
+    delete grid.dataset.scanAdjustment;
+    delete grid.dataset.scanGeometry;
     pockets = [];
     releasePreviews();
     const file = current;
@@ -929,12 +932,44 @@ export function openPageScanner(
       if (lifetime.signal.aborted || closed) return;
       manualAlign.hidden = false;
       skipPage.hidden = false;
+      if (aligned.method === 'full-photo') {
+        // Unknown geometry is not a successful nine-pocket detection.
+        // The original remains available for explicit manual alignment.
+        grid.dataset.scanGeometry = 'full-photo';
+        grid.dataset.scanAdjustment = 'required';
+        grid.dataset.scanState = 'needs-adjustment';
+        const url = URL.createObjectURL(file);
+        previews.push(url);
+        const original = el('img', 'w-page-alignment-preview');
+        original.src = url;
+        original.alt = 'Originalfoto – die Binderseiten-Grenzen sind unklar';
+        grid.replaceChildren(
+          el(
+            'section',
+            'w-page-alignment-needed',
+            el('h3', '', 'Binderseite nicht eindeutig erkannt'),
+            el(
+              'p',
+              'w-muted',
+              'Wir konnten die neun Fächer nicht sicher bestimmen. Prüfe das Originalfoto und richte die Seitenränder selbst aus. Vorher wird keine Karte erkannt oder übernommen.',
+            ),
+            original,
+            action(
+              'Binderseite jetzt ausrichten',
+              () => manualAlign.click(),
+              'primary',
+            ),
+          ),
+        );
+        status.textContent =
+          'Bitte Binderseite ausrichten. Es wurden keine neun Karten aus einem unsicheren Zuschnitt erzeugt.';
+        updateSave();
+        return;
+      }
       status.textContent =
         aligned.method === 'detected'
-          ? 'Seitenränder erkannt. Neun Kartenfächer werden gelesen …'
-          : aligned.method === 'grid'
-            ? 'Binderfächer automatisch ausgerichtet. Prüfe die neun Vorschaubilder.'
-            : 'Foto auf neun Fächer aufgeteilt. Prüfe die Vorschau; bei Bedarf „Zuschnitt korrigieren“.';
+          ? 'Seitenränder und Taschenraster erkannt. Prüfe die neun Vorschaubilder.'
+          : 'Binderfächer automatisch ausgerichtet. Prüfe die neun Vorschaubilder.';
       const tiles = await extractPagePockets(aligned.blob, lifetime.signal);
       if (closed || lifetime.signal.aborted) return;
       buildGrid(tiles);

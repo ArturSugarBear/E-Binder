@@ -32,8 +32,27 @@ jobs:
           retention-days: 14
       - run: npm run check
       - run: node scripts/verify-competitor-media.mjs
-      - run: npx playwright install --with-deps chromium webkit
-      - run: npm run test:e2e
+      # Browser downloads are cached between runs. For pull requests the
+      # full Chromium desktop/mobile suite gives fast feedback; master
+      # still gates publishing on the full Chromium + WebKit suite.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-1.65.0
+      - name: Install browsers for the required test scope
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install --with-deps chromium webkit
+          fi
+      - name: Browser regression
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            npx playwright test --project=chromium --project=mobile-chromium
+          else
+            npm run test:e2e
+          fi
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
