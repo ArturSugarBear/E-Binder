@@ -12,12 +12,14 @@ async function installCameraRig(page: Page): Promise<void> {
       setMode: (mode: string) => void;
       trackStates: () => string[];
       streams: MediaStream[];
+      ocrRequests: () => number;
     };
     const canvas = document.createElement('canvas');
     canvas.width = 384;
     canvas.height = 512;
     const context = canvas.getContext('2d')!;
     let mode = 'blank';
+    let ocrCalls = 0;
     const streams: MediaStream[] = [];
     const draw = () => {
       context.fillStyle = '#dedede';
@@ -46,6 +48,7 @@ async function installCameraRig(page: Page): Promise<void> {
         draw();
       },
       streams,
+      ocrRequests: () => ocrCalls,
       trackStates: () =>
         streams.flatMap((stream) =>
           stream.getTracks().map((track) => track.readyState),
@@ -71,6 +74,7 @@ async function installCameraRig(page: Page): Promise<void> {
         | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id: number }) {
+        ocrCalls++;
         setTimeout(() => {
           this.onmessage?.(
             new MessageEvent('message', {
@@ -196,11 +200,11 @@ test('three stable video observations create a reviewable scan but never ownersh
   await expect(live.locator('.w-live-options')).not.toHaveAttribute('open');
   await mode(page, 'card');
   await expect(live.locator('.w-live-status')).toContainText(
-    /Aufnahme verarbeitet|Scan fehlgeschlagen/,
+    /Aufnahme vorgemerkt|Scan fehlgeschlagen/,
     { timeout: 35_000 },
   );
   await expect(live.locator('.w-live-status')).toContainText(
-    'Aufnahme verarbeitet',
+    'Aufnahme vorgemerkt',
   );
   await expect(live.locator('.w-live-review-summary')).toContainText(
     '1 offene Aufnahme',
@@ -210,8 +214,9 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  // P07: removing the card automatically re-arms the same camera stream.
+  // No manual Next tap, repeated camera permission request or OCR stall.
   await mode(page, 'blank');
-  await live.getByRole('button', { name: 'Nächste Karte scannen' }).click();
   await expect(
     live.getByRole('button', { name: 'Ergebnisse prüfen (1)', exact: true }),
   ).toBeVisible();
@@ -219,6 +224,16 @@ test('three stable video observations create a reviewable scan but never ownersh
     'Ecken werden gesucht',
     { timeout: 10_000 },
   );
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __scanRig: { streams: MediaStream[] };
+          }
+        ).__scanRig.streams.length,
+    ),
+  ).toBe(1);
   const nextFrame = await live.locator('.w-live-frame-guide').boundingBox();
   expect(nextFrame).not.toBeNull();
   expect(nextFrame!.width).toBeCloseTo(originalFrame!.width, 0);
@@ -226,7 +241,7 @@ test('three stable video observations create a reviewable scan but never ownersh
   expect(nextFrame!.width / nextFrame!.height).toBeCloseTo(63 / 88, 2);
   await mode(page, 'card2');
   await expect(live.locator('.w-live-status')).toContainText(
-    'Aufnahme verarbeitet',
+    'Aufnahme vorgemerkt',
     {
       timeout: 35_000,
     },
@@ -235,6 +250,28 @@ test('three stable video observations create a reviewable scan but never ownersh
   await expect(live.locator('.w-live-review-summary')).toContainText(
     '2 offene Aufnahmen',
   );
+  // Expensive OCR and catalogue work is deferred until the user chooses
+  // Review: two consecutive captures are independent of model latency.
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __scanRig: { ocrRequests: () => number; streams: MediaStream[] };
+          }
+        ).__scanRig.ocrRequests(),
+    ),
+  ).toBe(0);
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __scanRig: { streams: MediaStream[] };
+          }
+        ).__scanRig.streams.length,
+    ),
+  ).toBe(1);
   await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
   const states = await page.evaluate(() =>
     (
