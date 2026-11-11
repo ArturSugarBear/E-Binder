@@ -574,6 +574,7 @@ export function openAddCards(
     results.replaceChildren();
     results.dataset.scanState = 'running';
     results.dataset.scanRankedKeys = '[]';
+    results.dataset.scanVisualModelCandidates = '0';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
     const journey = scanProgress();
@@ -739,6 +740,9 @@ export function openAddCards(
         automatic?.basis,
       );
       results.dataset.scanState = 'complete';
+      results.dataset.scanVisualModelCandidates = String(
+        automatic?.visualModelCandidates ?? 0,
+      );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       photoArea.scrollIntoView({ block: 'start' });
