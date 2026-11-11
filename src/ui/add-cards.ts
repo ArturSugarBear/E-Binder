@@ -556,12 +556,11 @@ export function openAddCards(
         const remaining = () =>
           remainingLiveScanBudget(started, performance.now());
         let text = '';
-        let attempts = 0;
         const tried: LiveHotZone[] = [];
         if (!liveOcrSession && remaining() > 300) prepareLiveOcr();
         if (liveOcrSession && remaining() > 300) {
           try {
-            attempts = 1;
+            let attempts = 1;
             onAnalysisState(true, 'Set, Nummer und Name werden gelesen …');
             text = await liveOcrSession.recognize(
               photo,
