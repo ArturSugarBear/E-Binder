@@ -56,3 +56,17 @@ for (const id of ['me06-111', 'me06-106', 'me05-101']) {
     cardmarket: card.pricing?.cardmarket
   }));
 }
+
+const independent = await load('https://raw.githubusercontent.com/ZyzyThePizi/pokemon-price-data/main/catalog/pokellector_en.json');
+console.log('independent mapping keys:', Object.keys(independent));
+console.log('mapping set fields:', JSON.stringify(independent.setFields));
+console.log('mapping card fields:', JSON.stringify(independent.cardFields));
+const relevantSets = (independent.sets ?? []).filter((set) =>
+  JSON.stringify(set).match(/Delta.Reign|Pitch.Black|Dusk.Raid|30.Years|Shrouded.Fable/i),
+);
+console.log('independent sets:', JSON.stringify(relevantSets.slice(0,12)));
+for (const set of relevantSets.slice(0,10)) {
+  const cards = independent.cards?.[set[0]] ?? [];
+  console.log('mapping relevant', set[0], cards.length,
+    JSON.stringify(cards.filter((card) => /^(0?53|088|090|101|106|111|113|124|140)$/i.test(String(card[0]))).slice(0,20)));
+}
