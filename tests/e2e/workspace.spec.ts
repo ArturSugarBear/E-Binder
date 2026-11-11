@@ -585,12 +585,12 @@ test('local vision model reads a printed identifier without saving the photo or 
     .getByRole('dialog', { name: 'Karte ausrichten', exact: true })
     .getByRole('button', { name: 'Texterkennung starten', exact: true })
     .click();
-  await expect(page.locator('.w-form-notices')).toContainText(
-    'Mögliche Ausgaben, noch kein bestätigter Bestand.',
-    { timeout: 45000 },
-  );
+  await expect(page.locator('.w-scan-match-card')).toBeVisible({
+    timeout: 45000,
+  });
+  await expect(page.locator('.w-scan-match-card')).toContainText('Trasla');
+  await expect(page.locator('.w-scan-match-card')).toContainText('211/198');
   await expect(page.locator('.w-ocr-text')).toContainText('211/198');
-  await expect(page.locator('.w-search-results')).toContainText('Trasla');
   await expect(page.locator('.w-capture-queue')).toContainText(
     '1 offen · 0 übernommen',
   );
