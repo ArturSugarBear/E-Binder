@@ -17,3 +17,4 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/audit-cardmarket-source.mjs
+      # Check public product names before building print identity matcher.
