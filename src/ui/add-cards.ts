@@ -10,6 +10,10 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import {
+  resolvePhotoScan,
+  type AutomaticScanResult,
+} from '../data/scan-auto-resolve';
 import { scanEvidence } from '../data/scan-review';
 import {
   recordBetaEvent,
@@ -585,14 +589,32 @@ export function openAddCards(
         ...ctx.state.holdings.map((item) => item.card),
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
-      const clues = recognitionClues(text);
       const local = candidatesFromText(text, known);
-      status.textContent = 'Kartenausgaben werden im Katalog abgeglichen …';
-      let online: PersonalCard[] = [];
+      status.textContent = 'Set, Sammlernummer und Kartenbild werden abgeglichen …';
+      let automatic: AutomaticScanResult | undefined;
       let catalogUnavailable = false;
-      // Only a printed SET code can initiate an exact remote printing
-      // lookup. A collector fraction by itself belongs to many sets.
-      if (!printedEnergy.length && clues.some((clue) => clue.setId)) {
+      if (!printedEnergy.length) {
+        try {
+          automatic = await resolvePhotoScan(
+            aligned,
+            text,
+            local,
+            language.value,
+            controller.signal,
+          );
+        } catch {
+          catalogUnavailable = true;
+        }
+      }
+      if (controller.signal.aborted || closed || ocrController !== controller)
+        return;
+      let online = automatic?.candidates ?? [];
+      let titleHint = '';
+      if (
+        !printedEnergy.length &&
+        !online.length &&
+        recognitionClues(text).some((clue) => clue.setId)
+      ) {
         try {
           online = await fetchRecognizedCards(
             text,
@@ -603,12 +625,9 @@ export function openAddCards(
           catalogUnavailable = true;
         }
       }
-      if (controller.signal.aborted || closed || ocrController !== controller)
-        return;
-      let titleHint = '';
       if (
         !printedEnergy.length &&
-        !clues.some((clue) => clue.setId) &&
+        !online.length &&
         navigator.onLine &&
         recognizedNameHints(text).length > 0
       ) {
@@ -621,7 +640,7 @@ export function openAddCards(
           online = found.candidates;
           titleHint = found.query;
         } catch {
-          // No invented edition if an optional name lookup fails.
+          catalogUnavailable = true;
         }
       }
       const candidates = printedEnergy.length
@@ -630,7 +649,7 @@ export function openAddCards(
             ...new Map(
               [...online, ...local].map((card) => [card.key, card]),
             ).values(),
-          ].slice(0, 12);
+          ].slice(0, 24);
       recordBetaEvent(
         'scan_result',
         'scan',
@@ -652,15 +671,20 @@ export function openAddCards(
         }),
       );
       showCapture();
-      await renderScanReview(text, candidates);
+      await renderScanReview(
+        text,
+        candidates,
+        automatic?.suggested,
+        automatic?.basis,
+      );
       results.dataset.scanState = 'complete';
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       photoArea.scrollIntoView({ block: 'start' });
       if (catalogUnavailable)
-        tell('Der Online-Katalog war nicht vollständig erreichbar. Set und Nummer kannst du weiterhin manuell bestätigen.');
-      else if (titleHint && !clues.some((clue) => clue.setId))
-        tell(`Kartenname „${titleHint}“ als Suchhinweis gelesen. Erst Set und Nummer können die genaue Ausgabe bestätigen.`);
+        tell('Der Katalog war teilweise nicht erreichbar. Prüfe den angezeigten Vorschlag oder nutze die Korrektursuche.');
+      else if (titleHint && !automatic?.suggested)
+        tell(`Der Kartenname „${titleHint}“ wurde gelesen. Die genaue Ausgabe muss noch bestätigt werden.`);
       else notices.replaceChildren();
     } catch (error) {
       if (closed || ocrController !== controller) return;
@@ -694,6 +718,8 @@ export function openAddCards(
   async function renderScanReview(
     text: string,
     candidates: PersonalCard[],
+    suggested?: PersonalCard,
+    basis?: AutomaticScanResult['basis'],
   ): Promise<void> {
     const request = ++setChoiceRequest;
     setFlowStage(1);
