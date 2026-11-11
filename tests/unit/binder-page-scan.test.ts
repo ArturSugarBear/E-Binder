@@ -20,7 +20,7 @@ const choice = (index: number): ScannedCardChoice => ({
 });
 
 describe('3x3 binder page geometry', () => {
-  it('extracts a row-major grid with inset for all nine cards', () => {
+  it('extracts a row-major full pocket with a tiny seam guard', () => {
     const crops = Array.from({ length: 9 }, (_, index) =>
       pocketCrop(index, 1260, 1760),
     );

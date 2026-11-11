@@ -113,9 +113,17 @@ test('binder-page scanning opens a real 3x3 camera with safe photo fallback', as
   const picker = await chooser;
   await picker.setFiles('public/assets/cards/svi-211.webp');
   await expect(parent).toBeVisible();
-  await expect(parent.locator('.w-page-scan-pocket')).toHaveCount(9, {
-    timeout: 15_000,
-  });
+  // A single trading-card photo is NOT a 3×3 binder page. The app must
+  // request explicit alignment rather than invent nine detected cards.
+  await expect(parent.locator('.w-page-scan-grid')).toHaveAttribute(
+    'data-scan-state',
+    'needs-adjustment',
+    { timeout: 15_000 },
+  );
+  await expect(parent.locator('.w-page-scan-pocket')).toHaveCount(0);
+  await expect(
+    parent.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
+  ).toBeVisible();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
