@@ -286,7 +286,13 @@ it('uses Groudon DLR111 only with the separately verified Cardmarket product', a
     'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
   );
   expect(result.holoPrice).toBeUndefined();
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  // The catalogue and independently generated manifest are both requested.
+  // The manifest mock intentionally returns no verified rows here; the
+  // legacy dated Groudon observation remains a safe outage fallback.
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining('/cards/me06-111'),
+    expect.anything(),
+  );
 });
 
 it('prefers newly corrected provider prices when Cardmarket ID is verified', async () => {
