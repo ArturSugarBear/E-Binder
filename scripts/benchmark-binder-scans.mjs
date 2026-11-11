@@ -152,8 +152,8 @@ async function run(path) {
               keys: pocket.dataset.scanRankedKeys,
               decision: pocket.dataset.decision,
               recognitionState: pocket.dataset.recognitionState,
-              warning:
-                pocket.querySelector('.w-page-scan-quality')?.textContent,
+              warning: pocket.querySelector('.w-page-scan-quality')
+                ?.textContent,
               status: pocket.querySelector('small.w-muted')?.textContent,
             }),
           ),
@@ -248,7 +248,8 @@ async function run(path) {
     top5Rate: rate(count('top5'), totalKnown),
     falseEmptySuggestions: known.filter((p) => p.falseEmptySuggestion).length,
     emptySlots: manifest.samples.reduce(
-      (sum, sample) => sum + sample.slots.filter((slot) => slot === null).length,
+      (sum, sample) =>
+        sum + sample.slots.filter((slot) => slot === null).length,
       0,
     ),
     p50DurationMs: percentile(
