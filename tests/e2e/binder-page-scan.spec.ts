@@ -194,7 +194,9 @@ test('a distorted photo is split into nine reviewable positions without changing
   await expect(
     dialog.getByRole('heading', { name: 'Fach 1 von 9 prüfen' }),
   ).toBeVisible();
-  await dialog.getByRole('button', { name: 'Fach als leer bestätigen' }).click();
+  await dialog
+    .getByRole('button', { name: 'Fach als leer bestätigen' })
+    .click();
   await expect(dialog.locator('.w-page-scan-pocket').first()).toHaveAttribute(
     'data-decision',
     'empty',
