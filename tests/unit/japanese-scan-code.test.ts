@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchRecognizedCards, recognitionClues } from '../../src/data/card-catalog';
+import {
+  fetchRecognizedCards,
+  recognitionClues,
+} from '../../src/data/card-catalog';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -9,7 +12,7 @@ describe('Japanese print identification by OCR', () => {
     expect(recognitionClues('M2a\nHP 340')).toEqual([]);
   });
 
-  it('preserves case-sensitive Japanese set codes and a printed fraction', () => {
+  it('keeps the Japanese set-code case with a collector fraction', () => {
     expect(recognitionClues('SV2a 001/165\n340')).toEqual([
       {
         number: '1/165',
@@ -20,7 +23,7 @@ describe('Japanese print identification by OCR', () => {
     ]);
   });
 
-  it('resolves the exact padded Japanese print ID rather than using an HP number', async () => {
+  it('uses padded Japanese print IDs instead of HP values', async () => {
     const fetcher = vi.fn(async (url: string) => {
       if (url.endsWith('/ja/sets/SV2a'))
         return new Response(
@@ -49,6 +52,8 @@ describe('Japanese print identification by OCR', () => {
     vi.stubGlobal('fetch', fetcher);
     const found = await fetchRecognizedCards('SV2a 001/165\nHP 340', 'de');
     expect(found.map((card) => card.sourceId)).toEqual(['SV2a-001']);
-    expect(fetcher.mock.calls.every(([url]) => String(url).includes('/ja/'))).toBe(true);
+    expect(
+      fetcher.mock.calls.every(([url]) => String(url).includes('/ja/')),
+    ).toBe(true);
   });
 });
