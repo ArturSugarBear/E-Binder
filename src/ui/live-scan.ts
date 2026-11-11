@@ -2,7 +2,8 @@ import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestPageCorners } from '../domain/page-outline';
-import { nextCardLock } from '../domain/live-card-lock';
+import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
+import { updateCaptureLatch } from '../domain/scan-capture-latch';
 import { action, el, errorText, modal } from './workspace-dom';
 
 type CaptureHandler = (file: File, aligned: boolean) => Promise<void>;
@@ -116,6 +117,7 @@ export function openLiveScanner(
   onFileCamera: () => void,
   pendingCaptures: () => number,
   onSwitchToPage?: () => void,
+  onReview?: () => void,
 ): void {
   const sheet = modal('Karte live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog');
@@ -170,7 +172,11 @@ export function openLiveScanner(
   const next = action(
     'Nächste Karte scannen',
     () => {
-      void startCamera();
+      if (running && waitingForRemoval) {
+        armForNextCard();
+      } else {
+        void startCamera();
+      }
     },
     'primary',
     'camera',
@@ -178,7 +184,10 @@ export function openLiveScanner(
   next.hidden = true;
   const finish = action(
     'Ergebnisse prüfen',
-    () => sheet.close(),
+    () => {
+      sheet.close();
+      onReview?.();
+    },
     'secondary',
     'check',
   );
@@ -206,6 +215,7 @@ export function openLiveScanner(
   const mode = el(
     'div',
     'w-scan-mode-toggle',
+    action('Zurück', () => sheet.close(), 'text', 'undo'),
     action('Einzelkarte', () => undefined, 'secondary'),
     action(
       'Binderseite',
@@ -218,7 +228,7 @@ export function openLiveScanner(
   );
   mode.setAttribute('role', 'group');
   mode.setAttribute('aria-label', 'Scanmodus wählen');
-  mode.firstElementChild!.setAttribute('aria-pressed', 'true');
+  mode.children[1]!.setAttribute('aria-pressed', 'true');
   mode.lastElementChild!.setAttribute('aria-pressed', 'false');
   const options = el(
     'details',
@@ -227,6 +237,17 @@ export function openLiveScanner(
     help,
     fallback,
   );
+  const cameraFallback = action(
+    'Kamerafoto aufnehmen',
+    () => {
+      sheet.close();
+      onFileCamera();
+    },
+    'primary',
+    'camera',
+  );
+  cameraFallback.classList.add('w-live-fallback-primary');
+  cameraFallback.hidden = true;
   // Camera, status, shutter, review: everything else is optional.
   stage.append(status);
   trigger.classList.add('w-live-shutter');
@@ -234,7 +255,13 @@ export function openLiveScanner(
   finish.classList.add('w-live-review');
   sheet.dialog.classList.add('w-live-scan-minimal');
   sheet.body.append(mode, stage, journey.element, progress, options);
-  sheet.footer.append(reviewSummary, trigger, next, finish);
+  sheet.footer.append(
+    reviewSummary,
+    trigger,
+    next,
+    finish,
+    cameraFallback,
+  );
 
   // A sticky review footer can occlude a status overlay inside the camera
   // stage on short iPhone viewports. For camera-denied/error states, move the
@@ -258,6 +285,8 @@ export function openLiveScanner(
   let busy = false;
   let closed = false;
   let observations = 0;
+  let waitingForRemoval = false;
+  let missingFrames = 0;
   let last: Quad | null = null;
   let reliable: Quad | null = null;
   let sampled = 0;
@@ -280,8 +309,32 @@ export function openLiveScanner(
     video.srcObject = null;
   }
 
+  function armForNextCard(): void {
+    if (!running || closed || busy) return;
+    waitingForRemoval = false;
+    missingFrames = 0;
+    observations = 0;
+    last = null;
+    reliable = null;
+    polygon.removeAttribute('points');
+    stage.classList.remove('has-card-outline');
+    stage.dataset.scanPhase = 'ready';
+    stageLabel.textContent = 'Nächste Karte ausrichten';
+    status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
+    trigger.hidden = false;
+    next.hidden = true;
+    progress.value = 0;
+  }
+
   async function captureCard(): Promise<void> {
-    if (!running || busy || !video.videoWidth || !video.videoHeight) return;
+    if (
+      !running ||
+      busy ||
+      waitingForRemoval ||
+      !video.videoWidth ||
+      !video.videoHeight
+    )
+      return;
     busy = true;
     trigger.disabled = true;
     journey.update('capture', 'Aufnahme wird ausgerichtet …', 0);
@@ -294,16 +347,14 @@ export function openLiveScanner(
     try {
       const blob = await snapshot(video, chosen);
       if (closed) return;
-      stopCamera();
-      status.textContent =
-        'Aufnahme gesichert · OCR und Katalogabgleich laufen …';
+      status.textContent = 'Foto wird lokal vorgemerkt …';
       progress.value = 3;
       journey.update(
-        'recognize',
-        'Karte wird erkannt · noch nicht gespeichert',
+        'capture',
+        'Foto erfasst · Identität später prüfen',
       );
-      stage.dataset.scanPhase = 'recognize';
-      stageLabel.textContent = 'Karte wird erkannt';
+      stage.dataset.scanPhase = 'capture';
+      stageLabel.textContent = 'Foto erfasst';
       await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
           type: 'image/jpeg',
@@ -311,11 +362,21 @@ export function openLiveScanner(
         aligned,
       );
       if (!closed) {
+        // The image is queued WITHOUT waiting for OCR, model loads or
+        // TCGdex network requests. Continue from the same MediaStream
+        // once the physical card is removed, HoloGem-style.
+        waitingForRemoval = true;
+        missingFrames = 0;
+        observations = 0;
+        last = null;
+        reliable = null;
+        polygon.removeAttribute('points');
+        stage.classList.remove('has-card-outline');
         status.textContent =
-          'Aufnahme verarbeitet. Prüfe die Kartenausgabe oder scanne die nächste Karte.';
-        journey.update('review', 'Aufnahme bereit · Ausgabe jetzt prüfen', 1);
-        stage.dataset.scanPhase = 'review';
-        stageLabel.textContent = 'Aufnahme bereit';
+          'Aufnahme vorgemerkt · Karte wechseln oder Ergebnisse prüfen';
+        journey.update('review', 'Foto vorgemerkt · noch nicht hinzugefügt', 1);
+        stage.dataset.scanPhase = 'queued';
+        stageLabel.textContent = 'Karte wechseln';
         next.hidden = false;
         refreshReview();
         trigger.hidden = true;
@@ -334,6 +395,7 @@ export function openLiveScanner(
         stage.dataset.scanPhase = 'error';
         stageLabel.textContent = 'Scan bitte wiederholen';
         options.open = true;
+        cameraFallback.hidden = false;
         showCameraAlert();
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
@@ -349,7 +411,13 @@ export function openLiveScanner(
   function inspectFrame(time: number): void {
     if (!running || closed) return;
     frameId = requestAnimationFrame(inspectFrame);
-    if (document.hidden || time - sampled < 280 || video.readyState < 2) return;
+    if (
+      busy ||
+      document.hidden ||
+      time - sampled < 280 ||
+      video.readyState < 2
+    )
+      return;
     sampled = time;
     if (!video.videoWidth || !video.videoHeight) return;
     let corners: Quad | null = null;
@@ -361,6 +429,19 @@ export function openLiveScanner(
       corners = suggestPageCorners(pixels.data, sample.width, sample.height);
     } catch {
       // A temporarily missing camera frame must never trigger a shutter.
+    }
+    if (waitingForRemoval) {
+      const latch = updateCaptureLatch(
+        { waitingForRemoval, missingFrames },
+        Boolean(
+          corners &&
+            plausibleCardQuad(corners, sample.width, sample.height),
+        ),
+      );
+      waitingForRemoval = latch.waitingForRemoval;
+      missingFrames = latch.missingFrames;
+      if (!waitingForRemoval) armForNextCard();
+      return;
     }
     const lock = nextCardLock(
       { corners: last, stableFrames: observations },
@@ -404,6 +485,9 @@ export function openLiveScanner(
     restoreCameraStatus();
     stopCamera();
     const generation = cameraGeneration;
+    waitingForRemoval = false;
+    missingFrames = 0;
+    cameraFallback.hidden = true;
     next.hidden = true;
     next.querySelector('span')!.textContent = 'Nächste Karte scannen';
     refreshReview();
@@ -423,6 +507,7 @@ export function openLiveScanner(
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
       options.open = true;
+      cameraFallback.hidden = false;
       trigger.hidden = true;
       showCameraAlert();
       status.textContent =
@@ -460,6 +545,7 @@ export function openLiveScanner(
       stopCamera();
       recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
       options.open = true;
+      cameraFallback.hidden = false;
       trigger.hidden = true;
       stageLabel.textContent = 'Kamera nicht verfügbar';
       showCameraAlert();
