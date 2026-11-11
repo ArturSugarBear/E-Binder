@@ -269,13 +269,7 @@ export function openLiveScanner(
   finish.classList.add('w-live-review');
   sheet.dialog.classList.add('w-live-scan-minimal');
   sheet.body.append(mode, stage, journey.element, progress, options);
-  sheet.footer.append(
-    reviewSummary,
-    trigger,
-    next,
-    finish,
-    cameraFallback,
-  );
+  sheet.footer.append(reviewSummary, trigger, next, finish, cameraFallback);
 
   // A sticky review footer can occlude a status overlay inside the camera
   // stage on short iPhone viewports. For camera-denied/error states, move the
@@ -363,10 +357,7 @@ export function openLiveScanner(
       if (closed) return;
       status.textContent = 'Foto wird lokal vorgemerkt …';
       progress.value = 3;
-      journey.update(
-        'capture',
-        'Foto erfasst · Identität später prüfen',
-      );
+      journey.update('capture', 'Foto erfasst · Identität später prüfen');
       stage.dataset.scanPhase = 'capture';
       stageLabel.textContent = 'Foto erfasst';
       await onCapture(
@@ -425,12 +416,7 @@ export function openLiveScanner(
   function inspectFrame(time: number): void {
     if (!running || closed) return;
     frameId = requestAnimationFrame(inspectFrame);
-    if (
-      busy ||
-      document.hidden ||
-      time - sampled < 280 ||
-      video.readyState < 2
-    )
+    if (busy || document.hidden || time - sampled < 280 || video.readyState < 2)
       return;
     sampled = time;
     if (!video.videoWidth || !video.videoHeight) return;
@@ -448,8 +434,7 @@ export function openLiveScanner(
       const latch = updateCaptureLatch(
         { waitingForRemoval, missingFrames },
         Boolean(
-          corners &&
-            plausibleCardQuad(corners, sample.width, sample.height),
+          corners && plausibleCardQuad(corners, sample.width, sample.height),
         ),
       );
       waitingForRemoval = latch.waitingForRemoval;

@@ -161,17 +161,16 @@ test('upload picker and manual entry allow returning to the scanner', async ({
   const chooser = await selecting;
   expect(chooser.isMultiple()).toBe(true);
 
-  await add
-    .getByRole('button', { name: 'Karte manuell eintragen' })
-    .click();
-  await expect(add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }))
-    .toBeVisible();
-  await add
-    .getByRole('button', { name: 'Zurück zu den Scanoptionen' })
-    .click();
-  await expect(add.getByRole('button', { name: 'Karte live scannen' }))
-    .toBeVisible();
-  await expect(add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }))
-    .toHaveCount(0);
+  await add.getByRole('button', { name: 'Karte manuell eintragen' }).click();
+  await expect(
+    add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }),
+  ).toBeVisible();
+  await add.getByRole('button', { name: 'Zurück zu den Scanoptionen' }).click();
+  await expect(
+    add.getByRole('button', { name: 'Karte live scannen' }),
+  ).toBeVisible();
+  await expect(
+    add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }),
+  ).toHaveCount(0);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });

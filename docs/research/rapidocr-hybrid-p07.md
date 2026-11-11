@@ -20,7 +20,7 @@ Pokemon name or a high image-similarity number. A robust local-first pipeline:
    quality checks to choose the most readable capture per region.
 3. **Use the card geometry to crop hot zones** before recognizing text. On a
    rectified 63:88 card: left/bottom footer for printed set and collector
-   number; broad upper title band for the *entire* name including EX, Mega and
+   number; broad upper title band for the _entire_ name including EX, Mega and
    prefix; inside body for supported trainer/energy exceptions. Regions are
    orientation-aware and can expand for misaligned prints and sleeves.
    Recognition should be run on **selected crops**, not the whole image by
@@ -46,7 +46,7 @@ Pokemon name or a high image-similarity number. A robust local-first pipeline:
 
 ## Model candidates and licensing
 
-- RapidOCR is maintained by **RapidAI**, *not Google*.
+- RapidOCR is maintained by **RapidAI**, _not Google_.
   https://github.com/RapidAI/RapidOCR
 - RapidOCR uses PaddleOCR-based ONNX models and supports ONNX Runtime,
   with code and relevant distributed model rights described as Apache-2.0.
@@ -66,13 +66,13 @@ Pokemon name or a high image-similarity number. A robust local-first pipeline:
 
 ## Hot zones
 
-| Region | Typical crop on rectified card (normalized x,y,w,h) | Rule |
-| --- | --- | --- |
-| Collector fraction + set | (0.04,0.89,0.63,0.10) | Multiple vertical offsets, small text; DLR, PBL, M1L and language-aware set alias map |
-| Full title | (0.04,0.00,0.91,0.12) | Keep whole name, suffix/prefix and non-Latin characters; trainer/item title uses same first pass |
-| Art | (0.06,0.12,0.88,0.70) | Image retrieval only, not OCR match certificate |
-| Special energy / trainer | (0.07,0.07,0.86,0.24) | On inconclusive primary read, look for energy type or exact trainer/item text and illustration; no random generic energy set match |
-| Footer fallback | (0.02,0.82,0.95,0.17) | Use only on ambiguous, missing or conflicting numbers; prevent slow full-card passes |
+| Region                   | Typical crop on rectified card (normalized x,y,w,h) | Rule                                                                                                                               |
+| ------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Collector fraction + set | (0.04,0.89,0.63,0.10)                               | Multiple vertical offsets, small text; DLR, PBL, M1L and language-aware set alias map                                              |
+| Full title               | (0.04,0.00,0.91,0.12)                               | Keep whole name, suffix/prefix and non-Latin characters; trainer/item title uses same first pass                                   |
+| Art                      | (0.06,0.12,0.88,0.70)                               | Image retrieval only, not OCR match certificate                                                                                    |
+| Special energy / trainer | (0.07,0.07,0.86,0.24)                               | On inconclusive primary read, look for energy type or exact trainer/item text and illustration; no random generic energy set match |
+| Footer fallback          | (0.02,0.82,0.95,0.17)                               | Use only on ambiguous, missing or conflicting numbers; prevent slow full-card passes                                               |
 
 These are **starting regions**, not universal coordinates: rotated, nonstandard
 promo, Japanese special layouts, V/EX and full-art designs require measured

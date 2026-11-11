@@ -29,7 +29,11 @@ describe('consecutive live card capture', () => {
 
   it('rejects one-frame rearming that could create duplicate photos', () => {
     expect(() =>
-      updateCaptureLatch({ waitingForRemoval: true, missingFrames: 0 }, false, 1),
+      updateCaptureLatch(
+        { waitingForRemoval: true, missingFrames: 0 },
+        false,
+        1,
+      ),
     ).toThrow('Ungültige Freigabezeit');
   });
 });

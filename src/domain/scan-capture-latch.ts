@@ -18,8 +18,7 @@ export function updateCaptureLatch(
   if (!state.waitingForRemoval) return state;
   if (!Number.isInteger(requiredMissingFrames) || requiredMissingFrames < 2)
     throw new Error('Ungültige Freigabezeit für den Kartenwechsel.');
-  if (validCardVisible)
-    return { waitingForRemoval: true, missingFrames: 0 };
+  if (validCardVisible) return { waitingForRemoval: true, missingFrames: 0 };
   if (state.missingFrames + 1 < requiredMissingFrames)
     return { waitingForRemoval: true, missingFrames: state.missingFrames + 1 };
   return { waitingForRemoval: false, missingFrames: 0 };

@@ -4989,11 +4989,15 @@ textarea.w-input,
   flex: 1 1 100%;
   min-height: 52px;
 }
-.w-live-scan-minimal .w-live-stage[data-scan-phase='queued'] .w-live-frame-guide {
+.w-live-scan-minimal
+  .w-live-stage[data-scan-phase='queued']
+  .w-live-frame-guide {
   border-style: solid;
   border-color: var(--accent);
 }
-.w-live-scan-minimal .w-live-stage[data-scan-phase='queued'] .w-live-stage-label {
+.w-live-scan-minimal
+  .w-live-stage[data-scan-phase='queued']
+  .w-live-stage-label {
   background: rgb(35 49 22 / 0.91);
   color: var(--accent);
 }

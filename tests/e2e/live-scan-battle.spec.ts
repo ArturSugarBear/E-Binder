@@ -253,13 +253,12 @@ test('three stable video observations create a reviewable scan but never ownersh
   // Expensive OCR and catalogue work is deferred until the user chooses
   // Review: two consecutive captures are independent of model latency.
   expect(
-    await page.evaluate(
-      () =>
-        (
-          window as typeof window & {
-            __scanRig: { ocrRequests: () => number; streams: MediaStream[] };
-          }
-        ).__scanRig.ocrRequests(),
+    await page.evaluate(() =>
+      (
+        window as typeof window & {
+          __scanRig: { ocrRequests: () => number; streams: MediaStream[] };
+        }
+      ).__scanRig.ocrRequests(),
     ),
   ).toBe(0);
   expect(
