@@ -5021,3 +5021,60 @@ textarea.w-input,
 .w-dialog.w-scan-parent-suspended {
   visibility: hidden;
 }
+
+/* P07: visual activity is tied to actual local OCR work. It never counts
+   down a made-up confidence value and never blocks the camera/shutter. */
+.w-live-scan-minimal .w-live-analysis:not([hidden]) {
+  position: absolute;
+  z-index: 4;
+  inset: 43% 5% auto;
+  display: grid;
+  gap: 7px;
+  pointer-events: none;
+  text-align: center;
+}
+.w-live-scan-minimal .w-live-analysis[hidden] {
+  display: none;
+}
+.w-live-analysis-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    rgb(255 255 255 / 0.92),
+    var(--accent),
+    transparent
+  );
+  box-shadow: 0 0 9px var(--accent);
+  animation: w-live-analyze-sweep 1.35s ease-in-out infinite alternate;
+}
+.w-live-analysis-caption {
+  padding: 6px 9px;
+  width: fit-content;
+  justify-self: center;
+  border-radius: 999px;
+  color: #f6f4ee;
+  background: rgb(16 19 22 / 0.86);
+  font-size: 11px;
+  line-height: 1.3;
+}
+@keyframes w-live-analyze-sweep {
+  from {
+    transform: translateY(-52px);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(55px);
+    opacity: 0.98;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-live-analysis-line {
+    animation: none;
+    opacity: 0.9;
+  }
+}
