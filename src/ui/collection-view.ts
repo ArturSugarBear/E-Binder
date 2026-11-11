@@ -54,12 +54,25 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
     'w-price-note',
     comparable ? 'Cardmarket · Preisreferenz' : 'Keine sichere Preisreferenz',
   );
+  const sourceLink = detail
+    ? el(
+        'a',
+        'w-button w-button-secondary w-price-source-link',
+        'Auf Cardmarket ansehen',
+      )
+    : undefined;
+  if (sourceLink) {
+    sourceLink.hidden = true;
+    sourceLink.target = '_blank';
+    sourceLink.rel = 'noopener noreferrer';
+  }
   const element = el(
     'span',
     detail ? 'w-price-reference w-holding-price' : 'w-price-reference',
     detail ? el('span', 'w-label', 'Cardmarket · Preisreferenz') : null,
     value,
     note,
+    sourceLink,
   );
   const render = (result: HoldingPriceResult) => {
     if (!element.isConnected) return;
@@ -68,8 +81,13 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
       const basis = result.quote.basis
         ? priceBasisLabels[result.quote.basis]
         : 'Preisreferenz';
-      note.textContent = `${basis} (nicht NM-gefiltert) · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+      note.textContent = `${basis}${result.quote.provenance === 'verified-snapshot' ? ' · verifizierter Snapshot, kein Livepreis' : ' (nicht NM-gefiltert)'} · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+      if (sourceLink) {
+        sourceLink.hidden = !result.quote.productUrl;
+        if (result.quote.productUrl) sourceLink.href = result.quote.productUrl;
+      }
     } else {
+      if (sourceLink) sourceLink.hidden = true;
       value.textContent = '—';
       note.textContent =
         result.status === 'error'

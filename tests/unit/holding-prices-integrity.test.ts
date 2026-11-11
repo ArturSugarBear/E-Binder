@@ -2,7 +2,10 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { holdingPrice } from '../../src/data/holding-prices';
 import type { Holding } from '../../src/domain/personal';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 const holding = (
   id: string,
@@ -38,7 +41,11 @@ const holding = (
   updatedAt: '2026-11-09T12:00:00Z',
 });
 
-it('refuses a suspicious illustration rare quote for all views', async () => {
+it('uses the verified price for the exact Groudon DLR111 holding', async () => {
+  // The direct-market snapshot expires in production. This test must
+  // remain deterministic once it has expired.
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
   vi.stubGlobal(
     'fetch',
     vi.fn(
@@ -48,7 +55,7 @@ it('refuses a suspicious illustration rare quote for all views', async () => {
             id: 'me06-111',
             localId: '111',
             name: 'Groudon',
-            variants: { normal: false, holo: true },
+            variants: { normal: true, holo: false },
             set: {
               id: 'me06',
               name: 'Delta-Herrschaft',
@@ -58,6 +65,7 @@ it('refuses a suspicious illustration rare quote for all views', async () => {
               cardmarket: {
                 unit: 'EUR',
                 updated: '2026-11-09T12:00:00Z',
+                idProduct: 918876,
                 trend: 0.04,
               },
             },
@@ -66,9 +74,18 @@ it('refuses a suspicious illustration rare quote for all views', async () => {
     ),
   );
   expect(
-    await holdingPrice(holding('me06-111', 'Groudon', '111/103', 'holo')),
-  ).toEqual({
-    status: 'suspect',
+    await holdingPrice(holding('me06-111', 'Groudon', '111/103', 'normal')),
+  ).toMatchObject({
+    status: 'priced',
+    quote: {
+      amount: 17.81,
+      source: 'cardmarket',
+      variant: 'normal',
+      basis: 'trend',
+      provenance: 'verified-snapshot',
+      productUrl:
+        'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
+    },
   });
 });
 

@@ -66,6 +66,8 @@ export async function holdingPrice(
             amount: price.amount,
             updated: price.updated,
             basis: price.basis,
+            provenance: price.provenance,
+            productUrl: entry.cardmarketUrl,
           }
         : undefined;
       const value: HoldingPriceResult =
