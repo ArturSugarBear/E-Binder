@@ -56,17 +56,20 @@ export async function autoAlignPage(
       proposed[2].x - proposed[3].x > 0.72 &&
       proposed[3].y - proposed[0].y > 0.68 &&
       proposed[2].y - proposed[1].y > 0.68;
-    const gridCorners = wideEnough
-      ? null
-      : suggestPocketGridCorners(thumbPixels, small.width, small.height);
-    const corners: Quad = wideEnough
-      ? proposed
-      : (gridCorners ?? [
-          { x: 0, y: 0 },
-          { x: 1, y: 0 },
-          { x: 1, y: 1 },
-          { x: 0, y: 1 },
-        ]);
+    // Outer edges alone can also describe a single trading card. The
+    // internal 3x3 separators provide independent evidence that this is
+    // actually a binder page rather than a rectangular non-page object.
+    const gridCorners = suggestPocketGridCorners(
+      thumbPixels,
+      small.width,
+      small.height,
+    );
+    if (!gridCorners) {
+      // Do not manufacture nine OCR crops from an arbitrary photo.
+      // The original stays local for the user-controlled correction flow.
+      return { blob: photo, method: 'full-photo' };
+    }
+    const corners: Quad = wideEnough ? proposed : gridCorners;
     const mapping = cardProjection(corners);
     const input = context.getImageData(0, 0, source.width, source.height);
     const output = document.createElement('canvas');
