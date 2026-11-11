@@ -100,9 +100,7 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
   await add.getByRole('button', { name: 'Treffer stimmt nicht?' }).click();
   await expect(add.locator('.w-scan-set-panel')).toBeVisible();
   await expect(add.locator('.w-scan-match-card')).toBeHidden();
-  await add
-    .getByRole('button', { name: 'Zurück zu den Treffern' })
-    .click();
+  await add.getByRole('button', { name: 'Zurück zu den Treffern' }).click();
   await expect(add.locator('.w-scan-set-panel')).toHaveCount(0);
   await expect(add.locator('.w-scan-match-card')).toBeVisible();
   await expect(add.locator('.w-scan-match-card')).toContainText(
