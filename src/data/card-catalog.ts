@@ -783,11 +783,25 @@ export async function fetchRecognizedCards(
         return numberKey(card.number) === clue.number ? [card] : [];
       }
       // Old frames and Japanese prints have different set codes. Match actual set counts and local IDs.
-      const sets = (await setsFor(language, signal)).filter(
-        (set) => String(set.cardCount.official) === total,
-      );
+      const sets = (await setsFor(language, signal))
+        .filter((set) => String(set.cardCount.official) === total)
+        // Set lists contain decades of printings. Prioritize recent sets
+        // rather than arbitrarily taking the provider's first eight results.
+        // This only orders review candidates; it never confirms ownership.
+        .sort((a, b) => {
+          const recency = (id: string) => {
+            const match = id.toLowerCase().match(/^(me|sv|swsh|sm)(\\d+)/);
+            if (!match) return 0;
+            const era = { me: 4, sv: 3, swsh: 2, sm: 1 }[
+              match[1] as 'me' | 'sv' | 'swsh' | 'sm'
+            ];
+            return era * 1000 + Number(match[2]);
+          };
+          return recency(b.id) - recency(a.id);
+        });
       const matches: PersonalCard[] = [];
-      // shortcut: cap ambiguous denominators at eight sets, use manual search for broader matches.
+      // Cap ambiguous denominators at eight sets; no name-only guess becomes
+      // an accepted printing, and older sets remain searchable manually.
       for (const set of sets.slice(0, 8)) {
         const detail = setDetails.parse(
           await getJson(
