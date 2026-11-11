@@ -4622,14 +4622,14 @@ textarea.w-input,
 
 /* Recognition shows a compact photo preview, not the technical capture queue. */
 .w-guided-scan .w-photo-comparison {
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: minmax(110px, 135px) minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  padding: 9px 12px;
+  padding: 12px;
 }
 .w-guided-scan .w-original-photo {
-  width: 72px;
-  max-height: 110px;
+  width: 100%;
+  max-height: 220px;
 }
 .w-guided-scan .w-photo-comparison h3,
 .w-guided-scan .w-photo-comparison .w-disclosure,
@@ -4687,5 +4687,32 @@ textarea.w-input,
 @media (max-width: 640px) {
   .w-scan-alternative-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Multi-photo review is a queue, not a dead end after recognition. */
+.w-dialog .w-scan-queue-toggle {
+  display: none;
+}
+.w-dialog.w-guided-scan .w-scan-queue-toggle:not([hidden]) {
+  display: inline-flex;
+  align-self: start;
+  min-height: 44px;
+}
+.w-dialog.w-guided-scan .w-capture-queue.is-expanded {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--raised);
+  border: 1px solid var(--w-border);
+  border-radius: 14px;
+}
+.w-scan-alternative-grid .w-button-card[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+@media (max-width: 640px) {
+  .w-guided-scan .w-photo-comparison {
+    grid-template-columns: minmax(100px, 35%) minmax(0, 1fr);
   }
 }
