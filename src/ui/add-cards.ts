@@ -321,7 +321,7 @@ export function openAddCards(
     showQueue();
     showCapture();
     const active = capture();
-    if (active?.candidates.length) renderChoices(active.candidates);
+    if (active?.text) void renderScanReview(active.text, active.candidates);
     else results.replaceChildren();
     tell(
       removable.length === 1
@@ -370,7 +370,7 @@ export function openAddCards(
           results.replaceChildren();
           notices.replaceChildren();
           showCapture();
-          if (shot.candidates.length) renderChoices(shot.candidates);
+          if (shot.text) void renderScanReview(shot.text, shot.candidates);
         },
         'text',
       );
@@ -585,13 +585,14 @@ export function openAddCards(
         ...ctx.state.holdings.map((item) => item.card),
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
+      const clues = recognitionClues(text);
       const local = candidatesFromText(text, known);
       status.textContent = 'Kartenausgaben werden im Katalog abgeglichen …';
       let online: PersonalCard[] = [];
       let catalogUnavailable = false;
-      // A verified MEE 009–016 code is more specific than any title-only
-      // catalogue lookup. Keep it as a single user-reviewed edition.
-      if (!printedEnergy.length) {
+      // Only a printed SET code can initiate an exact remote printing
+      // lookup. A collector fraction by itself belongs to many sets.
+      if (!printedEnergy.length && clues.some((clue) => clue.setId)) {
         try {
           online = await fetchRecognizedCards(
             text,
@@ -607,9 +608,9 @@ export function openAddCards(
       let titleHint = '';
       if (
         !printedEnergy.length &&
-        !online.length &&
+        !clues.some((clue) => clue.setId) &&
         navigator.onLine &&
-        text.trim()
+        recognizedNameHints(text).length > 0
       ) {
         try {
           const found = await fetchNameHintCandidates(
@@ -651,30 +652,16 @@ export function openAddCards(
         }),
       );
       showCapture();
-      renderChoices(candidates);
+      await renderScanReview(text, candidates);
       results.dataset.scanState = 'complete';
-      if (candidates.length) results.scrollIntoView({ block: 'start' });
-      else {
-        photoArea.scrollIntoView({ block: 'start' });
-        photoArea
-          .querySelector<HTMLButtonElement>('button')
-          ?.focus({ preventScroll: true });
-      }
-      tell(
-        candidates.length
-          ? `${titleHint ? `Kartenname „${titleHint}“ gelesen. ` : ''}Mögliche Ausgaben, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Nummernabgleich war nicht erreichbar.' : ''}`
-          : /\b(?:Energie|Energy)\b/i.test(text)
-            ? 'Energiekarte gelesen, aber Typ oder genaue Ausgabe sind nicht sicher erkannt. Prüfe den Energietyp und die Sammlernummer auf dem Foto und suche die Karte gezielt. Es wurde nichts übernommen.'
-            : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
-      );
-      if (printedEnergy.length)
-        tell(
-          `Gedruckten Setcode ${printedEnergy.map((card) => card.number).join(', ')} erkannt: 30-Jahre-Holo-Energie. Dies ist ein Vorschlag ohne Katalogbild. Prüfe Typ, Sprache, Emblem und Ausgabe auf deinem Foto, bevor du den Bestand bestätigst.`,
-        );
-      const number = recognitionClues(text)[0]?.number;
-      // Prefill the read number, but require an explicit manual search:
-      // an OCR fragment alone must not generate unrelated editions.
-      if (number && !candidates.length) search.value = number;
+      if (controller.signal.aborted || closed || ocrController !== controller)
+        return;
+      photoArea.scrollIntoView({ block: 'start' });
+      if (catalogUnavailable)
+        tell('Der Online-Katalog war nicht vollständig erreichbar. Set und Nummer kannst du weiterhin manuell bestätigen.');
+      else if (titleHint && !clues.some((clue) => clue.setId))
+        tell(`Kartenname „${titleHint}“ als Suchhinweis gelesen. Erst Set und Nummer können die genaue Ausgabe bestätigen.`);
+      else notices.replaceChildren();
     } catch (error) {
       if (closed || ocrController !== controller) return;
       if (controller.signal.aborted) {
@@ -701,7 +688,7 @@ export function openAddCards(
 
   function renderChoices(cards: PersonalCard[]): void {
     setFlowStage(1);
-    results.classList.remove('w-text-results');
+    results.classList.remove('w-text-results', 'w-scan-result-stack');
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [
@@ -739,6 +726,8 @@ export function openAddCards(
       );
     captureStart.hidden = true;
     interrupt();
+    sheet.dialog.classList.remove('w-guided-scan');
+    sheet.dialog.classList.add('w-scan-confirming');
     selected = card;
     details.replaceChildren();
     notices.replaceChildren();
@@ -977,6 +966,7 @@ export function openAddCards(
       );
       if (ok) {
         if (shot) {
+          sheet.dialog.classList.remove('w-scan-confirming', 'w-guided-scan');
           recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
             candidate: publicCardKey(shot.candidates[0]),
             selected: publicCardKey(adopted),
@@ -1007,6 +997,8 @@ export function openAddCards(
   }
 
   function manualForm(): void {
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    scanSetChoice.replaceChildren();
     setFlowStage(1);
     interrupt();
     selected = undefined;
@@ -1088,6 +1080,8 @@ export function openAddCards(
     }
   }
   search.addEventListener('input', () => {
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    scanSetChoice.replaceChildren();
     interrupt();
     clearTimeout(debounce);
     if (search.value.trim().length >= 2) {
@@ -1112,7 +1106,8 @@ export function openAddCards(
   showQueue();
   showCapture();
   if (selected) renderConfirmation();
-  else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
+  else if (capture()?.text)
+    void renderScanReview(capture()!.text, capture()!.candidates);
   else results.replaceChildren();
   if (options.live) takePhoto.click();
   else if (options.photos) gallery.click();
