@@ -4,7 +4,7 @@ import {
   portfolioQuoteKey,
   type PortfolioQuote,
 } from '../domain/portfolio';
-import type { Holding } from '../domain/personal';
+import { normalize, numberKey, type Holding } from '../domain/personal';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
@@ -45,6 +45,19 @@ export async function holdingPrice(
     false,
   )
     .then((entry) => {
+      // A stored printing can outlive catalogue corrections or be imported
+      // with a wrong language, fraction or finish. Never borrow its neighbor's
+      // market quote just because the source ID still exists.
+      const samePrinting =
+        entry.card.sourceId === sourceId &&
+        entry.card.setId === holding.card.setId &&
+        entry.card.language === holding.card.language &&
+        numberKey(entry.card.number) === numberKey(holding.card.number) &&
+        normalize(entry.card.name) === normalize(holding.card.name) &&
+        entry.card.finishes.includes(holding.finish);
+      if (!samePrinting) {
+        return { status: 'unavailable' } as HoldingPriceResult;
+      }
       const price = holding.finish === 'holo' ? entry.holoPrice : entry.price;
       const quote: PortfolioQuote | undefined = price
         ? {
