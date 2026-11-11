@@ -16,7 +16,7 @@ import { normalize, numberKey, type PersonalCard } from '../domain/personal';
 export interface AutomaticScanResult {
   candidates: PersonalCard[];
   suggested?: PersonalCard;
-  basis: 'printed-set' | 'full-name' | 'image' | 'review' | 'no-match';
+  basis: 'printed-set' | 'full-name' | 'image' | 'visual-review' | 'review' | 'no-match';
   visualChecked: number;
 }
 
@@ -252,7 +252,7 @@ export async function resolvePhotoScan(
     // Only a separate printed-identity match can suggest an exact
     // printing. Images alone cannot distinguish identical DE/EN artwork
     // or different foil treatments.
-    basis: candidates.length ? 'review' : 'no-match',
+    basis: fromVisual.length ? 'visual-review' : candidates.length ? 'review' : 'no-match',
     visualChecked: fromVisual.length + inspected.length,
   };
 }
