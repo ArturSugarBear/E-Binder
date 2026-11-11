@@ -790,7 +790,7 @@ export async function fetchRecognizedCards(
         // This only orders review candidates; it never confirms ownership.
         .sort((a, b) => {
           const recency = (id: string) => {
-            const match = id.toLowerCase().match(/^(me|sv|swsh|sm)(\\d+)/);
+            const match = id.toLowerCase().match(/^(me|sv|swsh|sm)(\d+)/);
             if (!match) return 0;
             const era = { me: 4, sv: 3, swsh: 2, sm: 1 }[
               match[1] as 'me' | 'sv' | 'swsh' | 'sm'
