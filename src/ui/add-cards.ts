@@ -1503,7 +1503,7 @@ export function openAddCards(
         'w-form-grid',
         field('Sprache der Karte', detailsLanguage),
         field('Druckvariante', finish),
-        edition ? field('Auflage (Basis-Set)', edition) : null,
+        ...(edition ? [field('Auflage (Basis-Set)', edition)] : []),
         edition
           ? el(
               'details',
@@ -1514,14 +1514,16 @@ export function openAddCards(
           : field('Variante / Auflage / Stempel', variant),
         field('Gesamtmenge dieser Variante', quantity),
       ),
-      edition
-        ? el(
-            'p',
-            'w-muted',
-            'Wichtig: Holo, Kartennummer und Referenzbild beweisen keine 1. Edition. Prüfe den schwarzen Editionsstempel auf der physischen Karte.',
-          )
-        : null,
-      stampCheck?.row,
+      ...(edition
+        ? [
+            el(
+              'p',
+              'w-muted',
+              'Wichtig: Holo, Kartennummer und Referenzbild beweisen keine 1. Edition. Prüfe den schwarzen Editionsstempel auf der physischen Karte.',
+            ),
+          ]
+        : []),
+      ...(stampCheck ? [stampCheck.row] : []),
       confirm.row,
       error,
       el('div', 'w-action-row', submit, wish),
