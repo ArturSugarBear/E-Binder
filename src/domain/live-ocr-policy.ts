@@ -25,7 +25,15 @@ export function liveScanMissingEvidence(text: string): {
     footer: !recognitionClues(text).some(
       (clue) => Boolean(clue.setId && clue.number),
     ),
-    title: recognizedNameHints(text).length === 0,
+    // A printed DLR/PBL/M1L code is a set hint, not the Pokémon's
+    // complete name. The usual name extractor only sees the last 3
+    // lines; footer retries must not masquerade as title evidence.
+    title: !recognizedNameHints(text).some(
+      (name) =>
+        !/^(?:SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR|M\d{1,2}[A-Z]?|SV\d{1,2}[A-Z]?|S\d{1,2}[A-Z]?)$/i.test(
+          name.trim(),
+        ),
+    ),
   };
 }
 
@@ -53,11 +61,15 @@ export function nextLiveHotZone(
 export function combineLiveOcrText(
   current: string,
   extra: string,
+  source: LiveHotZone,
 ): string {
-  const lines = new Set(
-    [...current.split(/\r?\n/), ...extra.split(/\r?\n/)]
-      .map((line) => line.trim())
-      .filter(Boolean),
-  );
+  const existing = current.split(/\r?\n/);
+  const added = extra.split(/\r?\n/);
+  // Name extraction expects the trailing OCR lines to be card titles.
+  // A late footer re-read belongs before those title lines, not after.
+  const ordered = source.startsWith('footer')
+    ? [...added, ...existing]
+    : [...existing, ...added];
+  const lines = new Set(ordered.map((line) => line.trim()).filter(Boolean));
   return [...lines].join('\n').slice(0, 30000);
 }
