@@ -1993,6 +1993,36 @@ textarea.w-input,
   }
 }
 
+/* An uncertain binder photo stays full-size until the user sets the corners. */
+.w-page-scan-grid:has(.w-page-alignment-needed) {
+  display: block;
+}
+.w-page-alignment-needed {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.w-page-alignment-needed h3 {
+  margin: 0;
+}
+.w-page-alignment-preview {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  max-height: 420px;
+  margin-inline: auto;
+  object-fit: contain;
+  background: var(--desk);
+  border-radius: 10px;
+}
+.w-page-alignment-needed .w-button {
+  justify-self: start;
+}
+
 /* Binder-page capture: nine reviewed positions, still using the app's dark card UI. */
 .w-page-scan-grid {
   display: grid;

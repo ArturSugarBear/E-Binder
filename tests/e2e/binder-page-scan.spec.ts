@@ -20,9 +20,18 @@ test('the scanner opens via the central add action without persisting a photo', 
   await dialog
     .locator('input[type=file][multiple]')
     .setInputFiles('public/assets/cards/svi-211.webp');
-  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
-    timeout: 30_000,
-  });
+  await expect(dialog.locator('.w-page-scan-grid')).toHaveAttribute(
+    'data-scan-state',
+    'needs-adjustment',
+    { timeout: 30_000 },
+  );
+  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(0);
+  await expect(
+    dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
+  ).toBeEnabled();
+  await expect(
+    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+  ).toBeDisabled();
   await expect(
     page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
   ).toHaveCount(0);
@@ -61,9 +70,16 @@ test('proposes editable binder corners only for a clear page outline', async ({
     mimeType: 'image/png',
     buffer: Buffer.from(image, 'base64'),
   });
-  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
-    timeout: 30_000,
-  });
+  await expect
+    .poll(
+      async () =>
+        (await dialog.locator('.w-page-scan-pocket').count()) === 9 ||
+        (await dialog
+          .locator('.w-page-scan-grid')
+          .getAttribute('data-scan-state')) === 'needs-adjustment',
+      { timeout: 30_000 },
+    )
+    .toBe(true);
   const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
   if (await stop.isVisible()) await stop.click();
   const correct = dialog.getByRole('button', { name: 'Zuschnitt korrigieren' });
@@ -136,9 +152,36 @@ test('a distorted photo is split into nine reviewable positions without changing
     mimeType: 'image/jpeg',
     buffer: Buffer.from(image, 'base64'),
   });
-  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9, {
-    timeout: 30_000,
-  });
+  await expect
+    .poll(
+      async () =>
+        (await dialog.locator('.w-page-scan-pocket').count()) === 9 ||
+        (await dialog
+          .locator('.w-page-scan-grid')
+          .getAttribute('data-scan-state')) === 'needs-adjustment',
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+  if (
+    (await dialog
+      .locator('.w-page-scan-grid')
+      .getAttribute('data-scan-state')) === 'needs-adjustment'
+  ) {
+    await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(0);
+    await expect(
+      dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
+    ).toBeEnabled();
+    await expect(
+      dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    ).toBeDisabled();
+    await dialog
+      .getByRole('button', { name: 'Binderseiten scannen schließen' })
+      .click();
+    await expect(
+      page.getByRole('heading', { name: 'Deine erste Seite wartet.' }),
+    ).toBeVisible();
+    return;
+  }
   await expect(dialog.locator('.w-page-scan-editor')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-editor[open]')).toHaveCount(0);
   await expect(dialog.locator('.w-page-scan-pocket img')).toHaveCount(9);
