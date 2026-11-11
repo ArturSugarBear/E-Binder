@@ -89,7 +89,7 @@ async function installCameraRig(page: Page): Promise<void> {
               },
             }),
           );
-        }, 30);
+        }, 320);
       }
       terminate() {}
     }
@@ -218,6 +218,10 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  // The scanner displays an animation only during genuine background work;
+  // OCR starts before the user clicks Results and can use two hot-zone
+  // retries with a common bounded deadline.
+  await expect(live.locator('.w-live-analysis')).toBeVisible();
   await expect
     .poll(() =>
       page.evaluate(() =>
@@ -228,7 +232,8 @@ test('three stable video observations create a reviewable scan but never ownersh
         ).__scanRig.ocrRequests(),
       ),
     )
-    .toBeGreaterThan(0);
+    .toBe(3);
+  await expect(live.locator('.w-live-analysis')).toBeHidden();
   // P07: removing the card automatically re-arms the same camera stream.
   // No manual Next tap, repeated camera permission request or OCR stall.
   await mode(page, 'blank');
@@ -278,7 +283,7 @@ test('three stable video observations create a reviewable scan but never ownersh
         ).__scanRig.ocrRequests(),
       ),
     )
-    .toBeGreaterThan(0);
+    .toBe(6);
   expect(
     await page.evaluate(
       () =>
