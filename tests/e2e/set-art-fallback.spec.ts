@@ -36,7 +36,7 @@ test('missing provider set logos use readable identities on mobile', async ({
     ['30 Jahre: Klassische Sammlung', '30'],
     ['MEP Black Star Promos', 'MEP'],
     ['Mega-Entwicklung Energie', 'MEE'],
-  ]) {
+  ] as const) {
     const tile = page.getByRole('button', { name });
     await expect(tile.locator('.w-set-fallback-mark')).toHaveText(mark);
     await expect(tile.locator('.w-set-symbol img')).toHaveCount(0);
