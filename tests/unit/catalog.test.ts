@@ -694,7 +694,7 @@ it('maps PBL and DLR footer codes to their current TCGdex print IDs', async () =
   const pbl = await fetchRecognizedCards('PBL DE 089/084', 'en');
   const dlr = await fetchRecognizedCards('DLR DE 136/103', 'en');
   expect(pbl).toMatchObject([
-    { setId: 'me05', number: '89/84', language: 'de' },
+    { setId: 'me05', number: '089/84', language: 'de' },
   ]);
   expect(dlr).toMatchObject([
     { setId: 'me06', number: '136/103', language: 'de' },
