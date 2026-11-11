@@ -8,7 +8,7 @@ import type { Holding } from '../domain/personal';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
-  | { status: 'unavailable' | 'error' };
+  | { status: 'unavailable' | 'suspect' | 'error' };
 
 interface CachedPrice {
   until: number;
@@ -55,9 +55,11 @@ export async function holdingPrice(
             basis: price.basis,
           }
         : undefined;
-      const value: HoldingPriceResult = isUsableQuote(quote, key)
-        ? { status: 'priced', quote }
-        : { status: 'unavailable' };
+      const value: HoldingPriceResult = entry.priceIssue === 'suspect'
+        ? { status: 'suspect' }
+        : isUsableQuote(quote, key)
+          ? { status: 'priced', quote }
+          : { status: 'unavailable' };
       results.set(key, { until: Date.now() + CACHE_MS, value });
       return value;
     })
