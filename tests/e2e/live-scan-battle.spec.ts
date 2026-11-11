@@ -371,12 +371,18 @@ for (const width of [320, 390, 430]) {
     await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
     // The native close event owns cleanup; wait for it before reading tracks.
     await expect(live).toHaveCount(0);
-    const states = await page.evaluate(() =>
-      (
-        window as typeof window & { __scanRig: { trackStates: () => string[] } }
-      ).__scanRig.trackStates(),
-    );
-    expect(states.every((state) => state === 'ended')).toBe(true);
+    await expect
+      .poll(async () => {
+        const states = await page.evaluate(() =>
+          (
+            window as typeof window & {
+              __scanRig: { trackStates: () => string[] };
+            }
+          ).__scanRig.trackStates(),
+        );
+        return states.length > 0 && states.every((state) => state === 'ended');
+      })
+      .toBe(true);
     await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
     await add
       .getByRole('button', { name: 'Karten hinzufügen schließen' })
