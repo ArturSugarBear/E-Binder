@@ -1,4 +1,5 @@
 import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm';
+import type { LiveHotZone } from '../domain/live-ocr-policy';
 import wasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.wasm?url';
 import runtimeUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url';
 import { decodeRecognition, recognitionTensor } from '../domain/vision-codec';
@@ -14,6 +15,7 @@ const scope = self as unknown as {
         event: MessageEvent<{
           photo: Blob;
           numberOnly?: boolean;
+          hotZone?: LiveHotZone;
           fast?: boolean;
           warmup?: boolean;
           modelUrl: string;
@@ -93,6 +95,7 @@ scope.onmessage = (event) => {
 async function recognize({
   photo,
   numberOnly,
+  hotZone,
   fast,
   modelUrl,
   dictionaryUrl,
@@ -100,6 +103,7 @@ async function recognize({
 }: {
   photo: Blob;
   numberOnly?: boolean;
+  hotZone?: LiveHotZone;
   fast?: boolean;
   modelUrl: string;
   dictionaryUrl: string;
@@ -175,6 +179,45 @@ async function recognize({
         input.dispose();
       }
     };
+    // Only re-read a region that was weak in the first pass. Avoid
+    // repeating the same full-card OCR while the camera is still active.
+    // Two extra hot-zone passes are permitted by the calling 5.6s budget.
+    if (hotZone) {
+      const retry: string[] = [];
+      report(
+        hotZone.startsWith('footer')
+          ? 'Sammlernummer wird nochmals lokal geprüft …'
+          : 'Vollständiger Kartenname wird nochmals geprüft …',
+        id,
+      );
+      switch (hotZone) {
+        case 'footer':
+          retry.push(await read([0.025, 0.91, 0.7, 0.08], 'gray'));
+          if (
+            !hasPrintedCollectorFraction(retry) ||
+            !hasPrintedSetCode(retry)
+          )
+            retry.push(await read([0.015, 0.875, 0.93, 0.12]));
+          break;
+        case 'footer-contrast':
+          retry.push(await read([0.04, 0.92, 0.83, 0.07], 'inverted'));
+          if (
+            !hasPrintedCollectorFraction(retry) ||
+            !hasPrintedSetCode(retry)
+          )
+            retry.push(await read([0.01, 0.875, 0.96, 0.12], 'binary'));
+          break;
+        case 'title':
+          retry.push(await read([0.03, 0.005, 0.93, 0.12], 'gray'));
+          break;
+        case 'title-wide':
+          retry.push(await read([0.015, 0.01, 0.97, 0.18]));
+          break;
+      }
+      scope.postMessage({ type: 'done', id, text: retry.join('\n') });
+      return;
+    }
+
     report('Set und Sammlernummer werden gelesen …', id);
     const number = await read([0.155, 0.94, 0.13, 0.032]);
     const identifier = await read([0.07, 0.94, 0.38, 0.032]);
