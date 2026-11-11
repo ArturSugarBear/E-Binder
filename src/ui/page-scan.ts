@@ -458,7 +458,8 @@ export function openPageScanner(
     if (pocket.container) pocket.container.dataset.decision = pocket.decision;
     if (reviewed)
       recordBetaEvent('scan_review', 'scan', 'page_pocket_reviewed', 'ok', {
-        selected: pocket.card?.source === 'tcgdex' ? pocket.card.key : undefined,
+        selected:
+          pocket.card?.source === 'tcgdex' ? pocket.card.key : undefined,
         metric: pockets.indexOf(pocket) + 1,
       });
     pocket.tileButton?.setAttribute(
@@ -562,10 +563,7 @@ export function openPageScanner(
       if (!item.editor) return;
       item.editor.hidden = position !== index;
       item.editor.open = position === index;
-      item.tileButton?.setAttribute(
-        'aria-pressed',
-        String(position === index),
-      );
+      item.tileButton?.setAttribute('aria-pressed', String(position === index));
     });
     reviewPanel.scrollIntoView({ block: 'nearest' });
   };
@@ -574,9 +572,7 @@ export function openPageScanner(
     const next = pockets.findIndex(
       (pocket, index) => index > activePocket && pocket.decision === 'pending',
     );
-    const first = pockets.findIndex(
-      (pocket) => pocket.decision === 'pending',
-    );
+    const first = pockets.findIndex((pocket) => pocket.decision === 'pending');
     showPocket(next >= 0 ? next : first >= 0 ? first : (activePocket + 1) % 9);
   };
   const reviewButtons = el(
@@ -1044,16 +1040,16 @@ export function openPageScanner(
               : ranked.conflictingName
                 ? 'Kartennamen widersprechen sich · Ausgabe genau prüfen'
                 : pocket.candidates.length && titleHint
-                ? `„${titleHint}“ erkannt · Ausgabe wählen`
-                : pocket.candidates.length
-                  ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
-                  : !navigator.onLine
-                    ? 'Offline · Katalogabgleich benötigt Internet'
-                    : catalogFailed
-                      ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
-                      : text.trim()
-                        ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
-                        : 'Kein lesbarer Kartenname · Foto prüfen';
+                  ? `„${titleHint}“ erkannt · Ausgabe wählen`
+                  : pocket.candidates.length
+                    ? `${pocket.candidates.length} mögliche Ausgaben · prüfen`
+                    : !navigator.onLine
+                      ? 'Offline · Katalogabgleich benötigt Internet'
+                      : catalogFailed
+                        ? 'Katalogabgleich fehlgeschlagen · später erneut suchen'
+                        : text.trim()
+                          ? 'Text gelesen, aber keine Ausgabe gefunden · prüfen'
+                          : 'Kein lesbarer Kartenname · Foto prüfen';
           if (printedEnergy.length)
             pocket.status.textContent = `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`;
           recordBetaEvent(
