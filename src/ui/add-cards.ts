@@ -187,7 +187,8 @@ export function openAddCards(
   );
   const takePhoto = action(
     'Karte live scannen',
-    () =>
+    () => {
+      prepareLiveOcr();
       openLiveScanner(
         async (file, aligned, onAnalysisState) => {
           const existing = new Set(ctx.state.captures.map((shot) => shot.id));
@@ -217,7 +218,8 @@ export function openAddCards(
             else void runOcr();
           }
         },
-      ),
+      );
+    },
     'primary',
     'camera',
   );
@@ -486,6 +488,21 @@ export function openAddCards(
     }
   };
 
+  function prepareLiveOcr(): void {
+    if (closed || liveOcrAbort.signal.aborted || liveOcrSession) return;
+    try {
+      liveOcrSession = createRecognitionSession(
+        liveOcrAbort.signal,
+        () => undefined,
+        { fast: true, timeoutMs: 5600 },
+      );
+      liveOcrSession.warmup();
+    } catch {
+      liveOcrSession?.close();
+      liveOcrSession = undefined;
+    }
+  }
+
   /**
    * Every physical scan gets up to 5.6s of fast ONNX OCR. The worker is
    * shared across photos, bounded to one inference at a time on iPhone.
@@ -502,14 +519,11 @@ export function openAddCards(
       .then(async () => {
         if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
           return;
-        if (!liveOcrSession)
-          liveOcrSession = createRecognitionSession(
-            liveOcrAbort.signal,
-            () => undefined,
-            { fast: true, timeoutMs: 5600 },
-          );
+        if (!liveOcrSession) prepareLiveOcr();
         const started = performance.now();
         try {
+          if (!liveOcrSession)
+            throw new Error('Die lokale OCR ist nicht verfügbar.');
           const text = await liveOcrSession.recognize(photo);
           if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
             return;
