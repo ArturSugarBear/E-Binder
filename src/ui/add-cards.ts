@@ -746,8 +746,8 @@ export function openAddCards(
       const quickText = prefilled ?? '';
       const usableLive =
         prefilled !== undefined &&
-        recognitionClues(quickText).some(
-          (clue) => Boolean(clue.setId && clue.number),
+        recognitionClues(quickText).some((clue) =>
+          Boolean(clue.setId && clue.number),
         ) &&
         recognizedNameHints(quickText).length > 0;
       const text = usableLive
