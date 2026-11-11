@@ -8,7 +8,7 @@
 A Pokemon card is identified by an **exact printing**, not by the presence of a
 Pokemon name or a high image-similarity number. A robust local-first pipeline:
 
-1. **Capture continuously, review later.** Auto-lock after three stable camera
+1. **Capture continuously; recognize in the background; review later.** Auto-lock after three stable camera
    observations, queue the cropped card immediately, and keep the camera live.
    Require actual card removal before automatic rearming; offer an explicit
    override button. No OCR, internet or price lookup should block the next
@@ -112,10 +112,19 @@ benchmarks, and no private photos in the public repository.
 
 ## Delivery slices
 
-- **P07a:** make camera capture independent of OCR/network; immediate review
-  queue; stable frame and safe card-removal auto-rearm; obvious fallback,
-  back navigation and screen-reader state. Tests use deterministic synthetic
-  camera but do not claim OCR accuracy.
+- **P07a:** make camera capture independent of OCR/network; launch a
+  bounded **5.6-second** hot-zone OCR job per captured card immediately in
+  a single reused worker queue while the camera stays live. The scanner
+  shows a looping analysis sweep ONLY during genuine pending OCR work;
+  reduced-motion users see a static indicator. Failed or slow scans keep
+  the photo for an automatic full OCR attempt at review, without requiring
+  a new photograph. Also include a stable card-removal rearm, obvious
+  fallback, back navigation and screen-reader state. Tests use a synthetic
+  camera and stubbed worker; they do not claim real accuracy.
+- **Remaining P07a calibration:** evaluate cold-start ONNX model load on
+  physical iPhone Safari; the 5.6-second budget bounds the OCR invocation,
+  but does not guarantee a result within that time. Multiple queued cards
+  are processed serially to protect iPhone memory.
 - **P07b:** frame sampler, sharpness/glare selection, per-region multi-frame
   consensus. Bounded memory; cap OCR calls and stop early when evidence
   converges. Test with real user photos locally.
