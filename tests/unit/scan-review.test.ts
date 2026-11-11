@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { scanEvidence, fullCardNameMatches, rankScanCandidates } from '../../src/data/scan-review';
+import {
+  scanEvidence,
+  fullCardNameMatches,
+  rankScanCandidates,
+} from '../../src/data/scan-review';
 import { hasPrintedSetCode } from '../../src/domain/ocr-number-search';
 import type { PersonalCard } from '../../src/domain/personal';
 
