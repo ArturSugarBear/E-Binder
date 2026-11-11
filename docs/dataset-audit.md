@@ -1,6 +1,6 @@
 # P08-DATASET-01 — real Pokémon photo ground truth
 
-Audit date: **2026-11-11 UTC**. Independent of P07 and P08 recognition work. No model training, inference, deployment or bulk download was performed. The initial Roboflow audit acquired no images; the follow-up below documents one separately sourced private image review. Only this report, the offline validator and its unit tests belong in Git.
+Audit date: **2026-11-11 UTC**. Independent of P07 and P08 recognition work. No model training, inference, deployment or bulk download was performed. The initial Roboflow audit acquired no images; the follow-ups below document one separately sourced private image review and six authenticated workspace samples. Only this report, the offline validator and its unit tests belong in Git.
 
 ## Evidence and findings
 
@@ -84,7 +84,7 @@ This example is an **unverified inventory template**, not a verified photo. Repl
 
 For `content: "empty"`, `cards` must also be `[]`. For `content: "cards"`, use at least one annotation, for example `{ "box": [0.1, 0.1, 0.7, 0.8], "regions": [], "identity": null }`, with coordinates actually inspected for that image. A verified card identity has the form `{ "tcgdexId": "base1-4", "observed": { "name": "Charizard", "localId": "4", "setId": "base1" } }`; this shape is illustrative, not evidence that a particular photo depicts that print. All non-null identities, even quarantined ones, must match the snapshot. Keep uncertain guesses outside the ground-truth identity field.
 
-Languages use lowercase codes matching TCGdex endpoint paths, such as `en`, `de`, `ja`, `zh-tw`; `unknown` is explicit. Rights statuses are `verified`, `unverified`, `restricted`. Verified rights require nonempty license, attribution and rights evidence for the intended use. Verification records and paths may contain private information and must not be published.
+Languages use lowercase codes matching TCGdex endpoint paths, such as `en`, `de`, `ja`, `zh-tw`; `unknown` is explicit. Use image-level `mixed` for photographs containing different card languages. Every identified card in a mixed photo must supply `identity.language`; a verified mixed photo must establish at least two distinct languages. An optional `identity.language` on a single-language photo must agree with its image-level language. Rights statuses are `verified`, `unverified`, `restricted`. Verified rights require nonempty license, attribution and rights evidence for the intended use. Verification records and paths may contain private information and must not be published.
 
 ### Pin a catalogue snapshot and validate offline
 
@@ -120,7 +120,7 @@ node --import tsx scripts/validate-photo-ground-truth.ts \
 npx vitest run tests/unit/photo-ground-truth.test.ts
 ```
 
-Exit codes: **0** valid manifest (possibly quarantine-only, not necessarily usable data); **1** schema/identity/rights/hash/path/duplicate/leakage issues; **2** invocation, private-input or JSON read failure. Output is deterministic for unchanged inputs. On invalid manifests, eligible-photo totals are `null`, not a partial approval. Other counts describe supplied records only: verification/media/rights gaps, missing card identities, unknown scenes, languages and splits. Never use these as counts of the unacquired remote datasets.
+Exit codes: **0** valid manifest (possibly quarantine-only, not necessarily usable data); **1** schema/identity/rights/hash/path/duplicate/leakage issues; **2** invocation, private-input or JSON read failure. Output is deterministic for unchanged inputs. The `reviewedExactPhotos` total counts validated, visually reviewed exact-identity photos independently of rights clearance and split eligibility; `usableVerifiedPhotos` additionally requires reviewed rights and an active split. On invalid manifests, both reviewed and eligible-photo totals are `null`, not a partial approval. Other counts describe supplied records only: verification/media/rights gaps, missing card identities, unknown scenes, languages and splits. Never use these as counts of the unacquired remote datasets.
 
 Duplicate IDs, source dataset/asset pairs and actual byte hashes are rejected even within one split. The same source asset is detected across dataset versions; a shared `groupId` across different splits is leakage. Hashing cannot find differently encoded/cropped near-duplicates unless original lineage is recorded correctly. This is not a perceptual similarity detector or a way to certify a dataset's split hygiene automatically. Image signatures are checked for JPEG/PNG/WebP; no full image decode, visual photo classification or box-to-pixel verification is claimed. Human review, authoritative catalogue capture and provenance remain essential.
 
@@ -155,3 +155,64 @@ Public search discovery was bounded to an example exact card, Guardevoir-ex `245
 **Recommended working route:** obtain original photographs and card inventory exports directly from consenting collectors/dealers, rather than harvesting their marketplace copies. An opt-in delivery should include original asset ID, photographer/permission evidence, intended private evaluation use, and card name/set/number/language as candidate metadata. Verify readable details against TCGdex, hash/group originals before splitting, and retain uncertain records in quarantine. Any public redistribution or future training rights must be agreed separately. No seller was contacted automatically.
 
 The repository also refers to 34 prior private binder photos. The user clarified these were attachments in earlier chat sessions. They are not present in the current workspace, and targeted Drive searches found no accessible copy. Reattaching those originals would provide a direct first-party route; a historical mention alone cannot populate the dataset or establish their labels.
+
+## Authenticated Roboflow workspace audit
+
+After the user supplied access, the normal authenticated API returned HTTP 200 and exposed two imported workspace projects. The earlier 401 blocker is therefore **resolved for this authorized workspace**. Workspace/project identifiers, account responses, credentials, image URLs and private manifests are not published here. No new versions, exports, training jobs, inference calls or changes to remote projects were made.
+
+These are API-reported project totals, not manually verified-photo totals or a deduplicated union:
+
+| Project alias | API image count | Annotation schema / count  | API source splits                | Generated versions |
+| ------------- | --------------- | -------------------------- | -------------------------------- | ------------------ |
+| A             | 430             | `cards`: 1,622 boxes       | 430 train; 0 validation; 0 test  | 0                  |
+| B             | 142             | `trading-cards`: 143 boxes | 99 train; 29 validation; 14 test | 0                  |
+
+Both projects report CC BY 4.0. Imported workspace ownership and an API key establish authorized access; they do not establish who photographed each imported image. All six image-detail responses inspected had no photographer/license provenance in user metadata. This report retains the distinction between the project-declared license and per-image rights evidence.
+
+### Six-image private sample and actual result
+
+The first three API search results in each project were frozen by image ID in a private snapshot; this is a bounded convenience sample, not random or representative sampling. Six original media files and their raw annotation responses were read, decoded and hashed privately. All six SHA-256 values differ; no claim is made about duplicate rates in the remaining images. Correct JPEG/PNG/WebP extensions are retained.
+
+- **Project A, three inspected images:** a five-card Japanese/English photograph; an occluded photograph of graded/slabbed cards with six selected source boxes and incomplete instance coverage; one clearly legible English Bagon photo. The mixed photo visibly includes an anniversary reprint; its English printed number alone must not select an original-set identity.
+- **Project B, three inspected images:** screenshots of hand-held physical Magnezone ex, Chandelure and Torterra cards. Visible fingers, perspective, background and reflections support camera-derived origin; the screenshots are not claimed as original camera files. Their similar backgrounds indicate a possible shared capture session, not proof of duplication. They are conservatively grouped together; the existing train/validation assignments are not reused as independent evaluation splits.
+- **Annotations:** 15 source card boxes inspected across the six samples. No source name/number/set regions or exact-print labels were present in these inspected responses. One source box exceeded the image boundary by 0.005 pixels from decimal rounding; the derived normalized box was clipped to the boundary and the correction recorded privately. Raw annotations remain unchanged.
+
+Four single-card images were visually matched against targeted, frozen English TCGdex responses using readable number, name, set identifier/symbol and corroborating details:
+
+| Readable photo         | Exact TCGdex ID                                             | Additional visible evidence                                       |
+| ---------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| Bagon `52/107`         | [ex8-52](https://api.tcgdex.net/v2/en/cards/ex8-52)         | Deoxys symbol, Takao Unno, HP50, Singe / Doubleslap               |
+| Magnezone ex `065/198` | [sv01-065](https://api.tcgdex.net/v2/en/cards/sv01-065)     | SVI EN, HP330, Energy Crush / Pulse Launcher                      |
+| Chandelure `026/196`   | [swsh11-026](https://api.tcgdex.net/v2/en/cards/swsh11-026) | Lost Origin symbol, sui, HP150, Mountain Roasting / Heat Blast    |
+| Torterra `008/172`     | [swsh9-008](https://api.tcgdex.net/v2/en/cards/swsh9-008)   | Brilliant Stars symbol, Oswaldo KATO, HP190, Evopress / Hammer In |
+
+These are Codex visual reviews, not independent human confirmation, authenticity or finish certifications. The other two samples remain unverified with **11 unidentified source boxes**. That number counts unresolved annotations, not all distinct physical cards in the occluded scene. No identity was inferred from a source filename.
+
+The actual offline CLI accepted the private six-image manifest with no issues:
+
+```json
+{
+  "samples": 6,
+  "reviewedExactPhotos": 4,
+  "usableVerifiedPhotos": 0,
+  "unverifiedPhotos": 2,
+  "missingIdentities": 11,
+  "unresolvedRights": 6,
+  "languages": { "mixed": 1, "en": 5 },
+  "splits": { "quarantine": 6 }
+}
+```
+
+Four exact photo identities are now available for review. They have not been promoted into an eligible dataset while imported-photo provenance remains unresolved. English is visible across the sample, with Japanese additionally present in the mixed photograph; language coverage of all 572 project records has not been established. No original split is treated as independently audited ground truth.
+
+### Reproduce the authorized access path
+
+Use a workspace-scoped credential from a local secret or `ROBOFLOW_API_KEY`, never a committed file or a printed request URL. The [official Roboflow Python project reference](https://roboflow.github.io/roboflow-python/core/project/) and its [SDK source](https://github.com/roboflow/roboflow-python/blob/main/roboflow/core/project.py) document the operations used:
+
+1. Read the account/default workspace and its projects via the authenticated API.
+2. Read each selected project's metadata to freeze image counts, classes, declared license, source splits and version availability.
+3. Call the read-only search operation `POST /{workspace}/{project}/search`, with `offset: 0`, `limit: 3`, `in_dataset: true` and fields `id`, `name`, `annotations`, `labels`, `split`, `user_metadata`, `url`, `width`, `height`. Save selected IDs privately; replay those IDs rather than assuming search order stays unchanged.
+4. Read `GET /{workspace}/{project}/images/{image_id}` for raw boxes and returned original-media URLs. Read only the six selected media files; do not request an export or create a version. Keep credentials restricted to the Roboflow API origin, and never append them to image URLs.
+5. Preserve raw annotations and provenance. Convert center-based pixel boxes to normalized image-relative boxes, documenting any source-boundary rounding correction. Review the actual files, populate only confirmed exact identities, freeze the language-specific catalogue responses and run the existing offline validator. Keep unresolved data in quarantine.
+
+Private artifacts include the project snapshots, selected-ID index, raw annotation responses, original files, catalogue snapshot, manifest, review notes and JSON validation report. The temporary local credential used for the audit is removed after acquisition. None of these private files or images is included in this PR.

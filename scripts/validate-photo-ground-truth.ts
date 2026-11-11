@@ -46,7 +46,7 @@ const sampleSchema = z
       })
       .strict(),
     media: z.enum(['camera-photo', 'digital-artwork', 'unknown']),
-    language: z.union([z.literal('unknown'), language]),
+    language: z.union([z.literal('unknown'), z.literal('mixed'), language]),
     verification: review,
     split: z.enum(['train', 'validation', 'test', 'quarantine']),
     content: z.enum(['cards', 'unknown', 'empty']),
@@ -60,6 +60,7 @@ const sampleSchema = z
           identity: z
             .object({
               tcgdexId: text,
+              language: language.optional(),
               // Transcribed from the photo and checked by the reviewer, never inferred
               // from a filename, a listing title or the Pokemon species alone.
               observed: z
@@ -198,6 +199,7 @@ export async function validatePhotoManifest(
   };
   const summary = {
     samples: manifest.data.samples.length,
+    reviewedExactPhotos: 0,
     usableVerifiedPhotos: 0,
     usableEmptyPhotos: 0,
     unverifiedPhotos: 0,
@@ -303,11 +305,22 @@ export async function validatePhotoManifest(
           'Verified samples cannot have unknown content, language or card identities',
         );
     }
+    const identityLanguages = new Set<string>();
     for (const card of sample.cards) {
       if (!card.identity) continue;
-      const metadata = index.get(
-        `${sample.language}:${card.identity.tcgdexId}`,
-      );
+      const cardLanguage = card.identity.language ?? sample.language;
+      identityLanguages.add(cardLanguage);
+      if (
+        (sample.language === 'mixed' && !card.identity.language) ||
+        (sample.language !== 'mixed' &&
+          sample.language !== 'unknown' &&
+          cardLanguage !== sample.language)
+      )
+        fail(
+          'identity_language',
+          'Mixed photos require a language per identified card; single-language photos must agree with every identity',
+        );
+      const metadata = index.get(`${cardLanguage}:${card.identity.tcgdexId}`);
       const observed = card.identity.observed;
       if (
         !metadata ||
@@ -320,6 +333,22 @@ export async function validatePhotoManifest(
           'Exact ID and observed language/name/number/set must match a TCGdex snapshot record',
         );
     }
+    if (
+      sample.language === 'mixed' &&
+      sample.verification.status === 'verified' &&
+      identityLanguages.size < 2
+    )
+      fail(
+        'identity_language',
+        'A verified mixed-language photo must establish at least two distinct card languages',
+      );
+    if (
+      issues.length === before &&
+      sample.media === 'camera-photo' &&
+      sample.content === 'cards' &&
+      sample.verification.status === 'verified'
+    )
+      summary.reviewedExactPhotos++;
     if (
       sample.split !== 'quarantine' &&
       (sample.verification.status !== 'verified' ||
@@ -348,6 +377,7 @@ export async function validatePhotoManifest(
     issues,
     summary: {
       ...summary,
+      reviewedExactPhotos: issues.length ? null : summary.reviewedExactPhotos,
       usableVerifiedPhotos: issues.length ? null : summary.usableVerifiedPhotos,
       usableEmptyPhotos: issues.length ? null : summary.usableEmptyPhotos,
     },

@@ -126,6 +126,77 @@ describe('private photo ground-truth validator', () => {
       expect(codes(await f.run())).toContain('exact_identity');
     },
   );
+  it('records reviewed exact photos separately from unresolved rights', async () => {
+    const f = await fixture();
+    f.sample.split = 'quarantine';
+    f.sample.source.rightsStatus = 'unverified';
+    expect(await f.run()).toMatchObject({
+      valid: true,
+      summary: {
+        reviewedExactPhotos: 1,
+        usableVerifiedPhotos: 0,
+        unresolvedRights: 1,
+      },
+    });
+  });
+  it('validates each language in a mixed photo and rejects implicit or conflicting labels', async () => {
+    const f = await fixture();
+    const data = snapshot();
+    data.records.push({
+      ...data.records[0]!,
+      language: 'de',
+      sourceUrl: 'https://api.tcgdex.net/v2/de/cards/base1-4',
+      card: { ...data.records[0]!.card, name: 'Glurak' },
+    });
+    const catalogue = JSON.stringify(data);
+    f.manifest.catalogueSha256 = digest(catalogue);
+    const sample = {
+      ...f.sample,
+      language: 'mixed',
+      cards: [
+        {
+          ...f.sample.cards[0]!,
+          identity: { ...f.sample.cards[0]!.identity, language: 'en' },
+        },
+        {
+          ...f.sample.cards[0]!,
+          identity: {
+            ...f.sample.cards[0]!.identity,
+            language: 'de',
+            observed: {
+              ...f.sample.cards[0]!.identity.observed,
+              name: 'Glurak',
+            },
+          },
+        },
+      ],
+    };
+    const run = () =>
+      validatePhotoManifest(
+        { ...f.manifest, samples: [sample] },
+        catalogue,
+        f.root,
+      );
+    expect(await run()).toMatchObject({
+      valid: true,
+      summary: { reviewedExactPhotos: 1, languages: { mixed: 1 } },
+    });
+    sample.cards[1]!.identity.language = 'en';
+    expect(codes(await run())).toContain('exact_identity');
+    sample.cards[1]!.identity.language = 'de';
+    sample.language = 'en';
+    expect(codes(await run())).toContain('identity_language');
+    const missing = { ...sample, language: 'mixed', cards: f.sample.cards };
+    expect(
+      codes(
+        await validatePhotoManifest(
+          { ...f.manifest, samples: [missing] },
+          catalogue,
+          f.root,
+        ),
+      ),
+    ).toContain('identity_language');
+  });
   it('does not infer an identity from an apparently exact filename', async () => {
     const f = await fixture();
     await writeFile(join(f.root, 'base1-4-Charizard.png'), png);
