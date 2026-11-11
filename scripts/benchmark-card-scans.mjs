@@ -12,6 +12,11 @@ import { chromium } from '@playwright/test';
 import { readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve, basename } from 'node:path';
 import { performance } from 'node:perf_hooks';
+import {
+  readRankedKeys,
+  rankMatch,
+  cardSummary,
+} from './scan-benchmark-results.mjs';
 
 const input = process.argv[2];
 if (!input) {
@@ -71,6 +76,7 @@ async function benchmark(manifestPath) {
       throw new Error("Single photo exceeds the app's 12 MB capture limit.");
   }
   const browser = await chromium.launch({ headless: true });
+  const browserVersion = browser.version();
   const reports = [];
   try {
     for (const sample of manifest.samples) {
@@ -85,8 +91,11 @@ async function benchmark(manifestPath) {
         const url = new URL(
           process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173/E-Binder/',
         );
+        url.hash = 'sammlung';
         await page.goto(url.toString(), { waitUntil: 'domcontentloaded' });
         await page.locator('#workspace-main[data-ready="true"]').waitFor();
+        const readyAt = performance.now();
+        const online = await page.evaluate(() => navigator.onLine);
         await page
           .getByRole('button', { name: 'Karten hinzufügen', exact: true })
           .click();
@@ -120,17 +129,21 @@ async function benchmark(manifestPath) {
           }
         }
         await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
+        const alignedAt = performance.now();
         await crop
           .getByRole('button', { name: 'Texterkennung starten' })
           .click();
         await add
           .locator('.w-search-results[data-scan-state="complete"]')
           .waitFor({ timeout: 180_000 });
-        const ranked = await add
-          .locator('.w-search-results button[data-card-key]')
-          .evaluateAll((nodes) =>
-            nodes.map((element) => element.dataset.cardKey),
-          );
+        const finishedAt = performance.now();
+        const payload = await add.locator('.w-search-results').evaluate(
+          (node) => ({
+            version: node.dataset.scanResultContract,
+            keys: node.dataset.scanRankedKeys,
+          }),
+        );
+        const ranked = readRankedKeys(payload.version, payload.keys);
         const owned = await page.locator('.w-owned-grid button').count();
         if (owned !== 0)
           throw new Error(
@@ -140,18 +153,19 @@ async function benchmark(manifestPath) {
           photo: basename(photoPath),
           conditions: sample.conditions ?? [],
           rights: sample.rights,
+          language: sample.language ?? 'de',
           expectedKey: sample.expectedKey,
-          top1:
-            sample.expectedKey === null
-              ? null
-              : ranked[0] === sample.expectedKey,
-          top3:
-            sample.expectedKey === null
-              ? null
-              : ranked.slice(0, 3).includes(sample.expectedKey),
-          unexpectedSuggestions:
-            sample.expectedKey === null ? ranked.length : null,
+          ...rankMatch(sample.expectedKey, ranked),
+          resultStatus: ranked.length ? 'candidates' : 'no-candidates',
+          rankedKeys: ranked,
           candidates: ranked.length,
+          online,
+          geometryMode: sample.corners ? 'corrected' : 'manual-default',
+          phasesMs: {
+            appLoad: Math.round(readyAt - start),
+            captureAndAlignment: Math.round(alignedAt - readyAt),
+            recognitionAndReview: Math.round(finishedAt - alignedAt),
+          },
           durationMs: Math.round(performance.now() - start),
         });
       } catch (error) {
@@ -161,6 +175,7 @@ async function benchmark(manifestPath) {
           rights: sample.rights,
           expectedKey: sample.expectedKey,
           durationMs: Math.round(performance.now() - start),
+          resultStatus: 'technical-error',
           error: error instanceof Error ? error.message : String(error),
         });
       } finally {
@@ -170,49 +185,24 @@ async function benchmark(manifestPath) {
   } finally {
     await browser.close();
   }
-  const completed = reports.filter((report) => !report.error);
-  const scored = completed.filter((report) => report.expectedKey !== null);
-  const known = scored.length;
-  const top1 = scored.filter((r) => r.top1).length;
-  const top3 = scored.filter((r) => r.top3).length;
-  const mean = (list) =>
-    list.length
-      ? Math.round(list.reduce((sum, v) => sum + v, 0) / list.length)
-      : null;
-  const byCondition = Object.fromEntries(
-    [...new Set(completed.flatMap((r) => r.conditions))].map((condition) => {
-      const subset = scored.filter((r) => r.conditions.includes(condition));
-      return [
-        condition,
-        {
-          known: subset.length,
-          top1Rate: subset.length
-            ? subset.filter((r) => r.top1).length / subset.length
-            : null,
-          top3Rate: subset.length
-            ? subset.filter((r) => r.top3).length / subset.length
-            : null,
-        },
-      ];
-    }),
-  );
-  const summary = {
-    samples: reports.length,
-    completed: completed.length,
-    errors: reports.length - completed.length,
-    known,
-    top1Correct: top1,
-    top3Correct: top3,
-    top1Rate: known ? top1 / known : null,
-    top3Rate: known ? top3 / known : null,
-    negativeSamples: completed.filter((r) => r.expectedKey === null).length,
-    negativeSamplesWithSuggestions: completed.filter(
-      (r) => r.expectedKey === null && r.unexpectedSuggestions > 0,
-    ).length,
-    meanDurationMs: mean(completed.map((r) => r.durationMs)),
-    byCondition,
+  const summary = cardSummary(reports);
+  const result = {
+    schemaVersion: 2,
+    measuredAt: new Date().toISOString(),
+    provenance: {
+      commit: process.env.GIT_COMMIT_SHA ?? null,
+      modelVersion: null,
+      indexVersion: null,
+      browser: 'chromium',
+      browserVersion,
+      viewport: '390x844',
+      serviceWorkers: 'blocked',
+      recognition: 'real-worker-no-stubs',
+      geometry: 'manual-photo-alignment',
+    },
+    summary,
+    reports,
   };
-  const result = { measuredAt: new Date().toISOString(), summary, reports };
   if (process.env.CARD_SCAN_BENCHMARK_OUT)
     await writeFile(
       resolve(process.env.CARD_SCAN_BENCHMARK_OUT),
