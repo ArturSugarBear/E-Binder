@@ -1,0 +1,99 @@
+import { test, expect } from './fixtures';
+
+test('scan cannot identify a printing from 088/063 alone; set-first review resolves M1L', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker;
+    class FakeOCR {
+      onmessage:
+        | ((event: MessageEvent<{ type: string; id: number; text: string }>) => void)
+        | null = null;
+      onerror: ((event: Event) => void) | null = null;
+      postMessage(data: { id: number }) {
+        setTimeout(() => {
+          this.onmessage?.(
+            new MessageEvent('message', {
+              data: { type: 'done', id: data.id, text: '088/063' },
+            }),
+          );
+        }, 25);
+      }
+      terminate() {}
+    }
+    class InterceptWorker extends NativeWorker {
+      constructor(url: string | URL, options?: WorkerOptions) {
+        if (String(url).includes('vision-worker'))
+          return new FakeOCR() as unknown as InterceptWorker;
+        super(url, options);
+      }
+    }
+    Object.defineProperty(window, 'Worker', {
+      configurable: true,
+      value: InterceptWorker,
+    });
+  });
+  await page.route('https://api.tcgdex.net/**', async (route) => {
+    const url = new URL(route.request().url());
+    const path = url.pathname;
+    const set = {
+      id: 'M1L',
+      name: 'メガブレイブ',
+      cardCount: { official: 63 },
+    };
+    const resume = {
+      id: 'M1L-088',
+      localId: '088',
+      name: 'メガルカリオex',
+    };
+    if (path.endsWith('/ja/sets'))
+      return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/sets/M1L'))
+      return route.fulfill({
+        json: { ...set, cards: [resume] },
+      });
+    if (path.endsWith('/ja/cards/M1L-088'))
+      return route.fulfill({
+        json: { ...resume, set, variants: { holo: true } },
+      });
+    if (path.endsWith('/series/tcgp'))
+      return route.fulfill({ json: { id: 'tcgp', sets: [] } });
+    if (path.endsWith('/sets') || path.endsWith('/series'))
+      return route.fulfill({ json: [] });
+    return route.fulfill({ json: [] });
+  });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
+  await add
+    .locator('input[capture]')
+    .setInputFiles('public/assets/cards/svi-211.webp');
+  const crop = page.getByRole('dialog', { name: 'Karte ausrichten' });
+  await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
+  await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
+  const setPanel = add.locator('.w-scan-set-panel');
+  await expect(setPanel).toBeVisible({ timeout: 30_000 });
+  await expect(setPanel).toContainText('Welches Set steht auf deiner Karte?');
+  await expect(add.locator('.w-scan-match-card')).toHaveCount(0);
+  await expect(add.locator('.w-search-results .w-button-card')).toHaveCount(0);
+  await setPanel.getByRole('button', { name: 'Japanisch' }).click();
+  await setPanel.getByLabel('Set suchen').fill('M1L');
+  await setPanel.getByLabel('Set auswählen').selectOption('M1L');
+  await setPanel
+    .getByRole('button', { name: 'Set und Nummer abgleichen' })
+    .click();
+  await expect(add.locator('.w-scan-match-card')).toContainText('メガルカリオex');
+  await expect(add.locator('.w-scan-match-card')).toContainText('088/63');
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  await add
+    .getByRole('button', { name: 'Diese Ausgabe prüfen', exact: true })
+    .click();
+  await expect(add.locator('.w-confirm-form')).toContainText('メガルカリオex');
+  await expect(
+    add.getByRole('button', { name: 'Zurück zur Set- und Kartenprüfung' }),
+  ).toBeVisible();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
