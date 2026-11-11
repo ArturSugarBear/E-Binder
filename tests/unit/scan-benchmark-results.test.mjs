@@ -8,16 +8,21 @@ import {
 
 describe('versioned scanner benchmark results', () => {
   it('preserves the displayed ranking and rejects a stale UI contract', () => {
-    expect(readRankedKeys('1', '["tcgdex:ja:M1L-088","tcgdex:ja:M1S-088"]')).toEqual(
-      ['tcgdex:ja:M1L-088', 'tcgdex:ja:M1S-088'],
-    );
+    expect(
+      readRankedKeys('1', '["tcgdex:ja:M1L-088","tcgdex:ja:M1S-088"]'),
+    ).toEqual(['tcgdex:ja:M1L-088', 'tcgdex:ja:M1S-088']);
     expect(() => readRankedKeys(undefined, '[]')).toThrow(/contract/);
     expect(() => readRankedKeys('1', 'not-json')).toThrow(/JSON/);
     expect(() => readRankedKeys('1', '["one","one"]')).toThrow(/invalid/);
   });
 
   it('scores exact print keys, top-five and negative photos separately', () => {
-    expect(rankMatch('tcgdex:ja:M1L-088', ['tcgdex:ja:M1S-088', 'tcgdex:ja:M1L-088'])).toEqual({
+    expect(
+      rankMatch('tcgdex:ja:M1L-088', [
+        'tcgdex:ja:M1S-088',
+        'tcgdex:ja:M1L-088',
+      ]),
+    ).toEqual({
       top1: false,
       top3: true,
       top5: true,
