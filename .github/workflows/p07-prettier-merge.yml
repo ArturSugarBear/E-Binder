@@ -1,0 +1,31 @@
+name: P07 merge format temporary
+on:
+  push:
+    branches: [feature/p07-rapid-scan-and-visual-evaluation]
+    paths: [.github/workflows/p07-prettier-merge.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/p07-rapid-scan-and-visual-evaluation
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format P07 sources on updated master
+        run: npx prettier --write src/data/recognize.ts src/data/vision-worker.ts src/domain/live-ocr-policy.ts src/ui/add-cards.ts tests/unit/live-ocr-policy.test.ts
+      - name: Commit and push formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/recognize.ts src/data/vision-worker.ts src/domain/live-ocr-policy.ts src/ui/add-cards.ts tests/unit/live-ocr-policy.test.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "Format integrated P07 scanner"
+            git push origin HEAD:feature/p07-rapid-scan-and-visual-evaluation
+          fi
