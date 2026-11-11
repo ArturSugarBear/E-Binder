@@ -134,7 +134,7 @@ describe('real, comparable portfolio history', () => {
     expect(points).toHaveLength(2);
     expect(points.map((point) => point.knownValue)).toEqual([15.5, 15.5]);
     const serialized = storage.get(
-      'e-binder-portfolio-history-v3:local:personal',
+      'e-binder-portfolio-history-v4:local:personal',
     )!;
     expect(serialized).not.toContain('Echte Karte');
     expect(serialized).not.toContain('sv01');

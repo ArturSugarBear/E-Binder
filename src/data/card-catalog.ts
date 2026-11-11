@@ -1,4 +1,5 @@
 import { secondaryCardArt } from './artwork-fallbacks';
+import { priceLooksMisassigned } from '../domain/price-integrity';
 import { z } from 'zod';
 import type { Collection } from '../domain/collection';
 import { recognizedNameHints } from '../domain/recognition-names';
@@ -127,6 +128,7 @@ export interface CatalogEntry {
   price?: MarketPrice;
   holoPrice?: MarketPrice;
   cardmarketUrl?: string;
+  priceIssue?: 'suspect';
 }
 export const catalogSetSchema = z.object({
   id: z.string().regex(/^[\w.+-]+$/),
@@ -405,6 +407,18 @@ const apiCardSchema = resumeSchema.extend({
         })
         .nullable()
         .optional(),
+      tcgplayer: z
+        .object({
+          normal: z
+            .object({ marketPrice: z.number().nullable().optional() })
+            .optional(),
+          holofoil: z
+            .object({ marketPrice: z.number().nullable().optional() })
+            .optional(),
+        })
+        .passthrough()
+        .nullable()
+        .optional(),
     })
     .nullish()
     .catch(undefined),
@@ -547,6 +561,54 @@ function personalFromApi(
       : ['normal', 'holo', 'reverse', 'other'],
   });
 }
+/**
+ * Upstream can accidentally assign the cheap base card's Cardmarket product
+ * ID to an illustration/secret print of the same Pokémon in the same set.
+ * Verify the sibling product mapping before publishing a secret-print quote.
+ * A catalogue outage cannot establish a match and must not invent one.
+ */
+async function hasSiblingCardmarketCollision(
+  card: z.infer<typeof apiCardSchema>,
+  language: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const productId = card.pricing?.cardmarket?.idProduct;
+  if (
+    !productId ||
+    !/^\d+$/.test(card.localId) ||
+    Number(card.localId) <= card.set.cardCount.official
+  )
+    return false;
+  try {
+    const cards = await catalogSetCards(card.set.id, language, signal);
+    const siblings = cards
+      .filter(
+        (candidate) =>
+          candidate.id !== card.id &&
+          normalize(candidate.name) === normalize(card.name),
+      )
+      .slice(0, 8);
+    const matches = await Promise.allSettled(
+      siblings.map(async (candidate) =>
+        apiCardSchema.parse(
+          await cachedJson(
+            `https://api.tcgdex.net/v2/${language}/cards/${encodeURIComponent(candidate.id)}`,
+            signal,
+          ),
+        ),
+      ),
+    );
+    return matches.some(
+      (result) =>
+        result.status === 'fulfilled' &&
+        result.value.id !== card.id &&
+        result.value.pricing?.cardmarket?.idProduct === productId,
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function catalogEntry(
   id: string,
   language: string,
@@ -596,24 +658,42 @@ export async function catalogEntry(
     }
     return undefined;
   };
-  const price = bestQuote(false);
+  const candidate = bestQuote(false);
+  const dollarMarket =
+    raw.variants?.holo && raw.variants.normal === false
+      ? raw.pricing?.tcgplayer?.holofoil?.marketPrice
+      : raw.pricing?.tcgplayer?.normal?.marketPrice;
+  // TCGdex has known wrong Cardmarket product mappings across versions of
+  // one card. A valid timestamp and currency do NOT prove a valid printing.
+  const suspect =
+    candidate !== undefined &&
+    (priceLooksMisassigned({
+      localId: raw.localId,
+      setOfficialCount: raw.set.cardCount.official,
+      amountEur: candidate.amount,
+      tcgplayerMarketUsd: dollarMarket ?? undefined,
+    }) ||
+      (await hasSiblingCardmarketCollision(raw, language, signal)));
+  const price = suspect ? undefined : candidate;
   // Cardmarket's secondary "-holo" series often denotes reverse foil, NOT
   // the regular holo-only printing. A holo-only card's real market reference
   // is the standard series (e.g. SV 151's illustration rare cards).
-  // Mixed/ambiguous variants stay unpriced rather than borrowing reverse data.
   const holoPrice =
     raw.variants?.holo === true && raw.variants.normal === false
       ? price
       : undefined;
-  const cardmarketUrl = quote?.idProduct
-    ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
-    : undefined;
+  // Never route the user to a known-suspect Cardmarket product ID either.
+  const cardmarketUrl =
+    !suspect && quote?.idProduct
+      ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
+      : undefined;
   return {
     card,
     rarity: raw.rarity ?? '',
     price,
     holoPrice,
     cardmarketUrl,
+    priceIssue: suspect ? 'suspect' : undefined,
   };
 }
 export async function catalogSetCards(

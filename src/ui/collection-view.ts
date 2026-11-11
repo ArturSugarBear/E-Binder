@@ -68,13 +68,15 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
       const basis = result.quote.basis
         ? priceBasisLabels[result.quote.basis]
         : 'Preisreferenz';
-      note.textContent = `${basis} · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+      note.textContent = `${basis} (nicht NM-gefiltert) · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
     } else {
       value.textContent = '—';
       note.textContent =
         result.status === 'error'
           ? 'Preis momentan nicht erreichbar'
-          : 'Keine datierte EUR-Preisreferenz';
+          : result.status === 'suspect'
+            ? 'Preiszuordnung unplausibel · nicht bewertet'
+            : 'Keine verlässliche EUR-Preisreferenz';
     }
   };
   return {

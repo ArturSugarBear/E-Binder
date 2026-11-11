@@ -53,7 +53,7 @@ test('collection prices match exact cards', async ({ page }) => {
   });
   await expect(priced.locator('.w-price-value')).toHaveText(/32,36\s*€/);
   await expect(priced.locator('.w-price-note')).toHaveText(
-    'Trendpreis · Stand 9.11.2026',
+    'Trendpreis (nicht NM-gefiltert) · Stand 9.11.2026',
   );
   await priced.click();
   const detail = page.getByRole('dialog', { name: 'Trasla' });
