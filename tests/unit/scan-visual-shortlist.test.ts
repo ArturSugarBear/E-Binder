@@ -118,7 +118,7 @@ describe('P08 visual print resolution', () => {
       new AbortController().signal,
       mockSession,
     );
-    expect(mockSession.match).toHaveBeenCalledWith(expect.any(Blob), 5000);
+    expect(mockSession.match).toHaveBeenCalledWith(expect.any(Blob), 4700);
     expect(result.candidates.map((entry) => entry.key).slice(0, 2)).toEqual([
       en.key,
       de.key,
