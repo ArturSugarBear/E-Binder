@@ -100,6 +100,25 @@ describe('P08 visual print resolution', () => {
     expect(readCard).not.toHaveBeenCalled();
   });
 
+  it('retains a valid visual candidate when OCR only sees partial collector digits', async () => {
+    const local = card('ja', 'M1L-088', '088/063');
+    const session = {
+      match: vi.fn(async () => [hit('ja', 'M1L-088', '088/063', 1)]),
+      close: vi.fn(),
+    };
+    const result = await resolvePhotoScan(
+      new Blob(['still']),
+      '088',
+      [local],
+      'ja',
+      new AbortController().signal,
+      session,
+    );
+    expect(result.candidates.map((entry) => entry.key)).toEqual([local.key]);
+    expect(result.suggested).toBeUndefined();
+    expect(result.basis).toBe('visual-review');
+  });
+
   it('surfaces image candidate alternatives when OCR could not read any text, without automatic confirmation', async () => {
     const de = card('de', 'me06-111', '111/103');
     const en = card('en', 'me06-111', '111/103');
