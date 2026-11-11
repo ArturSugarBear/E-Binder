@@ -536,7 +536,14 @@ export function openAddCards(
     const started = performance.now();
     onAnalysisState(true);
     onAnalysisState(true, 'Kartenmerkmale werden gelesen …');
-    const task = liveOcrQueue
+    // Only serialize ONNX inference. A slow online catalogue lookup for
+    // card N must not prevent the worker from reading card N+1.
+    const previousOcr = liveOcrQueue;
+    let releaseOcr: () => void = () => undefined;
+    liveOcrQueue = new Promise<void>((resolve) => {
+      releaseOcr = resolve;
+    });
+    const task = previousOcr
       .then(async () => {
         if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
           return;
@@ -588,6 +595,9 @@ export function openAddCards(
             liveOcrSession = undefined;
           }
         }
+        // Subsequent photos can now use the warmed OCR worker while this
+        // photo's catalogue requests continue in the background.
+        releaseOcr();
         if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
           return;
         const candidatesFromLocal = candidatesFromText(text, [
@@ -672,11 +682,13 @@ export function openAddCards(
         );
       })
       .finally(() => {
+        // Release even if the photo was discarded or analysis aborted before
+        // reaching the catalogue stage.
+        releaseOcr();
         onAnalysisState(false);
         liveOcrJobs.delete(id);
       });
     liveOcrJobs.set(id, task);
-    liveOcrQueue = task.catch(() => undefined);
   }
 
   async function addFiles(
