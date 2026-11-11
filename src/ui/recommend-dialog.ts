@@ -27,6 +27,7 @@ export function openRecommendations(
   pageId: string,
 ): void {
   const sheet = modal('Deine nächste Binderseite', true);
+  sheet.dialog.classList.add('w-recommend-dialog');
   const introduction = message(
     'Wir verwenden nur bestätigte, verfügbare Exemplare. Fixierte Plätze bleiben erhalten. Du entscheidest, welcher Entwurf zu dir passt.',
   );

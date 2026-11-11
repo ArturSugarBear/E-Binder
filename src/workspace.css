@@ -4296,3 +4296,65 @@ textarea.w-input,
     font-size: 14px;
   }
 }
+
+/* Binder interaction audit: compact mobile inspection and scrollable sheets. */
+.w-page-inspector-details {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 5px;
+  min-width: 0;
+}
+.w-page-inspector-details > summary,
+.w-slot-assignment > summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--glass-stroke);
+  border-radius: 12px;
+  background: var(--glass-background);
+  color: var(--ink);
+  font-weight: 600;
+}
+.w-page-inspector-details .w-message {
+  font-size: 11px;
+}
+.w-slot-assignment {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.w-slot-assignment:not([open]) {
+  display: block;
+}
+.w-slot-dialog .w-move-control {
+  min-width: 0;
+}
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-page-inspector {
+    display: block;
+  }
+  .w-page-inspector > .w-eyebrow {
+    display: none;
+  }
+  .w-page-pager .w-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+@media (max-width: 720px) and (pointer: coarse) {
+  .w-slot-dialog,
+  .w-recommend-dialog {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .w-slot-dialog > .w-dialog-body,
+  .w-recommend-dialog > .w-dialog-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}

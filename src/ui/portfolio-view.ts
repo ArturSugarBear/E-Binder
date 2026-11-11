@@ -19,6 +19,12 @@ const euros = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const quoteBasisLabel: Record<NonNullable<PortfolioQuote['basis']>, string> = {
+  trend: 'Trendpreis',
+  avg7: '7-Tage-Durchschnitt',
+  avg30: '30-Tage-Durchschnitt',
+  avg: 'Verkaufsdurchschnitt',
+};
 
 function shownValue(value: number, covered: number): string {
   return covered ? euros.format(value) : '—';
@@ -263,7 +269,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'Einige Katalogpreise sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
     else
       status.textContent = targets.length
-        ? `${known} von ${targets.length} unterschiedlichen Druckvarianten geprüft. Quelle: TCGdex / Cardmarket.`
+        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} angefragten Druckvarianten mit gültiger EUR-Preisreferenz · Quelle: TCGdex / Cardmarket.`
         : 'Für deine Sonderausgaben oder unbestimmten Varianten liegen noch keine eindeutig passenden Preisreferenzen vor.';
 
     const source = el(
@@ -407,6 +413,10 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       const grid = el('div', 'w-portfolio-leaders');
       for (const row of top) {
         const { holding } = row;
+        const quote = row.quoteKey ? quotes.get(row.quoteKey) : undefined;
+        const basis = quote?.basis
+          ? quoteBasisLabel[quote.basis]
+          : 'Preisreferenz';
         const button = action(
           `${holding.card.name} anzeigen`,
           () => ctx.openHolding(holding.id),
@@ -437,7 +447,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el(
               'small',
               '',
-              `${euros.format(row.unitValue!)} je Exemplar · Katalogtrend`,
+              `${euros.format(row.unitValue!)} je Exemplar · ${basis}`,
             ),
           ),
         );
@@ -466,14 +476,13 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         .filter((item) => item.unitValue === null)
         .slice(0, 12)) {
         const card = row.holding.card;
-        const reason =
-          card.source !== 'tcgdex'
-            ? 'Nicht mit einer geprüften Katalogausgabe verknüpft'
-            : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
-              ? 'Druckvariante noch nicht eindeutig bepreist'
-              : row.holding.variantNote
-                ? 'Sonderauflage ohne gesicherten Vergleichspreis'
-                : 'Für diese Ausgabe noch keine Preisreferenz';
+        const reason = !row.quoteKey
+          ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
+          : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
+            ? 'Druckvariante noch nicht eindeutig bepreist'
+            : row.holding.variantNote
+              ? 'Sonderauflage ohne gesicherten Vergleichspreis'
+              : 'Für diese Ausgabe noch keine Preisreferenz';
         const button = action(
           `${card.name} ansehen`,
           () => ctx.openHolding(row.holding.id),
