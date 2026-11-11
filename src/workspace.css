@@ -4451,3 +4451,141 @@ textarea.w-input,
     white-space: normal;
   }
 }
+
+/* Set-first, evidence-driven mobile scan review.
+   Keep only one decision visible instead of a catalogue/search/queue wall. */
+.w-scan-set-choice:empty {
+  display: none;
+}
+.w-dialog.w-guided-scan .w-capture-queue,
+.w-dialog.w-guided-scan .w-capture-start,
+.w-dialog.w-guided-scan .w-add-capture-intro,
+.w-dialog.w-guided-scan .w-search-line,
+.w-dialog.w-guided-scan .w-add-catalog-advanced,
+.w-dialog.w-guided-scan .w-dialog-footer,
+.w-dialog.w-scan-confirming .w-capture-queue,
+.w-dialog.w-scan-confirming .w-capture-start,
+.w-dialog.w-scan-confirming .w-add-capture-intro,
+.w-dialog.w-scan-confirming .w-search-line,
+.w-dialog.w-scan-confirming .w-add-catalog-advanced,
+.w-dialog.w-scan-confirming .w-photo-review,
+.w-dialog.w-scan-confirming .w-scan-set-choice,
+.w-dialog.w-scan-confirming .w-search-results,
+.w-dialog.w-scan-confirming .w-dialog-footer {
+  display: none;
+}
+.w-dialog.w-guided-scan .w-dialog-body,
+.w-dialog.w-scan-confirming .w-dialog-body {
+  gap: 13px;
+}
+.w-scan-set-panel {
+  display: grid;
+  gap: 13px;
+  padding: clamp(15px, 3vw, 24px);
+  border: 1px solid var(--w-border);
+  border-radius: 17px;
+  background: var(--raised);
+}
+.w-scan-set-panel h3 {
+  font-size: clamp(18px, 4vw, 24px);
+  line-height: 1.25;
+}
+.w-scan-set-panel .w-field {
+  min-width: 0;
+}
+.w-scan-set-panel .w-button-primary {
+  min-height: 48px;
+}
+.w-scan-language-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.w-scan-language-row .w-button {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 5px;
+  font-size: 12px;
+  justify-content: center;
+}
+.w-scan-result-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.w-scan-match-card {
+  display: grid;
+  grid-template-columns: minmax(105px, 150px) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--w-border);
+  border-radius: 16px;
+  background: var(--raised);
+}
+.w-scan-match-card > .card-art {
+  width: 100%;
+  min-width: 0;
+}
+.w-scan-match-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.w-scan-match-copy h3 {
+  font-size: clamp(18px, 3vw, 25px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.w-scan-match-copy p {
+  overflow-wrap: anywhere;
+}
+.w-scan-match-reason {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.w-scan-match-copy .w-button {
+  min-height: 44px;
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+}
+.w-scan-confirming .w-confirm-form {
+  gap: 15px;
+}
+.w-scan-confirming .w-confirm-form > .w-action-row {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
+  background: var(--paper);
+}
+@media (max-width: 640px) {
+  .w-dialog.w-guided-scan .w-dialog-body,
+  .w-dialog.w-scan-confirming .w-dialog-body {
+    padding-block: 14px;
+    gap: 12px;
+  }
+  .w-scan-set-panel {
+    padding: 14px;
+  }
+  .w-scan-match-card {
+    grid-template-columns: 106px minmax(0, 1fr);
+    gap: 11px;
+    padding: 11px;
+  }
+  .w-scan-match-copy {
+    gap: 8px;
+  }
+  .w-scan-match-copy h3 {
+    font-size: 18px;
+  }
+  .w-scan-match-copy .w-button {
+    font-size: 11px;
+    padding: 8px;
+  }
+  .w-scan-confirming .w-confirm-form > .w-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
