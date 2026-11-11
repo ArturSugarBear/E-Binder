@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { discoverNumberedCards, resolvePhotoScan } from '../../src/data/scan-auto-resolve';
+import {
+  discoverNumberedCards,
+  resolvePhotoScan,
+} from '../../src/data/scan-auto-resolve';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -35,9 +38,10 @@ describe('autonomous Japanese card matching', () => {
       } else if (url.pathname.endsWith('/series/tcgp')) {
         data = { id: 'tcgp', sets: [] };
       } else if (url.pathname.endsWith('/cards')) {
-        data = ja && url.searchParams.get('localId') === 'eq:088'
-          ? [lucario, other]
-          : [];
+        data =
+          ja && url.searchParams.get('localId') === 'eq:088'
+            ? [lucario, other]
+            : [];
       } else if (url.pathname.endsWith('/cards/M1L-088')) {
         data = { ...lucario, set, variants: { holo: true } };
       } else if (url.pathname.endsWith('/cards/M1S-088')) {
@@ -60,7 +64,9 @@ describe('autonomous Japanese card matching', () => {
       'M1L-088',
       'M1S-088',
     ]);
-    expect(fetcher.mock.calls.some(([url]) => String(url).includes('/ja/'))).toBe(true);
+    expect(
+      fetcher.mock.calls.some(([url]) => String(url).includes('/ja/')),
+    ).toBe(true);
   });
 
   it('resolves exact Japanese name and number without any set input', async () => {

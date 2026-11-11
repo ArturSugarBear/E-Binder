@@ -718,7 +718,8 @@ export function openAddCards(
   function confirmQuickScan(card: PersonalCard): void {
     const shot = capture();
     const variant = card.finishes.filter(
-      (finish) => finish === 'normal' || finish === 'holo' || finish === 'reverse',
+      (finish) =>
+        finish === 'normal' || finish === 'holo' || finish === 'reverse',
     );
     if (
       card.source !== 'tcgdex' ||

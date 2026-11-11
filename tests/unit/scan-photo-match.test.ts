@@ -42,13 +42,17 @@ describe('bounded local photo comparison', () => {
   });
 
   it('does not treat similar artwork scores as a confident exact printing', () => {
-    expect(strongAppearanceAgreement([
-      { card: card('one'), similarity: 0.91 },
-      { card: card('two'), similarity: 0.87 },
-    ])).toBeUndefined();
-    expect(strongAppearanceAgreement([
-      { card: card('one'), similarity: 0.95 },
-      { card: card('two'), similarity: 0.81 },
-    ])?.key).toBe('one');
+    expect(
+      strongAppearanceAgreement([
+        { card: card('one'), similarity: 0.91 },
+        { card: card('two'), similarity: 0.87 },
+      ]),
+    ).toBeUndefined();
+    expect(
+      strongAppearanceAgreement([
+        { card: card('one'), similarity: 0.95 },
+        { card: card('two'), similarity: 0.81 },
+      ])?.key,
+    ).toBe('one');
   });
 });
