@@ -1015,7 +1015,50 @@ export function openAddCards(
       );
       showAlternatives();
     } else {
-      await showSetChooser();
+      const fallback = el(
+        'details',
+        'w-scan-fallback-settings',
+        el('summary', '', 'Karte anhand von Set und Nummer suchen'),
+      );
+      fallback.append(
+        action(
+          'Set-Suche öffnen',
+          () => {
+            void showSetChooser();
+          },
+          'secondary',
+        ),
+      );
+      scanSetChoice.replaceChildren(
+        el(
+          'div',
+          'w-scan-set-panel',
+          el('p', 'w-eyebrow', 'Erkennung unvollständig'),
+          el('h3', '', 'Noch kein sicherer Kartentreffer'),
+          el(
+            'p',
+            'w-muted',
+            'Wir konnten aus diesem Foto noch keine vollständige Kartenausgabe bestimmen. Versuche eine neue, gut beleuchtete Aufnahme der ganzen Karte.',
+          ),
+          action(
+            'Neues Foto aufnehmen',
+            () => camera.click(),
+            'primary',
+            'camera',
+          ),
+          action(
+            'Karte nach Namen suchen',
+            () => {
+              sheet.dialog.classList.remove('w-guided-scan');
+              scanSetChoice.replaceChildren();
+              searchLine.scrollIntoView({ block: 'start' });
+              search.focus();
+            },
+            'secondary',
+          ),
+          fallback,
+        ),
+      );
     }
   }
 
