@@ -1,17 +1,22 @@
 import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
+  catalogSets,
+  catalogSetCards,
+  fetchCatalogCard,
   fetchRecognizedCards,
   fetchNameHintCandidates,
   recognitionClues,
   matchesCard,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import { scanEvidence } from '../data/scan-review';
 import {
   recordBetaEvent,
   betaDiagnosticsAuthorized,
 } from '../data/beta-diagnostics';
 import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
+import { recognizedNameHints } from '../domain/recognition-names';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
 import { createCatalogBrowser } from './catalog-browser';
@@ -22,6 +27,7 @@ import {
   finishLabels,
   finishes,
   normalize,
+  numberKey,
   sameCard,
   uid,
   type Capture,
@@ -77,6 +83,7 @@ export function openAddCards(
   const notices = el('div', 'w-form-notices');
   notices.setAttribute('aria-live', 'polite');
   const results = el('div', 'w-search-results');
+  const scanSetChoice = el('section', 'w-scan-set-choice');
   const details = el('div', 'w-add-details');
   const queue = el('div', 'w-capture-queue');
   const photoArea = el('div', 'w-photo-review');
@@ -116,7 +123,9 @@ export function openAddCards(
   let debounce: ReturnType<typeof setTimeout>;
   let closed = false;
   let queueLimit = 30;
+  let setChoiceRequest = 0;
   const interrupt = () => {
+    setChoiceRequest++;
     ocrController?.abort();
     ocrController = undefined;
     searchController?.abort();
@@ -207,6 +216,7 @@ export function openAddCards(
     advancedCatalog,
     notices,
     photoArea,
+    scanSetChoice,
     results,
     browser.pager,
     details,
