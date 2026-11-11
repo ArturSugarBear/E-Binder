@@ -1071,6 +1071,19 @@ export function openAddCards(
       control.addEventListener('change', clearConfirmationError);
       control.addEventListener('input', clearConfirmationError);
     }
+    if (shot?.text)
+      form.append(
+        action(
+          'Zurück zur Set- und Kartenprüfung',
+          () => {
+            selected = undefined;
+            details.replaceChildren();
+            sheet.dialog.classList.remove('w-scan-confirming');
+            void renderScanReview(shot.text, shot.candidates);
+          },
+          'secondary',
+        ),
+      );
     form.append(
       el(
         'div',
