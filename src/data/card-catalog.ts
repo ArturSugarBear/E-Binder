@@ -699,7 +699,7 @@ export function recognitionClues(text: string): RecognitionClue[] {
   );
   const setId = code
     ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
-    : japaneseCode?.[1]?.toLowerCase();
+    : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase());
   const language: 'de' | 'en' | 'ja' | undefined =
     (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
     (japaneseCode ? 'ja' : undefined);
