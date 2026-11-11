@@ -53,7 +53,8 @@ export function spatialColourSignature(
       const region =
         Math.min(3, Math.floor(y / (height / 4))) * 4 +
         Math.min(3, Math.floor(x / (width / 4)));
-      result[region * 14 + colour] += saturation > 0.14 ? 1 : 0.3;
+      const index = region * 14 + colour;
+      result[index] = (result[index] ?? 0) + (saturation > 0.14 ? 1 : 0.3);
     }
   }
   // Normalise every region: a brighter sleeve reflection should not dominate.
@@ -61,7 +62,10 @@ export function spatialColourSignature(
     let total = 0;
     for (let i = 0; i < 14; i++) total += result[region * 14 + i]!;
     if (!total) continue;
-    for (let i = 0; i < 14; i++) result[region * 14 + i] /= total;
+    for (let i = 0; i < 14; i++) {
+      const index = region * 14 + i;
+      result[index] = (result[index] ?? 0) / total;
+    }
   }
   return result;
 }
