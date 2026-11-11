@@ -5011,3 +5011,9 @@ textarea.w-input,
     font-size: 12px;
   }
 }
+
+/* The add-card dialog is a preserved state container, not a visible second
+   sheet behind the live camera. Restore it on scanner close/review. */
+.w-dialog.w-scan-parent-suspended {
+  visibility: hidden;
+}
