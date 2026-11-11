@@ -1,7 +1,10 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { catalogEntry } from '../../src/data/card-catalog';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 function mockCard(
   id: string,
@@ -103,11 +106,8 @@ it('does not value a normal-only print as holo even when a secondary foil series
   expect(entry.holoPrice).toBeUndefined();
 });
 
-it('withholds misassigned Delta Reign illustration rare Cardmarket price and link', async () => {
-  for (const [localId, name, usd] of [
-    ['111', 'Groudon', 22.67],
-    ['106', 'Fukano', 19.3],
-  ] as const) {
+it('withholds unverified Delta Reign illustration rare prices and links', async () => {
+  for (const [localId, name, usd] of [['106', 'Fukano', 19.3]] as const) {
     const id = `me06-${localId}`;
     vi.stubGlobal(
       'fetch',
@@ -239,4 +239,84 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
   expect(entry.price).toBeUndefined();
   expect(entry.priceIssue).toBe('suspect');
   expect(fetcher).toHaveBeenCalledTimes(3);
+});
+
+it('uses Groudon DLR111 only with the separately verified Cardmarket product', async () => {
+  // The direct-market snapshot expires in production. This test must
+  // remain deterministic once it has expired.
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
+  const fetcher = vi.fn(
+    async () =>
+      new Response(
+        JSON.stringify({
+          id: 'me06-111',
+          localId: '111',
+          name: 'Groudon',
+          rarity: 'Illustration Rare',
+          set: {
+            id: 'me06',
+            name: 'Delta-Herrschaft',
+            cardCount: { official: 103 },
+          },
+          variants: { normal: true, holo: false, reverse: false },
+          pricing: {
+            cardmarket: {
+              unit: 'EUR',
+              updated: '2026-11-10T23:49:36Z',
+              idProduct: 918876,
+              trend: 0.04,
+              avg7: 0.07,
+            },
+            tcgplayer: { holofoil: { marketPrice: 22.92 } },
+          },
+        }),
+      ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const result = await catalogEntry('me06-111', 'de', undefined, false);
+  expect(result.price).toEqual({
+    amount: 17.81,
+    updated: '2026-11-11T00:00:00.000Z',
+    basis: 'trend',
+    provenance: 'verified-snapshot',
+  });
+  expect(result.priceIssue).toBeUndefined();
+  expect(result.cardmarketUrl).toBe(
+    'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
+  );
+  expect(result.holoPrice).toBeUndefined();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it('prefers newly corrected provider prices when Cardmarket ID is verified', async () => {
+  const fetcher = vi.fn(
+    async () =>
+      new Response(
+        JSON.stringify({
+          id: 'me06-111',
+          localId: '111',
+          name: 'Groudon',
+          set: {
+            id: 'me06',
+            name: 'Delta Reign',
+            cardCount: { official: 103 },
+          },
+          variants: { normal: true, holo: false },
+          pricing: {
+            cardmarket: {
+              unit: 'EUR',
+              updated: '2026-11-11T00:00:00Z',
+              idProduct: 918949,
+              trend: 19.35,
+            },
+          },
+        }),
+      ),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const result = await catalogEntry('me06-111', 'en', undefined, false);
+  expect(result.price).toMatchObject({ amount: 19.35, basis: 'trend' });
+  expect(result.price?.provenance).toBeUndefined();
+  expect(result.cardmarketUrl).toContain('/Groudon-V2-DLR111');
 });

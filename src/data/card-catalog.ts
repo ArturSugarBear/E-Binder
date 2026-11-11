@@ -1,5 +1,6 @@
 import { secondaryCardArt } from './artwork-fallbacks';
 import { priceLooksMisassigned } from '../domain/price-integrity';
+import { verifiedCardmarketProduct } from './verified-cardmarket';
 import { z } from 'zod';
 import type { Collection } from '../domain/collection';
 import { recognizedNameHints } from '../domain/recognition-names';
@@ -121,6 +122,7 @@ export interface MarketPrice {
   amount: number;
   updated: string;
   basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
+  provenance?: 'verified-snapshot';
 }
 export interface CatalogEntry {
   card: PersonalCard;
@@ -663,37 +665,58 @@ export async function catalogEntry(
     raw.variants?.holo && raw.variants.normal === false
       ? raw.pricing?.tcgplayer?.holofoil?.marketPrice
       : raw.pricing?.tcgplayer?.normal?.marketPrice;
-  // TCGdex has known wrong Cardmarket product mappings across versions of
-  // one card. A valid timestamp and currency do NOT prove a valid printing.
+
+  const verified = verifiedCardmarketProduct({
+    id: raw.id,
+    setId: raw.set.id,
+    localId: raw.localId,
+    officialCount: raw.set.cardCount.official,
+    name: raw.name,
+    language,
+    normal: raw.variants?.normal,
+  });
+  // A correct printing-to-product ID is a separate assertion from a
+  // plausible numerical price. The provider currently maps Groudon DLR111
+  // to the cheap DLR053 product (918876 vs the verified 918949).
+  const wrongProduct = Boolean(
+    verified && quote?.idProduct !== verified.productId,
+  );
   const suspect =
     candidate !== undefined &&
-    (priceLooksMisassigned({
-      localId: raw.localId,
-      setOfficialCount: raw.set.cardCount.official,
-      amountEur: candidate.amount,
-      tcgplayerMarketUsd: dollarMarket ?? undefined,
-    }) ||
-      (await hasSiblingCardmarketCollision(raw, language, signal)));
-  const price = suspect ? undefined : candidate;
-  // Cardmarket's secondary "-holo" series often denotes reverse foil, NOT
-  // the regular holo-only printing. A holo-only card's real market reference
-  // is the standard series (e.g. SV 151's illustration rare cards).
+    (wrongProduct ||
+      priceLooksMisassigned({
+        localId: raw.localId,
+        setOfficialCount: raw.set.cardCount.official,
+        amountEur: candidate.amount,
+        tcgplayerMarketUsd: dollarMarket ?? undefined,
+      }) ||
+      (!verified &&
+        (await hasSiblingCardmarketCollision(raw, language, signal))));
+
+  // A verified and dated source can replace the rejected mismapped feed
+  // without permitting the false upstream product or its cent prices.
+  // Once the observation expires, retain the correct product link but
+  // withhold its market value until new independent data are verified.
+  const price: MarketPrice | undefined =
+    !suspect && !wrongProduct && candidate ? candidate : verified?.observation;
+  // Cardmarket's secondary "-holo" series can represent reverse foil.
+  // Never use it to value a regular card or a verified normal-only print.
   const holoPrice =
     raw.variants?.holo === true && raw.variants.normal === false
       ? price
       : undefined;
-  // Never route the user to a known-suspect Cardmarket product ID either.
   const cardmarketUrl =
-    !suspect && quote?.idProduct
+    verified?.url ??
+    (!suspect && !wrongProduct && quote?.idProduct
       ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
-      : undefined;
+      : undefined);
   return {
     card,
     rarity: raw.rarity ?? '',
     price,
     holoPrice,
     cardmarketUrl,
-    priceIssue: suspect ? 'suspect' : undefined,
+    priceIssue: (suspect || wrongProduct) && !price ? 'suspect' : undefined,
   };
 }
 export async function catalogSetCards(
