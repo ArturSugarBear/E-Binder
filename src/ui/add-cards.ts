@@ -747,9 +747,17 @@ export function openAddCards(
         el('p', 'w-scan-match-reason', explanation),
         action('Diese Ausgabe prüfen', () => choose(card), 'primary', 'check'),
         action(
-          'Anderes Set auswählen',
+          'Treffer stimmt nicht?',
           () => {
-            void showSetChooser();
+            const alternatives = results.querySelector<HTMLDetailsElement>(
+              '.w-scan-alternatives',
+            );
+            if (alternatives) {
+              alternatives.open = true;
+              alternatives.scrollIntoView({ block: 'nearest' });
+            } else {
+              void showSetChooser();
+            }
           },
           'secondary',
         ),
