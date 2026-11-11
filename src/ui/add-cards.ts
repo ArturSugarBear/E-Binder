@@ -11,6 +11,10 @@ import {
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
 import {
+  createVisualSearchSession,
+  type VisualSearchSession,
+} from '../data/visual-search';
+import {
   resolvePhotoScan,
   type AutomaticScanResult,
 } from '../data/scan-auto-resolve';
@@ -169,6 +173,8 @@ export function openAddCards(
     }
   >();
   const awaitingLiveReview = new Set<string>();
+  const visualAbort = new AbortController();
+  let visualSearch: Promise<VisualSearchSession | null> | undefined;
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
@@ -194,6 +200,8 @@ export function openAddCards(
     for (const url of previewUrls) URL.revokeObjectURL(url);
     previewUrls.clear();
     browser.close();
+    visualAbort.abort();
+    void visualSearch?.then((session) => session?.close());
     searchController?.abort();
     ocrController?.abort();
     clearTimeout(debounce);
@@ -906,6 +914,7 @@ export function openAddCards(
     results.replaceChildren();
     results.dataset.scanState = 'running';
     results.dataset.scanRankedKeys = '[]';
+    results.dataset.scanVisualModelCandidates = '0';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
     const journey = scanProgress();
@@ -1000,12 +1009,20 @@ export function openAddCards(
       let catalogUnavailable = false;
       if (!printedEnergy.length) {
         try {
+          // One same-origin model/index worker for the whole review session.
+          // No asset = null and OCR/catalogue stays unchanged. The model
+          // may only propose alternatives, never create holdings.
+          const visual = await (visualSearch ??= createVisualSearchSession(
+            visualAbort.signal,
+          ));
+          if (controller.signal.aborted || closed) return;
           automatic = await resolvePhotoScan(
             aligned,
             text,
-            local,
+            known,
             language.value,
             controller.signal,
+            visual,
           );
         } catch {
           catalogUnavailable = true;
@@ -1083,6 +1100,9 @@ export function openAddCards(
         automatic?.basis,
       );
       results.dataset.scanState = 'complete';
+      results.dataset.scanVisualModelCandidates = String(
+        automatic?.visualModelCandidates ?? 0,
+      );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       photoArea.scrollIntoView({ block: 'start' });
@@ -1566,7 +1586,9 @@ export function openAddCards(
     } else if (candidates.length) {
       showPrint(
         candidates[0]!,
-        'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
+        basis === 'visual-review'
+          ? 'Kartenmotive wurden lokal verglichen. Die genaue Ausgabe und Sprache sind noch nicht bestätigt – bitte Karte, Set, Nummer und Bild prüfen.'
+          : 'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
       );
       showAlternatives();
     } else {
