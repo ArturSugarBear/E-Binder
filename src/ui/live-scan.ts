@@ -121,6 +121,20 @@ export function openLiveScanner(
 ): void {
   const sheet = modal('Karte live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog');
+  const parent = Array.from(
+    document.querySelectorAll<HTMLDialogElement>('dialog.w-dialog[open]'),
+  ).find((dialog) => dialog !== sheet.dialog);
+  // Render only one visible scanner surface. The add-card sheet retains its
+  // in-memory photos and reappears intact after closing the camera.
+  if (parent) {
+    parent.classList.add('w-scan-parent-suspended');
+    parent.inert = true;
+  }
+  sheet.onClose(() => {
+    if (!parent) return;
+    parent.classList.remove('w-scan-parent-suspended');
+    parent.inert = false;
+  });
   const video = el('video', 'w-live-video');
   video.autoplay = true;
   video.muted = true;
