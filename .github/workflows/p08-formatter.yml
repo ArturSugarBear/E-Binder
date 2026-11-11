@@ -1,0 +1,46 @@
+name: P08 format exact-price pipeline (temporary)
+on:
+  push:
+    branches: [fix/p08-cardmarket-verified-price-pipeline]
+    paths:
+      - .github/workflows/p08-formatter.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/p08-cardmarket-verified-price-pipeline
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format hand-authored files only
+        run: >
+          npx prettier --write
+          scripts/lib/cardmarket-print-alignment.mjs
+          scripts/build-cardmarket-verified.mjs
+          src/data/official-cardmarket-prices.ts
+          src/data/card-catalog.ts
+          src/domain/portfolio.ts
+          src/ui/card-market.ts
+          src/ui/collection-view.ts
+          docs/cardmarket-price-integrity.md
+          tests/unit/cardmarket-print-alignment.test.mjs
+          tests/unit/official-cardmarket-prices.test.ts
+          tests/unit/cardmarket-verified-data.test.mjs
+          tests/unit/market-price-fallback.test.ts
+          .github/workflows/cardmarket-prices.yml
+      - name: Commit formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/lib/cardmarket-print-alignment.mjs scripts/build-cardmarket-verified.mjs src/data/official-cardmarket-prices.ts src/data/card-catalog.ts src/domain/portfolio.ts src/ui/card-market.ts src/ui/collection-view.ts docs/cardmarket-price-integrity.md tests/unit/cardmarket-print-alignment.test.mjs tests/unit/official-cardmarket-prices.test.ts tests/unit/cardmarket-verified-data.test.mjs tests/unit/market-price-fallback.test.ts .github/workflows/cardmarket-prices.yml
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format validated Cardmarket pricing pipeline'
+            git push origin HEAD:fix/p08-cardmarket-verified-price-pipeline
+          fi
