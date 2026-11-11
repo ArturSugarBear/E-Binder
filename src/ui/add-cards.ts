@@ -908,19 +908,77 @@ export function openAddCards(
       }
     };
 
-    if (evidence.kind === 'set-number') {
-      const explanation =
-        evidence.title === 'matching'
-          ? 'Setcode, Sammlernummer und vollständiger Name passen zusammen. Prüfe noch das Foto und die Druckvariante.'
-          : evidence.title === 'conflicting'
-            ? 'Setcode und Nummer passen, aber der gelesene Name weicht ab. Vergleiche den Kartennamen auf deinem Foto.'
-            : 'Setcode und Sammlernummer passen. Der Kartenname konnte nicht sicher gelesen werden; bitte visuell prüfen.';
-      showPrint(evidence.card, explanation);
+    const showAlternatives = () => {
+      if (candidates.length <= 1) return;
+      const other = el(
+        'details',
+        'w-scan-alternatives',
+        el(
+          'summary',
+          '',
+          'Nicht deine Karte? Weitere mögliche Ausgaben ansehen',
+        ),
+        el(
+          'p',
+          'w-muted',
+          'Nur mögliche Ausgaben mit passender Sammlernummer. Wähle die Karte, die deinem Foto entspricht.',
+        ),
+      );
+      const grid = el('div', 'w-scan-alternative-grid');
+      for (const card of candidates.slice(0, 6)) {
+        const button = action(
+          `${card.name}, ${card.setName}, ${card.number}`,
+          () =>
+            showPrint(
+              card,
+              'Manuell ausgewählte Ausgabe. Bitte Foto, Set und vollständigen Namen vergleichen.',
+            ),
+          'card',
+        );
+        button.replaceChildren(
+          ctx.images.artwork(card),
+          el(
+            'span',
+            'w-card-caption',
+            el('strong', '', card.name),
+            el('small', '', `${card.setName} · ${card.number}`),
+          ),
+        );
+        grid.append(button);
+      }
+      other.append(grid);
+      results.append(other);
+    };
+
+    if (suggested) {
+      const description =
+        basis === 'printed-set'
+          ? 'Gedrucktes Set und Sammlernummer stimmen überein. Prüfe die Kartenausgabe vor dem Hinzufügen.'
+          : basis === 'full-name'
+            ? 'Vollständiger Name und Sammlernummer stimmen mit dem Katalog überein. Prüfe noch das Set.'
+            : 'Kartenbild und Sammlernummer deuten auf diese Ausgabe. Vergleiche dein Foto vor der Bestätigung.';
+      showPrint(suggested, description);
+      showAlternatives();
+    } else if (evidence.kind === 'set-number') {
+      showPrint(
+        evidence.card,
+        evidence.title === 'conflicting'
+          ? 'Gedrucktes Set und Nummer stimmen überein, der gelesene Name jedoch nicht. Bitte Bild und Namen genau vergleichen.'
+          : 'Gedrucktes Set und Nummer passen. Prüfe diese Kartenausgabe.',
+      );
+      showAlternatives();
     } else if (evidence.kind === 'name-number') {
       showPrint(
         evidence.card,
-        'Vollständiger Name und Nummer passen zu genau einem Katalogtreffer. Bitte prüfe den Setcode auf deiner Karte.',
+        'Vollständiger Name und Sammlernummer passen. Prüfe das Set und das Bild.',
       );
+      showAlternatives();
+    } else if (candidates.length) {
+      showPrint(
+        candidates[0]!,
+        'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
+      );
+      showAlternatives();
     } else {
       await showSetChooser();
     }
