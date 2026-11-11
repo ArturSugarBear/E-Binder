@@ -1,5 +1,6 @@
 import {
   catalogSets,
+  catalogSetCards,
   fetchCatalogCard,
   recognitionClues,
 } from './card-catalog';
@@ -93,7 +94,7 @@ export async function discoverNumberedCards(
     langs.map(async (language) => {
       const [sets, previews] = await Promise.all([
         catalogSets(language, signal),
-        lookupCardNumber(language, fraction, signal),
+        lookupCardNumber(language, fraction, signal).catch(() => []),
       ]);
       const eligible = new Map(
         sets
@@ -102,14 +103,38 @@ export async function discoverNumberedCards(
       );
       // Only results with an exact collector fraction and official set total
       // survive. Leading-zero and letter suffixes remain significant.
-      const matching = previews.filter((item) => {
+      let matching = previews.filter((item) => {
         const split = item.id.lastIndexOf('-');
         const setId = item.id.slice(0, split);
-        return (
-          eligible.has(setId) &&
-          numberKey(item.localId) === number
-        );
+        return eligible.has(setId) && numberKey(item.localId) === number;
       });
+      // If a catalogue backend does not support exact-id filtering, try the
+      // newest matching set manifests instead. Never claim a number by itself
+      // is a printing or query every global card in a large collection.
+      if (!matching.length && eligible.size) {
+        const priority = (id: string) =>
+          /^(M\d|ME\d)/i.test(id) ? 5 :
+            /^SV\d/i.test(id) ? 4 :
+              /^S\d/i.test(id) ? 3 :
+                /^SM\d/i.test(id) ? 2 : 1;
+        const likely = [...eligible.values()]
+          .sort((a, b) =>
+            priority(b.id) - priority(a.id) ||
+            b.id.localeCompare(a.id),
+          )
+          .slice(0, 12);
+        const attempts = await Promise.allSettled(
+          likely.map((set) => catalogSetCards(set.id, language, signal)),
+        );
+        matching = attempts.flatMap((result) =>
+          result.status === 'fulfilled'
+            ? result.value.filter(
+                (item) =>
+                  numberKey(item.number ?? '') === fraction,
+              )
+            : [],
+        );
+      }
       const details: PersonalCard[] = [];
       for (let i = 0; i < matching.length && i < 24; i += 6) {
         if (signal.aborted) break;
