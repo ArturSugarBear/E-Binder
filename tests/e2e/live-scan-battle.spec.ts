@@ -214,6 +214,17 @@ test('three stable video observations create a reviewable scan but never ownersh
   );
   await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (
+          window as typeof window & {
+            __scanRig: { ocrRequests: () => number };
+          }
+        ).__scanRig.ocrRequests(),
+      ),
+    )
+    .toBeGreaterThan(0);
   // P07: removing the card automatically re-arms the same camera stream.
   // No manual Next tap, repeated camera permission request or OCR stall.
   await mode(page, 'blank');
@@ -250,17 +261,20 @@ test('three stable video observations create a reviewable scan but never ownersh
   await expect(live.locator('.w-live-review-summary')).toContainText(
     '2 offene Aufnahmen',
   );
-  // Expensive OCR and catalogue work is deferred until the user chooses
-  // Review: two consecutive captures are independent of model latency.
-  expect(
-    await page.evaluate(() =>
-      (
-        window as typeof window & {
-          __scanRig: { ocrRequests: () => number; streams: MediaStream[] };
-        }
-      ).__scanRig.ocrRequests(),
-    ),
-  ).toBe(0);
+  // P07 background OCR starts while the live camera is still open.
+  // Crucially, two consecutive captures use one camera stream even when OCR
+  // is underway; no additional click or model/network wait is required.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (
+          window as typeof window & {
+            __scanRig: { ocrRequests: () => number };
+          }
+        ).__scanRig.ocrRequests(),
+      ),
+    )
+    .toBeGreaterThan(0);
   expect(
     await page.evaluate(
       () =>
