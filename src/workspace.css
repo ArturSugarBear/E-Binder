@@ -4974,3 +4974,40 @@ textarea.w-input,
   min-height: 44px;
   margin-top: 8px;
 }
+
+/* P07: camera stays stable while a card is queued; compact, three-item
+   navigation distinguishes Back from the two scan modes. */
+.w-live-scan-dialog .w-scan-mode-toggle {
+  grid-template-columns: minmax(70px, 0.76fr) repeat(2, minmax(0, 1fr));
+  width: min(100%, 420px);
+}
+.w-live-scan-dialog .w-scan-mode-toggle > .w-button:first-child {
+  font-size: 12px;
+  border-right: 1px solid var(--glass-stroke);
+}
+.w-live-scan-minimal .w-live-fallback-primary:not([hidden]) {
+  flex: 1 1 100%;
+  min-height: 52px;
+}
+.w-live-scan-minimal .w-live-stage[data-scan-phase='queued'] .w-live-frame-guide {
+  border-style: solid;
+  border-color: var(--accent);
+}
+.w-live-scan-minimal .w-live-stage[data-scan-phase='queued'] .w-live-stage-label {
+  background: rgb(35 49 22 / 0.91);
+  color: var(--accent);
+}
+.w-live-scan-minimal .w-live-next:not([hidden]) {
+  flex: 1 1 140px;
+}
+@media (max-width: 380px) {
+  .w-live-scan-dialog .w-scan-mode-toggle {
+    grid-template-columns: 66px repeat(2, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+  }
+  .w-live-scan-dialog .w-scan-mode-toggle .w-button {
+    padding-inline: 5px;
+    font-size: 12px;
+  }
+}
