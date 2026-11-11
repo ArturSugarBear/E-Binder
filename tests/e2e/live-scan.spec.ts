@@ -49,6 +49,17 @@ test('live scanner offers a clear camera-permission fallback without collecting 
       name: 'Stattdessen Kamerafoto verwenden',
     }),
   ).toBeVisible();
+  // Camera denial should offer an immediately visible fallback, not a
+  // secondary accordion that the collector has to discover.
+  const fallback = live.getByRole('button', {
+    name: 'Kamerafoto aufnehmen',
+    exact: true,
+  });
+  await expect(fallback).toBeVisible();
+  expect((await fallback.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await expect(
+    live.getByRole('button', { name: 'Zurück', exact: true }),
+  ).toBeVisible();
   await live
     .getByRole('button', { name: 'Karte live scannen schließen' })
     .click();
@@ -130,5 +141,37 @@ test('pending scans remain reviewable while the camera is unavailable, including
     .click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await page.reload();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
+
+test('upload picker and manual entry allow returning to the scanner', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    exact: true,
+  });
+  const selecting = page.waitForEvent('filechooser');
+  await add.getByRole('button', { name: 'Fotos auswählen' }).click();
+  const chooser = await selecting;
+  expect(chooser.isMultiple()).toBe(true);
+
+  await add
+    .getByRole('button', { name: 'Karte manuell eintragen' })
+    .click();
+  await expect(add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }))
+    .toBeVisible();
+  await add
+    .getByRole('button', { name: 'Zurück zu den Scanoptionen' })
+    .click();
+  await expect(add.getByRole('button', { name: 'Karte live scannen' }))
+    .toBeVisible();
+  await expect(add.getByRole('heading', { name: 'Ausgabe manuell erfassen' }))
+    .toHaveCount(0);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
