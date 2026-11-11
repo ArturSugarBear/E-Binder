@@ -610,6 +610,25 @@ export function openAddCards(
       );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
+      // Privacy-safe beta triage: diagnose why a real scan has no result
+      // without uploading OCR content, search text, images or arbitrary input.
+      const readClues = recognitionClues(text);
+      const readNames = recognizedNameHints(text);
+      recordBetaEvent(
+        'scan_result',
+        'scan',
+        !text.trim()
+          ? 'ocr_empty'
+          : !readClues.length && !readNames.length
+            ? 'ocr_unreadable'
+            : !readClues.length
+              ? 'ocr_no_number'
+              : !readClues.some((clue) => clue.setId) && !readNames.length
+                ? 'ocr_number_only'
+                : 'ocr_identity_clues',
+        'unknown',
+        { metric: readClues.length },
+      );
       const known = [
         ...ctx.catalog,
         ...ctx.state.holdings.map((item) => item.card),
