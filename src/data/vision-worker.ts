@@ -169,7 +169,12 @@ async function recognize({
     // if the narrow crop missed PBL, DLR or another printed set code.
     if (!hasPrintedSetCode(texts)) {
       report('Gedrucktes Setkürzel wird gegengeprüft …', id);
-      texts.push(await read([0.06, 0.905, 0.56, 0.075], 'gray'));
+      texts.push(await read([0.035, 0.905, 0.62, 0.075], 'gray'));
+      // Japanese M1L/M1S/M2a codes are often left of the collector fraction.
+      // Re-read this footer with normal contrast before falling back to the
+      // ambiguous printed number alone.
+      if (!hasPrintedSetCode(texts))
+        texts.push(await read([0.02, 0.92, 0.64, 0.065]));
     }
     // The original OR condition repeated contrast OCR even after an initial hit.
     if (!hasPrintedCollectorFraction(texts)) {

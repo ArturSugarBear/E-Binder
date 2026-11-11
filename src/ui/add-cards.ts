@@ -1,6 +1,9 @@
 import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
+  catalogSets,
+  catalogSetCards,
+  fetchCatalogCard,
   fetchRecognizedCards,
   fetchNameHintCandidates,
   recognitionClues,
@@ -8,10 +11,16 @@ import {
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
 import {
+  resolvePhotoScan,
+  type AutomaticScanResult,
+} from '../data/scan-auto-resolve';
+import { scanEvidence } from '../data/scan-review';
+import {
   recordBetaEvent,
   betaDiagnosticsAuthorized,
 } from '../data/beta-diagnostics';
 import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
+import { recognizedNameHints } from '../domain/recognition-names';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
 import { createCatalogBrowser } from './catalog-browser';
@@ -22,6 +31,7 @@ import {
   finishLabels,
   finishes,
   normalize,
+  numberKey,
   sameCard,
   uid,
   type Capture,
@@ -77,6 +87,7 @@ export function openAddCards(
   const notices = el('div', 'w-form-notices');
   notices.setAttribute('aria-live', 'polite');
   const results = el('div', 'w-search-results');
+  const scanSetChoice = el('section', 'w-scan-set-choice');
   const details = el('div', 'w-add-details');
   const queue = el('div', 'w-capture-queue');
   const photoArea = el('div', 'w-photo-review');
@@ -116,7 +127,9 @@ export function openAddCards(
   let debounce: ReturnType<typeof setTimeout>;
   let closed = false;
   let queueLimit = 30;
+  let setChoiceRequest = 0;
   const interrupt = () => {
+    setChoiceRequest++;
     ocrController?.abort();
     ocrController = undefined;
     searchController?.abort();
@@ -207,6 +220,7 @@ export function openAddCards(
     advancedCatalog,
     notices,
     photoArea,
+    scanSetChoice,
     results,
     browser.pager,
     details,
@@ -311,7 +325,7 @@ export function openAddCards(
     showQueue();
     showCapture();
     const active = capture();
-    if (active?.candidates.length) renderChoices(active.candidates);
+    if (active?.text) void renderScanReview(active.text, active.candidates);
     else results.replaceChildren();
     tell(
       removable.length === 1
@@ -360,7 +374,7 @@ export function openAddCards(
           results.replaceChildren();
           notices.replaceChildren();
           showCapture();
-          if (shot.candidates.length) renderChoices(shot.candidates);
+          if (shot.text) void renderScanReview(shot.text, shot.candidates);
         },
         'text',
       );
@@ -576,12 +590,32 @@ export function openAddCards(
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
       const local = candidatesFromText(text, known);
-      status.textContent = 'Kartenausgaben werden im Katalog abgeglichen …';
-      let online: PersonalCard[] = [];
+      status.textContent =
+        'Set, Sammlernummer und Kartenbild werden abgeglichen …';
+      let automatic: AutomaticScanResult | undefined;
       let catalogUnavailable = false;
-      // A verified MEE 009–016 code is more specific than any title-only
-      // catalogue lookup. Keep it as a single user-reviewed edition.
       if (!printedEnergy.length) {
+        try {
+          automatic = await resolvePhotoScan(
+            aligned,
+            text,
+            local,
+            language.value,
+            controller.signal,
+          );
+        } catch {
+          catalogUnavailable = true;
+        }
+      }
+      if (controller.signal.aborted || closed || ocrController !== controller)
+        return;
+      let online = automatic?.candidates ?? [];
+      let titleHint = '';
+      if (
+        !printedEnergy.length &&
+        !online.length &&
+        recognitionClues(text).some((clue) => clue.setId)
+      ) {
         try {
           online = await fetchRecognizedCards(
             text,
@@ -592,14 +626,11 @@ export function openAddCards(
           catalogUnavailable = true;
         }
       }
-      if (controller.signal.aborted || closed || ocrController !== controller)
-        return;
-      let titleHint = '';
       if (
         !printedEnergy.length &&
         !online.length &&
         navigator.onLine &&
-        text.trim()
+        recognizedNameHints(text).length > 0
       ) {
         try {
           const found = await fetchNameHintCandidates(
@@ -610,7 +641,7 @@ export function openAddCards(
           online = found.candidates;
           titleHint = found.query;
         } catch {
-          // No invented edition if an optional name lookup fails.
+          catalogUnavailable = true;
         }
       }
       const candidates = printedEnergy.length
@@ -619,7 +650,7 @@ export function openAddCards(
             ...new Map(
               [...online, ...local].map((card) => [card.key, card]),
             ).values(),
-          ].slice(0, 12);
+          ].slice(0, 24);
       recordBetaEvent(
         'scan_result',
         'scan',
@@ -641,30 +672,25 @@ export function openAddCards(
         }),
       );
       showCapture();
-      renderChoices(candidates);
-      results.dataset.scanState = 'complete';
-      if (candidates.length) results.scrollIntoView({ block: 'start' });
-      else {
-        photoArea.scrollIntoView({ block: 'start' });
-        photoArea
-          .querySelector<HTMLButtonElement>('button')
-          ?.focus({ preventScroll: true });
-      }
-      tell(
-        candidates.length
-          ? `${titleHint ? `Kartenname „${titleHint}“ gelesen. ` : ''}Mögliche Ausgaben, noch kein bestätigter Bestand. Vergleiche Set, Sammlernummer und Sprache mit deinem Foto.${catalogUnavailable ? ' Der Nummernabgleich war nicht erreichbar.' : ''}`
-          : /\b(?:Energie|Energy)\b/i.test(text)
-            ? 'Energiekarte gelesen, aber Typ oder genaue Ausgabe sind nicht sicher erkannt. Prüfe den Energietyp und die Sammlernummer auf dem Foto und suche die Karte gezielt. Es wurde nichts übernommen.'
-            : 'Kein eindeutiger Kartentreffer. Prüfe die Aufnahme oder suche gezielt nach Name und Nummer. Es wurde nichts in den Bestand übernommen.',
+      await renderScanReview(
+        text,
+        candidates,
+        automatic?.suggested,
+        automatic?.basis,
       );
-      if (printedEnergy.length)
+      results.dataset.scanState = 'complete';
+      if (controller.signal.aborted || closed || ocrController !== controller)
+        return;
+      photoArea.scrollIntoView({ block: 'start' });
+      if (catalogUnavailable)
         tell(
-          `Gedruckten Setcode ${printedEnergy.map((card) => card.number).join(', ')} erkannt: 30-Jahre-Holo-Energie. Dies ist ein Vorschlag ohne Katalogbild. Prüfe Typ, Sprache, Emblem und Ausgabe auf deinem Foto, bevor du den Bestand bestätigst.`,
+          'Der Katalog war teilweise nicht erreichbar. Prüfe den angezeigten Vorschlag oder nutze die Korrektursuche.',
         );
-      const number = recognitionClues(text)[0]?.number;
-      // Prefill the read number, but require an explicit manual search:
-      // an OCR fragment alone must not generate unrelated editions.
-      if (number && !candidates.length) search.value = number;
+      else if (titleHint && !automatic?.suggested)
+        tell(
+          `Der Kartenname „${titleHint}“ wurde gelesen. Die genaue Ausgabe muss noch bestätigt werden.`,
+        );
+      else notices.replaceChildren();
     } catch (error) {
       if (closed || ocrController !== controller) return;
       if (controller.signal.aborted) {
@@ -689,9 +715,434 @@ export function openAddCards(
     }
   }
 
+  function confirmQuickScan(card: PersonalCard): void {
+    const shot = capture();
+    const variant = card.finishes.filter(
+      (finish) =>
+        finish === 'normal' || finish === 'holo' || finish === 'reverse',
+    );
+    if (
+      card.source !== 'tcgdex' ||
+      variant.length !== 1 ||
+      !shot ||
+      shot.status !== 'pending'
+    ) {
+      choose(card);
+      return;
+    }
+    const existing = ctx.state.holdings.find(
+      (holding) =>
+        sameCard(holding.card, card) &&
+        holding.finish === variant[0] &&
+        !holding.variantNote,
+    );
+    if ((existing?.quantity ?? 0) >= 999) {
+      choose(card);
+      return;
+    }
+    const saved = ctx.commit('Gescannte Karte hinzugefügt', (state) =>
+      confirmHolding(
+        state,
+        {
+          card,
+          finish: variant[0]!,
+          variantNote: '',
+          quantity: (existing?.quantity ?? 0) + 1,
+          tradeQuantity: existing?.tradeQuantity ?? 0,
+          favorite: existing?.favorite ?? false,
+          notes: existing?.notes ?? '',
+        },
+        shot.id,
+      ),
+    );
+    if (!saved) return;
+    recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
+      candidate: publicCardKey(shot.candidates[0]),
+      selected: publicCardKey(card),
+    });
+    transientPhotos.delete(shot.id);
+    alignedCaptures.delete(shot.id);
+    interrupt();
+    captureId = ctx.state.captures.find(
+      (item) => item.status === 'pending',
+    )?.id;
+    selected = undefined;
+    details.replaceChildren();
+    results.replaceChildren();
+    scanSetChoice.replaceChildren();
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    showQueue();
+    showCapture();
+    tell(
+      captureId
+        ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
+        : 'Karte hinzugefügt. Scanne die nächste Karte.',
+    );
+  }
+
+  /**
+   * Scan review is separate from general catalogue browsing: no random
+   * cards with the same collector fraction are presented as recognition.
+   * A collector can first select the physical set and resolve its one print.
+   */
+  async function renderScanReview(
+    text: string,
+    candidates: PersonalCard[],
+    suggested?: PersonalCard,
+    basis?: AutomaticScanResult['basis'],
+  ): Promise<void> {
+    const request = ++setChoiceRequest;
+    setFlowStage(1);
+    captureStart.hidden = true;
+    sheet.dialog.classList.remove('w-scan-confirming');
+    sheet.dialog.classList.add('w-guided-scan');
+    results.classList.remove('w-text-results');
+    results.classList.add('w-scan-result-stack');
+    results.replaceChildren();
+    scanSetChoice.replaceChildren();
+    browser.pager.replaceChildren();
+
+    const evidence = scanEvidence(text, candidates);
+    const knownNumber = recognitionClues(text)[0]?.number ?? '';
+
+    const showPrint = (card: PersonalCard, explanation: string) => {
+      if (closed || request !== setChoiceRequest) return;
+      scanSetChoice.replaceChildren();
+      const copy = el(
+        'div',
+        'w-scan-match-copy',
+        el('p', 'w-eyebrow', 'Ausgabe mit deinem Foto vergleichen'),
+        el('h3', '', card.name),
+        el(
+          'p',
+          'w-muted',
+          `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`,
+        ),
+        el('p', 'w-scan-match-reason', explanation),
+        action(
+          card.source === 'tcgdex' &&
+            card.finishes.filter(
+              (finish) =>
+                finish === 'normal' ||
+                finish === 'holo' ||
+                finish === 'reverse',
+            ).length === 1
+            ? 'Karte hinzufügen'
+            : 'Diese Ausgabe prüfen',
+          () => confirmQuickScan(card),
+          'primary',
+          'check',
+        ),
+        action(
+          'Treffer stimmt nicht?',
+          () => {
+            const alternatives = results.querySelector<HTMLDetailsElement>(
+              '.w-scan-alternatives',
+            );
+            if (alternatives) {
+              alternatives.open = true;
+              alternatives.scrollIntoView({ block: 'nearest' });
+            } else {
+              void showSetChooser();
+            }
+          },
+          'secondary',
+        ),
+      );
+      results.replaceChildren(
+        el('div', 'w-scan-match-card', ctx.images.artwork(card), copy),
+      );
+    };
+
+    const showSetChooser = async () => {
+      if (closed || request !== setChoiceRequest) return;
+      results.replaceChildren();
+      const currentLanguage = language.value;
+      const size = recognitionClues(text)[0]?.number.split('/')[1] ?? '';
+      const numberField = input('text', knownNumber);
+      numberField.placeholder = 'z. B. 088/063';
+      numberField.autocomplete = 'off';
+      const setQuery = input('search');
+      setQuery.placeholder = 'Setname oder Setcode, z. B. M1L';
+      const setList = select([['', 'Set auswählen']], '');
+      const feedback = el('p', 'w-muted', 'Passende Sets werden geladen …');
+      feedback.setAttribute('role', 'status');
+      const verify = action(
+        'Set und Nummer abgleichen',
+        () => {
+          void (async () => {
+            const setId = setList.value;
+            const fraction = numberField.value.trim();
+            if (!setId) {
+              feedback.textContent = 'Wähle zuerst das Set deiner Karte.';
+              return;
+            }
+            if (
+              !/^[a-z]{0,2}[0-9]{1,3}\s*\/\s*[a-z]{0,2}[0-9]{1,3}$/i.test(
+                fraction,
+              )
+            ) {
+              feedback.textContent =
+                'Gib die vollständige Sammlernummer wie 088/063 ein.';
+              numberField.focus();
+              return;
+            }
+            verify.disabled = true;
+            feedback.textContent = 'Set und Kartennummer werden geprüft …';
+            try {
+              const editions = await catalogSetCards(setId, currentLanguage);
+              if (closed || request !== setChoiceRequest) return;
+              const matched = editions.filter(
+                (item) => numberKey(item.number ?? '') === numberKey(fraction),
+              );
+              if (matched.length !== 1) {
+                feedback.textContent =
+                  'Diese Nummer wurde in dem gewählten Set nicht eindeutig gefunden. Prüfe die Nummer und den Setcode auf der Karte.';
+                return;
+              }
+              const card = await fetchCatalogCard(
+                matched[0]!.id,
+                currentLanguage,
+              );
+              if (closed || request !== setChoiceRequest) return;
+              const title = recognizedNameHints(text)[0];
+              const consistent =
+                !title || normalize(title) === normalize(card.name);
+              showPrint(
+                card,
+                consistent
+                  ? 'Set und vollständige Nummer stimmen im Katalog überein. Vergleiche noch den Kartennamen und das Bild.'
+                  : 'Set und Nummer stimmen überein, aber der gelesene Name weicht ab. Bitte den vollständigen Kartennamen auf dem Foto prüfen.',
+              );
+            } catch {
+              feedback.textContent =
+                'Der Setkatalog ist gerade nicht erreichbar. Du kannst die Karte auch manuell suchen.';
+            } finally {
+              verify.disabled = false;
+            }
+          })();
+        },
+        'primary',
+        'check',
+      );
+      const languageRow = el('div', 'w-scan-language-row');
+      for (const [key, caption] of [
+        ['de', 'Deutsch'],
+        ['en', 'Englisch'],
+        ['ja', 'Japanisch'],
+      ] as const) {
+        const button = action(
+          caption,
+          () => {
+            if (language.value === key) return;
+            language.value = key;
+            void showSetChooser();
+          },
+          key === currentLanguage ? 'primary' : 'secondary',
+        );
+        button.setAttribute('aria-pressed', String(key === currentLanguage));
+        languageRow.append(button);
+      }
+      scanSetChoice.replaceChildren(
+        el(
+          'div',
+          'w-scan-set-panel',
+          el('p', 'w-eyebrow', 'Set zuerst bestimmen'),
+          el('h3', '', 'Welches Set steht auf deiner Karte?'),
+          el(
+            'p',
+            'w-muted',
+            knownNumber
+              ? `Die Nummer ${knownNumber} allein kommt in mehreren Sets vor. Wähle das gedruckte Set; wir gleichen danach die vollständige Nummer ab.`
+              : 'Suche nach dem Setcode unten auf der Karte. Anschließend prüfen wir die Sammlernummer.',
+          ),
+          languageRow,
+          field('Sammlernummer', numberField),
+          field('Set suchen', setQuery),
+          field('Set auswählen', setList),
+          verify,
+          feedback,
+          action(
+            'Stattdessen Karte manuell suchen',
+            () => {
+              sheet.dialog.classList.remove('w-guided-scan');
+              scanSetChoice.replaceChildren();
+              results.classList.remove('w-scan-result-stack');
+              searchLine.scrollIntoView({ block: 'start' });
+              search.focus();
+            },
+            'text',
+          ),
+        ),
+      );
+      let allSets: Awaited<ReturnType<typeof catalogSets>> = [];
+      const fill = () => {
+        const query = normalize(setQuery.value);
+        const denominator = numberField.value.trim().split('/')[1] ?? size;
+        const appropriate = allSets.filter(
+          (item) =>
+            (!query ||
+              normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(
+                query,
+              )) &&
+            (query ||
+              !denominator ||
+              Number(denominator) === item.cardCount.official),
+        );
+        setList.replaceChildren(el('option', '', 'Set auswählen'));
+        for (const item of appropriate.slice(0, 45)) {
+          const option = el(
+            'option',
+            '',
+            `${item.id.toUpperCase()} · ${item.name}`,
+          );
+          option.value = item.id;
+          setList.append(option);
+        }
+        feedback.textContent = appropriate.length
+          ? `${appropriate.length} passende Sets. Suche bei Bedarf nach dem gedruckten Kürzel.`
+          : 'Kein Set mit dieser Nummer gefunden. Suche nach dem Setcode oder prüfe die Katalogsprache.';
+      };
+      setQuery.addEventListener('input', fill);
+      numberField.addEventListener('input', fill);
+      try {
+        allSets = await catalogSets(currentLanguage);
+        if (
+          closed ||
+          request !== setChoiceRequest ||
+          !scanSetChoice.isConnected
+        )
+          return;
+        fill();
+      } catch {
+        if (closed || request !== setChoiceRequest) return;
+        feedback.textContent =
+          'Die Setliste konnte nicht geladen werden. Probiere eine andere Sprache oder die manuelle Suche.';
+      }
+    };
+
+    const showAlternatives = () => {
+      if (candidates.length <= 1) return;
+      const other = el(
+        'details',
+        'w-scan-alternatives',
+        el(
+          'summary',
+          '',
+          'Nicht deine Karte? Weitere mögliche Ausgaben ansehen',
+        ),
+        el(
+          'p',
+          'w-muted',
+          'Nur mögliche Ausgaben mit passender Sammlernummer. Wähle die Karte, die deinem Foto entspricht.',
+        ),
+      );
+      const grid = el('div', 'w-scan-alternative-grid');
+      for (const card of candidates.slice(0, 6)) {
+        const button = action(
+          `${card.name}, ${card.setName}, ${card.number}`,
+          () =>
+            showPrint(
+              card,
+              'Manuell ausgewählte Ausgabe. Bitte Foto, Set und vollständigen Namen vergleichen.',
+            ),
+          'card',
+        );
+        button.replaceChildren(
+          ctx.images.artwork(card),
+          el(
+            'span',
+            'w-card-caption',
+            el('strong', '', card.name),
+            el('small', '', `${card.setName} · ${card.number}`),
+          ),
+        );
+        grid.append(button);
+      }
+      other.append(grid);
+      results.append(other);
+    };
+
+    if (suggested) {
+      const description =
+        basis === 'printed-set'
+          ? 'Gedrucktes Set und Sammlernummer stimmen überein. Prüfe die Kartenausgabe vor dem Hinzufügen.'
+          : basis === 'full-name'
+            ? 'Vollständiger Name und Sammlernummer stimmen mit dem Katalog überein. Prüfe noch das Set.'
+            : 'Kartenbild und Sammlernummer deuten auf diese Ausgabe. Vergleiche dein Foto vor der Bestätigung.';
+      showPrint(suggested, description);
+      showAlternatives();
+    } else if (evidence.kind === 'set-number') {
+      showPrint(
+        evidence.card,
+        evidence.title === 'conflicting'
+          ? 'Gedrucktes Set und Nummer stimmen überein, der gelesene Name jedoch nicht. Bitte Bild und Namen genau vergleichen.'
+          : 'Gedrucktes Set und Nummer passen. Prüfe diese Kartenausgabe.',
+      );
+      showAlternatives();
+    } else if (evidence.kind === 'name-number') {
+      showPrint(
+        evidence.card,
+        'Vollständiger Name und Sammlernummer passen. Prüfe das Set und das Bild.',
+      );
+      showAlternatives();
+    } else if (candidates.length) {
+      showPrint(
+        candidates[0]!,
+        'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
+      );
+      showAlternatives();
+    } else {
+      const fallback = el(
+        'details',
+        'w-scan-fallback-settings',
+        el('summary', '', 'Karte anhand von Set und Nummer suchen'),
+      );
+      fallback.append(
+        action(
+          'Set-Suche öffnen',
+          () => {
+            void showSetChooser();
+          },
+          'secondary',
+        ),
+      );
+      scanSetChoice.replaceChildren(
+        el(
+          'div',
+          'w-scan-set-panel',
+          el('p', 'w-eyebrow', 'Erkennung unvollständig'),
+          el('h3', '', 'Noch kein sicherer Kartentreffer'),
+          el(
+            'p',
+            'w-muted',
+            'Wir konnten aus diesem Foto noch keine vollständige Kartenausgabe bestimmen. Versuche eine neue, gut beleuchtete Aufnahme der ganzen Karte.',
+          ),
+          action(
+            'Neues Foto aufnehmen',
+            () => camera.click(),
+            'primary',
+            'camera',
+          ),
+          action(
+            'Karte nach Namen suchen',
+            () => {
+              sheet.dialog.classList.remove('w-guided-scan');
+              scanSetChoice.replaceChildren();
+              searchLine.scrollIntoView({ block: 'start' });
+              search.focus();
+            },
+            'secondary',
+          ),
+          fallback,
+        ),
+      );
+    }
+  }
+
   function renderChoices(cards: PersonalCard[]): void {
     setFlowStage(1);
-    results.classList.remove('w-text-results');
+    results.classList.remove('w-text-results', 'w-scan-result-stack');
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [
@@ -729,6 +1180,8 @@ export function openAddCards(
       );
     captureStart.hidden = true;
     interrupt();
+    sheet.dialog.classList.remove('w-guided-scan');
+    sheet.dialog.classList.add('w-scan-confirming');
     selected = card;
     details.replaceChildren();
     notices.replaceChildren();
@@ -858,6 +1311,19 @@ export function openAddCards(
       control.addEventListener('change', clearConfirmationError);
       control.addEventListener('input', clearConfirmationError);
     }
+    if (shot?.text)
+      form.append(
+        action(
+          'Zurück zur Set- und Kartenprüfung',
+          () => {
+            selected = undefined;
+            details.replaceChildren();
+            sheet.dialog.classList.remove('w-scan-confirming');
+            void renderScanReview(shot.text, shot.candidates);
+          },
+          'secondary',
+        ),
+      );
     form.append(
       el(
         'div',
@@ -967,6 +1433,7 @@ export function openAddCards(
       );
       if (ok) {
         if (shot) {
+          sheet.dialog.classList.remove('w-scan-confirming', 'w-guided-scan');
           recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
             candidate: publicCardKey(shot.candidates[0]),
             selected: publicCardKey(adopted),
@@ -997,6 +1464,8 @@ export function openAddCards(
   }
 
   function manualForm(): void {
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    scanSetChoice.replaceChildren();
     setFlowStage(1);
     interrupt();
     selected = undefined;
@@ -1078,6 +1547,8 @@ export function openAddCards(
     }
   }
   search.addEventListener('input', () => {
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    scanSetChoice.replaceChildren();
     interrupt();
     clearTimeout(debounce);
     if (search.value.trim().length >= 2) {
@@ -1102,7 +1573,8 @@ export function openAddCards(
   showQueue();
   showCapture();
   if (selected) renderConfirmation();
-  else if (capture()?.candidates.length) renderChoices(capture()!.candidates);
+  else if (capture()?.text)
+    void renderScanReview(capture()!.text, capture()!.candidates);
   else results.replaceChildren();
   if (options.live) takePhoto.click();
   else if (options.photos) gallery.click();
