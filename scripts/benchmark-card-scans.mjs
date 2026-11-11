@@ -137,12 +137,12 @@ async function benchmark(manifestPath) {
           .locator('.w-search-results[data-scan-state="complete"]')
           .waitFor({ timeout: 180_000 });
         const finishedAt = performance.now();
-        const payload = await add.locator('.w-search-results').evaluate(
-          (node) => ({
+        const payload = await add
+          .locator('.w-search-results')
+          .evaluate((node) => ({
             version: node.dataset.scanResultContract,
             keys: node.dataset.scanRankedKeys,
-          }),
-        );
+          }));
         const ranked = readRankedKeys(payload.version, payload.keys);
         const owned = await page.locator('.w-owned-grid button').count();
         if (owned !== 0)
