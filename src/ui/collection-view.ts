@@ -68,7 +68,7 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
       const basis = result.quote.basis
         ? priceBasisLabels[result.quote.basis]
         : 'Preisreferenz';
-      note.textContent = `${basis} (nicht NM-gefiltert) · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+      note.textContent = `${basis}${result.quote.provenance === 'verified-snapshot' ? ' · verifizierter Snapshot, kein Livepreis' : ' (nicht NM-gefiltert)'} · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
     } else {
       value.textContent = '—';
       note.textContent =
