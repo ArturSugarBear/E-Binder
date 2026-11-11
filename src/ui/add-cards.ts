@@ -10,6 +10,7 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { recognizePhoto } from '../data/recognize';
+import { createVisualSearchSession, type VisualSearchSession } from '../data/visual-search';
 import {
   resolvePhotoScan,
   type AutomaticScanResult,
@@ -135,6 +136,10 @@ export function openAddCards(
   });
   let selected = options.card;
   let captureId = options.captureId;
+  const visualAbort = new AbortController();
+  let visualSearch:
+    | Promise<VisualSearchSession | null>
+    | undefined;
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
@@ -155,6 +160,8 @@ export function openAddCards(
     for (const url of previewUrls) URL.revokeObjectURL(url);
     previewUrls.clear();
     browser.close();
+    visualAbort.abort();
+    void visualSearch?.then((session) => session?.close());
     searchController?.abort();
     ocrController?.abort();
     clearTimeout(debounce);
@@ -641,12 +648,20 @@ export function openAddCards(
       let catalogUnavailable = false;
       if (!printedEnergy.length) {
         try {
+          // One same-origin model/index worker for the whole review session.
+          // No asset = null and OCR/catalogue stays unchanged. The model
+          // may only propose alternatives, never create holdings.
+          const visual = await (visualSearch ??= createVisualSearchSession(
+            visualAbort.signal,
+          ));
+          if (controller.signal.aborted || closed) return;
           automatic = await resolvePhotoScan(
             aligned,
             text,
             local,
             language.value,
             controller.signal,
+            visual,
           );
         } catch {
           catalogUnavailable = true;
@@ -1196,7 +1211,9 @@ export function openAddCards(
     } else if (candidates.length) {
       showPrint(
         candidates[0]!,
-        'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
+        basis === 'visual-review'
+          ? 'Kartenmotive wurden lokal verglichen. Die genaue Ausgabe und Sprache sind noch nicht bestätigt – bitte Karte, Set, Nummer und Bild prüfen.'
+          : 'Mögliche Ausgabe, aber kein sicherer Treffer. Bitte vergleiche Name, Set und Bild. Wenn sie nicht passt, findest du unten weitere Vorschläge.',
       );
       showAlternatives();
     } else {
