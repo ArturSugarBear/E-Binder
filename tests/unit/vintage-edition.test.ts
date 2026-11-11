@@ -28,6 +28,8 @@ describe('Vintage Base Set edition integrity', () => {
       '1st Edition',
       'First Edition',
       'erste Auflage',
+      'Edition 1',
+      'Erstauflage',
     ]) {
       expect(editionClaimFromNote(note)).toBe('first');
     }
