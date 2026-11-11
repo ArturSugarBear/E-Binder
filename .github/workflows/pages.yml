@@ -69,6 +69,13 @@ jobs:
               tests/e2e/set-art-fallback.spec.ts \
               tests/e2e/liquid-collector.spec.ts \
               --project=chromium --project=mobile-chromium
+            # The live camera is an iPhone-first surface. Exercise its
+            # repeat-scan, camera-rejection and track-cleanup regressions
+            # once on mobile Chromium instead of duplicating on desktop.
+            npx playwright test \
+              tests/e2e/live-scan.spec.ts \
+              tests/e2e/live-scan-battle.spec.ts \
+              --project=mobile-chromium
           else
             npm run test:e2e
           fi
