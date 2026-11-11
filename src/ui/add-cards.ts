@@ -650,7 +650,24 @@ export function openAddCards(
   async function runOcr(): Promise<void> {
     setFlowStage(0);
     const shot = capture();
-    if (!shot || shot.status === 'confirmed') return;
+    if (!shot || shot.status === 'confirmed' || awaitingLiveReview.has(shot.id))
+      return;
+    awaitingLiveReview.add(shot.id);
+    try {
+      const liveJob = liveOcrJobs.get(shot.id);
+      if (liveJob) {
+        tell('Karte wird bereits geprüft · Ergebnis wird vorbereitet …');
+        await liveJob;
+      }
+      if (closed || shot.id !== captureId || shot.status === 'confirmed')
+        return;
+      await resolveOcrReview(shot);
+    } finally {
+      awaitingLiveReview.delete(shot.id);
+    }
+  }
+
+  async function resolveOcrReview(shot: Capture): Promise<void> {
     interrupt();
     const controller = new AbortController();
     ocrController = controller;
@@ -678,7 +695,8 @@ export function openAddCards(
         throw new Error(
           'Die Aufnahme ist nicht mehr geöffnet. Fotografiere die Karte erneut; Bilder werden nicht gespeichert.',
         );
-      const aligned = alignedCaptures.has(shot.id)
+      const prefilled = liveOcrEvidence.get(shot.id);
+      const aligned = alignedCaptures.has(shot.id) || prefilled !== undefined
         ? photo
         : await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
@@ -688,18 +706,27 @@ export function openAddCards(
           );
         return;
       }
-      const text = await recognizePhoto(
-        aligned,
-        controller.signal,
-        (label, fraction) => {
-          if (!closed && ocrController === controller) {
-            status.textContent = label;
-            journey.update('recognize', label);
-            if (fraction !== undefined) progress.value = fraction;
-            else progress.removeAttribute('value');
-          }
-        },
-      );
+      // Reuse fast OCR evidence whenever a usable number or title was
+      // found. A weak/empty live pass automatically receives the full
+      // worker's extra hot-zone retries in Review, without re-photographing.
+      const usableLive =
+        prefilled !== undefined &&
+        (recognitionClues(prefilled).length > 0 ||
+          recognizedNameHints(prefilled).length > 0);
+      const text = usableLive
+        ? prefilled
+        : await recognizePhoto(
+            aligned,
+            controller.signal,
+            (label, fraction) => {
+              if (!closed && ocrController === controller) {
+                status.textContent = label;
+                journey.update('recognize', label);
+                if (fraction !== undefined) progress.value = fraction;
+                else progress.removeAttribute('value');
+              }
+            },
+          );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       // Privacy-safe beta triage: diagnose why a real scan has no result
@@ -899,6 +926,7 @@ export function openAddCards(
     });
     transientPhotos.delete(shot.id);
     alignedCaptures.delete(shot.id);
+    liveOcrEvidence.delete(shot.id);
     interrupt();
     captureId = ctx.state.captures.find(
       (item) => item.status === 'pending',
