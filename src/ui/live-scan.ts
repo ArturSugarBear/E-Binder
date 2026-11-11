@@ -145,7 +145,7 @@ export function openLiveScanner(
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
   status.style.position = 'relative';
-  status.style.zIndex = '3';
+  status.style.zIndex = '30';
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
   progress.value = 0;
@@ -183,7 +183,7 @@ export function openLiveScanner(
   reviewSummary.setAttribute('role', 'status');
   reviewSummary.hidden = true;
   reviewSummary.style.position = 'relative';
-  reviewSummary.style.zIndex = '3';
+  reviewSummary.style.zIndex = '30';
   function refreshReview(): void {
     const pending = pendingCaptures();
     reviewSummary.hidden = pending === 0;
@@ -220,6 +220,19 @@ export function openLiveScanner(
   mode.lastElementChild!.setAttribute('aria-pressed', 'false');
   sheet.body.append(mode, stage, journey.element, progress, help);
   sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
+  sheet.footer.style.position = 'sticky';
+  sheet.footer.style.bottom = '0';
+  sheet.footer.style.zIndex = '25';
+  sheet.footer.style.background = 'var(--paper)';
+  sheet.footer.style.borderTop = '1px solid var(--w-border)';
+  trigger.style.position = 'relative';
+  trigger.style.zIndex = '30';
+  finish.style.position = 'relative';
+  finish.style.zIndex = '30';
+  next.style.position = 'relative';
+  next.style.zIndex = '30';
+  fallback.style.position = 'relative';
+  fallback.style.zIndex = '30';
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races
   // with closing or restarting the scanner.
