@@ -633,3 +633,54 @@ it('does not confuse an ambiguous foil market series with a verified holo print'
   expect(result.holoPrice).toBeUndefined();
   expect(result.price?.updated).toBe('2026-11-09T12:00:00Z');
 });
+
+it('maps PBL and DLR footer codes to their current TCGdex print IDs', async () => {
+  const { recognitionClues, fetchRecognizedCards } =
+    await import('../../src/data/card-catalog');
+
+  expect(recognitionClues('PBL DE 089/084')[0]).toMatchObject({
+    setId: 'me05',
+    language: 'de',
+    number: '89/84',
+  });
+  expect(recognitionClues('DLR DE 136/103')[0]).toMatchObject({
+    setId: 'me06',
+    language: 'de',
+    number: '136/103',
+  });
+
+  const mockFetch = vi.fn((url: string) => {
+    const id = url.endsWith('/me05-89') ? 'me05-89' : 'me06-136';
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          id,
+          localId: id.split('-').at(-1),
+          name: id === 'me05-89' ? 'Voltenso' : 'Raikou-ex',
+          set: {
+            id: id.split('-')[0],
+            name: id === 'me05-89' ? 'Dunkelnacht' : 'Delta-Herrschaft',
+            cardCount: { official: id === 'me05-89' ? 84 : 103 },
+          },
+          variants: { holo: true },
+        }),
+      ),
+    );
+  });
+  vi.stubGlobal('fetch', mockFetch);
+  const pbl = await fetchRecognizedCards('PBL DE 089/084', 'en');
+  const dlr = await fetchRecognizedCards('DLR DE 136/103', 'en');
+  expect(pbl).toMatchObject([
+    { setId: 'me05', number: '89/84', language: 'de' },
+  ]);
+  expect(dlr).toMatchObject([
+    { setId: 'me06', number: '136/103', language: 'de' },
+  ]);
+  expect(mockFetch).toHaveBeenCalledTimes(2);
+  expect(String(mockFetch.mock.calls[0]![0])).toContain(
+    '/de/cards/me05-89',
+  );
+  expect(String(mockFetch.mock.calls[1]![0])).toContain(
+    '/de/cards/me06-136',
+  );
+});
