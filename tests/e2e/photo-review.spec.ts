@@ -218,3 +218,100 @@ test('crop review magnifies the actual card footer before OCR and allows correct
     .click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
+
+test('multiple uploaded photos remain switchable after a guided scan review', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker;
+    class FakeOCR {
+      onmessage:
+        | ((
+            event: MessageEvent<{ type: string; id: number; text: string }>,
+          ) => void)
+        | null = null;
+      onerror: ((event: Event) => void) | null = null;
+      postMessage(data: { id: number }) {
+        setTimeout(() => {
+          this.onmessage?.(
+            new MessageEvent('message', {
+              data: { type: 'done', id: data.id, text: '088/063' },
+            }),
+          );
+        }, 25);
+      }
+      terminate() {}
+    }
+    class InterceptWorker extends NativeWorker {
+      constructor(url: string | URL, options?: WorkerOptions) {
+        if (String(url).includes('vision-worker'))
+          return new FakeOCR() as unknown as InterceptWorker;
+        super(url, options);
+      }
+    }
+    Object.defineProperty(window, 'Worker', {
+      configurable: true,
+      value: InterceptWorker,
+    });
+  });
+  await page.route('https://api.tcgdex.net/**', (route) => {
+    const url = new URL(route.request().url());
+    const path = url.pathname;
+    const set = {
+      id: 'M1L',
+      name: 'メガブレイブ',
+      cardCount: { official: 63 },
+    };
+    const card = {
+      id: 'M1L-088',
+      localId: '088',
+      name: 'メガルカリオex',
+    };
+    if (path.endsWith('/ja/sets')) return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/cards') && url.searchParams.has('localId'))
+      return route.fulfill({ json: [card] });
+    if (path.endsWith('/ja/sets/M1L'))
+      return route.fulfill({ json: { ...set, cards: [card] } });
+    if (path.endsWith('/ja/cards/M1L-088'))
+      return route.fulfill({
+        json: { ...card, set, variants: { holo: true } },
+      });
+    return route.fulfill({ json: [] });
+  });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    exact: true,
+  });
+  await add.locator('input[type=file][multiple]').setInputFiles([
+    'public/assets/cards/svi-211.webp',
+    'public/assets/cards/obf-207.webp',
+  ]);
+  await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
+  await add
+    .getByRole('button', { name: 'Foto ausrichten und erkennen' })
+    .click();
+  const crop = page.getByRole('dialog', { name: 'Karte ausrichten' });
+  await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
+  await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
+  await expect(add.locator('.w-scan-match-card')).toBeVisible({
+    timeout: 30_000,
+  });
+  const previewWidth = await add
+    .locator('.w-original-photo')
+    .evaluate((node) => node.getBoundingClientRect().width);
+  expect(previewWidth).toBeGreaterThan(95);
+  const switcher = add.getByRole('button', { name: /Aufnahmen wechseln/ });
+  await expect(switcher).toBeVisible();
+  await switcher.click();
+  await expect(add.locator('.w-capture-queue')).toBeVisible();
+  await add
+    .getByRole('button', { name: 'obf-207.webp · offen', exact: true })
+    .click();
+  await expect(add.locator('.w-photo-review h3')).toHaveText('obf-207.webp');
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
