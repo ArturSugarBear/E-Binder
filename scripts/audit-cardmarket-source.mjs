@@ -17,6 +17,12 @@ const products = await load(sources.products);
 console.log('products keys:', Object.keys(products));
 console.log('product count:', products.products?.length);
 console.log('sample:', JSON.stringify(products.products?.[0]));
+const knownIds = new Set([918949,918876,918832,895886]);
+console.log('verified-product-ids:', JSON.stringify(products.products?.filter((p) => knownIds.has(p.idProduct))));
+console.log('possible Groudon products:', JSON.stringify(products.products?.filter((p) => /Groudon/i.test(p.name)).slice(-20)));
+console.log('DLR set-marked products:', JSON.stringify(products.products?.filter((p) => /\[DLR\s*\d+/i.test(p.name)).slice(0,28)));
+console.log('PBL set-marked products:', JSON.stringify(products.products?.filter((p) => /\[PBL\s*\d+/i.test(p.name)).slice(0,12)));
+
 const interesting = products.products?.filter((p) =>
   /Delta Reign|Delta-Herrschaft|Pitch Black|Dunkelnacht|30 Years|30th|Nebel der Sagen|Shrouded Fable|Eternal Rivals|Destined Rivals/i.test(p.expansionName ?? ''),
 ) ?? [];
