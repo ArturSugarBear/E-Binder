@@ -183,12 +183,16 @@ export async function resolvePhotoScan(
   // when set/name OCR is unreadable. Start it beside catalogue discovery,
   // not after a potentially long network lookup. Missing licensed assets,
   // expired manifests or visual timeouts leave ordinary OCR functional.
+  const visualBudget = AbortSignal.any([
+    signal,
+    AbortSignal.timeout(4800),
+  ]);
   const visualCards = visualSession
     ? visualSession
-        .match(photo, 5000)
+        .match(photo, 4700)
         .then((hits) => reviewVisualCandidates(hits, visualNumberClues(text), 5))
         .then((review) =>
-          resolveVisualPrintings(review.choices, known, signal, {
+          resolveVisualPrintings(review.choices, known, visualBudget, {
             online: typeof navigator === 'undefined' || navigator.onLine,
           }),
         )
@@ -227,13 +231,15 @@ export async function resolvePhotoScan(
   // particular language, collector number or foil.
   const appearanceSignal = AbortSignal.any([
     signal,
-    AbortSignal.timeout(3000),
+    AbortSignal.timeout(1800),
   ]);
-  const inspected = await compareCandidateArtwork(
-    photo,
-    candidates.slice(0, 12),
-    appearanceSignal,
-  ).catch(() => []);
+  const inspected = fromVisual.length
+    ? []
+    : await compareCandidateArtwork(
+        photo,
+        candidates.slice(0, 12),
+        appearanceSignal,
+      ).catch(() => []);
   const scores = new Map(
     inspected.map((entry) => [entry.card.key, entry.similarity]),
   );
