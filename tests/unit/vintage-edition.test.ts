@@ -15,7 +15,9 @@ describe('Vintage Base Set edition integrity', () => {
   it('requires a dedicated edition review for German and English Base Set', () => {
     expect(requiresEditionStampReview(base)).toBe(true);
     expect(requiresEditionStampReview({ ...base, language: 'en' })).toBe(true);
-    expect(requiresEditionStampReview({ ...base, source: 'manual' })).toBe(false);
+    expect(requiresEditionStampReview({ ...base, source: 'manual' })).toBe(
+      false,
+    );
     expect(requiresEditionStampReview({ ...base, setId: 'base2' })).toBe(false);
     expect(requiresEditionStampReview({ ...base, setId: 'me06' })).toBe(false);
   });
@@ -40,14 +42,15 @@ describe('Vintage Base Set edition integrity', () => {
   });
 
   it('rejects unverified 1st Edition even when a catalogue match is exact', () => {
-    expect(
-      validateVintageEdition(base, '1. Edition', false, 'first'),
-    ).toMatch(/Editionsstempels/);
+    expect(validateVintageEdition(base, '1. Edition', false, 'first')).toMatch(
+      /Editionsstempels/,
+    );
     expect(
       validateVintageEdition(base, '1st Edition', false, 'unknown'),
     ).toMatch(/Editionsstempels/);
-    expect(validateVintageEdition(base, '1. Edition', true, 'first'))
-      .toBeUndefined();
+    expect(
+      validateVintageEdition(base, '1. Edition', true, 'first'),
+    ).toBeUndefined();
   });
 
   it('allows a neutral edition and manually selected Unlimited', () => {
@@ -62,11 +65,7 @@ describe('Vintage Base Set edition integrity', () => {
 
   it('does not block newer cards or pretend to detect edition stamps', () => {
     expect(
-      validateVintageEdition(
-        { ...base, setId: 'me06' },
-        '1. Edition',
-        false,
-      ),
+      validateVintageEdition({ ...base, setId: 'me06' }, '1. Edition', false),
     ).toBeUndefined();
   });
 });

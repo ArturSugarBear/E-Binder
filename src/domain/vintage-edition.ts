@@ -22,7 +22,11 @@ export type VintageEdition = 'unknown' | 'unlimited' | 'first';
 
 export function editionClaimFromNote(note: string): VintageEdition {
   const value = note.trim().toLowerCase();
-  if (/\b(?:1st|first|erste|erstauflage|1\s*\.?\s*(?:edition|auflage)|(?:edition|auflage)\s*1)\b/u.test(value))
+  if (
+    /\b(?:1st|first|erste|erstauflage|1\s*\.?\s*(?:edition|auflage)|(?:edition|auflage)\s*1)\b/u.test(
+      value,
+    )
+  )
     return 'first';
   if (/\b(?:unlimited|unlimitiert|ohne\s+stempel)\b/u.test(value))
     return 'unlimited';

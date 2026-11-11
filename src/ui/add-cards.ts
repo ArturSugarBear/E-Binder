@@ -1336,7 +1336,9 @@ export function openAddCards(
         )
       : undefined;
     const stampCheck = vintageReview
-      ? check('Ich habe den Editionsstempel auf dieser Karte persönlich geprüft.')
+      ? check(
+          'Ich habe den Editionsstempel auf dieser Karte persönlich geprüft.',
+        )
       : undefined;
     const syncEditionStamp = () => {
       if (!stampCheck) return;
