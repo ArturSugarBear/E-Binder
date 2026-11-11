@@ -666,7 +666,13 @@ export function openAddCards(
           // Recover with the full, foreground OCR path on worker failure.
         }
       }
-      if (closed || shot.id !== captureId || shot.status === 'confirmed')
+      const current = ctx.state.captures.find((item) => item.id === shot.id);
+      if (
+        closed ||
+        shot.id !== captureId ||
+        !current ||
+        current.status === 'confirmed'
+      )
         return;
       await resolveOcrReview(shot);
     } finally {
