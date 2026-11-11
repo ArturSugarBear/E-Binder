@@ -42,10 +42,13 @@ import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
 import { rankScanCandidates } from '../data/scan-review';
-import { binderReviewComplete } from '../domain/binder-scan-review';
+import {
+  binderReviewComplete,
+  type PocketDecision,
+} from '../domain/binder-scan-review';
+import { recordBetaEvent } from '../data/beta-diagnostics';
 import type { WorkspaceContext } from './workspace-context';
 
-import type { PocketDecision } from '../domain/binder-scan-review';
 type Decision = PocketDecision;
 type Pocket = {
   decision: Decision;
@@ -254,6 +257,9 @@ export function openPageScanner(
         )
       )
         return;
+      recordBetaEvent('scan_review', 'scan', 'page_imported', 'ok', {
+        metric: slots.filter(Boolean).length,
+      });
       const id = ctx.state.lastBinderId;
       if (id && ![...binder.options].some((option) => option.value === id)) {
         const option = el(
@@ -293,7 +299,7 @@ export function openPageScanner(
       for (const pocket of pockets)
         if (pocket.decision === 'pending') {
           pocket.select.value = 'skip';
-          updatePocket(pocket);
+          updatePocket(pocket, true);
         }
     },
     'secondary',
@@ -306,7 +312,7 @@ export function openPageScanner(
       for (const pocket of pockets)
         if (pocket.emptySuggested && pocket.decision === 'pending') {
           pocket.select.value = 'empty';
-          updatePocket(pocket);
+          updatePocket(pocket, true);
         }
     },
     'secondary',
@@ -430,7 +436,7 @@ export function openPageScanner(
   sheet.footer.append(stop, save);
   reportQueue();
 
-  const updatePocket = (pocket: Pocket) => {
+  const updatePocket = (pocket: Pocket, reviewed = false) => {
     const selected = pocket.select.value;
     if (selected === 'empty' || selected === 'skip') {
       pocket.decision = selected;
@@ -446,10 +452,15 @@ export function openPageScanner(
     if (pocket.decision === 'card' && pocket.card)
       pocket.status.textContent = `${pocket.card.name} · ${pocket.card.number}`;
     else if (pocket.decision === 'empty')
-      pocket.status.textContent = 'Vermutlich leer · antippen zum Ändern';
+      pocket.status.textContent = 'Leer bestätigt · jederzeit korrigierbar';
     else if (pocket.decision === 'skip')
       pocket.status.textContent = 'Nicht zugeordnet';
     if (pocket.container) pocket.container.dataset.decision = pocket.decision;
+    if (reviewed)
+      recordBetaEvent('scan_review', 'scan', 'page_pocket_reviewed', 'ok', {
+        selected: pocket.card?.source === 'tcgdex' ? pocket.card.key : undefined,
+        metric: pockets.indexOf(pocket) + 1,
+      });
     pocket.tileButton?.setAttribute(
       'aria-label',
       `Fach ${pockets.indexOf(pocket) + 1} prüfen · ${pocket.decision === 'card' ? 'Karte ausgewählt' : pocket.decision === 'empty' ? 'Leer bestätigt' : pocket.decision === 'skip' ? 'Ungeklärt' : 'Offen'}`,
@@ -517,7 +528,7 @@ export function openPageScanner(
         `${card.name} · ${card.setName} · ${card.number}`,
         () => {
           pocket.select.value = `card:${index}`;
-          updatePocket(pocket);
+          updatePocket(pocket, true);
         },
         'card',
       );
@@ -577,7 +588,7 @@ export function openPageScanner(
         const pocket = pockets[activePocket];
         if (!pocket) return;
         pocket.select.value = 'empty';
-        updatePocket(pocket);
+        updatePocket(pocket, true);
         nextPocket();
       },
       'secondary',
@@ -588,7 +599,7 @@ export function openPageScanner(
         const pocket = pockets[activePocket];
         if (!pocket) return;
         pocket.select.value = 'skip';
-        updatePocket(pocket);
+        updatePocket(pocket, true);
         nextPocket();
       },
       'secondary',
@@ -719,7 +730,7 @@ export function openPageScanner(
       pockets.push(pocket);
       pick.setAttribute('aria-label', `Karte für Fach ${index + 1} auswählen`);
       finish.setAttribute('aria-label', `Druckvariante für Fach ${index + 1}`);
-      pick.addEventListener('change', () => updatePocket(pocket));
+      pick.addEventListener('change', () => updatePocket(pocket, true));
       finish.addEventListener('change', () => updatePocket(pocket));
       variant.addEventListener('input', updateSave);
       const searchButton = action(
@@ -745,6 +756,7 @@ export function openPageScanner(
       );
       tileButton.classList.add('w-page-scan-open-pocket');
       tileButton.setAttribute('aria-pressed', 'false');
+      tileButton.setAttribute('aria-label', `Fach ${index + 1} prüfen · Offen`);
       tileButton.replaceChildren(
         el('div', 'w-page-scan-photo-frame', photo),
         el('strong', 'w-page-scan-pocket-label', `Fach ${index + 1}`),
@@ -852,6 +864,13 @@ export function openPageScanner(
             // must not silently disappear from the collector's binder.
             pocket.emptySuggested = true;
             pocket.container!.dataset.recognitionState = 'empty-suggested';
+            recordBetaEvent(
+              'scan_result',
+              'scan',
+              'page_pocket_empty_hint',
+              'unknown',
+              { metric: index + 1 },
+            );
             pocket.status.textContent = 'Vermutlich leer · bitte bestätigen';
             animateResolvedPocket(pocket.container, 'unknown');
             updateSave();
@@ -1037,9 +1056,31 @@ export function openPageScanner(
                         : 'Kein lesbarer Kartenname · Foto prüfen';
           if (printedEnergy.length)
             pocket.status.textContent = `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`;
+          recordBetaEvent(
+            'scan_result',
+            'scan',
+            matched
+              ? 'page_pocket_exact'
+              : ranked.conflictingName
+                ? 'page_pocket_conflict'
+                : pocket.candidates.length
+                  ? 'page_pocket_candidates'
+                  : 'page_pocket_no_candidate',
+            matched ? 'ok' : 'unknown',
+            {
+              candidate:
+                pocket.candidates[0]?.source === 'tcgdex'
+                  ? pocket.candidates[0].key
+                  : undefined,
+              metric: index + 1,
+            },
+          );
         } catch (error) {
           if (closed || abort.signal.aborted) break;
           pocket.container!.dataset.recognitionState = 'error';
+          recordBetaEvent('scan_result', 'scan', 'page_pocket_error', 'error', {
+            metric: index + 1,
+          });
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
