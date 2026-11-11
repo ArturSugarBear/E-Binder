@@ -15,6 +15,7 @@ const scope = self as unknown as {
           photo: Blob;
           numberOnly?: boolean;
           fast?: boolean;
+          warmup?: boolean;
           modelUrl: string;
           dictionaryUrl: string;
           id?: number;
@@ -68,6 +69,16 @@ async function resource(url: string): Promise<Response> {
 let queue = Promise.resolve();
 scope.onmessage = (event) => {
   const data = event.data;
+  if (data.warmup) {
+    // The same worker and ONNX session are reused for subsequent photos.
+    // A failed warmup must not prevent a later explicit OCR retry.
+    queue = queue
+      .then(async () => {
+        await modelResources(data.modelUrl, data.dictionaryUrl);
+      })
+      .catch(() => undefined);
+    return;
+  }
   queue = queue
     .then(() => recognize(data))
     .catch(() => {
