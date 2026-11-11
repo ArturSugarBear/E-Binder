@@ -113,6 +113,23 @@ physische Scanleistung.
 
 ## Verbleibende Produktvalidierung
 
+Der zusätzliche Abhängigkeitscheck vom 11. November mit `npm audit --omit=dev`
+meldet **keine bekannten Schwachstellen in Produktionsabhängigkeiten**. Der
+vollständige Audit meldet 15 betroffene Knoten im Entwicklungs-/Buildbaum
+(13 mittel, zwei niedrig; keine hohen oder kritischen):
+[Minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249),
+[Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) und
+[Deepmerge](https://github.com/advisories/GHSA-gcqx-w48m-w2h4). Die Knotenanzahl
+enthält abhängige Pakete und entspricht nicht 15 unabhängigen Schwachstellen.
+Betroffen sind ESLint/TypeScript-ESLint und Workbox/Rollup beim lokalen Build.
+Diese Meldungen sind **offen**: Die Elternpakete erlauben die korrigierten
+Glob-/Minimatch-Major-Versionen noch nicht; das aktuelle Deepmerge-Release
+4.3.1 ist ebenfalls betroffen. Erzwungene Major-Overrides beziehungsweise
+die von npm vorgeschlagenen Toolchain-Downgrades benötigen eine separate
+Kompatibilitätsprüfung. Der produktive Browsercode ist durch diesen Befund
+nicht als angreifbar nachgewiesen. Die GitHub-Dependabot-Detailansicht war für
+die Integration nicht freigegeben (403); Grundlage ist der lokale npm-Audit.
+
 Vor Aussagen über HoloGem-Überlegenheit fehlen echte iPhone-Scans bei Reflexion,
 schlechtem Licht und vollen Binderseiten sowie gemessene Erkennungszeiten und
 Trefferqualität. Auch eine neue Anmeldung mit realer Cloud-Synchronisierung
