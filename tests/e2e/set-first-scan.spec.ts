@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 
-test('scan cannot identify a printing from 088/063 alone; set-first review resolves M1L', async ({
+test('scan resolves Japanese M1L 088/063 automatically without asking for a set code', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -49,6 +49,8 @@ test('scan cannot identify a printing from 088/063 alone; set-first review resol
     };
     if (path.endsWith('/ja/sets'))
       return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/cards') && url.searchParams.has('localId'))
+      return route.fulfill({ json: [resume] });
     if (path.endsWith('/ja/sets/M1L'))
       return route.fulfill({
         json: { ...set, cards: [resume] },
@@ -74,17 +76,10 @@ test('scan cannot identify a printing from 088/063 alone; set-first review resol
   const crop = page.getByRole('dialog', { name: 'Karte ausrichten' });
   await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
   await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
-  const setPanel = add.locator('.w-scan-set-panel');
-  await expect(setPanel).toBeVisible({ timeout: 30_000 });
-  await expect(setPanel).toContainText('Welches Set steht auf deiner Karte?');
-  await expect(add.locator('.w-scan-match-card')).toHaveCount(0);
-  await expect(add.locator('.w-search-results .w-button-card')).toHaveCount(0);
-  await setPanel.getByRole('button', { name: 'Japanisch' }).click();
-  await setPanel.getByLabel('Set suchen').fill('M1L');
-  await setPanel.getByLabel('Set auswählen').selectOption('M1L');
-  await setPanel
-    .getByRole('button', { name: 'Set und Nummer abgleichen' })
-    .click();
+  await expect(add.locator('.w-scan-match-card')).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(add.locator('.w-scan-set-panel')).toHaveCount(0);
   await expect(add.locator('.w-scan-match-card')).toContainText('メガルカリオex');
   await expect(add.locator('.w-scan-match-card')).toContainText('088/63');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
