@@ -3,11 +3,12 @@ import {
   catalogSetCards,
   fetchCatalogCard,
   recognitionClues,
+  visualNumberClues,
 } from './card-catalog';
-import {
-  compareCandidateArtwork,
-  strongAppearanceAgreement,
-} from './scan-photo-match';
+import { compareCandidateArtwork } from './scan-photo-match';
+import { reviewVisualCandidates } from '../domain/visual-retrieval';
+import type { VisualSearchSession } from './visual-search';
+import { resolveVisualPrintings } from './scan-visual-shortlist';
 import { rankScanCandidates } from './scan-review';
 import { recognizedNameHints } from '../domain/recognition-names';
 import { normalize, numberKey, type PersonalCard } from '../domain/personal';
@@ -173,15 +174,40 @@ export async function resolvePhotoScan(
   known: PersonalCard[],
   preferredLanguage: string,
   signal: AbortSignal,
+  visualSession?: VisualSearchSession | null,
 ): Promise<AutomaticScanResult> {
-  const catalog = await discoverNumberedCards(text, preferredLanguage, signal);
+  // The optional ONNX index is the only path capable of finding printings
+  // when set/name OCR is unreadable. Start it beside catalogue discovery,
+  // not after a potentially long network lookup. Missing licensed assets,
+  // expired manifests or visual timeouts leave ordinary OCR functional.
+  const visualCards = visualSession
+    ? visualSession
+        .match(photo, 5000)
+        .then((hits) => reviewVisualCandidates(hits, visualNumberClues(text), 5))
+        .then((review) =>
+          resolveVisualPrintings(review.choices, known, signal, {
+            online: typeof navigator === 'undefined' || navigator.onLine,
+          }),
+        )
+        .catch(() => [] as PersonalCard[])
+    : Promise.resolve([] as PersonalCard[]);
+  const [catalog, fromVisual] = await Promise.all([
+    discoverNumberedCards(text, preferredLanguage, signal),
+    visualCards,
+  ]);
+  if (signal.aborted) throw new DOMException('Abgebrochen', 'AbortError');
   const all = [
-    ...new Map([...catalog, ...known].map((card) => [card.key, card])).values(),
+    ...new Map(
+      [...fromVisual, ...catalog, ...known].map((card) => [card.key, card]),
+    ).values(),
   ];
+  // Partial numbers (e.g. '088' without '/063') cannot discard otherwise
+  // valid image candidates or prove a printing by themselves.
   const number = recognitionClues(text)[0]?.number;
-  const candidates = number
-    ? all.filter((card) => numberKey(card.number) === number)
-    : all;
+  const candidates =
+    number?.includes('/')
+      ? all.filter((card) => numberKey(card.number) === numberKey(number))
+      : all;
   const exact = rankScanCandidates(text, candidates);
   if (exact.suggested)
     return {
@@ -190,10 +216,23 @@ export async function resolvePhotoScan(
       basis: exact.basis,
       visualChecked: 0,
     };
-  const inspected = await compareCandidateArtwork(photo, candidates, signal);
-  const strong = strongAppearanceAgreement(inspected);
+  // Lightweight artwork colour signatures can rank OCR candidates, but
+  // neither cosine similarity nor a dominant colour margin proves a
+  // particular language, collector number or foil.
+  const appearanceSignal = AbortSignal.any([
+    signal,
+    AbortSignal.timeout(3000),
+  ]);
+  const inspected = await compareCandidateArtwork(
+    photo,
+    candidates.slice(0, 12),
+    appearanceSignal,
+  ).catch(() => []);
   const scores = new Map(
     inspected.map((entry) => [entry.card.key, entry.similarity]),
+  );
+  const visualRanks = new Map(
+    fromVisual.map((card, index) => [card.key, index]),
   );
   const title = recognizedNameHints(text)[0];
   const ranked = [...candidates].sort((a, b) => {
@@ -201,20 +240,19 @@ export async function resolvePhotoScan(
     const nameB = title && normalize(title) === normalize(b.name) ? 1 : 0;
     return (
       Number(nameB) - Number(nameA) ||
+      (visualRanks.get(a.key) ?? 999) - (visualRanks.get(b.key) ?? 999) ||
       (scores.get(b.key) ?? -1) - (scores.get(a.key) ?? -1) ||
       Number(b.language === preferredLanguage) -
         Number(a.language === preferredLanguage) ||
       a.key.localeCompare(b.key)
     );
   });
-  const suggestion = strong && ranked.find((card) => card.key === strong.key);
-  const ordered = suggestion
-    ? [suggestion, ...ranked.filter((card) => card.key !== suggestion.key)]
-    : ranked;
   return {
-    candidates: ordered.slice(0, 24),
-    suggested: suggestion,
-    basis: suggestion ? 'image' : candidates.length ? 'review' : 'no-match',
-    visualChecked: inspected.length,
+    candidates: ranked.slice(0, 24),
+    // Only a separate printed-identity match can suggest an exact
+    // printing. Images alone cannot distinguish identical DE/EN artwork
+    // or different foil treatments.
+    basis: candidates.length ? 'review' : 'no-match',
+    visualChecked: fromVisual.length + inspected.length,
   };
 }
