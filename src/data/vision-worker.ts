@@ -14,6 +14,7 @@ const scope = self as unknown as {
         event: MessageEvent<{
           photo: Blob;
           numberOnly?: boolean;
+          fast?: boolean;
           modelUrl: string;
           dictionaryUrl: string;
           id?: number;
@@ -81,12 +82,14 @@ scope.onmessage = (event) => {
 async function recognize({
   photo,
   numberOnly,
+  fast,
   modelUrl,
   dictionaryUrl,
   id,
 }: {
   photo: Blob;
   numberOnly?: boolean;
+  fast?: boolean;
   modelUrl: string;
   dictionaryUrl: string;
   id?: number;
@@ -179,19 +182,23 @@ async function recognize({
     // The original OR condition repeated contrast OCR even after an initial hit.
     if (!hasPrintedCollectorFraction(texts)) {
       report('Nummernzeile im unteren Bildbereich wird gesucht …', id);
-      for (const region of collectorNumberFallbackRegions) {
+      // Two additional footer crops in live mode; the full review mode
+      // retains the complete fallback ladder. No model score is invented.
+      for (const region of fast
+        ? collectorNumberFallbackRegions.slice(0, 2)
+        : collectorNumberFallbackRegions) {
         texts.push(await read(region));
         if (hasPrintedCollectorFraction(texts)) break;
       }
     }
-    if (!hasPrintedCollectorFraction(texts)) {
+    if (!fast && !hasPrintedCollectorFraction(texts)) {
       report('Unterer Rand wird mit höherem Kontrast gegengeprüft …', id);
       for (const variant of ['gray', 'inverted', 'binary'] as const) {
         texts.push(await read([0.07, 0.94, 0.38, 0.032], variant));
         if (hasPrintedCollectorFraction(texts)) break;
       }
     }
-    if (!hasPrintedCollectorFraction(texts)) {
+    if (!fast && !hasPrintedCollectorFraction(texts)) {
       texts.push(await read([0.7, 0.9, 0.27, 0.045]));
     }
     if (numberOnly) {
