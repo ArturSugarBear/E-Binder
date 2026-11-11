@@ -167,25 +167,34 @@ export function openLiveScanner(
     'Karte mittig ausrichten',
   );
   stage.append(stageLabel);
+  const analysisCaption = el(
+    'span',
+    'w-live-analysis-caption',
+    'Kartendetails werden lokal geprüft …',
+  );
   const analysis = el(
     'div',
     'w-live-analysis',
     el('span', 'w-live-analysis-line'),
-    el(
-      'span',
-      'w-live-analysis-caption',
-      'Kartendetails werden lokal geprüft …',
-    ),
+    analysisCaption,
   );
   analysis.setAttribute('role', 'status');
   analysis.hidden = true;
   stage.append(analysis);
   let ongoingAnalysis = 0;
-  const onAnalysisState = (active: boolean) => {
+  const onAnalysisState = (active: boolean, detail?: string) => {
     if (closed) return;
+    // Status text changes come from actual OCR/retry/catalogue work;
+    // they do not increase the number of pending recognitions.
+    if (detail) {
+      analysisCaption.textContent = detail;
+      return;
+    }
     ongoingAnalysis = Math.max(0, ongoingAnalysis + (active ? 1 : -1));
     analysis.hidden = ongoingAnalysis === 0;
     stage.classList.toggle('is-analyzing', ongoingAnalysis > 0);
+    if (!ongoingAnalysis)
+      analysisCaption.textContent = 'Kartendetails werden lokal geprüft …';
   };
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
