@@ -86,10 +86,7 @@ describe('set-first card identification', () => {
   });
 
   it('never auto-selects a conflicting full card title in either scanner', () => {
-    const ranked = rankScanCandidates('M1L 088/063\nLucario', [
-      lucario,
-      third,
-    ]);
+    const ranked = rankScanCandidates('M1L 088/063\nLucario', [lucario, third]);
     expect(ranked.conflictingName).toBe(true);
     expect(ranked.suggested).toBeUndefined();
     expect(ranked.basis).toBe('review');
