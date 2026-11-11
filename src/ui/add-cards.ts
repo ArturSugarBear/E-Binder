@@ -193,14 +193,19 @@ export function openAddCards(
         },
         () => {
           reviewingLiveQueue = true;
-          captureStart.hidden = true;
           captureId = ctx.state.captures.find(
             (item) => item.status === 'pending',
           )?.id;
           showQueue();
           showCapture();
           const shot = capture();
-          if (shot?.status === 'pending' && !shot.text)
+          // File uploads without a trusted crop still need manual alignment.
+          // Camera-aligned live photos proceed without another dialog.
+          if (
+            shot?.status === 'pending' &&
+            !shot.text &&
+            alignedCaptures.has(shot.id)
+          )
             void runOcr();
           else if (shot?.status === 'pending' && shot.text)
             void renderScanReview(shot.text, shot.candidates);
@@ -843,7 +848,12 @@ export function openAddCards(
         ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
         : 'Karte hinzugefügt. Scanne die nächste Karte.',
     );
-    if (reviewingLiveQueue && captureId && transientPhotos.has(captureId))
+    if (
+      reviewingLiveQueue &&
+      captureId &&
+      transientPhotos.has(captureId) &&
+      alignedCaptures.has(captureId)
+    )
       void runOcr();
   }
 
@@ -1586,7 +1596,12 @@ export function openAddCards(
               ? 'Foto übernommen. Das nächste offene Foto ist ausgewählt.'
               : 'Foto übernommen. Du kannst die nächste Karte fotografieren oder weitere Fotos auswählen.',
           );
-          if (reviewingLiveQueue && captureId && transientPhotos.has(captureId))
+          if (
+            reviewingLiveQueue &&
+            captureId &&
+            transientPhotos.has(captureId) &&
+            alignedCaptures.has(captureId)
+          )
             void runOcr();
         } else sheet.close();
       }
