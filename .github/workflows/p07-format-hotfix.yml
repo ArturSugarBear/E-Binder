@@ -20,13 +20,22 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx prettier --write src/ui/add-cards.ts
+      - name: Format live multi-pass OCR and test files
+        run: >
+          npx prettier --write
+          src/domain/live-ocr-policy.ts
+          src/data/recognize.ts
+          src/data/vision-worker.ts
+          src/ui/add-cards.ts
+          src/ui/live-scan.ts
+          tests/unit/live-ocr-policy.test.ts
+          tests/e2e/live-scan-battle.spec.ts
       - name: Commit only formatting if needed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/ui/add-cards.ts
+          git add src/domain/live-ocr-policy.ts src/data/recognize.ts src/data/vision-worker.ts src/ui/add-cards.ts src/ui/live-scan.ts tests/unit/live-ocr-policy.test.ts tests/e2e/live-scan-battle.spec.ts
           if ! git diff --cached --quiet; then
-            git commit -m "Format P07 OCR scan orchestrator"
+            git commit -m "Format P07 bounded live multi-pass recognition"
             git push origin HEAD:feature/p07-rapid-scan-and-visual-evaluation
           fi
