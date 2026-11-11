@@ -55,8 +55,10 @@ export function plausibleCardQuad(
   const centerX = corners.reduce((sum, point) => sum + point.x, 0) / 4;
   const centerY = corners.reduce((sum, point) => sum + point.y, 0) / 4;
   return (
-    ratio >= 0.57 &&
-    ratio <= 0.87 &&
+    // Reject drifting/tall outlines that do not match physical 63×88 mm
+    // card geometry. These are only automatic-shutter guards.
+    ratio >= 0.63 &&
+    ratio <= 0.81 &&
     boxArea >= 0.23 &&
     Math.max(top, bottom) / Math.min(top, bottom) <= 1.42 &&
     Math.max(left, right) / Math.min(left, right) <= 1.42 &&

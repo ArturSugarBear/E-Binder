@@ -184,6 +184,31 @@ test('a distorted photo is split into nine reviewable positions without changing
   }
   await expect(dialog.locator('.w-page-scan-editor')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-editor[open]')).toHaveCount(0);
+  await expect(dialog.locator('.w-page-scan-review-panel')).toBeHidden();
+  await expect(
+    dialog.getByRole('button', { name: /Fach 1 prüfen/ }),
+  ).toBeVisible();
+  await dialog.getByRole('button', { name: /Fach 1 prüfen/ }).click();
+  await expect(dialog.locator('.w-page-scan-review-panel')).toBeVisible();
+  await expect(dialog.locator('.w-page-scan-editor[open]')).toHaveCount(1);
+  await expect(
+    dialog.getByRole('heading', { name: 'Fach 1 von 9 prüfen' }),
+  ).toBeVisible();
+  await dialog
+    .getByRole('button', { name: 'Fach als leer bestätigen' })
+    .click();
+  await expect(dialog.locator('.w-page-scan-pocket').first()).toHaveAttribute(
+    'data-decision',
+    'empty',
+  );
+  await expect(
+    dialog.getByRole('heading', { name: 'Fach 2 von 9 prüfen' }),
+  ).toBeVisible();
+  await dialog.getByRole('button', { name: 'Fach ungeklärt lassen' }).click();
+  await expect(dialog.locator('.w-page-scan-pocket').nth(1)).toHaveAttribute(
+    'data-decision',
+    'skip',
+  );
   await expect(dialog.locator('.w-page-scan-pocket img')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-photo-frame')).toHaveCount(9);
   await expect(dialog.locator('.w-page-scan-quality')).toHaveCount(9);

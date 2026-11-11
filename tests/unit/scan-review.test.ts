@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { scanEvidence, fullCardNameMatches } from '../../src/data/scan-review';
+import {
+  scanEvidence,
+  fullCardNameMatches,
+  rankScanCandidates,
+} from '../../src/data/scan-review';
 import { hasPrintedSetCode } from '../../src/domain/ocr-number-search';
 import type { PersonalCard } from '../../src/domain/personal';
 
@@ -70,6 +74,22 @@ describe('set-first card identification', () => {
       kind: 'name-number',
       card: mega,
     });
+  });
+
+  it('shares the exact printing choice between a photo and binder pocket', () => {
+    const items = [wrong, lucario, third];
+    const ranked = rankScanCandidates('M1L 088/063\nメガルカリオex', items);
+    expect(ranked.basis).toBe('printed-set');
+    expect(ranked.suggested?.key).toBe(lucario.key);
+    expect(ranked.candidates[0]?.key).toBe(lucario.key);
+    expect(rankScanCandidates('088/063', items).suggested).toBeUndefined();
+  });
+
+  it('never auto-selects a conflicting full card title in either scanner', () => {
+    const ranked = rankScanCandidates('M1L 088/063\nLucario', [lucario, third]);
+    expect(ranked.conflictingName).toBe(true);
+    expect(ranked.suggested).toBeUndefined();
+    expect(ranked.basis).toBe('review');
   });
 
   it('flags a contradictory OCR title even when the printed set and number match', () => {

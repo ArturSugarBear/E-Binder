@@ -54,6 +54,24 @@ describe('live camera: safety-critical automatic shutter gating', () => {
     expect(plausibleCardQuad(small, WIDTH, HEIGHT)).toBe(false);
   });
 
+  it('rejects a vertically stretched card outline instead of lengthening the scan frame', () => {
+    const stretched: Quad = [
+      { x: 0.18, y: 0.11 },
+      { x: 0.82, y: 0.11 },
+      { x: 0.82, y: 0.89 },
+      { x: 0.18, y: 0.89 },
+    ];
+    expect(plausibleCardQuad(stretched, WIDTH, HEIGHT)).toBe(false);
+    expect(
+      nextCardLock(
+        { corners: card, stableFrames: 3 },
+        stretched,
+        WIDTH,
+        HEIGHT,
+      ),
+    ).toEqual(blank);
+  });
+
   it('rejects frames with offscreen or invalid geometry instead of guessing', () => {
     expect(plausibleCardQuad(shifted(card, 0.6, 0), WIDTH, HEIGHT)).toBe(false);
     expect(plausibleCardQuad(shifted(card, 0, 0.6), WIDTH, HEIGHT)).toBe(false);

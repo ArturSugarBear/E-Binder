@@ -8,7 +8,7 @@ import {
   compareCandidateArtwork,
   strongAppearanceAgreement,
 } from './scan-photo-match';
-import { scanEvidence } from './scan-review';
+import { rankScanCandidates } from './scan-review';
 import { recognizedNameHints } from '../domain/recognition-names';
 import { normalize, numberKey, type PersonalCard } from '../domain/personal';
 
@@ -182,25 +182,12 @@ export async function resolvePhotoScan(
   const candidates = number
     ? all.filter((card) => numberKey(card.number) === number)
     : all;
-  const evidence = scanEvidence(text, candidates);
-  if (evidence.kind === 'set-number' && evidence.title !== 'conflicting')
+  const exact = rankScanCandidates(text, candidates);
+  if (exact.suggested)
     return {
-      candidates: [
-        evidence.card,
-        ...candidates.filter((card) => card.key !== evidence.card.key),
-      ],
-      suggested: evidence.card,
-      basis: 'printed-set',
-      visualChecked: 0,
-    };
-  if (evidence.kind === 'name-number')
-    return {
-      candidates: [
-        evidence.card,
-        ...candidates.filter((card) => card.key !== evidence.card.key),
-      ],
-      suggested: evidence.card,
-      basis: 'full-name',
+      candidates: exact.candidates,
+      suggested: exact.suggested,
+      basis: exact.basis,
       visualChecked: 0,
     };
   const inspected = await compareCandidateArtwork(photo, candidates, signal);

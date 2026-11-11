@@ -141,11 +141,15 @@ export function openLiveScanner(
   polygon.setAttribute('vector-effect', 'non-scaling-stroke');
   outline.append(polygon);
   const stage = el('div', 'w-live-stage', video, frame, outline);
+  const stageLabel = el(
+    'span',
+    'w-live-stage-label',
+    'Karte mittig ausrichten',
+  );
+  stage.append(stageLabel);
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
-  status.style.position = 'relative';
-  status.style.zIndex = '30';
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
   progress.value = 0;
@@ -153,7 +157,7 @@ export function openLiveScanner(
   const help = el(
     'p',
     'w-muted w-live-help',
-    'Halte die ganze Karte aufrecht in den Rahmen. Vermeide Spiegelungen auf der Folie und sorge für gleichmäßiges Licht. Die grüne Umrandung zeigt erkannte Ecken, noch keine bestätigte Kartenausrichtung.',
+    'Halte die ganze Karte aufrecht in den Rahmen. Vermeide Spiegelungen auf der Folie und sorge für gleichmäßiges Licht. Die grüne Umrandung zeigt erkannte Ecken, noch keine bestätigte Kartenausgabe.',
   );
   const trigger = action(
     'Jetzt aufnehmen',
@@ -182,8 +186,6 @@ export function openLiveScanner(
   const reviewSummary = el('p', 'w-live-review-summary');
   reviewSummary.setAttribute('role', 'status');
   reviewSummary.hidden = true;
-  reviewSummary.style.position = 'relative';
-  reviewSummary.style.zIndex = '30';
   function refreshReview(): void {
     const pending = pendingCaptures();
     reviewSummary.hidden = pending === 0;
@@ -218,21 +220,34 @@ export function openLiveScanner(
   mode.setAttribute('aria-label', 'Scanmodus wählen');
   mode.firstElementChild!.setAttribute('aria-pressed', 'true');
   mode.lastElementChild!.setAttribute('aria-pressed', 'false');
-  sheet.body.append(mode, stage, journey.element, progress, help);
-  sheet.footer.append(status, reviewSummary, trigger, next, finish, fallback);
-  sheet.footer.style.position = 'sticky';
-  sheet.footer.style.bottom = '0';
-  sheet.footer.style.zIndex = '25';
-  sheet.footer.style.background = 'var(--paper)';
-  sheet.footer.style.borderTop = '1px solid var(--w-border)';
-  trigger.style.position = 'relative';
-  trigger.style.zIndex = '30';
-  finish.style.position = 'relative';
-  finish.style.zIndex = '30';
-  next.style.position = 'relative';
-  next.style.zIndex = '30';
-  fallback.style.position = 'relative';
-  fallback.style.zIndex = '30';
+  const options = el(
+    'details',
+    'w-live-options',
+    el('summary', '', 'Tipps & Kamerafoto'),
+    help,
+    fallback,
+  );
+  // Camera, status, shutter, review: everything else is optional.
+  stage.append(status);
+  trigger.classList.add('w-live-shutter');
+  next.classList.add('w-live-next');
+  finish.classList.add('w-live-review');
+  sheet.dialog.classList.add('w-live-scan-minimal');
+  sheet.body.append(mode, stage, journey.element, progress, options);
+  sheet.footer.append(reviewSummary, trigger, next, finish);
+
+  // A sticky review footer can occlude a status overlay inside the camera
+  // stage on short iPhone viewports. For camera-denied/error states, move the
+  // *same live status node* ahead of the pending-review controls. This keeps
+  // screen-reader announcements and the original capture lifecycle intact.
+  const showCameraAlert = () => {
+    if (status.parentElement !== sheet.footer) sheet.footer.prepend(status);
+    stage.classList.add('has-camera-alert');
+  };
+  const restoreCameraStatus = () => {
+    if (status.parentElement !== stage) stage.append(status);
+    stage.classList.remove('has-camera-alert');
+  };
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races
   // with closing or restarting the scanner.
@@ -288,6 +303,7 @@ export function openLiveScanner(
         'Karte wird erkannt · noch nicht gespeichert',
       );
       stage.dataset.scanPhase = 'recognize';
+      stageLabel.textContent = 'Karte wird erkannt';
       await onCapture(
         new File([blob], `Live-Scan-${Date.now()}.jpg`, {
           type: 'image/jpeg',
@@ -299,6 +315,7 @@ export function openLiveScanner(
           'Aufnahme verarbeitet. Prüfe die Kartenausgabe oder scanne die nächste Karte.';
         journey.update('review', 'Aufnahme bereit · Ausgabe jetzt prüfen', 1);
         stage.dataset.scanPhase = 'review';
+        stageLabel.textContent = 'Aufnahme bereit';
         next.hidden = false;
         refreshReview();
         trigger.hidden = true;
@@ -315,6 +332,9 @@ export function openLiveScanner(
         );
         journey.update('error', 'Scan nicht abgeschlossen · erneut versuchen');
         stage.dataset.scanPhase = 'error';
+        stageLabel.textContent = 'Scan bitte wiederholen';
+        options.open = true;
+        showCameraAlert();
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
         refreshReview();
@@ -355,6 +375,7 @@ export function openLiveScanner(
       stage.classList.remove('has-card-outline');
       polygon.removeAttribute('points');
       progress.value = 0;
+      stageLabel.textContent = 'Karte ausrichten';
       status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
@@ -369,6 +390,8 @@ export function openLiveScanner(
     );
     stage.classList.add('has-card-outline');
     progress.value = observations;
+    stageLabel.textContent =
+      observations >= 2 ? 'Kurz ruhig halten' : 'Karte gefunden';
     status.textContent =
       observations >= 2
         ? 'Kartenecken erkannt · bitte kurz ruhig halten'
@@ -378,6 +401,7 @@ export function openLiveScanner(
 
   async function startCamera(): Promise<void> {
     if (closed || busy) return;
+    restoreCameraStatus();
     stopCamera();
     const generation = cameraGeneration;
     next.hidden = true;
@@ -394,9 +418,13 @@ export function openLiveScanner(
     polygon.removeAttribute('points');
     journey.update('ready', 'Karte in den Rahmen halten', 0);
     stage.dataset.scanPhase = 'ready';
+    stageLabel.textContent = 'Karte mittig ausrichten';
     status.textContent = 'Kamera wird gestartet …';
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
+      options.open = true;
+      trigger.hidden = true;
+      showCameraAlert();
       status.textContent =
         'Der Browser bietet keine Live-Kamera. Nutze stattdessen ein Kamerafoto.';
       return;
@@ -431,6 +459,10 @@ export function openLiveScanner(
       if (closed || generation !== cameraGeneration) return;
       stopCamera();
       recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
+      options.open = true;
+      trigger.hidden = true;
+      stageLabel.textContent = 'Kamera nicht verfügbar';
+      showCameraAlert();
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
       help.textContent =
         'Prüfe die Kameraberechtigung in Safari oder verwende die Fotoaufnahme als Rückfallmöglichkeit.';
