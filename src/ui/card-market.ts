@@ -57,7 +57,7 @@ export function cardMarket(entry: CatalogEntry): HTMLElement {
         ? 'Aus Cardmarkets Tagespreisführer für die verifizierte Druckausgabe. Kein Echtzeit- oder deutschsprachiger Near-Mint-Angebotspreis.'
         : entry.price?.provenance === 'verified-snapshot'
           ? 'Direkt geprüfter Cardmarket-Trend vom angegebenen Tag, kein Livepreis und nicht auf deutsche Near-Mint-Angebote gefiltert.'
-        : 'Orientierung aus dem Katalog. Sprache, Zustand und Druckvariante deines Exemplars können den Preis verändern.',
+          : 'Orientierung aus dem Katalog. Sprache, Zustand und Druckvariante deines Exemplars können den Preis verändern.',
     ),
   );
   if (entry.cardmarketUrl) {

@@ -16,11 +16,11 @@ export function canonicalProductName(name) {
 }
 
 export function canonicalCollectorNumber(value) {
-  const normalized = String(value ?? '').toUpperCase().replace(/\s+/g, '');
+  const normalized = String(value ?? '')
+    .toUpperCase()
+    .replace(/\s+/g, '');
   const match = normalized.match(/^([A-Z]*)(0*)([0-9]+)([A-Z]*)$/);
-  return match
-    ? match[1] + String(Number(match[3])) + match[4]
-    : normalized;
+  return match ? match[1] + String(Number(match[3])) + match[4] : normalized;
 }
 
 /**
@@ -44,12 +44,8 @@ export function alignProductPrints(products, numberedCards) {
   const m = cards.length;
   if (!n || !m || Math.abs(n - m) > Math.max(8, m * 0.2))
     return { accepted: false, coverage: 0, matches: [] };
-  const score = Array.from({ length: n + 1 }, () =>
-    new Float64Array(m + 1),
-  );
-  const path = Array.from({ length: n + 1 }, () =>
-    new Uint8Array(m + 1),
-  );
+  const score = Array.from({ length: n + 1 }, () => new Float64Array(m + 1));
+  const path = Array.from({ length: n + 1 }, () => new Uint8Array(m + 1));
   const skip = -4;
   for (let i = 1; i <= n; i++) score[i][0] = i * skip;
   for (let j = 1; j <= m; j++) score[0][j] = j * skip;
@@ -112,14 +108,13 @@ export function alignProductPrints(products, numberedCards) {
       return false;
     const previous = matches[index - 1];
     const next = matches[index + 1];
-    const anchoredBefore =
-      previous && item.cardIndex - previous.cardIndex <= 4;
+    const anchoredBefore = previous && item.cardIndex - previous.cardIndex <= 4;
     const anchoredAfter = next && next.cardIndex - item.cardIndex <= 4;
     return Boolean(
       (anchoredBefore && anchoredAfter) ||
-        (item.cardIndex <= 3 && anchoredAfter) ||
-        (item.cardIndex >= m - 4 && anchoredBefore) ||
-        Number(item.independentlyMappedId) === item.productId,
+      (item.cardIndex <= 3 && anchoredAfter) ||
+      (item.cardIndex >= m - 4 && anchoredBefore) ||
+      Number(item.independentlyMappedId) === item.productId,
     );
   });
   return { accepted: true, coverage, matches: trusted };

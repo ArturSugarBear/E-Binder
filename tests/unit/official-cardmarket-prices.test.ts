@@ -34,7 +34,10 @@ it('selects the actual illustration-rare product independently of TCGdex', async
   vi.setSystemTime(new Date('2026-11-11T12:00:00.000Z'));
   setup();
   const result = await officialCardmarketReference({
-    id: 'me06-111', setId: 'me06', localId: '111', language: 'de',
+    id: 'me06-111',
+    setId: 'me06',
+    localId: '111',
+    language: 'de',
   });
   expect(result).toMatchObject({
     productId: 918949,
@@ -49,12 +52,22 @@ it('selects the actual illustration-rare product independently of TCGdex', async
 
 it('never shares a price with another collector number or Japanese printing', async () => {
   setup();
-  expect(await officialCardmarketReference({
-    id: 'me06-111', setId: 'me06', localId: '053', language: 'de',
-  })).toBeUndefined();
-  expect(await officialCardmarketReference({
-    id: 'me06-111', setId: 'me06', localId: '111', language: 'ja',
-  })).toBeUndefined();
+  expect(
+    await officialCardmarketReference({
+      id: 'me06-111',
+      setId: 'me06',
+      localId: '053',
+      language: 'de',
+    }),
+  ).toBeUndefined();
+  expect(
+    await officialCardmarketReference({
+      id: 'me06-111',
+      setId: 'me06',
+      localId: '111',
+      language: 'ja',
+    }),
+  ).toBeUndefined();
 });
 
 it('does not use a stale snapshot but retains the trusted product link', async () => {
@@ -62,7 +75,10 @@ it('does not use a stale snapshot but retains the trusted product link', async (
   vi.setSystemTime(new Date('2026-11-20T12:00:00Z'));
   setup();
   const result = await officialCardmarketReference({
-    id: 'me06-106', setId: 'me06', localId: '106', language: 'en',
+    id: 'me06-106',
+    setId: 'me06',
+    localId: '106',
+    language: 'en',
   });
   expect(result).toMatchObject({ productId: 918943 });
   expect(result?.price).toBeUndefined();
@@ -70,7 +86,12 @@ it('does not use a stale snapshot but retains the trusted product link', async (
 
 it('handles missing/corrupted daily source without inventing a price', async () => {
   setup({ schemaVersion: 99 } as typeof guide);
-  expect(await officialCardmarketReference({
-    id: 'me06-111', setId: 'me06', localId: '111', language: 'de',
-  })).toBeUndefined();
+  expect(
+    await officialCardmarketReference({
+      id: 'me06-111',
+      setId: 'me06',
+      localId: '111',
+      language: 'de',
+    }),
+  ).toBeUndefined();
 });

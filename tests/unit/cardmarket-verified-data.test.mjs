@@ -3,7 +3,10 @@ import { describe, expect, it } from 'vitest';
 
 const guide = JSON.parse(
   await readFile(
-    new URL('../../public/assets/prices/cardmarket-verified.json', import.meta.url),
+    new URL(
+      '../../public/assets/prices/cardmarket-verified.json',
+      import.meta.url,
+    ),
     'utf8',
   ),
 );
@@ -33,7 +36,7 @@ describe('generated Cardmarket daily exact-print reference', () => {
       expect(card).toMatch(/^[a-z0-9.+-]+-[a-z0-9]+$/i);
       expect(Number.isSafeInteger(row[0])).toBe(true);
       expect(Number.isFinite(row[1]) && row[1] > 0).toBe(true);
-      expect(['trend','avg7','avg30','avg'].includes(row[2])).toBe(true);
+      expect(['trend', 'avg7', 'avg30', 'avg'].includes(row[2])).toBe(true);
       expect(typeof row[3]).toBe('string');
       expect(products.has(row[0])).toBe(false);
       products.add(row[0]);

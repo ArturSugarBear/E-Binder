@@ -23,11 +23,13 @@ describe('Cardmarket exact-print sequence alignment', () => {
     expect(result.accepted).toBe(true);
     expect(result.coverage).toBe(1);
     expect(
-      result.matches.filter((row) => row.cardName === 'Groudon')
+      result.matches
+        .filter((row) => row.cardName === 'Groudon')
         .map((row) => row.productId),
     ).toEqual([2003, 2010]);
     expect(
-      result.matches.filter((row) => row.cardName === 'Groudon')
+      result.matches
+        .filter((row) => row.cardName === 'Groudon')
         .map((row) => row.number),
     ).toEqual(['4', '11']);
   });
@@ -39,8 +41,9 @@ describe('Cardmarket exact-print sequence alignment', () => {
     ];
     const result = alignProductPrints(market, cards);
     expect(result.accepted).toBe(true);
-    expect(result.matches.find((row) => row.number === '11')?.productId)
-      .toBe(2010);
+    expect(result.matches.find((row) => row.number === '11')?.productId).toBe(
+      2010,
+    );
   });
 
   it('rejects independent product-ID contradictions', () => {
@@ -54,7 +57,9 @@ describe('Cardmarket exact-print sequence alignment', () => {
   it('declines low-coverage and ambiguous catalogues', () => {
     const wrong = products.map((p) => ({ ...p, name: 'Unknown' }));
     expect(alignProductPrints(wrong, cards).accepted).toBe(false);
-    expect(alignProductPrints(products.slice(0, 3), cards).accepted).toBe(false);
+    expect(alignProductPrints(products.slice(0, 3), cards).accepted).toBe(
+      false,
+    );
   });
 
   it('normalizes zero-padded printed numbers and artwork names', () => {

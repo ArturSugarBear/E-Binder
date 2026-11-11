@@ -8,7 +8,7 @@ pricing build.** Source and last-observed date are always displayed.
 The TCGdex `pricing.cardmarket.idProduct` field often points to another
 card of the same set (e.g., me06-106 maps to the cheap Growlithe, me06-111
 maps to the cheap Groudon). The TCGdex quote is then actually a quote for
-that *wrong product*, not just a price outlier. A one-card price override
+that _wrong product_, not just a price outlier. A one-card price override
 was insufficient and could expire with no replacement.
 
 ## New primary pipeline
@@ -21,7 +21,7 @@ sourced public catalogues**, but only publishes strongly verified matches:
 2. Cardmarket public **daily price guide**
    `price_guide_6.json`: trend/7d/30d, stamped at the original source date.
 3. Independently numbered Pokéllector print manifest (from the MIT-licensed
-   *code* project `ZyzyThePizi/pokemon-price-data`): English set, full
+   _code_ project `ZyzyThePizi/pokemon-price-data`): English set, full
    printed collector number, name, and occasional independently captured
    Cardmarket ID. Underlying marketplace and catalogue data are third-party.
 
@@ -75,8 +75,7 @@ job explicitly dispatches `pages.yml` for full tests and Pages deployment.
 
 ### Data rights
 
-Cardmarket announced free downloads of the catalog and price guide in June
-2024. Public download does **not** automatically grant rights for unlimited
+Cardmarket announced free downloads of the catalog and price guide in June 2024. Public download does **not** automatically grant rights for unlimited
 redistribution. The app ships a limited, derived set of market reference
 values, cites the source, and avoids mirroring the whole upstream data.
 Before any commercial expansion or large-scale publishing, verify the
@@ -84,6 +83,7 @@ latest marketplace data terms and secure required permission. The price
 guide and external catalogue data remain their respective owners' data.
 
 Sources:
+
 - https://news.cardmarket.com/en/StarWarsUnlimited/were-making-the-price-guide-and-product-catalogue-available-for-download
 - https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
 - https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json

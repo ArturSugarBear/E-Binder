@@ -14,10 +14,7 @@ interface VerifiedDailyGuide {
   schemaVersion: number;
   sourceCreatedAt: string;
   currency: string;
-  sets: Record<
-    string,
-    { status: string; pricedPrints?: number }
-  >;
+  sets: Record<string, { status: string; pricedPrints?: number }>;
   cards: Record<string, PricingRow>;
 }
 let cache:
@@ -71,24 +68,19 @@ export interface OfficialPrintingReference {
   };
 }
 
-export async function officialCardmarketReference(
-  card: {
-    id: string;
-    setId: string;
-    localId: string;
-    language: string;
-  },
-): Promise<OfficialPrintingReference | undefined> {
-  if (
-    card.language !== 'de' &&
-    card.language !== 'en'
-  )
-    return undefined;
+export async function officialCardmarketReference(card: {
+  id: string;
+  setId: string;
+  localId: string;
+  language: string;
+}): Promise<OfficialPrintingReference | undefined> {
+  if (card.language !== 'de' && card.language !== 'en') return undefined;
   const guide = await loadGuide();
   if (
     guide?.sets[card.setId]?.status !== 'validated' ||
     card.id.slice(0, card.id.lastIndexOf('-')) !== card.setId
-  ) return undefined;
+  )
+    return undefined;
   const row = guide.cards[card.id];
   if (
     !Array.isArray(row) ||
@@ -96,7 +88,7 @@ export async function officialCardmarketReference(
     !Number.isSafeInteger(row[0]) ||
     row[0] <= 0 ||
     numberKey(card.localId) !== numberKey(row[4]) ||
-    !['trend','avg7','avg30','avg'].includes(row[2]) ||
+    !['trend', 'avg7', 'avg30', 'avg'].includes(row[2]) ||
     typeof row[3] !== 'string' ||
     !row[3]
   )
@@ -109,10 +101,7 @@ export async function officialCardmarketReference(
   const fresh = Number.isFinite(age) && age >= -300000 && age < 72 * 3600000;
   const amount = row[1];
   const price =
-    fresh &&
-    Number.isFinite(amount) &&
-    amount > 0 &&
-    amount < 100000
+    fresh && Number.isFinite(amount) && amount > 0 && amount < 100000
       ? {
           amount,
           updated: new Date(observed).toISOString(),
