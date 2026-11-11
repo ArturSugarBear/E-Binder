@@ -95,6 +95,20 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
   );
   await expect(add.locator('.w-scan-match-card')).toContainText('088/63');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  // P06: a correction must not erase the recognized print or start OCR
+  // again. The collector can return without losing its candidate.
+  await add.getByRole('button', { name: 'Treffer stimmt nicht?' }).click();
+  await expect(add.locator('.w-scan-set-panel')).toBeVisible();
+  await expect(add.locator('.w-scan-match-card')).toBeHidden();
+  await add
+    .getByRole('button', { name: 'Zurück zu den Treffern' })
+    .click();
+  await expect(add.locator('.w-scan-set-panel')).toHaveCount(0);
+  await expect(add.locator('.w-scan-match-card')).toBeVisible();
+  await expect(add.locator('.w-scan-match-card')).toContainText(
+    'メガルカリオex',
+  );
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await add
     .getByRole('button', { name: 'Karte hinzufügen', exact: true })
     .click();
