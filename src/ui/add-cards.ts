@@ -30,6 +30,11 @@ import {
 } from '../domain/live-ocr-policy';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
+import {
+  pendingScanCount,
+  scanQueueBlocker,
+  type LiveCaptureOutcome,
+} from '../domain/scan-session-guardrails';
 import { createCatalogBrowser } from './catalog-browser';
 import {
   changeState,
@@ -210,14 +215,16 @@ export function openAddCards(
         async (file, aligned, onAnalysisState) => {
           const existing = new Set(ctx.state.captures.map((shot) => shot.id));
           // Only local photo queueing blocks capture; model inference does not.
-          await addFiles([file], false, aligned, true);
-          const shot = capture();
-          if (shot && !existing.has(shot.id))
-            startLiveOcr(shot.id, file, onAnalysisState);
+          const outcome = await addFiles([file], false, aligned, true);
+          if (outcome !== 'added') return outcome;
+          const shot = ctx.state.captures.find(
+            (item) => !existing.has(item.id) && item.status !== 'confirmed',
+          );
+          if (shot) startLiveOcr(shot.id, file, onAnalysisState);
+          return 'added';
         },
         () => camera.click(),
-        () =>
-          ctx.state.captures.filter((shot) => shot.status === 'pending').length,
+        () => pendingScanCount(ctx.state.captures),
         () => {
           sheet.close();
           ctx.openPageScan();
@@ -696,14 +703,18 @@ export function openAddCards(
     fromCamera = false,
     autoAligned = false,
     queuedLive = false,
-  ): Promise<void> {
-    if (!files?.length) return;
-    interrupt();
+  ): Promise<LiveCaptureOutcome> {
+    if (!files?.length) return 'error';
+    // Capturing another photo must not cancel ongoing OCR, the selected
+    // review, or a catalogue request. The scanner runs in its own dialog.
+    if (!queuedLive) interrupt();
     upload.disabled = true;
     takePhoto.disabled = true;
     let first: string | undefined;
     let added = 0;
     let repeats = 0;
+    let blocked = false;
+    let failed = false;
     try {
       for (const file of Array.from(files)) {
         if (
@@ -729,6 +740,19 @@ export function openAddCards(
           repeats++;
           continue;
         }
+        const blocker = scanQueueBlocker(
+          ctx.state.captures,
+          transientPhotos.values(),
+          file.size,
+        );
+        if (blocker) {
+          blocked = true;
+          throw new Error(
+            blocker === 'queue-full'
+              ? 'Der Scan-Puffer ist voll (24 offene Fotos). Bitte zuerst Ergebnisse prüfen oder offene Aufnahmen entfernen.'
+              : 'Der Foto-Puffer ist voll (48 MB). Bitte zuerst Ergebnisse prüfen oder offene Aufnahmen entfernen.',
+          );
+        }
         const shot: Capture = {
           id: uid(),
           hash,
@@ -747,18 +771,28 @@ export function openAddCards(
               next.captures.push(shot);
             }),
           )
-        )
+        ) {
+          transientPhotos.delete(shot.id);
+          alignedCaptures.delete(shot.id);
+          failed = true;
           break;
+        }
         first ??= shot.id;
         added++;
       }
       if (!closed) {
-        captureId = first;
-        selected = undefined;
-        details.replaceChildren();
-        results.replaceChildren();
+        if (!queuedLive) {
+          captureId = first;
+          selected = undefined;
+          details.replaceChildren();
+          results.replaceChildren();
+        } else if (!captureId) {
+          captureId = first;
+        }
+        // The foreground review is never re-rendered while consecutive
+        // physical photos are being added under the suspended scanner.
         showQueue();
-        showCapture();
+        if (!queuedLive) showCapture();
         if (!queuedLive) {
           photoArea.scrollIntoView({ block: 'start' });
           tell(
@@ -767,6 +801,7 @@ export function openAddCards(
         }
       }
     } catch (error) {
+      failed = !blocked;
       if (!closed) {
         if (first) {
           captureId = first;
@@ -785,6 +820,15 @@ export function openAddCards(
       camera.value = '';
     }
     if (fromCamera && first && !closed && !queuedLive) await runOcr();
+    return added > 0
+      ? 'added'
+      : blocked
+        ? 'limit'
+        : repeats
+          ? 'duplicate'
+          : failed
+            ? 'error'
+            : 'error';
   }
   gallery.addEventListener('change', () => {
     void addFiles(gallery.files);
