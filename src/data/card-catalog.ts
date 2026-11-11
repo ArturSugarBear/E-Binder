@@ -690,16 +690,15 @@ export async function catalogEntry(
         amountEur: candidate.amount,
         tcgplayerMarketUsd: dollarMarket ?? undefined,
       }) ||
-      (!verified && (await hasSiblingCardmarketCollision(raw, language, signal))));
+      (!verified &&
+        (await hasSiblingCardmarketCollision(raw, language, signal))));
 
   // A verified and dated source can replace the rejected mismapped feed
   // without permitting the false upstream product or its cent prices.
   // Once the observation expires, retain the correct product link but
   // withhold its market value until new independent data are verified.
   const price: MarketPrice | undefined =
-    !suspect && !wrongProduct && candidate
-      ? candidate
-      : verified?.observation;
+    !suspect && !wrongProduct && candidate ? candidate : verified?.observation;
   // Cardmarket's secondary "-holo" series can represent reverse foil.
   // Never use it to value a regular card or a verified normal-only print.
   const holoPrice =

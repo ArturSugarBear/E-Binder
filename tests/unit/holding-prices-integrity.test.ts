@@ -76,7 +76,8 @@ it('uses the verified price for the exact Groudon DLR111 holding', async () => {
       variant: 'normal',
       basis: 'trend',
       provenance: 'verified-snapshot',
-      productUrl: 'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
+      productUrl:
+        'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
     },
   });
 });

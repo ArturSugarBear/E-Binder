@@ -25,12 +25,14 @@ export interface ExactCardmarketPrinting {
 export interface VerifiedCardmarketProduct {
   productId: number;
   url: string;
-  observation: {
-    amount: number;
-    updated: string;
-    basis: 'trend';
-    provenance: 'verified-snapshot';
-  } | undefined;
+  observation:
+    | {
+        amount: number;
+        updated: string;
+        basis: 'trend';
+        provenance: 'verified-snapshot';
+      }
+    | undefined;
 }
 
 const GROUDON = {

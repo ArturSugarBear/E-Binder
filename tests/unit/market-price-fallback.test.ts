@@ -104,9 +104,7 @@ it('does not value a normal-only print as holo even when a secondary foil series
 });
 
 it('withholds unverified Delta Reign illustration rare prices and links', async () => {
-  for (const [localId, name, usd] of [
-    ['106', 'Fukano', 19.3],
-  ] as const) {
+  for (const [localId, name, usd] of [['106', 'Fukano', 19.3]] as const) {
     const id = `me06-${localId}`;
     vi.stubGlobal(
       'fetch',
@@ -241,31 +239,32 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
 });
 
 it('uses Groudon DLR111 only with the separately verified Cardmarket product', async () => {
-  const fetcher = vi.fn(async () =>
-    new Response(
-      JSON.stringify({
-        id: 'me06-111',
-        localId: '111',
-        name: 'Groudon',
-        rarity: 'Illustration Rare',
-        set: {
-          id: 'me06',
-          name: 'Delta-Herrschaft',
-          cardCount: { official: 103 },
-        },
-        variants: { normal: true, holo: false, reverse: false },
-        pricing: {
-          cardmarket: {
-            unit: 'EUR',
-            updated: '2026-11-10T23:49:36Z',
-            idProduct: 918876,
-            trend: 0.04,
-            avg7: 0.07,
+  const fetcher = vi.fn(
+    async () =>
+      new Response(
+        JSON.stringify({
+          id: 'me06-111',
+          localId: '111',
+          name: 'Groudon',
+          rarity: 'Illustration Rare',
+          set: {
+            id: 'me06',
+            name: 'Delta-Herrschaft',
+            cardCount: { official: 103 },
           },
-          tcgplayer: { holofoil: { marketPrice: 22.92 } },
-        },
-      }),
-    ),
+          variants: { normal: true, holo: false, reverse: false },
+          pricing: {
+            cardmarket: {
+              unit: 'EUR',
+              updated: '2026-11-10T23:49:36Z',
+              idProduct: 918876,
+              trend: 0.04,
+              avg7: 0.07,
+            },
+            tcgplayer: { holofoil: { marketPrice: 22.92 } },
+          },
+        }),
+      ),
   );
   vi.stubGlobal('fetch', fetcher);
   const result = await catalogEntry('me06-111', 'de', undefined, false);
@@ -284,28 +283,29 @@ it('uses Groudon DLR111 only with the separately verified Cardmarket product', a
 });
 
 it('prefers newly corrected provider prices when Cardmarket ID is verified', async () => {
-  const fetcher = vi.fn(async () =>
-    new Response(
-      JSON.stringify({
-        id: 'me06-111',
-        localId: '111',
-        name: 'Groudon',
-        set: {
-          id: 'me06',
-          name: 'Delta Reign',
-          cardCount: { official: 103 },
-        },
-        variants: { normal: true, holo: false },
-        pricing: {
-          cardmarket: {
-            unit: 'EUR',
-            updated: '2026-11-11T00:00:00Z',
-            idProduct: 918949,
-            trend: 19.35,
+  const fetcher = vi.fn(
+    async () =>
+      new Response(
+        JSON.stringify({
+          id: 'me06-111',
+          localId: '111',
+          name: 'Groudon',
+          set: {
+            id: 'me06',
+            name: 'Delta Reign',
+            cardCount: { official: 103 },
           },
-        },
-      }),
-    ),
+          variants: { normal: true, holo: false },
+          pricing: {
+            cardmarket: {
+              unit: 'EUR',
+              updated: '2026-11-11T00:00:00Z',
+              idProduct: 918949,
+              trend: 19.35,
+            },
+          },
+        }),
+      ),
   );
   vi.stubGlobal('fetch', fetcher);
   const result = await catalogEntry('me06-111', 'en', undefined, false);
