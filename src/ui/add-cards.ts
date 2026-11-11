@@ -9,7 +9,7 @@ import {
   recognitionClues,
   matchesCard,
 } from '../data/card-catalog';
-import { recognizePhoto } from '../data/recognize';
+import { createRecognitionSession, recognizePhoto } from '../data/recognize';
 import {
   resolvePhotoScan,
   type AutomaticScanResult,
@@ -136,6 +136,12 @@ export function openAddCards(
   let selected = options.card;
   let captureId = options.captureId;
   let reviewingLiveQueue = false;
+  const liveOcrAbort = new AbortController();
+  let liveOcrSession: ReturnType<typeof createRecognitionSession> | undefined;
+  let liveOcrQueue: Promise<void> = Promise.resolve();
+  const liveOcrJobs = new Map<string, Promise<void>>();
+  const liveOcrEvidence = new Map<string, string>();
+  const awaitingLiveReview = new Set<string>();
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
@@ -151,6 +157,10 @@ export function openAddCards(
   };
   sheet.onClose(() => {
     closed = true;
+    liveOcrAbort.abort();
+    liveOcrSession?.close();
+    liveOcrJobs.clear();
+    liveOcrEvidence.clear();
     transientPhotos.clear();
     alignedCaptures.clear();
     for (const url of previewUrls) URL.revokeObjectURL(url);
@@ -179,10 +189,13 @@ export function openAddCards(
     'Karte live scannen',
     () =>
       openLiveScanner(
-        async (file, aligned) => {
-          // Do not block the live camera on OCR/model loading or network
-          // catalogue calls. The scan cart is processed on Review.
+        async (file, aligned, onAnalysisState) => {
+          const existing = new Set(ctx.state.captures.map((shot) => shot.id));
+          // Only local photo queueing blocks capture; model inference does not.
           await addFiles([file], false, aligned, true);
+          const shot = capture();
+          if (shot && !existing.has(shot.id) && aligned)
+            startLiveOcr(shot.id, file, onAnalysisState);
         },
         () => camera.click(),
         () =>
@@ -199,16 +212,7 @@ export function openAddCards(
           showQueue();
           showCapture();
           const shot = capture();
-          // File uploads without a trusted crop still need manual alignment.
-          // Camera-aligned live photos proceed without another dialog.
-          if (
-            shot?.status === 'pending' &&
-            !shot.text &&
-            alignedCaptures.has(shot.id)
-          )
-            void runOcr();
-          else if (shot?.status === 'pending' && shot.text)
-            void renderScanReview(shot.text, shot.candidates);
+          if (shot?.status === 'pending') void runOcr();
         },
       ),
     'primary',
@@ -347,6 +351,7 @@ export function openAddCards(
     for (const id of removed) {
       transientPhotos.delete(id);
       alignedCaptures.delete(id);
+      liveOcrEvidence.delete(id);
     }
     if (captureId && removed.has(captureId)) {
       setFlowStage(0);
@@ -477,6 +482,68 @@ export function openAddCards(
       queue.append(history);
     }
   };
+
+  /**
+   * Every physical scan gets up to 5.6s of fast ONNX OCR. The worker is
+   * shared across photos, bounded to one inference at a time on iPhone.
+   * The video stream is NEVER blocked by this queue.
+   */
+  function startLiveOcr(
+    id: string,
+    photo: File,
+    onAnalysisState: (active: boolean) => void,
+  ): void {
+    if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
+    onAnalysisState(true);
+    const task = liveOcrQueue
+      .then(async () => {
+        if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
+          return;
+        if (!liveOcrSession)
+          liveOcrSession = createRecognitionSession(
+            liveOcrAbort.signal,
+            () => undefined,
+            { fast: true, timeoutMs: 5600 },
+          );
+        const started = performance.now();
+        try {
+          const text = await liveOcrSession.recognize(photo);
+          if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
+            return;
+          liveOcrEvidence.set(id, text);
+          recordBetaEvent(
+            'scan_result',
+            'scan',
+            text.trim() ? 'live_ocr_ready' : 'live_ocr_empty',
+            text.trim() ? 'ok' : 'unknown',
+            {
+              metric: Math.min(
+                200,
+                Math.ceil((performance.now() - started) / 100),
+              ),
+            },
+          );
+        } catch {
+          // A hard timeout disposes the worker and retains the photo for
+          // thorough on-demand OCR. Never fabricate a guessed card result.
+          liveOcrSession?.close();
+          liveOcrSession = undefined;
+          if (!closed && !liveOcrAbort.signal.aborted)
+            recordBetaEvent(
+              'scan_result',
+              'scan',
+              'live_ocr_unresolved',
+              'unknown',
+            );
+        }
+      })
+      .finally(() => {
+        onAnalysisState(false);
+        liveOcrJobs.delete(id);
+      });
+    liveOcrJobs.set(id, task);
+    liveOcrQueue = task.catch(() => undefined);
+  }
 
   async function addFiles(
     files: FileList | File[] | null,
