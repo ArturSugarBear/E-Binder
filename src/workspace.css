@@ -4362,3 +4362,92 @@ textarea.w-input,
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
   }
 }
+
+/* One consistent card valuation surface in Collection and its detail dialog. */
+.w-price-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--w-border);
+}
+.w-price-value {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.w-price-note {
+  color: var(--ink-2);
+  font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.w-holding-price {
+  margin: 4px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--w-border);
+  border-radius: 12px;
+  background: var(--raised);
+}
+.w-holding-price .w-price-value {
+  color: var(--accent);
+  font-size: 21px;
+}
+.w-holding-price .w-label {
+  margin-bottom: 3px;
+}
+
+/* A mobile binder header must never squeeze the title beside wrapped
+   actions. Keep two reachable calls to action beneath the full-width title. */
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  .w-binders > .w-page-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+    margin: 8px 0 14px;
+  }
+  .w-binders > .w-page-heading h1 {
+    font-size: clamp(25px, 7vw, 32px);
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  .w-binders > .w-page-heading > .w-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+  }
+  .w-binders > .w-page-heading > .w-action-row .w-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding: 8px 7px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+  .w-binders .w-binder-title {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  .w-binders .w-binder-title h2 {
+    overflow-wrap: anywhere;
+  }
+  .w-binders .w-binder-title > .w-button {
+    min-height: 44px;
+    max-width: 136px;
+    padding: 8px;
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+}
