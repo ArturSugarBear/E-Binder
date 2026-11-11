@@ -32,7 +32,7 @@ export async function holdingPrice(
   if (cached && cached.until > Date.now()) return cached.value;
   const request = pending.get(key);
   if (request) return request;
-  if (typeof navigator !== 'undefined' && !navigator.onLine)
+  if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { status: 'error' };
 
   // Keys are generated exclusively by portfolioQuoteKey, never from search
