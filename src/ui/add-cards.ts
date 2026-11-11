@@ -585,7 +585,7 @@ export function openAddCards(
                 region,
                 remaining(),
               );
-              text = combineLiveOcrText(text, extra);
+              text = combineLiveOcrText(text, extra, region);
               liveOcrEvidence.set(id, text);
             }
           } catch {
