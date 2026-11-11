@@ -1,6 +1,7 @@
 import {
   catalogSets,
   catalogSetCards,
+  candidatesFromText,
   fetchCatalogCard,
   recognitionClues,
   visualNumberClues,
@@ -200,7 +201,9 @@ export async function resolvePhotoScan(
   if (signal.aborted) throw new DOMException('Abgebrochen', 'AbortError');
   const all = [
     ...new Map(
-      [...fromVisual, ...catalog, ...known].map((card) => [card.key, card]),
+      [...fromVisual, ...catalog, ...candidatesFromText(text, known)].map(
+        (card) => [card.key, card],
+      ),
     ).values(),
   ];
   // Partial numbers (e.g. '088' without '/063') cannot discard otherwise
