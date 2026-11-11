@@ -76,14 +76,15 @@ async function installCameraRig(page: Page): Promise<void> {
       postMessage(data: { id?: number; warmup?: boolean }) {
         // A model warmup is not a recognized photo and must not inflate
         // measured live OCR calls or simulate a result.
-        if (data.warmup) return;
+        if (data.warmup || typeof data.id !== 'number') return;
+        const id = data.id;
         ocrCalls++;
         setTimeout(() => {
           this.onmessage?.(
             new MessageEvent('message', {
               data: {
                 type: 'done',
-                id: data.id,
+                id,
                 text: '',
               },
             }),
