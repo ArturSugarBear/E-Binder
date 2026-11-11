@@ -24,7 +24,7 @@ describe('printed-card edges inside a binder pocket', () => {
     const pixels = image((x, y) => {
       if (x < 10 || x > 149 || y < 12 || y > 211) return 24;
       if ((y > 16 && y < 35) || (y > 193 && y < 207))
-        return (x % 8) < 2 ? 70 : 206;
+        return x % 8 < 2 ? 70 : 206;
       return 206;
     });
     const bounds = detectCardBounds(pixels, WIDTH, HEIGHT);
@@ -38,7 +38,13 @@ describe('printed-card edges inside a binder pocket', () => {
   });
 
   it('falls back to the full pocket for a plain or one-axis image', () => {
-    expect(detectCardBounds(image(() => 26), WIDTH, HEIGHT)).toBeNull();
+    expect(
+      detectCardBounds(
+        image(() => 26),
+        WIDTH,
+        HEIGHT,
+      ),
+    ).toBeNull();
     expect(
       detectCardBounds(
         image((x) => (x > 10 && x < 150 ? 205 : 26)),
