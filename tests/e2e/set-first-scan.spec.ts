@@ -87,11 +87,10 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
   await expect(add.locator('.w-scan-match-card')).toContainText('088/63');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await add
-    .getByRole('button', { name: 'Diese Ausgabe prüfen', exact: true })
+    .getByRole('button', { name: 'Karte hinzufügen', exact: true })
     .click();
-  await expect(add.locator('.w-confirm-form')).toContainText('メガルカリオex');
-  await expect(
-    add.getByRole('button', { name: 'Zurück zur Set- und Kartenprüfung' }),
-  ).toBeVisible();
-  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  await expect(add.locator('.w-capture-queue')).toContainText(
+    '0 offen · 1 übernommen',
+  );
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
 });
