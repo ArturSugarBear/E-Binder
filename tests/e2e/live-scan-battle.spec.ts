@@ -24,7 +24,7 @@ async function installCameraRig(page: Page): Promise<void> {
     const draw = () => {
       context.fillStyle = '#dedede';
       context.fillRect(0, 0, 384, 512);
-      if (mode === 'card' || mode === 'card2') {
+      if (mode.startsWith('card')) {
         // Portrait 2.5:3.5 card; clean dark border on light tabletop.
         context.fillStyle = '#141414';
         context.fillRect(62, 61, 260, 390);
@@ -32,6 +32,11 @@ async function installCameraRig(page: Page): Promise<void> {
         context.fillRect(76, 77, 232, 354);
         context.fillStyle = mode === 'card2' ? '#bd68c0' : '#8da9ad';
         context.fillRect(91, 109, 197, 170);
+        // Each physical-card stand-in has distinct pixels; reusing card 1
+        // would correctly hit the existing duplicate-photo guard.
+        const cardIndex = Number(mode.slice(4)) || 1;
+        context.fillStyle = `hsl(${cardIndex * 53} 55% 45%)`;
+        context.fillRect(100, 310, 90, 45);
       } else if (mode === 'square') {
         context.fillStyle = '#111';
         context.fillRect(39, 105, 306, 306);
@@ -89,7 +94,7 @@ async function installCameraRig(page: Page): Promise<void> {
               },
             }),
           );
-        }, 320);
+        }, 800);
       }
       terminate() {}
     }
@@ -137,7 +142,10 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
-  const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    includeHidden: true,
+  });
   await add.getByRole('button', { name: 'Karte live scannen' }).click();
   const live = page.getByRole('dialog', { name: 'Karte live scannen' });
   await expect(live.locator('.w-live-status')).toContainText(
@@ -178,138 +186,213 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
-test('three stable video observations create a reviewable scan but never ownership', async ({
-  page,
-}, testInfo) => {
-  test.skip(
-    testInfo.project.name.includes('webkit'),
-    'Deterministic canvas MediaStream simulator is Chromium-specific; native iPhone capture needs a device.',
-  );
-  await installCameraRig(page);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./#sammlung');
-  await page
-    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
-    .click();
-  const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
-  await add.getByRole('button', { name: 'Karte live scannen' }).click();
-  const live = page.getByRole('dialog', { name: 'Karte live scannen' });
-  await expect(live.locator('.w-live-status')).toContainText(
-    'Ecken werden gesucht',
-    { timeout: 15_000 },
-  );
-  const originalFrame = await live.locator('.w-live-frame-guide').boundingBox();
-  expect(originalFrame).not.toBeNull();
-  expect(originalFrame!.width / originalFrame!.height).toBeCloseTo(63 / 88, 2);
-  await expect(live.locator('.w-live-options')).not.toHaveAttribute('open');
-  await mode(page, 'card');
-  await expect(live.locator('.w-live-status')).toContainText(
-    /Aufnahme vorgemerkt|Scan fehlgeschlagen/,
-    { timeout: 35_000 },
-  );
-  await expect(live.locator('.w-live-status')).toContainText(
-    'Aufnahme vorgemerkt',
-  );
-  await expect(live.locator('.w-live-review-summary')).toContainText(
-    '1 offene Aufnahme',
-  );
-  await expect(live.locator('.w-live-review-summary')).toContainText(
-    'erst nach deiner Bestätigung',
-  );
-  await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
-  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  // The scanner displays an animation only during genuine background work;
-  // OCR starts before the user clicks Results and can use two hot-zone
-  // retries with a common bounded deadline.
-  await expect(live.locator('.w-live-analysis')).toBeVisible();
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (
-          window as typeof window & {
-            __scanRig: { ocrRequests: () => number };
-          }
-        ).__scanRig.ocrRequests(),
+for (const width of [320, 390, 430]) {
+  test(`five consecutive scans keep a stable reviewable UI at ${width}px without ownership`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name.includes('webkit'),
+      'Deterministic canvas MediaStream simulator is Chromium-specific; native iPhone capture needs a device.',
+    );
+    await installCameraRig(page);
+    await page.setViewportSize({ width, height: width === 320 ? 667 : 844 });
+    await page.goto('./#sammlung');
+    await page
+      .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+      .click();
+    const add = page.getByRole('dialog', {
+      name: 'Karten hinzufügen',
+      includeHidden: true,
+    });
+    await add.getByRole('button', { name: 'Karte live scannen' }).click();
+    const live = page.getByRole('dialog', { name: 'Karte live scannen' });
+    await expect(live.locator('.w-live-status')).toContainText(
+      'Ecken werden gesucht',
+      { timeout: 15_000 },
+    );
+    // Measure the settled sheet, not its existing entry animation.
+    await live.evaluate(async (node) => {
+      await Promise.all(
+        node.getAnimations().map((animation) => animation.finished),
+      );
+    });
+    const originalFrame = await live
+      .locator('.w-live-frame-guide')
+      .boundingBox();
+    expect(originalFrame).not.toBeNull();
+    expect(originalFrame!.width / originalFrame!.height).toBeCloseTo(
+      63 / 88,
+      2,
+    );
+    await expect(live.locator('.w-live-options')).not.toHaveAttribute('open');
+    const initialStage = await live.locator('.w-live-stage').boundingBox();
+    const initialFooter = await live.locator('.w-dialog-footer').boundingBox();
+    await expect(live.locator('.w-live-analysis')).toBeHidden();
+    await mode(page, 'card');
+    await expect(live.locator('.w-live-status')).toContainText(
+      /Aufnahme vorgemerkt|Scan fehlgeschlagen/,
+      { timeout: 35_000 },
+    );
+    await expect(live.locator('.w-live-status')).toContainText(
+      'Aufnahme vorgemerkt',
+    );
+    await expect(live.locator('.w-live-review-summary')).toContainText(
+      '1 offene Aufnahme',
+    );
+    await expect(live.locator('.w-live-review-summary')).toContainText(
+      'erst nach deiner Bestätigung',
+    );
+    await expect(add.locator('.w-capture-queue')).toContainText('1 offen');
+    await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+    // The scanner displays an animation only during genuine background work;
+    // OCR starts before the user clicks Results and can use two hot-zone
+    // retries with a common bounded deadline.
+    await expect(live.locator('.w-live-analysis')).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          (
+            window as typeof window & {
+              __scanRig: { ocrRequests: () => number };
+            }
+          ).__scanRig.ocrRequests(),
+        ),
+      )
+      .toBe(3);
+    await expect(live.locator('.w-live-analysis')).toBeHidden();
+    // P07: removing the card automatically re-arms the same camera stream.
+    // No manual Next tap, repeated camera permission request or OCR stall.
+    await mode(page, 'blank');
+    await expect(
+      live.getByRole('button', { name: 'Ergebnisse prüfen (1)', exact: true }),
+    ).toBeVisible();
+    await expect(live.locator('.w-live-status')).toContainText(
+      'Ecken werden gesucht',
+      { timeout: 10_000 },
+    );
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __scanRig: { streams: MediaStream[] };
+            }
+          ).__scanRig.streams.length,
       ),
-    )
-    .toBe(3);
-  await expect(live.locator('.w-live-analysis')).toBeHidden();
-  // P07: removing the card automatically re-arms the same camera stream.
-  // No manual Next tap, repeated camera permission request or OCR stall.
-  await mode(page, 'blank');
-  await expect(
-    live.getByRole('button', { name: 'Ergebnisse prüfen (1)', exact: true }),
-  ).toBeVisible();
-  await expect(live.locator('.w-live-status')).toContainText(
-    'Ecken werden gesucht',
-    { timeout: 10_000 },
-  );
-  expect(
-    await page.evaluate(
-      () =>
-        (
-          window as typeof window & {
-            __scanRig: { streams: MediaStream[] };
-          }
-        ).__scanRig.streams.length,
-    ),
-  ).toBe(1);
-  const nextFrame = await live.locator('.w-live-frame-guide').boundingBox();
-  expect(nextFrame).not.toBeNull();
-  expect(nextFrame!.width).toBeCloseTo(originalFrame!.width, 0);
-  expect(nextFrame!.height).toBeCloseTo(originalFrame!.height, 0);
-  expect(nextFrame!.width / nextFrame!.height).toBeCloseTo(63 / 88, 2);
-  await mode(page, 'card2');
-  await expect(live.locator('.w-live-status')).toContainText(
-    'Aufnahme vorgemerkt',
-    {
-      timeout: 35_000,
-    },
-  );
-  await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
-  await expect(live.locator('.w-live-review-summary')).toContainText(
-    '2 offene Aufnahmen',
-  );
-  // P07 background OCR starts while the live camera is still open.
-  // Crucially, two consecutive captures use one camera stream even when OCR
-  // is underway; no additional click or model/network wait is required.
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (
-          window as typeof window & {
-            __scanRig: { ocrRequests: () => number };
-          }
-        ).__scanRig.ocrRequests(),
+    ).toBe(1);
+    const nextFrame = await live.locator('.w-live-frame-guide').boundingBox();
+    expect(nextFrame).not.toBeNull();
+    expect(nextFrame!.width).toBeCloseTo(originalFrame!.width, 0);
+    expect(nextFrame!.height).toBeCloseTo(originalFrame!.height, 0);
+    expect(nextFrame!.width / nextFrame!.height).toBeCloseTo(63 / 88, 2);
+    await mode(page, 'card2');
+    await expect(live.locator('.w-live-status')).toContainText(
+      'Aufnahme vorgemerkt',
+      {
+        timeout: 35_000,
+      },
+    );
+    await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
+    await expect(live.locator('.w-live-review-summary')).toContainText(
+      '2 offene Aufnahmen',
+    );
+    // P07 background OCR starts while the live camera is still open.
+    // Crucially, two consecutive captures use one camera stream even when OCR
+    // is underway; no additional click or model/network wait is required.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          (
+            window as typeof window & {
+              __scanRig: { ocrRequests: () => number };
+            }
+          ).__scanRig.ocrRequests(),
+        ),
+      )
+      .toBe(6);
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __scanRig: { streams: MediaStream[] };
+            }
+          ).__scanRig.streams.length,
       ),
-    )
-    .toBe(6);
-  expect(
-    await page.evaluate(
-      () =>
-        (
-          window as typeof window & {
-            __scanRig: { streams: MediaStream[] };
-          }
-        ).__scanRig.streams.length,
-    ),
-  ).toBe(1);
-  await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
-  const states = await page.evaluate(() =>
-    (
-      window as typeof window & { __scanRig: { trackStates: () => string[] } }
-    ).__scanRig.trackStates(),
-  );
-  expect(states.every((state) => state === 'ended')).toBe(true);
-  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await add
-    .getByRole('button', { name: 'Karten hinzufügen schließen' })
-    .click();
-  await page.reload();
-  await page.getByRole('button', { name: 'Erfassung fortsetzen' }).click();
-  await expect(page.locator('.w-photo-review img')).toHaveCount(0);
-  await expect(page.locator('.w-capture-queue')).toContainText('2 offen');
-});
+    ).toBe(1);
+    // Continue without Next taps: the real removal latch re-arms the stream.
+    for (let count = 3; count <= 5; count++) {
+      await mode(page, 'blank');
+      await expect(live.locator('.w-live-stage')).toHaveAttribute(
+        'data-scan-phase',
+        'ready',
+      );
+      await mode(page, `card${count}`);
+      await expect(live.locator('.w-live-review-summary')).toContainText(
+        `${count} offene Aufnahmen`,
+      );
+      const stage = await live.locator('.w-live-stage').boundingBox();
+      const footer = await live.locator('.w-dialog-footer').boundingBox();
+      for (const key of ['x', 'y', 'width', 'height'] as const) {
+        expect(stage![key]).toBeCloseTo(initialStage![key], 0);
+        expect(footer![key]).toBeCloseTo(initialFooter![key], 0);
+      }
+      const status = await live.locator('.w-live-status').boundingBox();
+      expect(status!.y + status!.height).toBeLessThanOrEqual(footer!.y);
+      const review = live.getByRole('button', {
+        name: `Ergebnisse prüfen (${count})`,
+        exact: true,
+      });
+      await expect(review).toBeInViewport({ ratio: 1 });
+      expect(
+        await live.evaluate((node) => node.scrollWidth <= node.clientWidth),
+      ).toBe(true);
+    }
+    expect(
+      await page.evaluate(
+        () =>
+          (window as typeof window & { __scanRig: { streams: MediaStream[] } })
+            .__scanRig.streams.length,
+      ),
+    ).toBe(1);
+    await expect(live.locator('.w-live-analysis')).toBeHidden({
+      timeout: 15_000,
+    });
+    await expect(live.locator('.w-live-stage')).not.toHaveClass(/is-analyzing/);
+    await testInfo.attach(`queued-${width}px`, {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(live.locator('.w-live-analysis-line')).toHaveCSS(
+      'animation-name',
+      'none',
+    );
+    await live.getByRole('button', { name: 'Ergebnisse prüfen' }).click();
+    // The native close event owns cleanup; wait for it before reading tracks.
+    await expect(live).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const states = await page.evaluate(() =>
+          (
+            window as typeof window & {
+              __scanRig: { trackStates: () => string[] };
+            }
+          ).__scanRig.trackStates(),
+        );
+        return states.length > 0 && states.every((state) => state === 'ended');
+      })
+      .toBe(true);
+    await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+    await add
+      .getByRole('button', { name: 'Karten hinzufügen schließen' })
+      .click();
+    await page.reload();
+    await page.getByRole('button', { name: 'Erfassung fortsetzen' }).click();
+    await expect(page.locator('.w-photo-review img')).toHaveCount(0);
+    await expect(page.locator('.w-capture-queue')).toContainText('5 offen');
+  });
+}
 
 test('closing the scanner while camera permission is pending releases late tracks', async ({
   page,
@@ -352,7 +435,10 @@ test('closing the scanner while camera permission is pending releases late track
   await page
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
-  const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    includeHidden: true,
+  });
   await add.getByRole('button', { name: 'Karte live scannen' }).click();
   const live = page.getByRole('dialog', { name: 'Karte live scannen' });
   await expect(live.locator('.w-live-status')).toContainText(
@@ -378,3 +464,49 @@ test('closing the scanner while camera permission is pending releases late track
   await expect(add.locator('.w-capture-queue')).toBeEmpty();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
+
+for (const width of [320, 390, 430]) {
+  test(`camera-denied recovery stays accessible at ${width}px with reduced motion`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 667 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: {
+          getUserMedia: async () => {
+            throw new DOMException('Camera denied', 'NotAllowedError');
+          },
+        },
+      });
+    });
+    await page.goto('./#sammlung');
+    await page
+      .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+      .click();
+    await page
+      .getByRole('button', { name: 'Karte live scannen', exact: true })
+      .click();
+    const live = page.getByRole('dialog', { name: 'Karte live scannen' });
+    await expect(live.locator('.w-live-status')).toContainText(
+      'Live-Kamera nicht verfügbar',
+    );
+    const fallback = live.getByRole('button', {
+      name: 'Kamerafoto aufnehmen',
+      exact: true,
+    });
+    await expect(fallback).toBeInViewport({ ratio: 1 });
+    await expect(live.locator('.w-live-analysis')).toBeHidden();
+    expect(
+      await live.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    ).toBe(true);
+    const status = await live.locator('.w-live-status').boundingBox();
+    const button = await fallback.boundingBox();
+    expect(status!.y + status!.height).toBeLessThanOrEqual(button!.y);
+    await testInfo.attach(`denied-${width}px`, {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+  });
+}

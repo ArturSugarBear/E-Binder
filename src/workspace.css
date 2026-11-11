@@ -4821,12 +4821,28 @@ textarea.w-input,
   display: none;
 }
 .w-live-scan-minimal .w-live-stage {
-  width: min(100%, 400px, 52dvh);
+  /* Leave room for the header, modes and persistent review controls. */
+  width: min(100%, 400px, max(180px, calc(75dvh - 280px)));
   aspect-ratio: 3 / 4;
   height: auto;
   max-height: none;
   flex: none;
   contain: layout paint;
+}
+/* Keep single-card feedback local; binder-page capture keeps its own guide. */
+.w-live-scan-minimal .w-live-frame-guide {
+  border: 2px solid rgb(244 241 234 / 0.45);
+}
+.w-live-scan-minimal .has-card-outline .w-live-frame-guide {
+  border-color: transparent;
+}
+.w-live-scan-minimal .w-live-outline {
+  filter: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.w-live-scan-minimal .has-card-outline .w-live-outline {
+  opacity: 1;
 }
 .w-live-stage-label {
   position: absolute;
@@ -4880,24 +4896,28 @@ textarea.w-input,
   width: 100%;
   min-height: 44px;
 }
+/* Reserve the same review and control rows before and after every capture. */
 .w-live-scan-minimal .w-dialog-footer {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: 32px 68px;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  gap: 8px 12px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
 }
 .w-live-scan-minimal .w-live-review-summary:not([hidden]) {
-  flex: 0 0 100%;
+  grid-column: 1 / -1;
+  grid-row: 1;
   font-size: 12px;
   text-align: center;
   line-height: 1.3;
 }
 .w-live-scan-minimal .w-live-shutter:not([hidden]) {
-  width: 68px;
-  height: 68px;
-  flex: 0 0 68px;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: center;
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
   padding: 0;
   display: grid;
@@ -4905,6 +4925,9 @@ textarea.w-input,
   box-shadow:
     0 0 0 4px var(--paper),
     0 0 0 6px var(--accent);
+}
+.w-live-scan-minimal.has-pending-scans .w-live-shutter:not([hidden]) {
+  grid-column: 1;
 }
 .w-live-scan-minimal .w-live-shutter svg {
   width: 25px;
@@ -4919,20 +4942,23 @@ textarea.w-input,
 }
 .w-live-scan-minimal .w-live-next:not([hidden]),
 .w-live-scan-minimal .w-live-review:not([hidden]) {
-  flex: 1 1 155px;
+  grid-row: 2;
+  min-width: 0;
   min-height: 52px;
+  padding-inline: 10px;
+  white-space: normal;
 }
-@media (max-width: 640px) {
-  .w-live-scan-minimal .w-dialog-footer .w-button {
-    flex-basis: auto;
-  }
-  .w-live-scan-minimal .w-live-shutter:not([hidden]) {
-    flex: 0 0 68px;
-  }
-  .w-live-scan-minimal .w-live-next:not([hidden]),
-  .w-live-scan-minimal .w-live-review:not([hidden]) {
-    flex: 1 1 140px;
-  }
+.w-live-scan-minimal .w-live-next:not([hidden]) {
+  grid-column: 1;
+  background: var(--raised);
+  color: var(--ink);
+  border-color: var(--w-border);
+}
+.w-live-scan-minimal .w-live-review:not([hidden]) {
+  grid-column: 2;
+}
+.w-live-scan-minimal.has-camera-alert .w-dialog-footer {
+  display: flex;
 }
 
 /* Camera-denied state: show the live status in a safe visible row above
@@ -4993,7 +5019,18 @@ textarea.w-input,
   .w-live-stage[data-scan-phase='queued']
   .w-live-frame-guide {
   border-style: solid;
-  border-color: var(--accent);
+  border-color: rgb(244 241 234 / 0.45);
+}
+.w-live-scan-minimal
+  .w-live-stage[data-scan-phase='queued']
+  .w-live-frame-guide::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--accent);
+  border-radius: inherit;
+  opacity: 0;
+  animation: w-live-acknowledge 420ms ease-out;
 }
 .w-live-scan-minimal
   .w-live-stage[data-scan-phase='queued']
@@ -5027,7 +5064,7 @@ textarea.w-input,
 .w-live-scan-minimal .w-live-analysis:not([hidden]) {
   position: absolute;
   z-index: 4;
-  inset: 43% 5% auto;
+  inset: 16% 5% 18%;
   display: grid;
   gap: 7px;
   pointer-events: none;
@@ -5038,8 +5075,9 @@ textarea.w-input,
 }
 .w-live-analysis-line {
   display: block;
+  position: absolute;
+  inset: 0 0 auto;
   width: 100%;
-  height: 3px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
@@ -5049,10 +5087,13 @@ textarea.w-input,
     var(--accent),
     transparent
   );
-  box-shadow: 0 0 9px var(--accent);
-  animation: w-live-analyze-sweep 1.35s ease-in-out infinite alternate;
+  height: 100%;
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  animation: w-live-analyze-sweep 1.8s ease-in-out infinite alternate;
 }
 .w-live-analysis-caption {
+  align-self: start;
   padding: 6px 9px;
   width: fit-content;
   justify-self: center;
@@ -5064,15 +5105,40 @@ textarea.w-input,
 }
 @keyframes w-live-analyze-sweep {
   from {
-    transform: translateY(-52px);
+    transform: translateY(0);
     opacity: 0.5;
   }
   to {
-    transform: translateY(55px);
+    transform: translateY(100%);
     opacity: 0.98;
   }
 }
+.w-live-stage[data-scan-phase='stable'] .w-live-outline {
+  animation: w-live-stable 240ms ease-out;
+}
+@keyframes w-live-stable {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes w-live-acknowledge {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .w-live-frame-guide::after,
+  .w-live-frame-guide,
+  .w-live-outline {
+    animation: none !important;
+    transition: none;
+  }
   .w-live-analysis-line {
     animation: none;
     opacity: 0.9;
