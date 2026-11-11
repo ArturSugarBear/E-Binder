@@ -21,6 +21,12 @@ import {
 } from '../data/beta-diagnostics';
 import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import { recognizedNameHints } from '../domain/recognition-names';
+import {
+  requiresEditionStampReview,
+  editionClaimFromNote,
+  validateVintageEdition,
+  type VintageEdition,
+} from '../domain/vintage-edition';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
 import { createCatalogBrowser } from './catalog-browser';
@@ -768,6 +774,9 @@ export function openAddCards(
     );
     if (
       card.source !== 'tcgdex' ||
+      // The same Base Set number exists as Unlimited and 1. Edition.
+      // OCR/TCGdex/foil alone cannot prove the physical edition stamp.
+      requiresEditionStampReview(card) ||
       variant.length !== 1 ||
       !shot ||
       shot.status !== 'pending'
@@ -1315,6 +1324,45 @@ export function openAddCards(
     const variant = input('text', original?.variantNote ?? '');
     variant.placeholder = 'z. B. 1. Auflage, Stempel';
     variant.maxLength = 200;
+    const vintageReview = requiresEditionStampReview(card);
+    const edition = vintageReview
+      ? select(
+          [
+            ['unknown', 'Auflage nicht bestimmt'],
+            ['unlimited', 'Unlimited – kein Editionsstempel'],
+            ['first', '1. Edition – Editionsstempel vorhanden'],
+          ],
+          editionClaimFromNote(original?.variantNote ?? ''),
+        )
+      : undefined;
+    const stampCheck = vintageReview
+      ? check(
+          'Ich habe den Editionsstempel auf dieser Karte persönlich geprüft.',
+        )
+      : undefined;
+    const syncEditionStamp = () => {
+      if (!stampCheck) return;
+      const claimed = editionClaimFromNote(variant.value) === 'first';
+      const needStamp = edition?.value === 'first' || claimed;
+      stampCheck.row.hidden = !needStamp;
+      if (!needStamp) stampCheck.input.checked = false;
+    };
+    if (edition) {
+      // Explicit manual action: neither a catalog image nor a scan assigns
+      // a valuable first-edition variant.
+      edition.addEventListener('change', () => {
+        const value = edition.value as VintageEdition;
+        variant.value =
+          value === 'first'
+            ? '1. Edition'
+            : value === 'unlimited'
+              ? 'Unlimited'
+              : '';
+        syncEditionStamp();
+      });
+      variant.addEventListener('input', syncEditionStamp);
+      syncEditionStamp();
+    }
     const quantity = input(
       'number',
       String(original?.quantity ?? known?.quantity ?? 1),
@@ -1416,6 +1464,8 @@ export function openAddCards(
       quantity,
       detailsLanguage,
       variant,
+      ...(edition ? [edition] : []),
+      ...(stampCheck ? [stampCheck.input] : []),
     ]) {
       control.addEventListener('change', clearConfirmationError);
       control.addEventListener('input', clearConfirmationError);
@@ -1453,9 +1503,27 @@ export function openAddCards(
         'w-form-grid',
         field('Sprache der Karte', detailsLanguage),
         field('Druckvariante', finish),
-        field('Variante / Auflage / Stempel', variant),
+        ...(edition ? [field('Auflage (Basis-Set)', edition)] : []),
+        edition
+          ? el(
+              'details',
+              'w-vintage-extra-details',
+              el('summary', '', 'Weitere Druckdetails'),
+              field('Zusatzangabe', variant),
+            )
+          : field('Variante / Auflage / Stempel', variant),
         field('Gesamtmenge dieser Variante', quantity),
       ),
+      ...(edition
+        ? [
+            el(
+              'p',
+              'w-muted',
+              'Wichtig: Holo, Kartennummer und Referenzbild beweisen keine 1. Edition. Prüfe den schwarzen Editionsstempel auf der physischen Karte.',
+            ),
+          ]
+        : []),
+      ...(stampCheck ? [stampCheck.row] : []),
       confirm.row,
       error,
       el('div', 'w-action-row', submit, wish),
@@ -1503,6 +1571,24 @@ export function openAddCards(
         return;
       }
       const adopted = chosenCard();
+      const vintageError = validateVintageEdition(
+        adopted,
+        variant.value,
+        stampCheck?.input.checked ?? false,
+        edition?.value as VintageEdition | undefined,
+      );
+      if (vintageError) {
+        error.textContent = vintageError;
+        error.hidden = false;
+        if (
+          edition?.value === 'first' &&
+          stampCheck &&
+          !stampCheck.input.checked
+        )
+          stampCheck.input.focus();
+        else edition?.focus();
+        return;
+      }
       const previous =
         original ??
         ctx.state.holdings.find(
