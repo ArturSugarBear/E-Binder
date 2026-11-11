@@ -23,9 +23,7 @@ import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import { recognizedNameHints } from '../domain/recognition-names';
 import {
   combineLiveOcrText,
-  LIVE_SCAN_BUDGET_MS,
   LIVE_SCAN_MAX_OCR_PASSES,
-  liveScanMissingEvidence,
   nextLiveHotZone,
   remainingLiveScanBudget,
   type LiveHotZone,
@@ -807,6 +805,32 @@ export function openAddCards(
         current.status === 'confirmed'
       )
         return;
+      // The live camera has already completed its bounded OCR, targeted
+      // retries and (when possible) the exact-print catalogue check.
+      // Opening Review must NOT restart the same expensive recognition or
+      // force a second capture after a failed attempt.
+      const background = liveReviewResults.get(shot.id);
+      if (background) {
+        ctx.commit('Texterkennung abgeschlossen', (state) =>
+          changeState(state, (next) => {
+            const target = next.captures.find((item) => item.id === shot.id);
+            if (target?.status === 'pending') {
+              target.text = background.text.slice(0, 30000);
+              target.candidates = background.candidates;
+              target.error = '';
+            }
+          }),
+        );
+        showCapture();
+        await renderScanReview(
+          background.text,
+          background.candidates,
+          background.suggested,
+          background.basis,
+        );
+        results.dataset.scanState = 'complete';
+        return;
+      }
       await resolveOcrReview(shot);
     } finally {
       awaitingLiveReview.delete(shot.id);
