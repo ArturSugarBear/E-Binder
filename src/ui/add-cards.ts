@@ -715,6 +715,70 @@ export function openAddCards(
     }
   }
 
+  function confirmQuickScan(card: PersonalCard): void {
+    const shot = capture();
+    const variant = card.finishes.filter(
+      (finish) => finish === 'normal' || finish === 'holo' || finish === 'reverse',
+    );
+    if (
+      card.source !== 'tcgdex' ||
+      variant.length !== 1 ||
+      !shot ||
+      shot.status !== 'pending'
+    ) {
+      choose(card);
+      return;
+    }
+    const existing = ctx.state.holdings.find(
+      (holding) =>
+        sameCard(holding.card, card) &&
+        holding.finish === variant[0] &&
+        !holding.variantNote,
+    );
+    if ((existing?.quantity ?? 0) >= 999) {
+      choose(card);
+      return;
+    }
+    const saved = ctx.commit('Gescannte Karte hinzugefügt', (state) =>
+      confirmHolding(
+        state,
+        {
+          card,
+          finish: variant[0]!,
+          variantNote: '',
+          quantity: (existing?.quantity ?? 0) + 1,
+          tradeQuantity: existing?.tradeQuantity ?? 0,
+          favorite: existing?.favorite ?? false,
+          notes: existing?.notes ?? '',
+        },
+        shot.id,
+      ),
+    );
+    if (!saved) return;
+    recordBetaEvent('scan_review', 'scan', 'card_confirmed', 'ok', {
+      candidate: publicCardKey(shot.candidates[0]),
+      selected: publicCardKey(card),
+    });
+    transientPhotos.delete(shot.id);
+    alignedCaptures.delete(shot.id);
+    interrupt();
+    captureId = ctx.state.captures.find(
+      (item) => item.status === 'pending',
+    )?.id;
+    selected = undefined;
+    details.replaceChildren();
+    results.replaceChildren();
+    scanSetChoice.replaceChildren();
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    showQueue();
+    showCapture();
+    tell(
+      captureId
+        ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
+        : 'Karte hinzugefügt. Scanne die nächste Karte.',
+    );
+  }
+
   /**
    * Scan review is separate from general catalogue browsing: no random
    * cards with the same collector fraction are presented as recognition.
@@ -754,7 +818,20 @@ export function openAddCards(
           `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`,
         ),
         el('p', 'w-scan-match-reason', explanation),
-        action('Diese Ausgabe prüfen', () => choose(card), 'primary', 'check'),
+        action(
+          card.source === 'tcgdex' &&
+            card.finishes.filter(
+              (finish) =>
+                finish === 'normal' ||
+                finish === 'holo' ||
+                finish === 'reverse',
+            ).length === 1
+            ? 'Karte hinzufügen'
+            : 'Diese Ausgabe prüfen',
+          () => confirmQuickScan(card),
+          'primary',
+          'check',
+        ),
         action(
           'Treffer stimmt nicht?',
           () => {
