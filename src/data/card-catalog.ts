@@ -1,6 +1,7 @@
 import { secondaryCardArt } from './artwork-fallbacks';
 import { priceLooksMisassigned } from '../domain/price-integrity';
 import { verifiedCardmarketProduct } from './verified-cardmarket';
+import { officialCardmarketReference } from './official-cardmarket-prices';
 import { z } from 'zod';
 import type { Collection } from '../domain/collection';
 import { recognizedNameHints } from '../domain/recognition-names';
@@ -122,7 +123,7 @@ export interface MarketPrice {
   amount: number;
   updated: string;
   basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
-  provenance?: 'verified-snapshot';
+  provenance?: 'verified-snapshot' | 'official-export';
 }
 export interface CatalogEntry {
   card: PersonalCard;
@@ -666,6 +667,15 @@ export async function catalogEntry(
       ? raw.pricing?.tcgplayer?.holofoil?.marketPrice
       : raw.pricing?.tcgplayer?.normal?.marketPrice;
 
+  // Cross-check real Cardmarket product IDs, not only numeric price
+  // plausibility. This covers hundreds of prints, including the same
+  // Pokémon's common card and illustration rare in one set.
+  const official = await officialCardmarketReference({
+    id: raw.id,
+    setId: raw.set.id,
+    localId: raw.localId,
+    language,
+  });
   const verified = verifiedCardmarketProduct({
     id: raw.id,
     setId: raw.set.id,
@@ -675,37 +685,42 @@ export async function catalogEntry(
     language,
     normal: raw.variants?.normal,
   });
-  // A correct printing-to-product ID is a separate assertion from a
-  // plausible numerical price. The provider currently maps Groudon DLR111
-  // to the cheap DLR053 product (918876 vs the verified 918949).
+  const trustedProduct = official?.productId ?? verified?.productId;
   const wrongProduct = Boolean(
-    verified && quote?.idProduct !== verified.productId,
+    trustedProduct && quote?.idProduct && quote.idProduct !== trustedProduct,
   );
   const suspect =
     candidate !== undefined &&
     (wrongProduct ||
-      priceLooksMisassigned({
-        localId: raw.localId,
-        setOfficialCount: raw.set.cardCount.official,
-        amountEur: candidate.amount,
-        tcgplayerMarketUsd: dollarMarket ?? undefined,
-      }) ||
-      (!verified &&
+      // A separately identified, exact Cardmarket product is stronger
+      // evidence than heuristic rare-vs-common price expectations.
+      (!official &&
+        priceLooksMisassigned({
+          localId: raw.localId,
+          setOfficialCount: raw.set.cardCount.official,
+          amountEur: candidate.amount,
+          tcgplayerMarketUsd: dollarMarket ?? undefined,
+        })) ||
+      (!official &&
+        !verified &&
         (await hasSiblingCardmarketCollision(raw, language, signal))));
 
-  // A verified and dated source can replace the rejected mismapped feed
-  // without permitting the false upstream product or its cent prices.
-  // Once the observation expires, retain the correct product link but
-  // withhold its market value until new independent data are verified.
+  // Cardmarket's own daily price guide wins only when independently matched
+  // to the exact printed card. Never borrow an unrelated TCGdex product's
+  // price. Keep the old one-off observation as a dated outage fallback.
   const price: MarketPrice | undefined =
-    !suspect && !wrongProduct && candidate ? candidate : verified?.observation;
-  // Cardmarket's secondary "-holo" series can represent reverse foil.
-  // Never use it to value a regular card or a verified normal-only print.
+    official?.price ??
+    (!suspect && !wrongProduct && candidate
+      ? candidate
+      : verified?.observation);
+  // A holo-only illustration printing uses Cardmarket's regular product
+  // series; the secondary "-holo" series is often reverse foil instead.
   const holoPrice =
     raw.variants?.holo === true && raw.variants.normal === false
       ? price
       : undefined;
   const cardmarketUrl =
+    official?.url ??
     verified?.url ??
     (!suspect && !wrongProduct && quote?.idProduct
       ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
