@@ -39,17 +39,26 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-1.65.0
-      - name: Install browsers for the required test scope
+      - name: Prepare browsers for the required test scope
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            npx playwright install --with-deps chromium
+            # GitHub-hosted Ubuntu runners ship Chrome; avoid a redundant
+            # browser+apt installation on the fast feedback path.
+            if ! command -v google-chrome >/dev/null 2>&1; then
+              npx playwright install --with-deps chromium
+            fi
           else
             npx playwright install --with-deps chromium webkit
           fi
       - name: Browser regression
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            npx playwright test --project=chromium --project=mobile-chromium
+            if command -v google-chrome >/dev/null 2>&1; then
+              PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(command -v google-chrome)" \
+                npx playwright test --project=chromium --project=mobile-chromium
+            else
+              npx playwright test --project=chromium --project=mobile-chromium
+            fi
           else
             npm run test:e2e
           fi
