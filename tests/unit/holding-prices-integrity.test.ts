@@ -2,7 +2,10 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { holdingPrice } from '../../src/data/holding-prices';
 import type { Holding } from '../../src/domain/personal';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 const holding = (
   id: string,
@@ -39,6 +42,10 @@ const holding = (
 });
 
 it('uses the verified price for the exact Groudon DLR111 holding', async () => {
+  // The direct-market snapshot expires in production. This test must
+  // remain deterministic once it has expired.
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
   vi.stubGlobal(
     'fetch',
     vi.fn(
