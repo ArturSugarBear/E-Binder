@@ -136,7 +136,9 @@ async function run(path) {
             .getByRole('button', { name: 'Neun Fächer auswerten' })
             .click();
           await dialog
-            .locator('.w-page-scan-grid[data-scan-adjustment="manual"][data-scan-state="complete"]')
+            .locator(
+              '.w-page-scan-grid[data-scan-adjustment="manual"][data-scan-state="complete"]',
+            )
             .waitFor({ timeout: 900_000 });
         }
         const finishedAt = performance.now();
@@ -150,7 +152,8 @@ async function run(path) {
               keys: pocket.dataset.scanRankedKeys,
               decision: pocket.dataset.decision,
               recognitionState: pocket.dataset.recognitionState,
-              warning: pocket.querySelector('.w-page-scan-quality')?.textContent,
+              warning:
+                pocket.querySelector('.w-page-scan-quality')?.textContent,
               status: pocket.querySelector('small.w-muted')?.textContent,
             }),
           ),
@@ -190,8 +193,8 @@ async function run(path) {
           photo: basename(photo),
           rights: sample.rights,
           conditions: sample.conditions ?? [],
-          geometryMode: sample.geometryMode ??
-            (sample.corners ? 'manual' : 'automatic'),
+          geometryMode:
+            sample.geometryMode ?? (sample.corners ? 'manual' : 'automatic'),
           geometryMethod: payload.geometryMethod,
           online,
           phasesMs: {
