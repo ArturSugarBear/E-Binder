@@ -10,11 +10,9 @@ describe('explicit 9-pocket binder review', () => {
     ).toBe(false);
   });
   it('requires one selected card and a decision for all nine positions', () => {
-    expect(
-      binderReviewComplete(['card', ...Array(8).fill('skip')]),
-    ).toBe(true);
-    expect(
-      binderReviewComplete(['card', ...Array(8).fill('empty')]),
-    ).toBe(true);
+    expect(binderReviewComplete(['card', ...Array(8).fill('skip')])).toBe(true);
+    expect(binderReviewComplete(['card', ...Array(8).fill('empty')])).toBe(
+      true,
+    );
   });
 });
