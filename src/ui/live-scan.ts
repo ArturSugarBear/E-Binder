@@ -6,7 +6,11 @@ import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
 import { action, el, errorText, modal } from './workspace-dom';
 
-type CaptureHandler = (file: File, aligned: boolean) => Promise<void>;
+type CaptureHandler = (
+  file: File,
+  aligned: boolean,
+  onAnalysisState: (active: boolean) => void,
+) => Promise<void>;
 
 function visibleCrop(video: HTMLVideoElement, width: number, height: number) {
   const ratio = width / height;
@@ -163,6 +167,22 @@ export function openLiveScanner(
     'Karte mittig ausrichten',
   );
   stage.append(stageLabel);
+  const analysis = el(
+    'div',
+    'w-live-analysis',
+    el('span', 'w-live-analysis-line'),
+    el('span', 'w-live-analysis-caption', 'Kartendetails werden lokal geprüft …'),
+  );
+  analysis.setAttribute('role', 'status');
+  analysis.hidden = true;
+  stage.append(analysis);
+  let ongoingAnalysis = 0;
+  const onAnalysisState = (active: boolean) => {
+    if (closed) return;
+    ongoingAnalysis = Math.max(0, ongoingAnalysis + (active ? 1 : -1));
+    analysis.hidden = ongoingAnalysis === 0;
+    stage.classList.toggle('is-analyzing', ongoingAnalysis > 0);
+  };
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
@@ -365,6 +385,7 @@ export function openLiveScanner(
           type: 'image/jpeg',
         }),
         aligned,
+        onAnalysisState,
       );
       if (!closed) {
         // The image is queued WITHOUT waiting for OCR, model loads or
