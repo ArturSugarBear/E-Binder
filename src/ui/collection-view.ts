@@ -42,10 +42,7 @@ interface PriceBadge {
   load: () => Promise<void>;
 }
 
-function priceBadge(
-  holding: Holding,
-  detail = false,
-): PriceBadge {
+function priceBadge(holding: Holding, detail = false): PriceBadge {
   const comparable = portfolioQuoteKey(holding) !== null;
   const value = el(
     'strong',
@@ -290,7 +287,9 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
       void (async () => {
         for (let index = 0; index < prices.length; index += 4) {
           if (!root.isConnected) return;
-          await Promise.all(prices.slice(index, index + 4).map((item) => item.load()));
+          await Promise.all(
+            prices.slice(index, index + 4).map((item) => item.load()),
+          );
         }
       })();
     });
