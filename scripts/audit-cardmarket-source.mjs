@@ -70,3 +70,15 @@ for (const set of relevantSets.slice(0,10)) {
   console.log('mapping relevant', set[0], cards.length,
     JSON.stringify(cards.filter((card) => /^(0?53|088|090|101|106|111|113|124|140)$/i.test(String(card[0]))).slice(0,20)));
 }
+
+for (const [expansionId, slug] of [[6704,'Delta-Reign-Expansion'],[6569,'Pitch-Black-Expansion']]) {
+  const market = products.products.filter((p)=>p.idExpansion===expansionId)
+    .sort((a,b)=>a.idProduct-b.idProduct);
+  const local = independent.cards?.[slug]??[];
+  const simplify = v => String(v).toLowerCase().split('[')[0].replace(/[^a-z0-9]/g,'');
+  const matches = Math.min(market.length,local.length);
+  const aligned = Array.from({length:matches},(_,i)=>simplify(market[i]?.name)===simplify(local[i]?.[1])).filter(Boolean).length;
+  console.log('EXPANSION',expansionId,slug,'market',market.length,'local',local.length,'indexNameAgree',aligned,'of',matches);
+  console.log('START SAMPLE',JSON.stringify(Array.from({length:14},(_,i)=>({i:i+1,marketId:market[i]?.idProduct,mName:market[i]?.name,n:local[i]?.[0],lName:local[i]?.[1],match:simplify(market[i]?.name)===simplify(local[i]?.[1])}))));
+  console.log('SECRET SAMPLE',JSON.stringify(Array.from({length:18},(_,i)=>{let index=93+i;return {i:index+1,marketId:market[index]?.idProduct,mName:market[index]?.name,n:local[index]?.[0],lName:local[index]?.[1]};})));
+}
