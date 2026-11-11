@@ -122,8 +122,8 @@ export function detectCardBounds(
   if (
     cardWidth < width * 0.74 ||
     cardHeight < height * 0.74 ||
-    Math.abs(centreX - width / 2) > width * 0.06 ||
-    Math.abs(centreY - height / 2) > height * 0.06 ||
+    Math.abs(centreX - width / 2) > width * 0.045 ||
+    Math.abs(centreY - height / 2) > height * 0.045 ||
     Math.abs(cardRatio / pocketRatio - 1) > 0.12
   )
     return null;
