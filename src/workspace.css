@@ -4589,3 +4589,73 @@ textarea.w-input,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Recognition shows a compact photo preview, not the technical capture queue. */
+.w-guided-scan .w-photo-comparison {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+}
+.w-guided-scan .w-original-photo {
+  width: 72px;
+  max-height: 110px;
+}
+.w-guided-scan .w-photo-comparison h3,
+.w-guided-scan .w-photo-comparison .w-disclosure,
+.w-guided-scan .w-photo-comparison .w-muted {
+  display: none;
+}
+.w-guided-scan .w-photo-comparison > div {
+  gap: 5px;
+}
+.w-guided-scan .w-photo-comparison .w-button {
+  min-height: 44px;
+  white-space: normal;
+}
+.w-scan-alternatives {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--w-border);
+  border-radius: 14px;
+}
+.w-scan-alternatives summary,
+.w-scan-fallback-settings summary {
+  cursor: pointer;
+  min-height: 42px;
+  color: var(--ink);
+  font-size: 13px;
+}
+.w-scan-alternative-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.w-scan-alternative-grid .w-button-card {
+  min-width: 0;
+  padding: 7px;
+  text-align: left;
+}
+.w-scan-alternative-grid .card-art {
+  width: 100%;
+  margin: 0;
+}
+.w-scan-alternative-grid .w-card-caption {
+  display: grid;
+  gap: 5px;
+  padding: 9px 2px;
+  min-width: 0;
+}
+.w-scan-alternative-grid .w-card-caption strong,
+.w-scan-alternative-grid .w-card-caption small {
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .w-scan-alternative-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
