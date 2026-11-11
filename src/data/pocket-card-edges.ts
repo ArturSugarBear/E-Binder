@@ -51,7 +51,10 @@ export function detectCardBounds(
     const cross = vertical ? height : width;
     // Only consider borders near pocket edges. An edge around the artwork
     // must never be mistaken for the actual outer edge of the printed card.
-    const low = Math.max(2, Math.round(dimension * (side === 'near' ? 0.015 : 0.85)));
+    const low = Math.max(
+      2,
+      Math.round(dimension * (side === 'near' ? 0.015 : 0.85)),
+    );
     const high = Math.min(
       dimension - 3,
       Math.round(dimension * (side === 'near' ? 0.15 : 0.985)),
@@ -108,10 +111,7 @@ export function detectCardBounds(
 
   // A card-sized rectangle must have paired borders with opposite edge
   // polarity. This rejects one-axis seams and most interior artwork lines.
-  if (
-    left.polarity === right.polarity ||
-    top.polarity === bottom.polarity
-  )
+  if (left.polarity === right.polarity || top.polarity === bottom.polarity)
     return null;
   const cardWidth = right.position - left.position;
   const cardHeight = bottom.position - top.position;
