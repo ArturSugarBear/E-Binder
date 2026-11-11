@@ -64,9 +64,8 @@ test('sets without verified artwork show intentional Rare Room identities, not g
   }
   expect(placeholders).toEqual([]);
 
-  const withLogo = gallery.getByRole('button', {
-    name: 'Mega-Entwicklung',
-    exact: true,
+  const withLogo = gallery.locator('button.w-set-choice').filter({
+    has: page.getByText('Mega-Entwicklung', { exact: true }),
   });
   await expect(withLogo.locator('.w-set-symbol')).toHaveAttribute(
     'data-image-state',
