@@ -235,6 +235,19 @@ export function openLiveScanner(
   sheet.dialog.classList.add('w-live-scan-minimal');
   sheet.body.append(mode, stage, journey.element, progress, options);
   sheet.footer.append(reviewSummary, trigger, next, finish);
+
+  // A sticky review footer can occlude a status overlay inside the camera
+  // stage on short iPhone viewports. For camera-denied/error states, move the
+  // *same live status node* ahead of the pending-review controls. This keeps
+  // screen-reader announcements and the original capture lifecycle intact.
+  const showCameraAlert = () => {
+    if (status.parentElement !== sheet.footer) sheet.footer.prepend(status);
+    stage.classList.add('has-camera-alert');
+  };
+  const restoreCameraStatus = () => {
+    if (status.parentElement !== stage) stage.append(status);
+    stage.classList.remove('has-camera-alert');
+  };
   let stream: MediaStream | null = null;
   // Track every granted stream, even when a late permission/play response races
   // with closing or restarting the scanner.
@@ -321,6 +334,7 @@ export function openLiveScanner(
         stage.dataset.scanPhase = 'error';
         stageLabel.textContent = 'Scan bitte wiederholen';
         options.open = true;
+        showCameraAlert();
         status.textContent = `Scan fehlgeschlagen: ${errorText(error)}`;
         next.hidden = false;
         refreshReview();
@@ -387,6 +401,7 @@ export function openLiveScanner(
 
   async function startCamera(): Promise<void> {
     if (closed || busy) return;
+    restoreCameraStatus();
     stopCamera();
     const generation = cameraGeneration;
     next.hidden = true;
@@ -408,6 +423,7 @@ export function openLiveScanner(
     if (!navigator.mediaDevices?.getUserMedia) {
       recordBetaEvent('scan_result', 'scan', 'camera_unavailable', 'error');
       options.open = true;
+      showCameraAlert();
       status.textContent =
         'Der Browser bietet keine Live-Kamera. Nutze stattdessen ein Kamerafoto.';
       return;
@@ -444,6 +460,7 @@ export function openLiveScanner(
       recordBetaEvent('scan_result', 'scan', 'camera_start_failed', 'error');
       options.open = true;
       stageLabel.textContent = 'Kamera nicht verfügbar';
+      showCameraAlert();
       status.textContent = `Live-Kamera nicht verfügbar: ${errorText(error)}`;
       help.textContent =
         'Prüfe die Kameraberechtigung in Safari oder verwende die Fotoaufnahme als Rückfallmöglichkeit.';
