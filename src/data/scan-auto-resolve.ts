@@ -18,6 +18,8 @@ export interface AutomaticScanResult {
   suggested?: PersonalCard;
   basis: 'printed-set' | 'full-name' | 'image' | 'visual-review' | 'review' | 'no-match';
   visualChecked: number;
+  /** Validated local-model candidate count, not confidence or accuracy. */
+  visualModelCandidates: number;
 }
 
 interface CardPreview {
@@ -215,6 +217,7 @@ export async function resolvePhotoScan(
       suggested: exact.suggested,
       basis: exact.basis,
       visualChecked: 0,
+      visualModelCandidates: fromVisual.length,
     };
   // Lightweight artwork colour signatures can rank OCR candidates, but
   // neither cosine similarity nor a dominant colour margin proves a
@@ -254,5 +257,6 @@ export async function resolvePhotoScan(
     // or different foil treatments.
     basis: fromVisual.length ? 'visual-review' : candidates.length ? 'review' : 'no-match',
     visualChecked: fromVisual.length + inspected.length,
+    visualModelCandidates: fromVisual.length,
   };
 }
