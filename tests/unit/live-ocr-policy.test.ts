@@ -59,6 +59,8 @@ describe('P07 live analysis budget', () => {
       'Groudon\nGroudon',
       'title-wide',
     );
-    expect(merged.split('\n').filter((line) => line === 'Groudon')).toHaveLength(1);
+    expect(
+      merged.split('\n').filter((line) => line === 'Groudon'),
+    ).toHaveLength(1);
   });
 });

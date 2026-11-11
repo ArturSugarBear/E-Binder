@@ -133,9 +133,20 @@ test('pending scans remain reviewable while the camera is unavailable, including
   await expect(live).toHaveCount(0);
   await expect(add).toBeVisible();
   await expect(add.locator('.w-capture-queue')).toContainText('2 offen');
-  await expect(
-    add.getByRole('button', { name: 'Karte live scannen', exact: true }),
-  ).toBeFocused();
+  // An unreviewed upload opens its existing crop confirmation. Focus must
+  // stay in that active modal, rather than the inert scanner opener beneath it.
+  const alignment = page.getByRole('dialog', {
+    name: 'Karte ausrichten',
+    exact: true,
+  });
+  await expect(alignment).toBeVisible();
+  expect(
+    await alignment.evaluate((node) => node.contains(document.activeElement)),
+  ).toBe(true);
+  await alignment
+    .getByRole('button', { name: 'Karte ausrichten schließen', exact: true })
+    .click();
+  await expect(add).toBeVisible();
   await add
     .getByRole('button', { name: 'Karten hinzufügen schließen', exact: true })
     .click();

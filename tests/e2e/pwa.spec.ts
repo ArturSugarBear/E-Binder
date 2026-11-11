@@ -103,9 +103,8 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     navigation.locator(':scope > a, :scope > button').nth(4),
   ).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte scannen' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Karten hinzufügen' }),
-  ).toBeVisible();
+  // The add sheet remains preserved but suspended beneath the camera.
+  await expect(page.locator('dialog.w-scan-parent-suspended')).toBeHidden();
   await expect(
     page.getByRole('dialog', { name: 'Karte live scannen' }),
   ).toBeVisible();

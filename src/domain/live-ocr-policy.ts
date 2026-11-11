@@ -22,8 +22,8 @@ export function liveScanMissingEvidence(text: string): {
   title: boolean;
 } {
   return {
-    footer: !recognitionClues(text).some(
-      (clue) => Boolean(clue.setId && clue.number),
+    footer: !recognitionClues(text).some((clue) =>
+      Boolean(clue.setId && clue.number),
     ),
     // A printed DLR/PBL/M1L code is a set hint, not the Pokémon's
     // complete name. The usual name extractor only sees the last 3

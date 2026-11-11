@@ -70,8 +70,17 @@ test('camera scanner switches modes without writing inventory', async ({
     .getByRole('group', { name: 'Scanmodus wählen' })
     .getByRole('button', { name: 'Einzelkarte' })
     .click();
+  const reopened = page.getByRole('dialog', {
+    name: 'Karte live scannen',
+    exact: true,
+  });
+  await expect(reopened).toBeVisible();
+  await expect(page.locator('dialog.w-scan-parent-suspended')).toBeHidden();
+  await reopened
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
   await expect(
-    page.getByRole('dialog', { name: 'Karten hinzufügen' }),
+    page.getByRole('dialog', { name: 'Karten hinzufügen', exact: true }),
   ).toBeVisible();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
