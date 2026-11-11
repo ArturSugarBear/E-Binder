@@ -739,13 +739,17 @@ export function openAddCards(
           );
         return;
       }
-      // Reuse fast OCR evidence whenever a usable number or title was
-      // found. A weak/empty live pass automatically receives the full
-      // worker's extra hot-zone retries in Review, without re-photographing.
+      // Reuse fast OCR ONLY when it found both a printed set+number and a
+      // plausible full title. A lone number or partial energy/Trainer title
+      // automatically triggers the fuller hot-zone OCR in Review without
+      // asking the user to take another photo.
+      const quickText = prefilled ?? '';
       const usableLive =
         prefilled !== undefined &&
-        (recognitionClues(prefilled).length > 0 ||
-          recognizedNameHints(prefilled).length > 0);
+        recognitionClues(quickText).some(
+          (clue) => Boolean(clue.setId && clue.number),
+        ) &&
+        recognizedNameHints(quickText).length > 0;
       const text = usableLive
         ? prefilled
         : await recognizePhoto(
