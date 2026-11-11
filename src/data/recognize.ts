@@ -1,7 +1,15 @@
 /** Reusable local PaddleOCR worker. All photos stay on the device. */
+export interface RecognitionOptions {
+  /** A limited hot-zone pass for responsive live capture; no accuracy claim. */
+  fast?: boolean;
+  /** Hard per-card OCR time budget; a timed-out worker is disposed. */
+  timeoutMs?: number;
+}
+
 export function createRecognitionSession(
   signal: AbortSignal,
   progress: (status: string, fraction?: number) => void,
+  options: RecognitionOptions = {},
 ) {
   const worker = new Worker(new URL('./vision-worker.ts', import.meta.url), {
     type: 'module',
@@ -75,7 +83,7 @@ export function createRecognitionSession(
           new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'),
         );
         close();
-      }, 90000);
+      }, options.timeoutMs ?? 90000);
       pending = { id, timer, resolve, reject };
       progress('Lokale Erkennung wird vorbereitet …');
       try {
@@ -83,6 +91,7 @@ export function createRecognitionSession(
           id,
           photo,
           numberOnly,
+          fast: options.fast === true,
           modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
           dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
         });
@@ -101,8 +110,9 @@ export async function recognizePhoto(
   photo: Blob,
   signal: AbortSignal,
   progress: (status: string, fraction?: number) => void,
+  options: RecognitionOptions = {},
 ): Promise<string> {
-  const session = createRecognitionSession(signal, progress);
+  const session = createRecognitionSession(signal, progress, options);
   try {
     return await session.recognize(photo);
   } finally {
