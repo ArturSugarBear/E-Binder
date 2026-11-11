@@ -204,7 +204,7 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
     },
     'testprice-150': {
       id: 'testprice-150',
-      localId: '111',
+      localId: '150',
       name: 'Groudon',
       set,
       pricing: {
@@ -225,7 +225,7 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
           ...set,
           cards: [
             { id: 'testprice-053', localId: '053', name: 'Groudon' },
-            { id: 'testprice-150', localId: '111', name: 'Groudon' },
+            { id: 'testprice-150', localId: '150', name: 'Groudon' },
           ],
         }),
       );
@@ -238,7 +238,5 @@ it('rejects a secretly numbered printing sharing the base card Cardmarket produc
   const entry = await catalogEntry('testprice-150', 'de', undefined, false);
   expect(entry.price).toBeUndefined();
   expect(entry.priceIssue).toBe('suspect');
-  expect(fetcher.mock.calls.some(([url]) => url.endsWith('/sets/testprice'))).toBe(
-    true,
-  );
+  expect(fetcher).toHaveBeenCalledTimes(3);
 });
