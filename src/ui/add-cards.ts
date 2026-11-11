@@ -194,6 +194,11 @@ export function openAddCards(
         () => {
           reviewingLiveQueue = true;
           captureStart.hidden = true;
+          captureId = ctx.state.captures.find(
+            (item) => item.status === 'pending',
+          )?.id;
+          showQueue();
+          showCapture();
           const shot = capture();
           if (shot?.status === 'pending' && !shot.text)
             void runOcr();
@@ -561,7 +566,7 @@ export function openAddCards(
       gallery.value = '';
       camera.value = '';
     }
-    if (fromCamera && first && !closed) await runOcr();
+    if (fromCamera && first && !closed && !queuedLive) await runOcr();
   }
   gallery.addEventListener('change', () => {
     void addFiles(gallery.files);
