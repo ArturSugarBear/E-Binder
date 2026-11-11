@@ -36,11 +36,13 @@ describe('live background OCR safety budget', () => {
       fast: true,
       timeoutMs: 5600,
     });
+    session.warmup();
+    expect(SilentWorker.latest?.messages[0]).toMatchObject({ warmup: true });
     const work = session.recognize(new Blob(['card'], { type: 'image/jpeg' }));
     const failure = expect(work).rejects.toThrow(
       'Die Erkennung dauert zu lange',
     );
-    expect(SilentWorker.latest?.messages[0]).toMatchObject({
+    expect(SilentWorker.latest?.messages[1]).toMatchObject({
       fast: true,
       numberOnly: false,
     });
