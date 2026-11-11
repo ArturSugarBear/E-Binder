@@ -1,7 +1,16 @@
 /** Reusable local PaddleOCR worker. All photos stay on the device. */
+import type { LiveHotZone } from '../domain/live-ocr-policy';
+export interface RecognitionOptions {
+  /** A limited hot-zone pass for responsive live capture; no accuracy claim. */
+  fast?: boolean;
+  /** Hard per-card OCR time budget; a timed-out worker is disposed. */
+  timeoutMs?: number;
+}
+
 export function createRecognitionSession(
   signal: AbortSignal,
   progress: (status: string, fraction?: number) => void,
+  options: RecognitionOptions = {},
 ) {
   const worker = new Worker(new URL('./vision-worker.ts', import.meta.url), {
     type: 'module',
@@ -59,7 +68,12 @@ export function createRecognitionSession(
       );
     }
   };
-  const recognize = (photo: Blob, numberOnly = false): Promise<string> =>
+  const recognize = (
+    photo: Blob,
+    numberOnly = false,
+    hotZone?: LiveHotZone,
+    timeoutMs?: number,
+  ): Promise<string> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -70,12 +84,20 @@ export function createRecognitionSession(
         return;
       }
       const id = ++sequence;
-      const timer = setTimeout(() => {
-        finish(
-          new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'),
-        );
-        close();
-      }, 90000);
+      const timer = setTimeout(
+        () => {
+          finish(
+            new Error(
+              'Die Erkennung dauert zu lange. Prüfe die Karte manuell.',
+            ),
+          );
+          close();
+        },
+        Math.max(
+          1,
+          Math.min(options.timeoutMs ?? 90000, timeoutMs ?? Infinity),
+        ),
+      );
       pending = { id, timer, resolve, reject };
       progress('Lokale Erkennung wird vorbereitet …');
       try {
@@ -83,6 +105,8 @@ export function createRecognitionSession(
           id,
           photo,
           numberOnly,
+          hotZone,
+          fast: options.fast === true,
           modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
           dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
         });
@@ -92,8 +116,23 @@ export function createRecognitionSession(
         );
       }
     });
+  const warmup = () => {
+    if (disposed || signal.aborted) return;
+    try {
+      // Preload the same local 10.8 MB ONNX model while the collector
+      // positions the first card. The worker serializes this ahead of OCR.
+      worker.postMessage({
+        warmup: true,
+        photo: new Blob(),
+        modelUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocrv4-rec.onnx`,
+        dictionaryUrl: `${import.meta.env.BASE_URL}assets/ocr/ppocr-keys.txt`,
+      });
+    } catch {
+      // First real scan will retry normal model loading.
+    }
+  };
   if (signal.aborted) close();
-  return { recognize, close };
+  return { recognize, warmup, close };
 }
 
 /** Compatible with the original single-card flow; worker is disposed after use. */
@@ -101,8 +140,9 @@ export async function recognizePhoto(
   photo: Blob,
   signal: AbortSignal,
   progress: (status: string, fraction?: number) => void,
+  options: RecognitionOptions = {},
 ): Promise<string> {
-  const session = createRecognitionSession(signal, progress);
+  const session = createRecognitionSession(signal, progress, options);
   try {
     return await session.recognize(photo);
   } finally {

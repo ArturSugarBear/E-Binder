@@ -103,12 +103,14 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     navigation.locator(':scope > a, :scope > button').nth(4),
   ).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte scannen' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Karten hinzufügen' }),
-  ).toBeVisible();
+  // Opening Scan creates one dominant camera sheet, while the add-card
+  // sheet stays in memory but is inert/hidden to avoid stacked dialogs.
   await expect(
     page.getByRole('dialog', { name: 'Karte live scannen' }),
   ).toBeVisible();
+  const parent = page.locator('dialog.w-dialog.w-scan-parent-suspended');
+  await expect(parent).toHaveAttribute('inert', '');
+  await expect(parent).toBeHidden();
   await page
     .getByRole('dialog', { name: 'Karte live scannen' })
     .getByRole('button', { name: 'Karte live scannen schließen' })

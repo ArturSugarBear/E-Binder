@@ -9,7 +9,7 @@ import {
   recognitionClues,
   matchesCard,
 } from '../data/card-catalog';
-import { recognizePhoto } from '../data/recognize';
+import { createRecognitionSession, recognizePhoto } from '../data/recognize';
 import {
   resolvePhotoScan,
   type AutomaticScanResult,
@@ -22,6 +22,13 @@ import {
 import { anniversaryEnergyFromText } from '../domain/anniversary-energy';
 import { recognizedNameHints } from '../domain/recognition-names';
 import {
+  combineLiveOcrText,
+  LIVE_SCAN_MAX_OCR_PASSES,
+  nextLiveHotZone,
+  remainingLiveScanBudget,
+  type LiveHotZone,
+} from '../domain/live-ocr-policy';
+import {
   requiresEditionStampReview,
   editionClaimFromNote,
   validateVintageEdition,
@@ -29,6 +36,11 @@ import {
 } from '../domain/vintage-edition';
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
+import {
+  pendingScanCount,
+  scanQueueBlocker,
+  type LiveCaptureOutcome,
+} from '../domain/scan-session-guardrails';
 import { createCatalogBrowser } from './catalog-browser';
 import {
   changeState,
@@ -141,6 +153,22 @@ export function openAddCards(
   });
   let selected = options.card;
   let captureId = options.captureId;
+  let reviewingLiveQueue = false;
+  const liveOcrAbort = new AbortController();
+  let liveOcrSession: ReturnType<typeof createRecognitionSession> | undefined;
+  let liveOcrQueue: Promise<void> = Promise.resolve();
+  const liveOcrJobs = new Map<string, Promise<void>>();
+  const liveOcrEvidence = new Map<string, string>();
+  const liveReviewResults = new Map<
+    string,
+    {
+      text: string;
+      candidates: PersonalCard[];
+      suggested?: PersonalCard;
+      basis?: AutomaticScanResult['basis'];
+    }
+  >();
+  const awaitingLiveReview = new Set<string>();
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
@@ -156,6 +184,11 @@ export function openAddCards(
   };
   sheet.onClose(() => {
     closed = true;
+    liveOcrAbort.abort();
+    liveOcrSession?.close();
+    liveOcrJobs.clear();
+    liveOcrEvidence.clear();
+    liveReviewResults.clear();
     transientPhotos.clear();
     alignedCaptures.clear();
     for (const url of previewUrls) URL.revokeObjectURL(url);
@@ -182,19 +215,41 @@ export function openAddCards(
   );
   const takePhoto = action(
     'Karte live scannen',
-    () =>
+    () => {
+      prepareLiveOcr();
       openLiveScanner(
-        async (file, aligned) => {
-          await addFiles([file], true, aligned);
+        async (file, aligned, onAnalysisState) => {
+          const existing = new Set(ctx.state.captures.map((shot) => shot.id));
+          // Only local photo queueing blocks capture; model inference does not.
+          const outcome = await addFiles([file], false, aligned, true);
+          if (outcome !== 'added') return outcome;
+          const shot = ctx.state.captures.find(
+            (item) => !existing.has(item.id) && item.status !== 'confirmed',
+          );
+          if (shot) startLiveOcr(shot.id, file, onAnalysisState);
+          return 'added';
         },
         () => camera.click(),
-        () =>
-          ctx.state.captures.filter((shot) => shot.status === 'pending').length,
+        () => pendingScanCount(ctx.state.captures),
         () => {
           sheet.close();
           ctx.openPageScan();
         },
-      ),
+        () => {
+          reviewingLiveQueue = true;
+          captureId = ctx.state.captures.find(
+            (item) => item.status === 'pending',
+          )?.id;
+          showQueue();
+          showCapture();
+          const shot = capture();
+          if (shot?.status === 'pending') {
+            if (shot.text) void renderScanReview(shot.text, shot.candidates);
+            else void runOcr();
+          }
+        },
+      );
+    },
     'primary',
     'camera',
   );
@@ -331,6 +386,8 @@ export function openAddCards(
     for (const id of removed) {
       transientPhotos.delete(id);
       alignedCaptures.delete(id);
+      liveOcrEvidence.delete(id);
+      liveReviewResults.delete(id);
     }
     if (captureId && removed.has(captureId)) {
       setFlowStage(0);
@@ -462,18 +519,206 @@ export function openAddCards(
     }
   };
 
+  function prepareLiveOcr(): void {
+    if (closed || liveOcrAbort.signal.aborted || liveOcrSession) return;
+    try {
+      liveOcrSession = createRecognitionSession(
+        liveOcrAbort.signal,
+        () => undefined,
+        { fast: true, timeoutMs: 5600 },
+      );
+      liveOcrSession.warmup();
+    } catch {
+      liveOcrSession?.close();
+      liveOcrSession = undefined;
+    }
+  }
+
+  /**
+   * Each physical scan has a single absolute 5.6-second window covering
+   * worker queueing, up to three ACTUAL OCR hot-zone passes and a bounded
+   * catalogue lookup. Recognition never blocks the live camera. Multiple
+   * crops of one image are not independent confidence votes.
+   */
+  function startLiveOcr(
+    id: string,
+    photo: File,
+    onAnalysisState: (active: boolean, detail?: string) => void,
+  ): void {
+    if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
+    const started = performance.now();
+    onAnalysisState(true);
+    onAnalysisState(true, 'Kartenmerkmale werden gelesen …');
+    // Only serialize ONNX inference. A slow online catalogue lookup for
+    // card N must not prevent the worker from reading card N+1.
+    const previousOcr = liveOcrQueue;
+    let releaseOcr: () => void = () => undefined;
+    liveOcrQueue = new Promise<void>((resolve) => {
+      releaseOcr = resolve;
+    });
+    const task = previousOcr
+      .then(async () => {
+        if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
+          return;
+        const remaining = () =>
+          remainingLiveScanBudget(started, performance.now());
+        let text = '';
+        const tried: LiveHotZone[] = [];
+        if (!liveOcrSession && remaining() > 300) prepareLiveOcr();
+        if (liveOcrSession && remaining() > 300) {
+          try {
+            let attempts = 1;
+            onAnalysisState(true, 'Set, Nummer und Name werden gelesen …');
+            text = await liveOcrSession.recognize(
+              photo,
+              false,
+              undefined,
+              remaining(),
+            );
+            liveOcrEvidence.set(id, text);
+            while (
+              attempts < LIVE_SCAN_MAX_OCR_PASSES &&
+              remaining() > 650 &&
+              !liveOcrAbort.signal.aborted
+            ) {
+              const region = nextLiveHotZone(text, tried);
+              if (!region) break;
+              tried.push(region);
+              attempts++;
+              onAnalysisState(
+                true,
+                region.startsWith('footer')
+                  ? 'Sammlernummer wird nochmals geprüft …'
+                  : 'Vollständiger Kartenname wird geprüft …',
+              );
+              const extra = await liveOcrSession.recognize(
+                photo,
+                false,
+                region,
+                remaining(),
+              );
+              text = combineLiveOcrText(text, extra, region);
+              liveOcrEvidence.set(id, text);
+            }
+          } catch {
+            // Timeouts terminate the worker, but partial OCR evidence is
+            // retained; the collector may correct the card manually.
+            liveOcrSession?.close();
+            liveOcrSession = undefined;
+          }
+        }
+        // Subsequent photos can now use the warmed OCR worker while this
+        // photo's catalogue requests continue in the background.
+        releaseOcr();
+        if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
+          return;
+        const candidatesFromLocal = candidatesFromText(text, [
+          ...ctx.catalog,
+          ...ctx.state.holdings.map((item) => item.card),
+        ]);
+        let automatic: AutomaticScanResult | undefined;
+        if (text.trim() && remaining() > 450) {
+          onAnalysisState(true, 'Kartenkatalog wird abgeglichen …');
+          const controller = new AbortController();
+          const timeout = setTimeout(
+            () => controller.abort(),
+            Math.max(1, remaining() - 100),
+          );
+          const cleanup = () => controller.abort();
+          liveOcrAbort.signal.addEventListener('abort', cleanup, {
+            once: true,
+          });
+          try {
+            automatic = await resolvePhotoScan(
+              photo,
+              text,
+              candidatesFromLocal,
+              language.value,
+              controller.signal,
+            );
+          } catch {
+            // Remote catalogue access is advisory. Never spend beyond the
+            // live scan deadline or fabricate a suggested printing.
+          } finally {
+            clearTimeout(timeout);
+            liveOcrAbort.signal.removeEventListener('abort', cleanup);
+          }
+        }
+        if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
+          return;
+        const candidates = [
+          ...new Map(
+            [...(automatic?.candidates ?? []), ...candidatesFromLocal].map(
+              (card) => [card.key, card],
+            ),
+          ).values(),
+        ].slice(0, 24);
+        liveOcrEvidence.set(id, text);
+        liveReviewResults.set(id, {
+          text,
+          candidates,
+          suggested: automatic?.suggested,
+          basis: automatic?.basis,
+        });
+        recordBetaEvent(
+          'scan_result',
+          'scan',
+          candidates.length
+            ? 'live_candidate_ready'
+            : text.trim()
+              ? 'live_ocr_unresolved'
+              : 'live_ocr_empty',
+          candidates.length ? 'ok' : 'unknown',
+          {
+            candidate: publicCardKey(candidates[0]),
+            metric: Math.min(
+              200,
+              Math.ceil((performance.now() - started) / 100),
+            ),
+          },
+        );
+      })
+      .catch(() => {
+        // On any unexpected failure the photo remains available for review.
+        if (closed || liveOcrAbort.signal.aborted) return;
+        liveReviewResults.set(id, {
+          text: liveOcrEvidence.get(id) ?? '',
+          candidates: [],
+        });
+        recordBetaEvent(
+          'scan_result',
+          'scan',
+          'live_ocr_unresolved',
+          'unknown',
+        );
+      })
+      .finally(() => {
+        // Release even if the photo was discarded or analysis aborted before
+        // reaching the catalogue stage.
+        releaseOcr();
+        onAnalysisState(false);
+        liveOcrJobs.delete(id);
+      });
+    liveOcrJobs.set(id, task);
+  }
+
   async function addFiles(
     files: FileList | File[] | null,
     fromCamera = false,
     autoAligned = false,
-  ): Promise<void> {
-    if (!files?.length) return;
-    interrupt();
+    queuedLive = false,
+  ): Promise<LiveCaptureOutcome> {
+    if (!files?.length) return 'error';
+    // Capturing another photo must not cancel ongoing OCR, the selected
+    // review, or a catalogue request. The scanner runs in its own dialog.
+    if (!queuedLive) interrupt();
     upload.disabled = true;
     takePhoto.disabled = true;
     let first: string | undefined;
     let added = 0;
     let repeats = 0;
+    let blocked = false;
+    let failed = false;
     try {
       for (const file of Array.from(files)) {
         if (
@@ -499,6 +744,19 @@ export function openAddCards(
           repeats++;
           continue;
         }
+        const blocker = scanQueueBlocker(
+          ctx.state.captures,
+          transientPhotos.values(),
+          file.size,
+        );
+        if (blocker) {
+          blocked = true;
+          throw new Error(
+            blocker === 'queue-full'
+              ? 'Der Scan-Puffer ist voll (24 offene Fotos). Bitte zuerst Ergebnisse prüfen oder offene Aufnahmen entfernen.'
+              : 'Der Foto-Puffer ist voll (48 MB). Bitte zuerst Ergebnisse prüfen oder offene Aufnahmen entfernen.',
+          );
+        }
         const shot: Capture = {
           id: uid(),
           hash,
@@ -517,24 +775,37 @@ export function openAddCards(
               next.captures.push(shot);
             }),
           )
-        )
+        ) {
+          transientPhotos.delete(shot.id);
+          alignedCaptures.delete(shot.id);
+          failed = true;
           break;
+        }
         first ??= shot.id;
         added++;
       }
       if (!closed) {
-        captureId = first;
-        selected = undefined;
-        details.replaceChildren();
-        results.replaceChildren();
+        if (!queuedLive) {
+          captureId = first;
+          selected = undefined;
+          details.replaceChildren();
+          results.replaceChildren();
+        } else if (!captureId) {
+          captureId = first;
+        }
+        // The foreground review is never re-rendered while consecutive
+        // physical photos are being added under the suspended scanner.
         showQueue();
-        showCapture();
-        photoArea.scrollIntoView({ block: 'start' });
-        tell(
-          `${added} Aufnahmen geöffnet.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
-        );
+        if (!queuedLive) showCapture();
+        if (!queuedLive) {
+          photoArea.scrollIntoView({ block: 'start' });
+          tell(
+            `${added} Aufnahmen geöffnet.${repeats ? ` ${repeats} identische Fotos waren bereits erfasst; Mengen wurden nicht erhöht.` : ''} Richte das Foto aus und starte die Erkennung oder suche die Ausgabe manuell.`,
+          );
+        }
       }
     } catch (error) {
+      failed = !blocked;
       if (!closed) {
         if (first) {
           captureId = first;
@@ -552,7 +823,16 @@ export function openAddCards(
       gallery.value = '';
       camera.value = '';
     }
-    if (fromCamera && first && !closed) await runOcr();
+    if (fromCamera && first && !closed && !queuedLive) await runOcr();
+    return added > 0
+      ? 'added'
+      : blocked
+        ? 'limit'
+        : repeats
+          ? 'duplicate'
+          : failed
+            ? 'error'
+            : 'error';
   }
   gallery.addEventListener('change', () => {
     void addFiles(gallery.files);
@@ -564,7 +844,60 @@ export function openAddCards(
   async function runOcr(): Promise<void> {
     setFlowStage(0);
     const shot = capture();
-    if (!shot || shot.status === 'confirmed') return;
+    if (!shot || shot.status === 'confirmed' || awaitingLiveReview.has(shot.id))
+      return;
+    awaitingLiveReview.add(shot.id);
+    try {
+      const liveJob = liveOcrJobs.get(shot.id);
+      if (liveJob) {
+        tell('Karte wird bereits geprüft · Ergebnis wird vorbereitet …');
+        try {
+          await liveJob;
+        } catch {
+          // Recover with the full, foreground OCR path on worker failure.
+        }
+      }
+      const current = ctx.state.captures.find((item) => item.id === shot.id);
+      if (
+        closed ||
+        shot.id !== captureId ||
+        !current ||
+        current.status === 'confirmed'
+      )
+        return;
+      // The live camera has already completed its bounded OCR, targeted
+      // retries and (when possible) the exact-print catalogue check.
+      // Opening Review must NOT restart the same expensive recognition or
+      // force a second capture after a failed attempt.
+      const background = liveReviewResults.get(shot.id);
+      if (background) {
+        ctx.commit('Texterkennung abgeschlossen', (state) =>
+          changeState(state, (next) => {
+            const target = next.captures.find((item) => item.id === shot.id);
+            if (target?.status === 'pending') {
+              target.text = background.text.slice(0, 30000);
+              target.candidates = background.candidates;
+              target.error = '';
+            }
+          }),
+        );
+        showCapture();
+        await renderScanReview(
+          background.text,
+          background.candidates,
+          background.suggested,
+          background.basis,
+        );
+        results.dataset.scanState = 'complete';
+        return;
+      }
+      await resolveOcrReview(shot);
+    } finally {
+      awaitingLiveReview.delete(shot.id);
+    }
+  }
+
+  async function resolveOcrReview(shot: Capture): Promise<void> {
     interrupt();
     const controller = new AbortController();
     ocrController = controller;
@@ -592,9 +925,16 @@ export function openAddCards(
         throw new Error(
           'Die Aufnahme ist nicht mehr geöffnet. Fotografiere die Karte erneut; Bilder werden nicht gespeichert.',
         );
-      const aligned = alignedCaptures.has(shot.id)
-        ? photo
-        : await alignPhoto(photo, controller.signal);
+      // A raw camera photo without four trusted card edges still needs the
+      // explicit alignment step; never treat its background text as a
+      // verified exact printing.
+      const prefilled = alignedCaptures.has(shot.id)
+        ? liveOcrEvidence.get(shot.id)
+        : undefined;
+      const aligned =
+        alignedCaptures.has(shot.id) || prefilled !== undefined
+          ? photo
+          : await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
         if (!closed && ocrController === controller)
           tell(
@@ -602,18 +942,31 @@ export function openAddCards(
           );
         return;
       }
-      const text = await recognizePhoto(
-        aligned,
-        controller.signal,
-        (label, fraction) => {
-          if (!closed && ocrController === controller) {
-            status.textContent = label;
-            journey.update('recognize', label);
-            if (fraction !== undefined) progress.value = fraction;
-            else progress.removeAttribute('value');
-          }
-        },
-      );
+      // Reuse fast OCR ONLY when it found both a printed set+number and a
+      // plausible full title. A lone number or partial energy/Trainer title
+      // automatically triggers the fuller hot-zone OCR in Review without
+      // asking the user to take another photo.
+      const quickText = prefilled ?? '';
+      const usableLive =
+        prefilled !== undefined &&
+        recognitionClues(quickText).some((clue) =>
+          Boolean(clue.setId && clue.number),
+        ) &&
+        recognizedNameHints(quickText).length > 0;
+      const text = usableLive
+        ? prefilled
+        : await recognizePhoto(
+            aligned,
+            controller.signal,
+            (label, fraction) => {
+              if (!closed && ocrController === controller) {
+                status.textContent = label;
+                journey.update('recognize', label);
+                if (fraction !== undefined) progress.value = fraction;
+                else progress.removeAttribute('value');
+              }
+            },
+          );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
       // Privacy-safe beta triage: diagnose why a real scan has no result
@@ -774,8 +1127,7 @@ export function openAddCards(
     );
     if (
       card.source !== 'tcgdex' ||
-      // The same Base Set number exists as Unlimited and 1. Edition.
-      // OCR/TCGdex/foil alone cannot prove the physical edition stamp.
+      // Unstamped Base Set prints cannot be automatically identified as 1. Edition.
       requiresEditionStampReview(card) ||
       variant.length !== 1 ||
       !shot ||
@@ -816,6 +1168,8 @@ export function openAddCards(
     });
     transientPhotos.delete(shot.id);
     alignedCaptures.delete(shot.id);
+    liveOcrEvidence.delete(shot.id);
+    liveReviewResults.delete(shot.id);
     interrupt();
     captureId = ctx.state.captures.find(
       (item) => item.status === 'pending',
@@ -832,6 +1186,13 @@ export function openAddCards(
         ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
         : 'Karte hinzugefügt. Scanne die nächste Karte.',
     );
+    if (
+      reviewingLiveQueue &&
+      captureId &&
+      transientPhotos.has(captureId) &&
+      alignedCaptures.has(captureId)
+    )
+      void runOcr();
   }
 
   /**
@@ -1650,6 +2011,13 @@ export function openAddCards(
               ? 'Foto übernommen. Das nächste offene Foto ist ausgewählt.'
               : 'Foto übernommen. Du kannst die nächste Karte fotografieren oder weitere Fotos auswählen.',
           );
+          if (
+            reviewingLiveQueue &&
+            captureId &&
+            transientPhotos.has(captureId) &&
+            alignedCaptures.has(captureId)
+          )
+            void runOcr();
         } else sheet.close();
       }
     });
@@ -1680,6 +2048,22 @@ export function openAddCards(
     const form = el(
       'form',
       'w-manual-form',
+      action(
+        'Zurück zu den Scanoptionen',
+        () => {
+          details.replaceChildren();
+          results.replaceChildren();
+          sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+          captureStart.hidden = false;
+          setFlowStage(0);
+          showQueue();
+          showCapture();
+          captureStart.scrollIntoView({ block: 'nearest' });
+          takePhoto.focus({ preventScroll: true });
+        },
+        'secondary',
+        'undo',
+      ),
       el('h3', '', 'Ausgabe manuell erfassen'),
       message(
         'Unbekannte Angaben bleiben offen. Ein Illustrator wird nur mit deiner Bestätigung für Artist-Vorschläge verwendet.',
