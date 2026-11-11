@@ -144,6 +144,8 @@ export function openLiveScanner(
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
+  status.style.position = 'relative';
+  status.style.zIndex = '3';
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
   progress.value = 0;
@@ -151,7 +153,7 @@ export function openLiveScanner(
   const help = el(
     'p',
     'w-muted w-live-help',
-    'Halte die ganze Karte aufrecht in den Rahmen. Vermeide Spiegelungen auf der Folie und sorge für gleichmäßiges Licht. Die grüne Umrandung zeigt erkannte Ecken, noch keine bestätigte Kartenausgabe.',
+    'Halte die ganze Karte aufrecht in den Rahmen. Vermeide Spiegelungen auf der Folie und sorge für gleichmäßiges Licht. Die grüne Umrandung zeigt erkannte Ecken, noch keine bestätigte Kartenausrichtung.',
   );
   const trigger = action(
     'Jetzt aufnehmen',
@@ -180,6 +182,8 @@ export function openLiveScanner(
   const reviewSummary = el('p', 'w-live-review-summary');
   reviewSummary.setAttribute('role', 'status');
   reviewSummary.hidden = true;
+  reviewSummary.style.position = 'relative';
+  reviewSummary.style.zIndex = '3';
   function refreshReview(): void {
     const pending = pendingCaptures();
     reviewSummary.hidden = pending === 0;
