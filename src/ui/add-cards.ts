@@ -643,10 +643,9 @@ export function openAddCards(
           return;
         const candidates = [
           ...new Map(
-            [
-              ...(automatic?.candidates ?? []),
-              ...candidatesFromLocal,
-            ].map((card) => [card.key, card]),
+            [...(automatic?.candidates ?? []), ...candidatesFromLocal].map(
+              (card) => [card.key, card],
+            ),
           ).values(),
         ].slice(0, 24);
         liveOcrEvidence.set(id, text);

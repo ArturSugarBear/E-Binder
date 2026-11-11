@@ -428,7 +428,9 @@ export function openLiveScanner(
         return;
       }
       if (outcome === 'error')
-        throw new Error('Foto konnte nicht zur Scan-Sitzung hinzugefügt werden.');
+        throw new Error(
+          'Foto konnte nicht zur Scan-Sitzung hinzugefügt werden.',
+        );
       if (!closed && running) {
         // The image is queued WITHOUT waiting for OCR, model loads or
         // TCGdex network requests. Continue from the same MediaStream

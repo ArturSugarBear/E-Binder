@@ -180,8 +180,9 @@ test('P09 pauses a full batch before requesting camera and keeps reviewable capt
 }) => {
   await page.addInitScript(() => {
     let permissions = 0;
-    (window as typeof window & { __cameraRequests?: () => number })
-      .__cameraRequests = () => permissions;
+    (
+      window as typeof window & { __cameraRequests?: () => number }
+    ).__cameraRequests = () => permissions;
     Object.defineProperty(navigator, 'mediaDevices', {
       configurable: true,
       value: {
@@ -194,7 +195,8 @@ test('P09 pauses a full batch before requesting camera and keeps reviewable capt
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./#sammlung');
-  await page.getByRole('button', { name: 'Karten hinzufügen', exact: true })
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
   const add = page.getByRole('dialog', { name: 'Karten hinzufügen' });
   const images = Array.from({ length: 24 }, (_, index) => ({
@@ -215,13 +217,19 @@ test('P09 pauses a full batch before requesting camera and keeps reviewable capt
     'data-scan-phase',
     'queue-full',
   );
-  await expect(live.getByRole('button', { name: 'Jetzt aufnehmen' })).toBeHidden();
-  await expect(live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }))
-    .toBeVisible();
-  expect(await page.evaluate(() =>
-    (window as typeof window & { __cameraRequests: () => number })
-      .__cameraRequests(),
-  )).toBe(0);
+  await expect(
+    live.getByRole('button', { name: 'Jetzt aufnehmen' }),
+  ).toBeHidden();
+  await expect(
+    live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() =>
+      (
+        window as typeof window & { __cameraRequests: () => number }
+      ).__cameraRequests(),
+    ),
+  ).toBe(0);
   await live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }).click();
   await expect(live).toHaveCount(0);
   await expect(add.locator('.w-capture-queue')).toContainText('24 offen');

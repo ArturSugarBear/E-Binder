@@ -46,9 +46,12 @@ describe('P09 bounded scan-session buffer', () => {
 
   it('handles malformed and overflow sizes conservatively', () => {
     expect(scanQueueBlocker([], [], -1)).toBe('memory-full');
-    expect(scanQueueBlocker([], [], Number.POSITIVE_INFINITY)).toBe('memory-full');
-    expect(scanQueueBlocker([], [{ size: Number.MAX_SAFE_INTEGER }], 9))
-      .toBe('memory-full');
+    expect(scanQueueBlocker([], [], Number.POSITIVE_INFINITY)).toBe(
+      'memory-full',
+    );
+    expect(scanQueueBlocker([], [{ size: Number.MAX_SAFE_INTEGER }], 9)).toBe(
+      'memory-full',
+    );
   });
 
   it('does not alter holdings or silently add duplicate physical copies', () => {

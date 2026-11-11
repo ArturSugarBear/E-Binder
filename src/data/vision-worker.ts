@@ -193,18 +193,12 @@ async function recognize({
       switch (hotZone) {
         case 'footer':
           retry.push(await read([0.025, 0.91, 0.7, 0.08], 'gray'));
-          if (
-            !hasPrintedCollectorFraction(retry) ||
-            !hasPrintedSetCode(retry)
-          )
+          if (!hasPrintedCollectorFraction(retry) || !hasPrintedSetCode(retry))
             retry.push(await read([0.015, 0.875, 0.93, 0.12]));
           break;
         case 'footer-contrast':
           retry.push(await read([0.04, 0.92, 0.83, 0.07], 'inverted'));
-          if (
-            !hasPrintedCollectorFraction(retry) ||
-            !hasPrintedSetCode(retry)
-          )
+          if (!hasPrintedCollectorFraction(retry) || !hasPrintedSetCode(retry))
             retry.push(await read([0.01, 0.875, 0.96, 0.12], 'binary'));
           break;
         case 'title':

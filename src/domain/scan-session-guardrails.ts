@@ -35,8 +35,7 @@ export function scanQueueBlocker(
     if (!Number.isSafeInteger(photo.size) || photo.size < 0)
       return 'memory-full';
     usedBytes += photo.size;
-    if (!Number.isSafeInteger(usedBytes))
-      return 'memory-full';
+    if (!Number.isSafeInteger(usedBytes)) return 'memory-full';
   }
   return usedBytes + incomingBytes > MAX_SCAN_SESSION_BYTES
     ? 'memory-full'

@@ -84,12 +84,20 @@ export function createRecognitionSession(
         return;
       }
       const id = ++sequence;
-      const timer = setTimeout(() => {
-        finish(
-          new Error('Die Erkennung dauert zu lange. Prüfe die Karte manuell.'),
-        );
-        close();
-      }, Math.max(1, Math.min(options.timeoutMs ?? 90000, timeoutMs ?? Infinity)));
+      const timer = setTimeout(
+        () => {
+          finish(
+            new Error(
+              'Die Erkennung dauert zu lange. Prüfe die Karte manuell.',
+            ),
+          );
+          close();
+        },
+        Math.max(
+          1,
+          Math.min(options.timeoutMs ?? 90000, timeoutMs ?? Infinity),
+        ),
+      );
       pending = { id, timer, resolve, reject };
       progress('Lokale Erkennung wird vorbereitet …');
       try {
