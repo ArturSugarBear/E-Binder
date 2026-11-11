@@ -541,6 +541,7 @@ export function openAddCards(
     details.replaceChildren();
     results.replaceChildren();
     results.dataset.scanState = 'running';
+    results.dataset.scanRankedKeys = '[]';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
     const journey = scanProgress();
@@ -803,6 +804,25 @@ export function openAddCards(
     browser.pager.replaceChildren();
 
     const evidence = scanEvidence(text, candidates);
+    // Stable, read-only benchmark contract: the candidate ranking actually
+    // offered to the collector, independent of the review card DOM layout.
+    const first =
+      suggested ??
+      (evidence.kind === 'set-number' || evidence.kind === 'name-number'
+        ? evidence.card
+        : candidates[0]);
+    const ranked = [
+      ...new Map(
+        [...(first ? [first] : []), ...candidates].map((card) => [
+          card.key,
+          card,
+        ]),
+      ).values(),
+    ];
+    results.dataset.scanResultContract = '1';
+    results.dataset.scanRankedKeys = JSON.stringify(
+      ranked.map((card) => card.key),
+    );
     const knownNumber = recognitionClues(text)[0]?.number ?? '';
 
     const showPrint = (card: PersonalCard, explanation: string) => {
@@ -1143,6 +1163,8 @@ export function openAddCards(
   function renderChoices(cards: PersonalCard[]): void {
     setFlowStage(1);
     results.classList.remove('w-text-results', 'w-scan-result-stack');
+    delete results.dataset.scanResultContract;
+    delete results.dataset.scanRankedKeys;
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [

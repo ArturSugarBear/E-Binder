@@ -8,6 +8,13 @@
 import { chromium } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
+import { performance } from 'node:perf_hooks';
+import {
+  readRankedKeys,
+  rankMatch,
+  rate,
+  percentile,
+} from './scan-benchmark-results.mjs';
 
 const manifestPath = process.argv[2];
 if (!manifestPath) {
@@ -34,7 +41,10 @@ async function run(path) {
       !Array.isArray(sample.slots) ||
       sample.slots.length !== 9 ||
       typeof sample.rights !== 'string' ||
-      !sample.rights.trim()
+      !sample.rights.trim() ||
+      (sample.geometryMode !== undefined &&
+        !['automatic', 'manual'].includes(sample.geometryMode)) ||
+      (sample.geometryMode === 'manual' && !sample.corners)
     )
       throw new Error(
         'Each sample needs photo, rights and exactly nine slots.',
@@ -59,6 +69,7 @@ async function run(path) {
       throw new Error('Slots must be null or exact catalogue card keys.');
   }
   const browser = await chromium.launch({ headless: true });
+  const browserVersion = browser.version();
   const reports = [];
   try {
     for (const sample of manifest.samples) {
@@ -75,6 +86,8 @@ async function run(path) {
         url.hash = 'binder';
         await page.goto(url.toString(), { waitUntil: 'domcontentloaded' });
         await page.locator('#workspace-main[data-ready="true"]').waitFor();
+        const readyAt = performance.now();
+        const online = await page.evaluate(() => navigator.onLine);
         await page
           .getByRole('button', { name: 'Binderseite scannen', exact: true })
           .click();
@@ -88,11 +101,27 @@ async function run(path) {
             'Use a browser-supported JPG, PNG or WebP benchmark image.',
           );
         await dialog.locator('input[type=file][multiple]').setInputFiles(photo);
-        const crop = page.getByRole('dialog', {
-          name: 'Binderseite ausrichten',
+        const grid = dialog.locator('.w-page-scan-grid');
+        // The app auto-aligns immediately. A crop dialog is not the default.
+        await grid.locator('.w-page-scan-pocket').nth(8).waitFor({
+          timeout: 90_000,
         });
-        await crop.waitFor();
-        if (sample.corners) {
+        await grid.locator('[data-recognition-state]').first().waitFor();
+        await grid.waitFor({ state: 'visible' });
+        await dialog
+          .locator('.w-page-scan-grid[data-scan-state="complete"]')
+          .waitFor({ timeout: 900_000 });
+        const automaticCompletedAt = performance.now();
+        const geometryMode =
+          sample.geometryMode ?? (sample.corners ? 'manual' : 'automatic');
+        if (geometryMode === 'manual') {
+          await dialog
+            .getByRole('button', { name: 'Zuschnitt korrigieren' })
+            .click();
+          const crop = page.getByRole('dialog', {
+            name: 'Binderseite ausrichten',
+          });
+          await crop.waitFor();
           for (const [index, [x, y]] of sample.corners.entries()) {
             await crop.getByLabel('Ecke auswählen').selectOption(String(index));
             await crop
@@ -102,52 +131,84 @@ async function run(path) {
               .getByLabel('Position senkrecht')
               .fill(String(Math.round(y * 1000)));
           }
+          await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
+          await crop
+            .getByRole('button', { name: 'Neun Fächer auswerten' })
+            .click();
+          await dialog
+            .locator(
+              '.w-page-scan-grid[data-scan-adjustment="manual"][data-scan-state="complete"]',
+            )
+            .waitFor({ timeout: 900_000 });
         }
-        await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
-        await crop
-          .getByRole('button', { name: 'Neun Fächer auswerten' })
-          .click();
-        await dialog.locator('.w-page-scan-pocket').nth(8).waitFor({
-          timeout: 30_000,
-        });
-        await dialog
-          .getByRole('button', { name: 'Erkennung stoppen' })
-          .waitFor({
-            state: 'hidden',
-            timeout: 900_000,
-          });
-        const pockets = await dialog
-          .locator('.w-page-scan-pocket')
-          .evaluateAll((nodes) =>
-            nodes.map((node) => ({
-              keys: Array.from(
-                node.querySelectorAll('option[data-card-key]'),
-                (option) => option.dataset.cardKey,
-              ),
-              warning: node.querySelector('.w-page-scan-quality')?.textContent,
-              status: node.querySelector('small.w-muted')?.textContent,
-            })),
-          );
-        const evaluated = pockets.map((pocket, index) => {
+        const finishedAt = performance.now();
+        const payload = await grid.evaluate((node) => ({
+          version: node.dataset.scanResultContract,
+          geometryMethod: node.dataset.scanGeometry,
+          adjustment: node.dataset.scanAdjustment,
+          pockets: Array.from(
+            node.querySelectorAll('.w-page-scan-pocket'),
+            (pocket) => ({
+              keys: pocket.dataset.scanRankedKeys,
+              decision: pocket.dataset.decision,
+              recognitionState: pocket.dataset.recognitionState,
+              warning: pocket.querySelector('.w-page-scan-quality')
+                ?.textContent,
+              status: pocket.querySelector('small.w-muted')?.textContent,
+            }),
+          ),
+        }));
+        if (payload.pockets.length !== 9)
+          throw new Error('Benchmark expected exactly nine physical pockets.');
+        if (payload.adjustment !== geometryMode)
+          throw new Error('Benchmark geometry mode did not match the run.');
+        const evaluated = payload.pockets.map((pocket, index) => {
+          const keys = readRankedKeys(payload.version, pocket.keys);
           const expected = sample.slots[index];
           return {
             position: index + 1,
             expected,
-            top1: expected === null ? null : pocket.keys[0] === expected,
-            top3:
-              expected === null
-                ? null
-                : pocket.keys.slice(0, 3).includes(expected),
-            candidates: pocket.keys.length,
+            ...rankMatch(expected, keys),
+            candidates: keys.length,
+            rankedKeys: keys,
+            decision: pocket.decision,
+            recognitionState: pocket.recognitionState,
+            falseEmptySuggestion:
+              expected !== null &&
+              pocket.recognitionState === 'empty-suggested',
             warnings: pocket.warning,
             status: pocket.status,
           };
         });
+        // No imported ownership: the benchmark must never press the save action.
+        await page.keyboard.press('Escape');
+        await page.goto(new URL('#sammlung', url).toString());
+        await page.locator('#workspace-main[data-ready="true"]').waitFor();
+        const owned = await page.locator('.w-owned-grid button').count();
+        if (owned !== 0)
+          throw new Error(
+            'Safety regression: binder scan added inventory without confirmation.',
+          );
         reports.push({
           photo: basename(photo),
           rights: sample.rights,
           conditions: sample.conditions ?? [],
+          geometryMode:
+            sample.geometryMode ?? (sample.corners ? 'manual' : 'automatic'),
+          geometryMethod: payload.geometryMethod,
+          online,
+          phasesMs: {
+            appLoad: Math.round(readyAt - startedAt),
+            automaticAlignmentAndRecognition: Math.round(
+              automaticCompletedAt - readyAt,
+            ),
+            manualCorrectionAndRecognition:
+              geometryMode === 'manual'
+                ? Math.round(finishedAt - automaticCompletedAt)
+                : null,
+          },
           durationMs: Math.round(performance.now() - startedAt),
+          resultStatus: 'complete',
           positions: evaluated,
         });
       } catch (error) {
@@ -156,6 +217,7 @@ async function run(path) {
           rights: sample.rights,
           conditions: sample.conditions ?? [],
           durationMs: Math.round(performance.now() - startedAt),
+          resultStatus: 'technical-error',
           error: error instanceof Error ? error.message : String(error),
         });
       } finally {
@@ -165,28 +227,58 @@ async function run(path) {
   } finally {
     await browser.close();
   }
-  const known = reports.flatMap((report) =>
-    (report.positions ?? []).filter((position) => position.expected !== null),
+  const positions = reports.flatMap((report) => report.positions ?? []);
+  const known = positions.filter((position) => position.expected !== null);
+  const totalKnown = manifest.samples.reduce(
+    (sum, sample) => sum + sample.slots.filter((slot) => slot !== null).length,
+    0,
   );
+  const count = (key) => known.filter((position) => position[key]).length;
   const summary = {
     sampleCount: reports.length,
     completed: reports.filter((report) => !report.error).length,
-    knownCards: known.length,
-    top1Correct: known.filter((position) => position.top1).length,
-    top3Correct: known.filter((position) => position.top3).length,
-    // Null is intentional when the dataset has no ground-truth cards.
-    top1Rate:
-      known.length === 0
-        ? null
-        : known.filter((position) => position.top1).length / known.length,
-    top3Rate:
-      known.length === 0
-        ? null
-        : known.filter((position) => position.top3).length / known.length,
-    // Empty pockets are not automatically classified by this scanner.
+    errors: reports.filter((report) => report.error).length,
+    knownCards: totalKnown,
+    knownEvaluated: known.length,
+    top1Correct: count('top1'),
+    top3Correct: count('top3'),
+    top5Correct: count('top5'),
+    top1Rate: rate(count('top1'), totalKnown),
+    top3Rate: rate(count('top3'), totalKnown),
+    top5Rate: rate(count('top5'), totalKnown),
+    falseEmptySuggestions: known.filter((p) => p.falseEmptySuggestion).length,
+    emptySlots: manifest.samples.reduce(
+      (sum, sample) =>
+        sum + sample.slots.filter((slot) => slot === null).length,
+      0,
+    ),
+    p50DurationMs: percentile(
+      reports.filter((r) => !r.error).map((r) => r.durationMs),
+      0.5,
+    ),
+    p95DurationMs: percentile(
+      reports.filter((r) => !r.error).map((r) => r.durationMs),
+      0.95,
+    ),
+    // Occupancy detection has not yet been validated as a reliable classifier.
     emptyPocketAccuracy: null,
   };
-  const result = { measuredAt: new Date().toISOString(), summary, reports };
+  const result = {
+    schemaVersion: 2,
+    measuredAt: new Date().toISOString(),
+    provenance: {
+      commit: process.env.GIT_COMMIT_SHA ?? null,
+      modelVersion: null,
+      indexVersion: null,
+      browser: 'chromium',
+      browserVersion,
+      viewport: '390x844',
+      serviceWorkers: 'blocked',
+      recognition: 'real-worker-no-stubs',
+    },
+    summary,
+    reports,
+  };
   const outputPath = process.env.BINDER_BENCHMARK_OUT;
   if (outputPath)
     await writeFile(resolve(outputPath), JSON.stringify(result, null, 2));

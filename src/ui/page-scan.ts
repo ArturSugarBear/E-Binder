@@ -148,6 +148,7 @@ export function openPageScanner(
       if (!current || processing || reAligning) return;
       const photo = current;
       reAligning = true;
+      grid.dataset.scanState = 'aligning';
       updateSave();
       void (async () => {
         try {
@@ -162,6 +163,8 @@ export function openPageScanner(
           const tiles = await extractPagePockets(aligned, lifetime.signal);
           if (closed || lifetime.signal.aborted || current !== photo) return;
           releasePreviews();
+          grid.dataset.scanGeometry = 'manual';
+          grid.dataset.scanAdjustment = 'manual';
           buildGrid(tiles);
           void recognizeAll(tiles);
         } catch (error) {
@@ -394,6 +397,10 @@ export function openPageScanner(
         [...pocket.candidates, ...cards].map((card) => [card.key, card]),
       ).values(),
     ].slice(0, 14);
+    if (pocket.container)
+      pocket.container.dataset.scanRankedKeys = JSON.stringify(
+        pocket.candidates.map((card) => card.key),
+      );
     const options: [string, string][] = [
       ['', 'Karte auswählen / prüfen'],
       ['empty', 'Fach ist leer'],
@@ -619,8 +626,12 @@ export function openPageScanner(
       );
       pocket.container = container;
       container.dataset.decision = 'pending';
+      container.dataset.recognitionState = 'pending';
+      container.dataset.scanRankedKeys = '[]';
       grid.append(container);
     }
+    grid.dataset.scanResultContract = '1';
+    grid.dataset.scanState = 'pending';
     updateSave();
   };
   const recognizeAll = async (tiles: Blob[]) => {
@@ -646,6 +657,7 @@ export function openPageScanner(
     const session = sharedRecognition;
     recognitionAbort = abort;
     processing = true;
+    grid.dataset.scanState = 'running';
     progress.hidden = false;
     progress.value = 0;
     journey.update('recognize', 'Fächer werden einzeln geprüft …', 0);
@@ -691,6 +703,7 @@ export function openPageScanner(
           if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
             if (closed || abort.signal.aborted) break;
             pocket.select.value = 'empty';
+            pocket.container!.dataset.recognitionState = 'empty-suggested';
             updatePocket(pocket);
             animateResolvedPocket(pocket.container, 'empty');
             pocket.container?.classList.add('is-processed');
@@ -835,6 +848,15 @@ export function openPageScanner(
               : [...resolvedVisual, ...online, ...local],
           );
           if (titleHint) pocket.search.value = titleHint;
+          pocket.container!.dataset.recognitionState = pocket.candidates.length
+            ? catalogFailed
+              ? 'partial-catalog'
+              : 'suggestions'
+            : !navigator.onLine
+              ? 'offline'
+              : catalogFailed
+                ? 'catalog-error'
+                : 'no-candidates';
           const matched = selectExactPrintedMatch(pocket, text);
           pocket.status.textContent = matched
             ? `${pocket.card!.name} · ${pocket.card!.number}`
@@ -855,6 +877,7 @@ export function openPageScanner(
             pocket.status.textContent = `${printedEnergy[0]!.name} · ${printedEnergy[0]!.number} · Code erkannt, bitte prüfen`;
         } catch (error) {
           if (closed || abort.signal.aborted) break;
+          pocket.container!.dataset.recognitionState = 'error';
           pocket.status.textContent = `Erkennung fehlgeschlagen: ${errorText(error)}`;
         } finally {
           pocket.container?.classList.remove('is-scanning');
@@ -887,6 +910,7 @@ export function openPageScanner(
       processing = false;
       stop.hidden = true;
       progress.hidden = true;
+      grid.dataset.scanState = abort.signal.aborted ? 'cancelled' : 'complete';
       journey.update(
         abort.signal.aborted ? 'cancelled' : 'review',
         abort.signal.aborted
@@ -930,6 +954,8 @@ export function openPageScanner(
       status.textContent = 'Binderseite wird automatisch ausgerichtet …';
       const aligned = await autoAlignPage(file, lifetime.signal);
       if (lifetime.signal.aborted || closed) return;
+      grid.dataset.scanGeometry = aligned.method;
+      grid.dataset.scanAdjustment = 'automatic';
       manualAlign.hidden = false;
       skipPage.hidden = false;
       if (aligned.method === 'full-photo') {
