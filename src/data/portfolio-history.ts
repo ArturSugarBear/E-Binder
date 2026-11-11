@@ -9,10 +9,11 @@ export interface PortfolioObservation {
   pricedCopies: number;
   signature: string;
 }
-// Unscoped v2 observations cannot safely be assigned to an account. Start a
-// fresh series rather than importing another collector's history on this device.
+// v3 observations may include misassigned Cardmarket products that inflated
+// or deflated portfolio values. Begin a new price-policy series, keeping the
+// legacy observations in local storage without displaying them.
 const key = (mode: PersonalState['mode'], accountId: string | undefined) =>
-  `e-binder-portfolio-history-v3:${accountId ? `account:${accountId}` : 'local'}:${mode}`;
+  `e-binder-portfolio-history-v4:${accountId ? `account:${accountId}` : 'local'}:${mode}`;
 
 /** Compare only the same quantities and exact printings; adding a card starts
  * a new series instead of faking a market gain. */
