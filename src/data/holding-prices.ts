@@ -18,7 +18,9 @@ const CACHE_MS = 5 * 60 * 1000;
  * Reuse the Portfolio's exact-printing rules in Collection cards and details.
  * No approximate set price is shown for unverified, reverse or custom copies.
  */
-export async function holdingPrice(holding: Holding): Promise<HoldingPriceResult> {
+export async function holdingPrice(
+  holding: Holding,
+): Promise<HoldingPriceResult> {
   const key = portfolioQuoteKey(holding);
   if (!key) return { status: 'unavailable' };
   const cached = results.get(key);
