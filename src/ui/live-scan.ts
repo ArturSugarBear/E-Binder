@@ -171,7 +171,11 @@ export function openLiveScanner(
     'div',
     'w-live-analysis',
     el('span', 'w-live-analysis-line'),
-    el('span', 'w-live-analysis-caption', 'Kartendetails werden lokal geprüft …'),
+    el(
+      'span',
+      'w-live-analysis-caption',
+      'Kartendetails werden lokal geprüft …',
+    ),
   );
   analysis.setAttribute('role', 'status');
   analysis.hidden = true;

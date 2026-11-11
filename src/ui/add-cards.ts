@@ -708,9 +708,10 @@ export function openAddCards(
       const prefilled = alignedCaptures.has(shot.id)
         ? liveOcrEvidence.get(shot.id)
         : undefined;
-      const aligned = alignedCaptures.has(shot.id) || prefilled !== undefined
-        ? photo
-        : await alignPhoto(photo, controller.signal);
+      const aligned =
+        alignedCaptures.has(shot.id) || prefilled !== undefined
+          ? photo
+          : await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
         if (!closed && ocrController === controller)
           tell(
