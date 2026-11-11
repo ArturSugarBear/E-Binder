@@ -47,6 +47,9 @@ const setIds: Record<string, string> = {
   ssp: 'sv08',
   jtg: 'sv09',
   dri: 'sv10',
+  // Printed set codes differ from the TCGdex catalogue IDs.
+  pbl: 'me05', // Dunkelnacht / Pitch Black (084 cards in the main set)
+  dlr: 'me06', // Delta-Herrschaft / Delta Reign (103 main-set cards)
 };
 const evolution: Record<string, string> = {
   'svi-212': 'Trasla',
@@ -686,7 +689,7 @@ export interface RecognitionClue {
 /** Printed codes narrow candidates; an OCR string never confirms ownership. */
 export function recognitionClues(text: string): RecognitionClue[] {
   const code = text.match(
-    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI)\s*(DE|EN)?(?=[^A-Z]|$)/i,
+    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/i,
   );
   const setId = code
     ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
