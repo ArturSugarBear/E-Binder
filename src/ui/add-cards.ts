@@ -686,6 +686,220 @@ export function openAddCards(
     }
   }
 
+  /**
+   * Scan review is separate from general catalogue browsing: no random
+   * cards with the same collector fraction are presented as recognition.
+   * A collector can first select the physical set and resolve its one print.
+   */
+  async function renderScanReview(
+    text: string,
+    candidates: PersonalCard[],
+  ): Promise<void> {
+    const request = ++setChoiceRequest;
+    setFlowStage(1);
+    captureStart.hidden = true;
+    sheet.dialog.classList.remove('w-scan-confirming');
+    sheet.dialog.classList.add('w-guided-scan');
+    results.classList.remove('w-text-results');
+    results.classList.add('w-scan-result-stack');
+    results.replaceChildren();
+    scanSetChoice.replaceChildren();
+    browser.pager.replaceChildren();
+
+    const evidence = scanEvidence(text, candidates);
+    const knownNumber = recognitionClues(text)[0]?.number ?? '';
+
+    const showPrint = (card: PersonalCard, explanation: string) => {
+      if (closed || request !== setChoiceRequest) return;
+      scanSetChoice.replaceChildren();
+      const copy = el(
+        'div',
+        'w-scan-match-copy',
+        el('p', 'w-eyebrow', 'Ausgabe mit deinem Foto vergleichen'),
+        el('h3', '', card.name),
+        el('p', 'w-muted', `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`),
+        el('p', 'w-scan-match-reason', explanation),
+        action('Diese Ausgabe prüfen', () => choose(card), 'primary', 'check'),
+        action(
+          'Anderes Set auswählen',
+          () => {
+            void showSetChooser();
+          },
+          'secondary',
+        ),
+      );
+      results.replaceChildren(
+        el('div', 'w-scan-match-card', ctx.images.artwork(card), copy),
+      );
+    };
+
+    const showSetChooser = async () => {
+      if (closed || request !== setChoiceRequest) return;
+      results.replaceChildren();
+      const currentLanguage = language.value;
+      const size = recognitionClues(text)[0]?.number.split('/')[1] ?? '';
+      const numberField = input('text', knownNumber);
+      numberField.placeholder = 'z. B. 088/063';
+      numberField.autocomplete = 'off';
+      const setQuery = input('search');
+      setQuery.placeholder = 'Setname oder Setcode, z. B. M1L';
+      const setList = select([['', 'Set auswählen']], '');
+      const feedback = el('p', 'w-muted', 'Passende Sets werden geladen …');
+      feedback.setAttribute('role', 'status');
+      const verify = action(
+        'Set und Nummer abgleichen',
+        () => {
+          void (async () => {
+            const setId = setList.value;
+            const fraction = numberField.value.trim();
+            if (!setId) {
+              feedback.textContent = 'Wähle zuerst das Set deiner Karte.';
+              return;
+            }
+            if (!/^[a-z]{0,2}[0-9]{1,3}\s*\/\s*[a-z]{0,2}[0-9]{1,3}$/i.test(fraction)) {
+              feedback.textContent = 'Gib die vollständige Sammlernummer wie 088/063 ein.';
+              numberField.focus();
+              return;
+            }
+            verify.disabled = true;
+            feedback.textContent = 'Set und Kartennummer werden geprüft …';
+            try {
+              const editions = await catalogSetCards(setId, currentLanguage);
+              if (closed || request !== setChoiceRequest) return;
+              const matched = editions.filter(
+                (item) => numberKey(item.number ?? '') === numberKey(fraction),
+              );
+              if (matched.length !== 1) {
+                feedback.textContent =
+                  'Diese Nummer wurde in dem gewählten Set nicht eindeutig gefunden. Prüfe die Nummer und den Setcode auf der Karte.';
+                return;
+              }
+              const card = await fetchCatalogCard(matched[0]!.id, currentLanguage);
+              if (closed || request !== setChoiceRequest) return;
+              const title = recognizedNameHints(text)[0];
+              const consistent =
+                !title || normalize(title) === normalize(card.name);
+              showPrint(
+                card,
+                consistent
+                  ? 'Set und vollständige Nummer stimmen im Katalog überein. Vergleiche noch den Kartennamen und das Bild.'
+                  : 'Set und Nummer stimmen überein, aber der gelesene Name weicht ab. Bitte den vollständigen Kartennamen auf dem Foto prüfen.',
+              );
+            } catch {
+              feedback.textContent =
+                'Der Setkatalog ist gerade nicht erreichbar. Du kannst die Karte auch manuell suchen.';
+            } finally {
+              verify.disabled = false;
+            }
+          })();
+        },
+        'primary',
+        'check',
+      );
+      const languageRow = el('div', 'w-scan-language-row');
+      for (const [key, caption] of [
+        ['de', 'Deutsch'],
+        ['en', 'Englisch'],
+        ['ja', 'Japanisch'],
+      ] as const) {
+        const button = action(
+          caption,
+          () => {
+            if (language.value === key) return;
+            language.value = key;
+            void showSetChooser();
+          },
+          key === currentLanguage ? 'primary' : 'secondary',
+        );
+        button.setAttribute('aria-pressed', String(key === currentLanguage));
+        languageRow.append(button);
+      }
+      scanSetChoice.replaceChildren(
+        el(
+          'div',
+          'w-scan-set-panel',
+          el('p', 'w-eyebrow', 'Set zuerst bestimmen'),
+          el('h3', '', 'Welches Set steht auf deiner Karte?'),
+          el(
+            'p',
+            'w-muted',
+            knownNumber
+              ? `Die Nummer ${knownNumber} allein kommt in mehreren Sets vor. Wähle das gedruckte Set; wir gleichen danach die vollständige Nummer ab.`
+              : 'Suche nach dem Setcode unten auf der Karte. Anschließend prüfen wir die Sammlernummer.',
+          ),
+          languageRow,
+          field('Sammlernummer', numberField),
+          field('Set suchen', setQuery),
+          field('Set auswählen', setList),
+          verify,
+          feedback,
+          action(
+            'Stattdessen Karte manuell suchen',
+            () => {
+              sheet.dialog.classList.remove('w-guided-scan');
+              scanSetChoice.replaceChildren();
+              results.classList.remove('w-scan-result-stack');
+              searchLine.scrollIntoView({ block: 'start' });
+              search.focus();
+            },
+            'text',
+          ),
+        ),
+      );
+      let allSets: Awaited<ReturnType<typeof catalogSets>> = [];
+      const fill = () => {
+        const query = normalize(setQuery.value);
+        const denominator =
+          numberField.value.trim().split('/')[1] ?? size;
+        const appropriate = allSets.filter(
+          (item) =>
+            (!query ||
+              normalize(`${item.id} ${item.name} ${item.alias ?? ''}`).includes(query)) &&
+            (query || !denominator ||
+              Number(denominator) === item.cardCount.official),
+        );
+        setList.replaceChildren(el('option', '', 'Set auswählen'));
+        for (const item of appropriate.slice(0, 45)) {
+          const option = el('option', '', `${item.id.toUpperCase()} · ${item.name}`);
+          option.value = item.id;
+          setList.append(option);
+        }
+        feedback.textContent = appropriate.length
+          ? `${appropriate.length} passende Sets. Suche bei Bedarf nach dem gedruckten Kürzel.`
+          : 'Kein Set mit dieser Nummer gefunden. Suche nach dem Setcode oder prüfe die Katalogsprache.';
+      };
+      setQuery.addEventListener('input', fill);
+      numberField.addEventListener('input', fill);
+      try {
+        allSets = await catalogSets(currentLanguage);
+        if (closed || request !== setChoiceRequest || !scanSetChoice.isConnected)
+          return;
+        fill();
+      } catch {
+        if (closed || request !== setChoiceRequest) return;
+        feedback.textContent =
+          'Die Setliste konnte nicht geladen werden. Probiere eine andere Sprache oder die manuelle Suche.';
+      }
+    };
+
+    if (evidence.kind === 'set-number') {
+      const explanation =
+        evidence.title === 'matching'
+          ? 'Setcode, Sammlernummer und vollständiger Name passen zusammen. Prüfe noch das Foto und die Druckvariante.'
+          : evidence.title === 'conflicting'
+            ? 'Setcode und Nummer passen, aber der gelesene Name weicht ab. Vergleiche den Kartennamen auf deinem Foto.'
+            : 'Setcode und Sammlernummer passen. Der Kartenname konnte nicht sicher gelesen werden; bitte visuell prüfen.';
+      showPrint(evidence.card, explanation);
+    } else if (evidence.kind === 'name-number') {
+      showPrint(
+        evidence.card,
+        'Vollständiger Name und Nummer passen zu genau einem Katalogtreffer. Bitte prüfe den Setcode auf deiner Karte.',
+      );
+    } else {
+      await showSetChooser();
+    }
+  }
+
   function renderChoices(cards: PersonalCard[]): void {
     setFlowStage(1);
     results.classList.remove('w-text-results', 'w-scan-result-stack');
