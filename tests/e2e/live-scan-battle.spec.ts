@@ -190,6 +190,12 @@ test('three stable video observations create a reviewable scan but never ownersh
     'Ecken werden gesucht',
     { timeout: 15_000 },
   );
+  const originalFrame = await live
+    .locator('.w-live-frame-guide')
+    .boundingBox();
+  expect(originalFrame).not.toBeNull();
+  expect(originalFrame!.width / originalFrame!.height).toBeCloseTo(63 / 88, 2);
+  await expect(live.locator('.w-live-options')).not.toHaveAttribute('open');
   await mode(page, 'card');
   await expect(live.locator('.w-live-status')).toContainText(
     /Aufnahme verarbeitet|Scan fehlgeschlagen/,
@@ -215,6 +221,13 @@ test('three stable video observations create a reviewable scan but never ownersh
     'Ecken werden gesucht',
     { timeout: 10_000 },
   );
+  const nextFrame = await live
+    .locator('.w-live-frame-guide')
+    .boundingBox();
+  expect(nextFrame).not.toBeNull();
+  expect(nextFrame!.width).toBeCloseTo(originalFrame!.width, 0);
+  expect(nextFrame!.height).toBeCloseTo(originalFrame!.height, 0);
+  expect(nextFrame!.width / nextFrame!.height).toBeCloseTo(63 / 88, 2);
   await mode(page, 'card2');
   await expect(live.locator('.w-live-status')).toContainText(
     'Aufnahme verarbeitet',
