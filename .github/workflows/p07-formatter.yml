@@ -25,6 +25,8 @@ jobs:
           npx prettier --write
           docs/research/rapidocr-hybrid-p07.md
           src/domain/scan-capture-latch.ts
+          src/data/recognize.ts
+          src/data/vision-worker.ts
           src/ui/add-cards.ts
           src/ui/live-scan.ts
           src/workspace.css
@@ -35,7 +37,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/research/rapidocr-hybrid-p07.md src/domain/scan-capture-latch.ts src/ui/add-cards.ts src/ui/live-scan.ts src/workspace.css tests/e2e/live-scan-battle.spec.ts tests/e2e/live-scan.spec.ts tests/unit/scan-capture-latch.test.ts
+          git add docs/research/rapidocr-hybrid-p07.md src/domain/scan-capture-latch.ts src/data/recognize.ts src/data/vision-worker.ts src/ui/add-cards.ts src/ui/live-scan.ts src/workspace.css tests/e2e/live-scan-battle.spec.ts tests/e2e/live-scan.spec.ts tests/unit/scan-capture-latch.test.ts
           if ! git diff --cached --quiet; then
             git commit -m "Apply Prettier to P07 live scanner and RapidOCR research"
             git push origin HEAD:feature/p07-rapid-scan-and-visual-evaluation
