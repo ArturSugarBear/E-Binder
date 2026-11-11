@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 
-test('collection tiles and card details show only verified Cardmarket price references', async ({
+test('collection cards show exact Cardmarket pricing and detail', async ({
   page,
 }) => {
   let exactRequests = 0;
