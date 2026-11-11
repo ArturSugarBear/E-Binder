@@ -24,19 +24,21 @@ test('sets without verified artwork show intentional Rare Room identities, not g
     { id: '30th-c', name: '30 Jahre: Klassische Sammlung' },
     { id: 'mep', name: 'MEP Black Star Promos' },
     { id: 'mee', name: 'Mega-Entwicklung Energie' },
-    { id: 'me01', name: 'Mega-Entwicklung', logo: 'https://assets.tcgdex.net/de/me/me01/logo' },
+    {
+      id: 'me01',
+      name: 'Mega-Entwicklung',
+      logo: 'https://assets.tcgdex.net/de/me/me01/logo',
+    },
   ].map((set) => ({ ...set, cardCount: { official: 30 } }));
   await page.route('https://assets.tcgdex.net/**', (route) =>
     route.fulfill({ path: 'public/assets/cards/svi-211.webp' }),
   );
   await page.route('https://api.tcgdex.net/**', (route) => {
     const path = new URL(route.request().url()).pathname;
-    if (path.endsWith('/sets'))
-      return route.fulfill({ json: entries });
+    if (path.endsWith('/sets')) return route.fulfill({ json: entries });
     if (path.endsWith('/series/tcgp'))
       return route.fulfill({ json: { id: 'tcgp', sets: [] } });
-    if (path.endsWith('/series'))
-      return route.fulfill({ json: [] });
+    if (path.endsWith('/series')) return route.fulfill({ json: [] });
     if (path.endsWith('/rarities') || path.endsWith('/illustrators'))
       return route.fulfill({ json: [] });
     return route.fulfill({ status: 404, body: 'Not mocked' });
@@ -77,14 +79,25 @@ test('missing-logo identities fit narrow mobile set cards', async ({ page }) => 
   await page.setViewportSize({ width: 320, height: 780 });
   await page.route('**/catalog-art/index.json', (route) =>
     route.fulfill({
-      json: { version: 1, sets: { mep: { logo: [], symbol: [], placeholder: 'set-mep.svg' } } },
+      json: {
+        version: 1,
+        sets: {
+          mep: { logo: [], symbol: [], placeholder: 'set-mep.svg' },
+        },
+      },
     }),
   );
   await page.route('https://api.tcgdex.net/**', (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/sets'))
       return route.fulfill({
-        json: [{ id: 'mep', name: 'MEP Black Star Promos', cardCount: { official: 80 } }],
+        json: [
+          {
+            id: 'mep',
+            name: 'MEP Black Star Promos',
+            cardCount: { official: 80 },
+          },
+        ],
       });
     if (path.endsWith('/series/tcgp'))
       return route.fulfill({ json: { id: 'tcgp', sets: [] } });
