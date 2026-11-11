@@ -102,3 +102,141 @@ it('does not value a normal-only print as holo even when a secondary foil series
   expect(entry.price).toMatchObject({ amount: 3.5 });
   expect(entry.holoPrice).toBeUndefined();
 });
+
+it('withholds misassigned Delta Reign illustration rare Cardmarket price and link', async () => {
+  for (const [localId, name, usd] of [
+    ['111', 'Groudon', 22.67],
+    ['106', 'Fukano', 19.3],
+  ] as const) {
+    const id = `me06-${localId}`;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id,
+              localId,
+              name,
+              rarity: 'Illustration Rare',
+              set: {
+                id: 'me06',
+                name: 'Delta-Herrschaft',
+                cardCount: { official: 103 },
+              },
+              variants: { normal: false, holo: true, reverse: false },
+              pricing: {
+                cardmarket: {
+                  unit: 'EUR',
+                  updated: '2026-11-09T12:00:00Z',
+                  idProduct: 234567,
+                  trend: 0.04,
+                  avg7: 0.07,
+                },
+                tcgplayer: {
+                  holofoil: { marketPrice: usd },
+                },
+              },
+            }),
+          ),
+      ),
+    );
+    const entry = await catalogEntry(id, 'de', undefined, false);
+    expect(entry.price).toBeUndefined();
+    expect(entry.holoPrice).toBeUndefined();
+    expect(entry.cardmarketUrl).toBeUndefined();
+    expect(entry.priceIssue).toBe('suspect');
+  }
+});
+
+it('does not block normal low priced cards in the same set', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'me06-053',
+            localId: '053',
+            name: 'Groudon',
+            set: {
+              id: 'me06',
+              name: 'Delta-Herrschaft',
+              cardCount: { official: 103 },
+            },
+            variants: { normal: true, holo: false, reverse: true },
+            pricing: {
+              cardmarket: {
+                unit: 'EUR',
+                updated: '2026-11-09T12:00:00Z',
+                trend: 0.04,
+              },
+            },
+          }),
+        ),
+    ),
+  );
+  const entry = await catalogEntry('me06-053', 'de', undefined, false);
+  expect(entry.price).toMatchObject({ amount: 0.04, basis: 'trend' });
+  expect(entry.priceIssue).toBeUndefined();
+});
+
+it('rejects a secretly numbered printing sharing the base card Cardmarket product ID', async () => {
+  const set = {
+    id: 'testprice',
+    name: 'Delta-Herrschaft',
+    cardCount: { official: 103 },
+  };
+  const products = {
+    'testprice-053': {
+      id: 'testprice-053',
+      localId: '053',
+      name: 'Groudon',
+      set,
+      pricing: {
+        cardmarket: {
+          idProduct: 777001,
+          unit: 'EUR',
+          updated: '2026-11-09T12:00:00Z',
+          trend: 0.04,
+        },
+      },
+    },
+    'testprice-150': {
+      id: 'testprice-150',
+      localId: '150',
+      name: 'Groudon',
+      set,
+      pricing: {
+        cardmarket: {
+          idProduct: 777001,
+          unit: 'EUR',
+          updated: '2026-11-09T12:00:00Z',
+          trend: 4.5,
+        },
+      },
+    },
+  };
+  const fetcher = vi.fn(async (url: string) => {
+    const last = decodeURIComponent(url.split('/').at(-1)!);
+    if (last === 'testprice') {
+      return new Response(
+        JSON.stringify({
+          ...set,
+          cards: [
+            { id: 'testprice-053', localId: '053', name: 'Groudon' },
+            { id: 'testprice-150', localId: '150', name: 'Groudon' },
+          ],
+        }),
+      );
+    }
+    return new Response(
+      JSON.stringify(products[last as keyof typeof products]),
+    );
+  });
+  vi.stubGlobal('fetch', fetcher);
+  const entry = await catalogEntry('testprice-150', 'de', undefined, false);
+  expect(entry.price).toBeUndefined();
+  expect(entry.priceIssue).toBe('suspect');
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});

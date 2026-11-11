@@ -1,4 +1,4 @@
-import { catalogEntry } from '../data/card-catalog';
+import { holdingPrice } from '../data/holding-prices';
 import {
   portfolioQuoteKey,
   summarizePortfolio,
@@ -595,7 +595,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     const foot = el(
       'p',
       'w-portfolio-footnote',
-      'Wichtig: Werte zeigen datierte EUR-Referenzen zum exakt passenden Cardmarket-Druck (Trend, sonst 7-/30-Tage- oder allgemeiner Verkaufsdurchschnitt). Durchschnitt ist kein Trend. Unbestimmte Varianten, Reverse-Holo und Grading bleiben ohne eindeutige Zuordnung unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine Verkaufserlöse oder historischen Depotkurse.',
+      'Wichtig: TCGdex-Cardmarket-Katalogtrends sind nicht nach Near Mint und Sprache gefiltert. Ausgaben mit verdächtiger Produktzuordnung werden nicht bewertet. Nur verfügbare, plausible EUR-Referenzen gehen in die angezeigte Summe ein. Reverse-Holo, unbekannte Druckvarianten und Grading bleiben unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine gesicherten Verkaufserlöse.',
     );
     if (!count) {
       leaders.querySelector('.w-portfolio-section-head')?.remove();
@@ -644,17 +644,10 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       if (closed || controller.signal.aborted) break;
       const chunk = missing.slice(index, index + 4);
       const results = await Promise.allSettled(
-        chunk.map(async ({ key, holding }) => {
-          const entry = await catalogEntry(
-            key.split(':').slice(1, -1).join(':'),
-            'de',
-            controller.signal,
-            false,
-          );
-          const price =
-            holding.finish === 'holo' ? entry.holoPrice : entry.price;
-          return { key, price, finish: holding.finish };
-        }),
+        chunk.map(async ({ key, holding }) => ({
+          key,
+          value: await holdingPrice(holding),
+        })),
       );
       if (closed || controller.signal.aborted) break;
       for (const [offset, result] of results.entries()) {
@@ -664,16 +657,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           connectionError = true;
           continue;
         }
-        const { price, finish } = result.value;
-        if (!price || !Number.isFinite(price.amount) || price.amount <= 0)
-          continue;
-        quotes.set(target.key, {
-          source: 'cardmarket',
-          variant: finish === 'holo' ? 'holo' : 'normal',
-          amount: price.amount,
-          updated: price.updated,
-          basis: price.basis,
-        });
+        if (result.value.value.status === 'error') {
+          connectionError = true;
+        } else if (result.value.value.status === 'priced') {
+          quotes.set(target.key, result.value.value.quote);
+        }
       }
       render();
     }

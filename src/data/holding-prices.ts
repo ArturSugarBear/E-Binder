@@ -4,11 +4,11 @@ import {
   portfolioQuoteKey,
   type PortfolioQuote,
 } from '../domain/portfolio';
-import type { Holding } from '../domain/personal';
+import { normalize, numberKey, type Holding } from '../domain/personal';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
-  | { status: 'unavailable' | 'error' };
+  | { status: 'unavailable' | 'suspect' | 'error' };
 
 interface CachedPrice {
   until: number;
@@ -32,7 +32,7 @@ export async function holdingPrice(
   if (cached && cached.until > Date.now()) return cached.value;
   const request = pending.get(key);
   if (request) return request;
-  if (typeof navigator !== 'undefined' && !navigator.onLine)
+  if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { status: 'error' };
 
   // Keys are generated exclusively by portfolioQuoteKey, never from search
@@ -45,6 +45,19 @@ export async function holdingPrice(
     false,
   )
     .then((entry) => {
+      // A stored printing can outlive catalogue corrections or be imported
+      // with a wrong language, fraction or finish. Never borrow its neighbor's
+      // market quote just because the source ID still exists.
+      const samePrinting =
+        entry.card.sourceId === sourceId &&
+        entry.card.setId === holding.card.setId &&
+        entry.card.language === holding.card.language &&
+        numberKey(entry.card.number) === numberKey(holding.card.number) &&
+        normalize(entry.card.name) === normalize(holding.card.name) &&
+        entry.card.finishes.includes(holding.finish);
+      if (!samePrinting) {
+        return { status: 'unavailable' } as HoldingPriceResult;
+      }
       const price = holding.finish === 'holo' ? entry.holoPrice : entry.price;
       const quote: PortfolioQuote | undefined = price
         ? {
@@ -55,9 +68,12 @@ export async function holdingPrice(
             basis: price.basis,
           }
         : undefined;
-      const value: HoldingPriceResult = isUsableQuote(quote, key)
-        ? { status: 'priced', quote }
-        : { status: 'unavailable' };
+      const value: HoldingPriceResult =
+        entry.priceIssue === 'suspect'
+          ? { status: 'suspect' }
+          : isUsableQuote(quote, key)
+            ? { status: 'priced', quote }
+            : { status: 'unavailable' };
       results.set(key, { until: Date.now() + CACHE_MS, value });
       return value;
     })
