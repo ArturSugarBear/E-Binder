@@ -1,0 +1,42 @@
+name: Temporary scan PR formatter
+on:
+  push:
+    branches:
+      - fix/scan-review-image-first-ux
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/scan-review-image-first-ux
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: >
+          npx prettier --write
+          src/data/scan-auto-resolve.ts
+          src/data/scan-photo-match.ts
+          src/data/scan-review.ts
+          src/ui/add-cards.ts
+          src/domain/ocr-number-search.ts
+          src/data/vision-worker.ts
+          tests/unit/scan-review.test.ts
+          tests/e2e/set-first-scan.spec.ts
+      - name: Commit only formatting changes
+        run: |
+          if ! git diff --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src/data/scan-auto-resolve.ts src/data/scan-photo-match.ts src/data/scan-review.ts src/ui/add-cards.ts src/domain/ocr-number-search.ts src/data/vision-worker.ts tests/unit/scan-review.test.ts tests/e2e/set-first-scan.spec.ts
+            git commit -m 'Format autonomous scan implementation'
+            git push origin HEAD:fix/scan-review-image-first-ux
+          fi
