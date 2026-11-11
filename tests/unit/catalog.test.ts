@@ -82,13 +82,24 @@ it('reads footer identifiers as candidates, preserves ambiguous numbers and chec
   expect(clues).toHaveLength(2);
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue(new Response(JSON.stringify(card))),
+    vi.fn().mockImplementation((url: string) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify(
+            url.endsWith('/sets/sv01')
+              ? {
+                  id: 'sv01',
+                  name: 'Karmesin & Purpur',
+                  cardCount: { official: 198 },
+                  cards: [{ id: 'sv01-211', localId: '211', name: 'Trasla' }],
+                }
+              : card,
+          ),
+        ),
+      ),
+    ),
   );
   expect(await fetchRecognizedCards('SVI de 211/198', 'en')).toHaveLength(1);
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue(new Response(JSON.stringify(card))),
-  );
   expect(await fetchRecognizedCards('SVI de 211/999', 'en')).toHaveLength(0);
 });
 
@@ -96,15 +107,22 @@ it('keeps a valid candidate when another uncertain OCR number is absent from the
   const { fetchRecognizedCards } = await import('../../src/data/card-catalog');
   vi.stubGlobal(
     'fetch',
-    vi
-      .fn()
-      .mockImplementation((url: string) =>
-        Promise.resolve(
-          url.endsWith('sv01-217')
-            ? new Response('', { status: 404 })
-            : new Response(JSON.stringify(card)),
+    vi.fn().mockImplementation((url: string) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify(
+            url.endsWith('/sets/sv01')
+              ? {
+                  id: 'sv01',
+                  name: 'Karmesin & Purpur',
+                  cardCount: { official: 198 },
+                  cards: [{ id: 'sv01-211', localId: '211', name: 'Trasla' }],
+                }
+              : card,
+          ),
         ),
       ),
+    ),
   );
   const found = await fetchRecognizedCards(
     'SVI de 217/198\nSVI de 211/198',
@@ -650,22 +668,27 @@ it('maps PBL and DLR footer codes to their current TCGdex print IDs', async () =
   });
 
   const mockFetch = vi.fn((url: string) => {
-    const id = url.endsWith('/me05-89') ? 'me05-89' : 'me06-136';
-    return Promise.resolve(
-      new Response(
-        JSON.stringify({
+    const pbl = url.includes('me05');
+    const id = pbl ? 'me05-089' : 'me06-136';
+    const name = pbl ? 'Dunkelnacht' : 'Delta-Herrschaft';
+    const cardName = pbl ? 'Voltenso' : 'Raikou-ex';
+    const localId = pbl ? '089' : '136';
+    const official = pbl ? 84 : 103;
+    const details = url.includes('/sets/')
+      ? {
+          id: pbl ? 'me05' : 'me06',
+          name,
+          cardCount: { official },
+          cards: [{ id, localId, name: cardName }],
+        }
+      : {
           id,
-          localId: id.split('-').at(-1),
-          name: id === 'me05-89' ? 'Voltenso' : 'Raikou-ex',
-          set: {
-            id: id.split('-')[0],
-            name: id === 'me05-89' ? 'Dunkelnacht' : 'Delta-Herrschaft',
-            cardCount: { official: id === 'me05-89' ? 84 : 103 },
-          },
+          localId,
+          name: cardName,
+          set: { id: pbl ? 'me05' : 'me06', name, cardCount: { official } },
           variants: { holo: true },
-        }),
-      ),
-    );
+        };
+    return Promise.resolve(new Response(JSON.stringify(details)));
   });
   vi.stubGlobal('fetch', mockFetch);
   const pbl = await fetchRecognizedCards('PBL DE 089/084', 'en');
@@ -676,11 +699,11 @@ it('maps PBL and DLR footer codes to their current TCGdex print IDs', async () =
   expect(dlr).toMatchObject([
     { setId: 'me06', number: '136/103', language: 'de' },
   ]);
-  expect(mockFetch).toHaveBeenCalledTimes(2);
-  expect(String(mockFetch.mock.calls[0]![0])).toContain(
-    '/de/cards/me05-89',
-  );
-  expect(String(mockFetch.mock.calls[1]![0])).toContain(
-    '/de/cards/me06-136',
-  );
+  expect(mockFetch).toHaveBeenCalledTimes(4);
+  expect(mockFetch.mock.calls.map(([url]) => String(url))).toEqual([
+    'https://api.tcgdex.net/v2/de/sets/me05',
+    'https://api.tcgdex.net/v2/de/cards/me05-089',
+    'https://api.tcgdex.net/v2/de/sets/me06',
+    'https://api.tcgdex.net/v2/de/cards/me06-136',
+  ]);
 });
