@@ -25,7 +25,7 @@ export function hasPrintedCollectorFraction(texts: readonly string[]): boolean {
  * specific printing lookup instead of an arbitrary same-numbered card. */
 export function hasPrintedSetCode(texts: readonly string[]): boolean {
   return texts.some((text) =>
-    /(?:^|[^A-Z])(?:SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(?:DE|EN)?(?=[^A-Z]|$)/i.test(
+    /(?:^|[^A-Z0-9])(?:(?:SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(?:DE|EN)?|(?:SV|SM|XY|BW|S|M)\d{1,2}[A-Z]?)(?=[^A-Z0-9]|$)/i.test(
       text,
     ),
   );
