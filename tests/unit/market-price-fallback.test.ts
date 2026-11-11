@@ -178,3 +178,65 @@ it('does not block normal low priced cards in the same set', async () => {
   expect(entry.price).toMatchObject({ amount: 0.04, basis: 'trend' });
   expect(entry.priceIssue).toBeUndefined();
 });
+
+it('rejects a secretly numbered printing sharing the base card Cardmarket product ID', async () => {
+  const set = {
+    id: 'me06',
+    name: 'Delta-Herrschaft',
+    cardCount: { official: 103 },
+  };
+  const products = {
+    'me06-053': {
+      id: 'me06-053',
+      localId: '053',
+      name: 'Groudon',
+      set,
+      pricing: {
+        cardmarket: {
+          idProduct: 777001,
+          unit: 'EUR',
+          updated: '2026-11-09T12:00:00Z',
+          trend: 0.04,
+        },
+      },
+    },
+    'me06-111': {
+      id: 'me06-111',
+      localId: '111',
+      name: 'Groudon',
+      set,
+      pricing: {
+        cardmarket: {
+          idProduct: 777001,
+          unit: 'EUR',
+          updated: '2026-11-09T12:00:00Z',
+          trend: 4.5,
+        },
+      },
+    },
+  };
+  const fetcher = vi.fn(async (url: string) => {
+    const last = decodeURIComponent(url.split('/').at(-1)!);
+    if (last === 'me06') {
+      return new Response(
+        JSON.stringify({
+          ...set,
+          cards: [
+            { id: 'me06-053', localId: '053', name: 'Groudon' },
+            { id: 'me06-111', localId: '111', name: 'Groudon' },
+          ],
+        }),
+      );
+    }
+    return new Response(
+      JSON.stringify(products[last as keyof typeof products]),
+    );
+  });
+  vi.stubGlobal('fetch', fetcher);
+  const entry = await catalogEntry('me06-111', 'de', undefined, false);
+  expect(entry.price).toBeUndefined();
+  expect(entry.priceIssue).toBe('suspect');
+  expect(fetcher.mock.calls.some(([url]) => url.endsWith('/sets/me06'))).toBe(
+    true,
+  );
+});
