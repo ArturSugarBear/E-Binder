@@ -70,6 +70,22 @@ test('camera scanner switches modes without writing inventory', async ({
     .getByRole('group', { name: 'Scanmodus wählen' })
     .getByRole('button', { name: 'Einzelkarte' })
     .click();
+  const returned = page.getByRole('dialog', {
+    name: 'Karte live scannen',
+  });
+  await expect(returned).toBeVisible();
+  // The underlying add-card sheet is preserved but must not create a
+  // second visible modal or compete with the live camera controls.
+  const parent = page.locator('dialog.w-dialog', {
+    has: page.getByRole('heading', {
+      name: 'Karten hinzufügen',
+      includeHidden: true,
+    }),
+  });
+  await expect(parent).toHaveAttribute('inert', '');
+  await returned
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
   await expect(
     page.getByRole('dialog', { name: 'Karten hinzufügen' }),
   ).toBeVisible();
