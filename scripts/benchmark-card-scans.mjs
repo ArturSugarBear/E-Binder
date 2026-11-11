@@ -142,6 +142,7 @@ async function benchmark(manifestPath) {
           .evaluate((node) => ({
             version: node.dataset.scanResultContract,
             keys: node.dataset.scanRankedKeys,
+            modelCandidates: node.dataset.scanVisualModelCandidates,
           }));
         const ranked = readRankedKeys(payload.version, payload.keys);
         const owned = await page.locator('.w-owned-grid button').count();
@@ -159,6 +160,9 @@ async function benchmark(manifestPath) {
           resultStatus: ranked.length ? 'candidates' : 'no-candidates',
           rankedKeys: ranked,
           candidates: ranked.length,
+          // An actual licensed/indexed visual model may return no matches;
+          // zero is not a failed measurement or proof of OCR-only success.
+          visualModelCandidates: Number(payload.modelCandidates ?? 0),
           online,
           geometryMode: sample.corners ? 'corrected' : 'manual-default',
           phasesMs: {
