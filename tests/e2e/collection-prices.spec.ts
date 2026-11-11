@@ -1,8 +1,6 @@
 import { test, expect } from './fixtures';
 
-test('collection cards show exact Cardmarket pricing and detail', async ({
-  page,
-}) => {
+test('collection prices match exact cards', async ({ page }) => {
   let exactRequests = 0;
   await page.route('https://api.tcgdex.net/**', async (route) => {
     if (route.request().url().endsWith('/de/cards/sv01-211')) {
