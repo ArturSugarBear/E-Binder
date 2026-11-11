@@ -81,6 +81,12 @@ test('scan resolves Japanese M1L 088/063 automatically without asking for a set 
     timeout: 30_000,
   });
   await expect(add.locator('.w-scan-set-panel')).toHaveCount(0);
+  const scanResult = await add.locator('.w-search-results').evaluate((node) => ({
+    version: node.dataset.scanResultContract,
+    ranked: JSON.parse(node.dataset.scanRankedKeys ?? 'null') as string[] | null,
+  }));
+  expect(scanResult.version).toBe('1');
+  expect(scanResult.ranked?.[0]).toBe('tcgdex:ja:M1L-088');
   await expect(add.locator('.w-scan-match-card')).toContainText(
     'メガルカリオex',
   );
