@@ -1,7 +1,7 @@
 import type { VisualHit } from '../domain/visual-retrieval';
 
 export interface VisualSearchSession {
-  match: (photo: Blob) => Promise<VisualHit[]>;
+  match: (photo: Blob, timeoutMs?: number) => Promise<VisualHit[]>;
   close: () => void;
 }
 
@@ -16,7 +16,7 @@ export async function createVisualSearchSession(
   const manifestUrl = `${import.meta.env.BASE_URL}assets/vision/manifest.json`;
   try {
     const response = await fetch(manifestUrl, {
-      signal,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(1800)]),
       cache: 'no-cache',
     });
     if (!response.ok) return null;
@@ -72,7 +72,10 @@ export async function createVisualSearchSession(
       close();
     }
   };
-  const match = (photo: Blob): Promise<VisualHit[]> =>
+  const match = (
+    photo: Blob,
+    timeoutMs = 45000,
+  ): Promise<VisualHit[]> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -90,7 +93,7 @@ export async function createVisualSearchSession(
           ),
         );
         close();
-      }, 45000);
+      }, Math.max(1, Math.min(45000, timeoutMs)));
       current = { id, resolve, reject, timer };
       worker.postMessage({ id, photo, manifestUrl });
     });
