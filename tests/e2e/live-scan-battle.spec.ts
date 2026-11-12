@@ -387,10 +387,11 @@ for (const width of [320, 390, 430]) {
     await add
       .getByRole('button', { name: 'Karten hinzufügen schließen' })
       .click();
+    // Closed live sessions discard abandoned preview metadata automatically.
+    // A restart must never expose dead image placeholders or demand cleanup.
     await page.reload();
-    await page.getByRole('button', { name: 'Erfassung fortsetzen' }).click();
-    await expect(page.locator('.w-photo-review img')).toHaveCount(0);
-    await expect(page.locator('.w-capture-queue')).toContainText('5 offen');
+    await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Erfassung fortsetzen' })).toHaveCount(0);
   });
 }
 
