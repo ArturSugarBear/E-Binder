@@ -101,7 +101,9 @@ export class CloudStore extends PersonalStore {
         }
       });
     this.remoteQueue = operation;
-    return operation;
+    // A remote request must never hold up a local inventory write or the next
+    // camera capture. The serialized queue still runs in the background.
+    return local;
   }
   private async push(state: PersonalState): Promise<void> {
     if (this.conflict) throw new Error('WORKSPACE_CONFLICT');
