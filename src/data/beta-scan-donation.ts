@@ -74,7 +74,7 @@ export async function loadBetaScanConsent(
 }
 
 export async function changeBetaScanConsent(enabled: boolean): Promise<void> {
-  let selected = ownerClient;
+  const selected = ownerClient;
   if (!selected) throw new Error('Beta-Foto-Speicherung ist nicht verfügbar.');
   if (state === 'loading')
     throw new Error('Bitte die bestehende Beta-Einstellung zuerst laden.');
