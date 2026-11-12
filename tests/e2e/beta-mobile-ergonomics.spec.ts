@@ -9,7 +9,9 @@ test('guest profile never enables private beta photo donations by default', asyn
     'true',
   );
   await expect(
-    page.getByRole('button', { name: 'Foto-Teilnahme ausdrücklich aktivieren' }),
+    page.getByRole('button', {
+      name: 'Foto-Teilnahme ausdrücklich aktivieren',
+    }),
   ).toHaveCount(0);
   await expect(
     page.getByRole('heading', { name: 'Dein Profil' }),
@@ -21,7 +23,14 @@ test('mobile primary navigation remains reachable without horizontal overflow', 
 }) => {
   for (const width of [320, 375, 390, 430]) {
     await page.setViewportSize({ width, height: 667 });
-    for (const route of ['home', 'entdecken', 'sammlung', 'binder', 'portfolio', 'profil']) {
+    for (const route of [
+      'home',
+      'entdecken',
+      'sammlung',
+      'binder',
+      'portfolio',
+      'profil',
+    ]) {
       await page.goto('./#' + route);
       await expect(page.locator('#workspace-main')).toHaveAttribute(
         'data-ready',
@@ -32,8 +41,9 @@ test('mobile primary navigation remains reachable without horizontal overflow', 
         const visible = nav && getComputedStyle(nav).display !== 'none';
         const bounds = nav?.getBoundingClientRect();
         const controls = visible
-          ? Array.from(nav!.querySelectorAll<HTMLElement>(':scope > a, :scope > button'))
-              .map((item) => item.getBoundingClientRect())
+          ? Array.from(
+              nav!.querySelectorAll<HTMLElement>(':scope > a, :scope > button'),
+            ).map((item) => item.getBoundingClientRect())
           : [];
         return {
           viewport: document.documentElement.clientWidth,
@@ -89,8 +99,12 @@ test('short iPhone camera-denied view retains a visible fallback and close actio
     exact: true,
   });
   await expect(scanner).toBeVisible();
-  await expect(scanner.getByRole('button', { name: 'Kamerafoto aufnehmen' })).toBeVisible();
-  const close = scanner.getByRole('button', { name: 'Karte live scannen schließen' });
+  await expect(
+    scanner.getByRole('button', { name: 'Kamerafoto aufnehmen' }),
+  ).toBeVisible();
+  const close = scanner.getByRole('button', {
+    name: 'Karte live scannen schließen',
+  });
   const box = await close.boundingBox();
   expect(box).not.toBeNull();
   expect(box!.width).toBeGreaterThanOrEqual(44);

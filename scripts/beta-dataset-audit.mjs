@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !key) {
-  console.error('Dataset audit requires private SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY secrets.');
+  console.error(
+    'Dataset audit requires private SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY secrets.',
+  );
   process.exit(1);
 }
 const client = createClient(url, key, {
@@ -40,7 +42,11 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   await appendFile(process.env.GITHUB_STEP_SUMMARY, markdown);
 }
 if (counts.accepted < 200) {
-  console.log('Training gate: BLOCKED, fewer than 200 independently reviewed samples.');
+  console.log(
+    'Training gate: BLOCKED, fewer than 200 independently reviewed samples.',
+  );
 } else {
-  console.log('Sample count gate reached; rights and benchmark checks are still mandatory.');
+  console.log(
+    'Sample count gate reached; rights and benchmark checks are still mandatory.',
+  );
 }

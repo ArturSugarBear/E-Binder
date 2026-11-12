@@ -56,14 +56,18 @@ export async function changeBetaScanConsent(enabled: boolean): Promise<void> {
     },
     { onConflict: 'user_id' },
   );
-  if (error) throw new Error('Die Beta-Einwilligung konnte nicht gespeichert werden.');
+  if (error)
+    throw new Error('Die Beta-Einwilligung konnte nicht gespeichert werden.');
   if (accountId !== userId) return;
   state = enabled ? 'on' : 'off';
   if (!enabled) generation++;
   statusChanged?.();
 }
 
-async function compressedJpeg(photo: Blob, kind: 'card' | 'page'): Promise<Blob | null> {
+async function compressedJpeg(
+  photo: Blob,
+  kind: 'card' | 'page',
+): Promise<Blob | null> {
   let bitmap: ImageBitmap | undefined;
   try {
     bitmap = await createImageBitmap(photo, { imageOrientation: 'from-image' });
@@ -72,12 +76,20 @@ async function compressedJpeg(photo: Blob, kind: 'card' | 'page'): Promise<Blob 
     const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
     canvas.width = Math.max(1, Math.round(bitmap.width * scale));
     canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    canvas
+      .getContext('2d')
+      ?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     const encode = (quality: number) =>
-      new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/jpeg', quality),
+      );
     let output = await encode(0.74);
     if (output && output.size > MAX_UPLOAD_BYTES) output = await encode(0.56);
-    if (!output || output.type !== 'image/jpeg' || output.size > MAX_UPLOAD_BYTES)
+    if (
+      !output ||
+      output.type !== 'image/jpeg' ||
+      output.size > MAX_UPLOAD_BYTES
+    )
       return null;
     return output;
   } catch {
@@ -93,7 +105,12 @@ export async function donateBetaScanPhoto(
   photo: Blob,
   kind: 'card' | 'page',
 ): Promise<void> {
-  if (state !== 'on' || !accountId || !cloudClient || submitted >= MAX_PER_SESSION)
+  if (
+    state !== 'on' ||
+    !accountId ||
+    !cloudClient ||
+    submitted >= MAX_PER_SESSION
+  )
     return;
   const userId = accountId;
   const current = generation;
@@ -116,15 +133,17 @@ export async function donateBetaScanPhoto(
       await cloudClient.storage.from(BUCKET).remove([objectPath]);
       return;
     }
-    const { error: rowError } = await cloudClient.from('beta_scan_samples').insert({
-      id,
-      user_id: userId,
-      object_path: objectPath,
-      source_kind: kind,
-      consent_version: BETA_SCAN_CONSENT_VERSION,
-      byte_count: jpeg.size,
-      review_status: 'pending',
-    });
+    const { error: rowError } = await cloudClient
+      .from('beta_scan_samples')
+      .insert({
+        id,
+        user_id: userId,
+        object_path: objectPath,
+        source_kind: kind,
+        consent_version: BETA_SCAN_CONSENT_VERSION,
+        byte_count: jpeg.size,
+        review_status: 'pending',
+      });
     if (rowError) await cloudClient.storage.from(BUCKET).remove([objectPath]);
   } catch {
     // Network donation is best effort, never a prerequisite for local recognition.
@@ -143,18 +162,24 @@ export async function deletePendingBetaScanPhotos(): Promise<number> {
       .eq('user_id', accountId)
       .eq('review_status', 'pending')
       .limit(100);
-    if (error) throw new Error('Deine Testaufnahmen konnten nicht abgerufen werden.');
+    if (error)
+      throw new Error('Deine Testaufnahmen konnten nicht abgerufen werden.');
     if (!data?.length) break;
     const paths = data.map((item) => item.object_path as string);
     const { error: storageError } = await cloudClient.storage
       .from(BUCKET)
       .remove(paths);
-    if (storageError) throw new Error('Die Testaufnahmen konnten nicht gelöscht werden.');
+    if (storageError)
+      throw new Error('Die Testaufnahmen konnten nicht gelöscht werden.');
     const { error: rowError } = await cloudClient
       .from('beta_scan_samples')
       .delete()
-      .in('id', data.map((item) => item.id));
-    if (rowError) throw new Error('Die Metadaten konnten nicht gelöscht werden.');
+      .in(
+        'id',
+        data.map((item) => item.id),
+      );
+    if (rowError)
+      throw new Error('Die Metadaten konnten nicht gelöscht werden.');
     deleted += data.length;
     if (data.length < 100) break;
   }

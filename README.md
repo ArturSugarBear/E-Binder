@@ -8,8 +8,8 @@ Kostenlose, installierbare Pokémon-TCG-Web-App mit Live-Kartenscanner, 3×3-Bin
 
 ![Rare Room auf dem iPhone – Home](docs/screenshots/review-2026-11-11/home-390.png)
 
-| Dein Binder | Deine Sammlung | Live-Scanner |
-| :---: | :---: | :---: |
+|                          Dein Binder                          |                            Deine Sammlung                             |                       Live-Scanner                        |
+| :-----------------------------------------------------------: | :-------------------------------------------------------------------: | :-------------------------------------------------------: |
 | ![Digitaler Binder](docs/screenshots/rare-room-v2/binder.png) | ![Sammlungsansicht](docs/screenshots/rare-room-v2/collection-390.png) | ![Scanner](docs/screenshots/rare-room-v2/scanner-320.png) |
 
 > **Beta:** Die Erkennung ist eine Hilfe, keine Garantie. Set, Nummer, vollständigen Namen, Sprache, Holo-/Edition-Variante und Menge bewusst kontrollieren. Ein Scan erhöht niemals ungeprüft den Bestand.
@@ -47,23 +47,23 @@ In Safari [E-Binder](https://artursugarbear.github.io/E-Binder/) öffnen, **Teil
 
 Node.js **24** laut .nvmrc:
 
-~~~sh
+```sh
 npm ci
 npm run dev
 npm run check
 npx playwright install --with-deps chromium webkit
 npm run test:e2e
-~~~
+```
 
 Der GitHub-Pages-Release wird durch Build, Unit-Tests und Chromium-/Mobile-/WebKit-Tests abgesichert. Ein Browser-Simulationstest ist kein Ersatz für echte iPhone-Kameratests.
 
-| Thema | Dokumentation |
-| --- | --- |
-| Architektur, Daten und private Anmeldung | [Architektur](docs/architecture.md) · [Backend](docs/backend.md) |
-| Scannen, OCR und Sicherheit | [Scanner](docs/scanner.md) · [Visuelle Erkennung](docs/p08-visual-retrieval.md) |
-| Bedienkonzept und UI | [Design](docs/design.md) · [Referenz-Benchmark](docs/benchmarks/competitors/2026-11-10/ANALYSIS.md) |
-| Foto-Benchmarks | [Scan-Qualität](docs/scanner-quality.md) · [Dataset-Audit](docs/dataset-audit.md) |
-| Deployment und Regressionen | [Deployment](docs/deployment.md) · [CI](.github/workflows/pages.yml) |
+| Thema                                    | Dokumentation                                                                                       |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Architektur, Daten und private Anmeldung | [Architektur](docs/architecture.md) · [Backend](docs/backend.md)                                    |
+| Scannen, OCR und Sicherheit              | [Scanner](docs/scanner.md) · [Visuelle Erkennung](docs/p08-visual-retrieval.md)                     |
+| Bedienkonzept und UI                     | [Design](docs/design.md) · [Referenz-Benchmark](docs/benchmarks/competitors/2026-11-10/ANALYSIS.md) |
+| Foto-Benchmarks                          | [Scan-Qualität](docs/scanner-quality.md) · [Dataset-Audit](docs/dataset-audit.md)                   |
+| Deployment und Regressionen              | [Deployment](docs/deployment.md) · [CI](.github/workflows/pages.yml)                                |
 
 ## Rechte und Grenzen
 

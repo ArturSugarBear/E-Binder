@@ -129,7 +129,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
                 : 'Teilnahme ausgeschaltet · Fotos bleiben auf deinem Gerät.',
           ),
           action(
-            enabled ? 'Foto-Teilnahme beenden' : 'Foto-Teilnahme ausdrücklich aktivieren',
+            enabled
+              ? 'Foto-Teilnahme beenden'
+              : 'Foto-Teilnahme ausdrücklich aktivieren',
             () => {
               void changeBetaScanConsent(!enabled)
                 .then(() => {
@@ -148,7 +150,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
             'Meine unbewerteten Testbilder löschen',
             () => {
               void deletePendingBetaScanPhotos()
-                .then((count) => ctx.notify(count + ' unbewertete Testbilder gelöscht.'))
+                .then((count) =>
+                  ctx.notify(count + ' unbewertete Testbilder gelöscht.'),
+                )
                 .catch((error: unknown) => ctx.notify(String(error), true));
             },
             'text',
