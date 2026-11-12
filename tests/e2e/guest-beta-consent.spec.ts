@@ -11,7 +11,7 @@ test('local-only collector sees optional photo donation without creating an E-Bi
     page.getByRole('button', { name: 'Als Gast freiwillig Fotos spenden' }),
   ).toBeVisible();
   await expect(
-    page.getByText(/anonyme Testidentität in diesem Browser/),
+    page.getByText(/pseudonyme Testidentität in diesem Browser/),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Alle meine Beta-Testbilder löschen' }),
