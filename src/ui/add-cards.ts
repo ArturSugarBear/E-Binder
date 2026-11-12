@@ -12,6 +12,7 @@ import {
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
 import { donateBetaScanPhoto } from '../data/beta-scan-donation';
+import { visualBetaEnabled } from '../data/visual-beta';
 import {
   createVisualSearchSession,
   type VisualSearchSession,
@@ -185,6 +186,10 @@ export function openAddCards(
   const awaitingLiveReview = new Set<string>();
   const visualAbort = new AbortController();
   let visualSearch: Promise<VisualSearchSession | null> | undefined;
+  // Optional model begins downloading on scan entry rather than at the end
+  // of OCR. This is nonblocking and is independent of photo donation.
+  if (visualBetaEnabled())
+    visualSearch = createVisualSearchSession(visualAbort.signal);
   let searchController: AbortController | undefined;
   let ocrController: AbortController | undefined;
   let debounce: ReturnType<typeof setTimeout>;
