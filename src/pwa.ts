@@ -136,7 +136,10 @@ export function initPwa(): void {
   if (label) {
     label.textContent = versionLabel();
     // Accessible name must contain the visible version text (WCAG 2.5.3).
-    label.setAttribute('aria-label', `${versionLabel()} – App-Version und Updates im Profil`);
+    label.setAttribute(
+      'aria-label',
+      `${versionLabel()} – App-Version und Updates im Profil`,
+    );
     label.title = `E-Binder Build ${appBuild.builtAt || 'lokal'}`;
     label.dataset.buildCommit = appBuild.commit;
   }
