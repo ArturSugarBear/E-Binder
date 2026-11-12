@@ -1,5 +1,6 @@
 import { localizedCardName } from '../data/japanese-catalog';
 import { enableSheetDrag } from './sheet-gestures';
+import { collectorCardOverview, collectorCardExtras } from './collector-card-overview';
 import type { CatalogEntry } from '../data/card-catalog';
 import { cardMarket } from './card-market';
 import { addWish, sameCard, type PersonalCard } from '../domain/personal';
@@ -209,7 +210,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     status.replaceChildren();
     const view = modal(card.name);
     view.dialog.querySelector('h2')?.replaceChildren(localizedCardName(card));
-    view.dialog.classList.add('w-card-detail-dialog');
+    view.dialog.classList.add('w-card-detail-dialog', 'w-collector-card-dialog');
     closePreview = view.close;
     const owned = el('p', 'w-muted');
     const wish = action(
@@ -237,35 +238,23 @@ export function createDiscoverView(ctx: WorkspaceContext) {
         ? 'Auf deiner Wunschliste'
         : 'Auf die Wunschliste';
     };
-    // The card is the hero, as in the physical demo binder's detail sheet.
-    // Keep prices and ownership clearly separate from the artwork.
-    const stage = el('div', 'w-discover-stage', ctx.images.artwork(card));
-    const detail = el(
-      'div',
-      'w-discover-info',
-      el('p', 'w-discover-overline', card.language.toUpperCase()),
-      el('h3', '', localizedCardName(card)),
-      el('h4', 'w-discover-set-name', card.setName),
-      el(
-        'p',
-        'w-discover-collector',
-        `${card.number} · ${card.language.toUpperCase()}`,
-      ),
-      el(
-        'p',
-        'w-muted',
-        card.artist
-          ? `Illustration: ${card.artist} · ${card.artistSource === 'publisher' ? 'Verlagsangabe' : 'Katalogangabe'}`
-          : 'Illustration nicht bekannt',
-      ),
-      entry.rarity ? el('p', 'w-card-rarity', entry.rarity) : null,
-      owned,
-      cardMarket(entry),
-    );
-    view.body.append(el('div', 'w-discover-card', stage, detail));
-    // A downward drag on the card closes the sheet, while the information
-    // column remains scrollable and its links remain normally clickable.
-    stage.classList.add('w-card-touch-surface');
+    // Reuse the demo-binder's card-first hierarchy across the workspace.
+    const overview = collectorCardOverview(ctx, card, entry.rarity);
+    overview.classList.add('w-discover-card');
+    const stage = overview.querySelector<HTMLElement>('.w-collector-card-stage')!;
+    stage.classList.add('w-discover-stage', 'w-card-touch-surface');
+    overview.querySelector<HTMLElement>('.w-collector-card-heading')!
+      .classList.add('w-discover-info');
+    const market = cardMarket(entry);
+    const extraActions = el('div', 'w-collector-card-extra-actions', owned, wish);
+    const extra = collectorCardExtras('Weitere Details', extraActions);
+    // Keep market data provenance and secondary provider information available
+    // without filling the default card detail with long technical diagnostics.
+    for (const node of market.querySelectorAll<HTMLElement>(
+      '.w-help, .w-tcgplayer-market, small.w-muted',
+    ))
+      extra.append(node);
+    view.body.append(overview, market, extra);
     enableSheetDrag(view.dialog, view.dialog, [stage]);
     view.footer.append(
       action(
@@ -277,7 +266,6 @@ export function createDiscoverView(ctx: WorkspaceContext) {
         'primary',
         'plus',
       ),
-      wish,
     );
     view.onClose(() => {
       previewRefresh = undefined;
