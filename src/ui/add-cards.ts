@@ -1014,15 +1014,6 @@ export function openAddCards(
       // force a second capture after a failed attempt.
       const background = liveReviewResults.get(shot.id);
       if (background) {
-        progress.value = 1;
-        status.textContent = candidates.length
-          ? 'Kandidaten gefunden · Ausgabe mit Foto vergleichen'
-          : 'Noch kein Treffer · deine Aufnahme bleibt für die Suche erhalten';
-        journey.update(
-          'recognize',
-          'Abgleich abgeschlossen · nächster Prüfschritt',
-          1,
-        );
         ctx.commit('Texterkennung abgeschlossen', (state) =>
           changeState(state, (next) => {
             const target = next.captures.find((item) => item.id === shot.id);
