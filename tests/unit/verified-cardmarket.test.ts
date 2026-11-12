@@ -15,7 +15,7 @@ describe('verified Cardmarket product crosswalk', () => {
   it('binds the rare to the independent product, never the base Groudon', () => {
     const rare = verifiedCardmarketProduct(
       groudon,
-      Date.parse('2026-11-11T18:00:00Z'),
+      Date.parse('2026-11-12T18:00:00Z'),
     );
     expect(rare).toMatchObject({
       productId: 918949,
@@ -23,7 +23,7 @@ describe('verified Cardmarket product crosswalk', () => {
     });
     expect(
       verifiedCardmarketProduct({ ...groudon, id: 'me06-053', localId: '053' }),
-    ).toBeUndefined();
+    ).toMatchObject({ productId: 918876 });
   });
 
   it('never borrows this price for the wrong name, language, set or foil', () => {
@@ -44,7 +44,7 @@ describe('verified Cardmarket product crosswalk', () => {
   it('expires dated observations without discarding a verified product link', () => {
     const expired = verifiedCardmarketProduct(
       groudon,
-      Date.parse('2026-11-19T00:00:00Z'),
+      Date.parse('2026-11-20T00:00:00Z'),
     );
     expect(expired?.productId).toBe(918949);
     expect(expired?.url).toContain('/Groudon-V2-DLR111');

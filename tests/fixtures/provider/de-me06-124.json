@@ -1,0 +1,102 @@
+{
+  "category": "Pokémon",
+  "id": "me06-124",
+  "illustrator": "5ban Graphics",
+  "localId": "124",
+  "name": "Fiaro-ex",
+  "rarity": "Ultra Selten",
+  "set": {
+    "cardCount": {
+      "official": 103,
+      "total": 141
+    },
+    "id": "me06",
+    "name": "Delta-Herrschaft"
+  },
+  "variants": {
+    "firstEdition": false,
+    "holo": false,
+    "normal": true,
+    "reverse": false,
+    "wPromo": false
+  },
+  "variants_detailed": [
+    {
+      "type": "normal",
+      "size": "Standard",
+      "variantId": "generated"
+    }
+  ],
+  "hp": 280,
+  "types": ["Farblos"],
+  "stage": "Basis",
+  "suffix": "EX",
+  "abilities": [
+    {
+      "type": "Fähigkeit",
+      "name": "Begeisterter Sturzflug",
+      "effect": "Einmal während deines Zuges, wenn dieses Pokémon auf deiner Hand ist und wenn du mindestens 1 Colorless-Mega-Entwicklungs-Pokémon-ex im Spiel hast, kannst du diese Fähigkeit einsetzen. Lege dieses Pokémon auf deine Bank."
+    }
+  ],
+  "attacks": [
+    {
+      "cost": ["Farblos", "Farblos"],
+      "name": "Klauenjagd",
+      "effect": "Du kannst dein Deck nach bis zu 2 Karten durchsuchen und sie auf deine Hand nehmen. Mische anschließend dein Deck.",
+      "damage": 150
+    }
+  ],
+  "weaknesses": [
+    {
+      "type": "Elektro",
+      "value": "×2"
+    }
+  ],
+  "resistances": [
+    {
+      "type": "Kampf",
+      "value": "-30"
+    }
+  ],
+  "retreat": 0,
+  "legal": {
+    "standard": false,
+    "expanded": true
+  },
+  "updated": "2026-11-08T00:42:51+01:00",
+  "thirdParty": {
+    "tcgplayer": 728055,
+    "cardmarket": 918916
+  },
+  "pricing": {
+    "cardmarket": {
+      "updated": "2026-11-11T23:49:36.439Z",
+      "unit": "EUR",
+      "idProduct": 918916,
+      "avg": 4.33,
+      "low": 1.9,
+      "trend": 4.39,
+      "avg1": 4.06,
+      "avg7": 3.87,
+      "avg30": 4.01,
+      "avg-holo": null,
+      "low-holo": null,
+      "trend-holo": 0,
+      "avg1-holo": null,
+      "avg7-holo": null,
+      "avg30-holo": null
+    },
+    "tcgplayer": {
+      "unit": "USD",
+      "updated": "2026-11-11T23:49:52.157Z",
+      "holofoil": {
+        "productId": 728055,
+        "lowPrice": 11.5,
+        "midPrice": 15.43,
+        "highPrice": 129.99,
+        "marketPrice": 14.32,
+        "directLowPrice": 16.33
+      }
+    }
+  }
+}

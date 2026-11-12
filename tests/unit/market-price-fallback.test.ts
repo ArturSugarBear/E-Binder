@@ -249,6 +249,7 @@ it('does not block normal low priced cards in the same set', async () => {
                 unit: 'EUR',
                 updated: '2026-11-09T12:00:00Z',
                 trend: 0.04,
+                idProduct: 918876,
               },
             },
           }),
@@ -324,7 +325,7 @@ it('uses Groudon DLR111 only with the separately verified Cardmarket product', a
   // The direct-market snapshot expires in production. This test must
   // remain deterministic once it has expired.
   vi.useFakeTimers();
-  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
+  vi.setSystemTime(new Date('2026-11-12T18:00:00Z'));
   const fetcher = vi.fn(
     async () =>
       new Response(
@@ -356,7 +357,7 @@ it('uses Groudon DLR111 only with the separately verified Cardmarket product', a
   const result = await catalogEntry('me06-111', 'de', undefined, false);
   expect(result.price).toEqual({
     amount: 17.81,
-    updated: '2026-11-11T00:00:00.000Z',
+    updated: '2026-11-12T01:51:19.000Z',
     basis: 'trend',
     provenance: 'verified-snapshot',
   });

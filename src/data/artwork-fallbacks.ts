@@ -1,3 +1,4 @@
+import { japanesePrinting } from './japanese-catalog';
 import { numberKey, type PersonalCard } from '../domain/personal';
 
 type Art = { url: string; language: string; providerId: string };
@@ -47,6 +48,20 @@ export function trustedArtwork(url: string): boolean {
 export async function secondaryCardArt(
   card: PersonalCard,
 ): Promise<Art | undefined> {
+  if (card.language === 'ja') {
+    try {
+      const match = await japanesePrinting(card);
+      if (match)
+        return {
+          url: `https://tcgplayer-cdn.tcgplayer.com/product/${match.productId}_in_1000x1000.jpg`,
+          language: 'ja',
+          providerId: String(match.productId),
+        };
+    } catch {
+      /* Missing exact metadata cannot establish artwork identity. */
+    }
+    return;
+  }
   if (
     card.source !== 'tcgdex' ||
     !['de', 'en'].includes(card.language) ||

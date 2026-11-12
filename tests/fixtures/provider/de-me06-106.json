@@ -1,0 +1,92 @@
+{
+  "category": "Pokémon",
+  "id": "me06-106",
+  "illustrator": "Yoshimoto Yoshimon",
+  "localId": "106",
+  "name": "Fukano",
+  "rarity": "Selten, Illustration",
+  "set": {
+    "cardCount": {
+      "official": 103,
+      "total": 141
+    },
+    "id": "me06",
+    "name": "Delta-Herrschaft"
+  },
+  "variants": {
+    "firstEdition": false,
+    "holo": false,
+    "normal": true,
+    "reverse": false,
+    "wPromo": false
+  },
+  "variants_detailed": [
+    {
+      "type": "normal",
+      "size": "Standard",
+      "variantId": "generated"
+    }
+  ],
+  "hp": 80,
+  "types": ["Feuer"],
+  "stage": "Basis",
+  "attacks": [
+    {
+      "cost": ["Farblos"],
+      "name": "Brüller",
+      "effect": "Wechsle das Aktive Pokémon deines Gegners auf seine Bank aus. <em>(Dein Gegner wählt das neue Aktive Pokémon.)</em>"
+    },
+    {
+      "cost": ["Feuer", "Farblos", "Farblos"],
+      "name": "Rückwärtskick",
+      "damage": 50
+    }
+  ],
+  "weaknesses": [
+    {
+      "type": "Wasser",
+      "value": "×2"
+    }
+  ],
+  "retreat": 2,
+  "legal": {
+    "standard": false,
+    "expanded": true
+  },
+  "updated": "2026-11-08T00:42:51+01:00",
+  "thirdParty": {
+    "tcgplayer": 726559,
+    "cardmarket": 918832
+  },
+  "pricing": {
+    "cardmarket": {
+      "updated": "2026-11-11T23:49:36.439Z",
+      "unit": "EUR",
+      "idProduct": 918832,
+      "avg": 0.05,
+      "low": 0.02,
+      "trend": 0.04,
+      "avg1": 0.04,
+      "avg7": 0.04,
+      "avg30": 0.04,
+      "avg-holo": null,
+      "low-holo": 0.02,
+      "trend-holo": 0.17,
+      "avg1-holo": 0.18,
+      "avg7-holo": 0.14,
+      "avg30-holo": 0.14
+    },
+    "tcgplayer": {
+      "unit": "USD",
+      "updated": "2026-11-11T23:49:52.157Z",
+      "holofoil": {
+        "productId": 726559,
+        "lowPrice": 14.62,
+        "midPrice": 18.63,
+        "highPrice": 49.99,
+        "marketPrice": 16.57,
+        "directLowPrice": 19.98
+      }
+    }
+  }
+}

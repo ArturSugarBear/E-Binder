@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { secondarySetArt } from '../data/artwork-fallbacks';
 import {
   catalogEntry,
@@ -817,7 +818,7 @@ export function createCatalogBrowser(options: Options) {
     const caption = el(
       'span',
       'w-card-caption',
-      el('strong', '', card.name),
+      el('strong', '', localizedCardName(card)),
       el('small', '', `${card.setName} · ${card.number}`),
     );
     if (entry?.rarity) caption.append(el('small', 'w-muted', entry.rarity));
@@ -844,7 +845,7 @@ export function createCatalogBrowser(options: Options) {
         'span',
         'w-unpictured-card',
         el('small', '', `${card.setName} / ${card.number}`),
-        el('strong', '', card.name),
+        el('strong', '', localizedCardName(card)),
         el('span', '', 'Abbildung noch nicht verfügbar'),
       );
       placeholder.setAttribute(

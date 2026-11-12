@@ -1,3 +1,4 @@
+import { numberKey } from '../domain/personal';
 import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
 import type { PersonalStore } from './personal-store';
 import {
@@ -53,18 +54,32 @@ export class CardImages {
       card.number,
       card.language,
       card.image,
+      card.name,
+      card.finishes,
     ]);
   }
   private async remote(card: PersonalCard): Promise<string> {
-    if (!card.image && card.source === 'tcgdex' && card.sourceId) {
+    if (
+      card.source === 'tcgdex' &&
+      card.sourceId &&
+      !exactPrimaryArtwork(card)
+    ) {
       try {
-        const apiImage = (await catalogEntry(card.sourceId, card.language)).card
-          .image;
+        const resolved = (await catalogEntry(card.sourceId, card.language))
+          .card;
+        const apiImage =
+          resolved.setId === card.setId &&
+          numberKey(resolved.number) === numberKey(card.number) &&
+          resolved.name === card.name
+            ? resolved.image
+            : '';
         if (apiImage) return apiImage;
       } catch {
         // Known, licensed-in-project local artwork still works offline.
       }
-      const local = verifiedLocalArt(card);
+      const art = await secondaryCardArt(card);
+      if (art) return art.url;
+      const local = verifiedLocalArt({ ...card, image: '' });
       if (local) return `${import.meta.env.BASE_URL}${local}`;
       return '';
     }
@@ -83,7 +98,11 @@ export class CardImages {
     language.className = 'w-art-language';
     language.hidden = true;
     const labelLanguage = (url: string) => {
-      const displayed = imageLanguage(url);
+      const displayed =
+        card.language === 'ja' &&
+        url.startsWith('https://tcgplayer-cdn.tcgplayer.com/product/')
+          ? 'ja'
+          : imageLanguage(url);
       language.hidden = !displayed || displayed === card.language;
       if (displayed) language.textContent = `Bild: ${displayed.toUpperCase()}`;
     };
@@ -102,6 +121,7 @@ export class CardImages {
       edition.textContent = `${card.setName} · ${card.number}`;
       fallback.append(message, identity, edition);
       frame.dataset.imageState = 'unavailable';
+      frame.dataset.imageReason ??= 'no-verified-exact-artwork';
     };
     let retried = false;
     let triedLocal = false;
@@ -143,6 +163,7 @@ export class CardImages {
     image.addEventListener('load', () => {
       fallback.hidden = true;
       frame.dataset.imageState = 'loaded';
+      delete frame.dataset.imageReason;
       // Reuse a successful exact-print fallback on the next page visit.
       this.remember(resourceKey, {
         until: Date.now() + 300_000,
@@ -151,6 +172,7 @@ export class CardImages {
       });
     });
     image.addEventListener('error', () => {
+      frame.dataset.imageReason = 'asset-load-failed';
       if (
         retried ||
         card.language !== 'de' ||
@@ -285,5 +307,27 @@ export class CardImages {
     } catch {
       return undefined;
     }
+  }
+}
+
+/** Stored URLs are hints, never permission to display another printing. */
+export function exactPrimaryArtwork(card: PersonalCard): boolean {
+  try {
+    const url = new URL(card.image);
+    const parts = url.pathname.split('/');
+    const local = card.sourceId.slice(card.setId.length + 1);
+    const assetSet = card.setId === 'swsh12.5gg' ? 'swsh12.5' : card.setId;
+    return (
+      url.protocol === 'https:' &&
+      url.hostname === 'assets.tcgdex.net' &&
+      card.sourceId.startsWith(`${card.setId}-`) &&
+      numberKey(local) === numberKey(card.number).split('/')[0] &&
+      parts[3] === assetSet &&
+      numberKey(parts[4] ?? '') === numberKey(local) &&
+      (parts[1] === card.language ||
+        (card.language === 'de' && parts[1] === 'en'))
+    );
+  } catch {
+    return false;
   }
 }

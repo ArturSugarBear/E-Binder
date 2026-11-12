@@ -1,0 +1,138 @@
+{
+  "category": "Pokémon",
+  "id": "me01-077",
+  "illustrator": "5ban Graphics",
+  "image": "https://assets.tcgdex.net/de/me/me01/077",
+  "localId": "077",
+  "name": "Mega-Lucario-ex",
+  "rarity": "Doppelselten",
+  "set": {
+    "cardCount": {
+      "official": 132,
+      "total": 188
+    },
+    "id": "me01",
+    "logo": "https://assets.tcgdex.net/de/me/me01/logo",
+    "name": "Mega-Entwicklung",
+    "symbol": "https://assets.tcgdex.net/univ/me/me01/symbol"
+  },
+  "variants": {
+    "firstEdition": false,
+    "holo": true,
+    "normal": false,
+    "reverse": false,
+    "wPromo": false
+  },
+  "variants_detailed": [
+    {
+      "type": "Holo",
+      "size": "Standard",
+      "thirdParty": {
+        "tcgplayer": 654416,
+        "cardmarket": 851148
+      },
+      "variantId": "jr7oetx1mqug9",
+      "pricing": {
+        "cardmarket": {
+          "updated": "2026-11-11T23:49:36.426Z",
+          "unit": "EUR",
+          "idProduct": 851148,
+          "avg": 1.06,
+          "low": 0.1,
+          "trend": 0.91,
+          "avg1": 0.91,
+          "avg7": 0.89,
+          "avg30": 1.03,
+          "avg-holo": null,
+          "low-holo": null,
+          "trend-holo": 0,
+          "avg1-holo": null,
+          "avg7-holo": null,
+          "avg30-holo": null
+        },
+        "tcgplayer": {
+          "unit": "USD",
+          "updated": "2026-11-11T23:49:51.485Z",
+          "holofoil": {
+            "productId": 654416,
+            "lowPrice": 0.25,
+            "midPrice": 0.97,
+            "highPrice": 999,
+            "marketPrice": 0.73,
+            "directLowPrice": null
+          }
+        }
+      }
+    },
+    {
+      "type": "Holo",
+      "size": "Standard",
+      "stamp": ["player-rewards-program"],
+      "variantId": "mtltux8quqoc7vwp24c9zzhgmzduu8xcik8"
+    }
+  ],
+  "dexId": [448],
+  "hp": 340,
+  "types": ["Kampf"],
+  "evolveFrom": "Riolu",
+  "stage": "Rang 1",
+  "suffix": "ex",
+  "attacks": [
+    {
+      "cost": ["Kampf"],
+      "name": "Aura-Hieb",
+      "effect": "Lege bis zu 3 Basis-{F}-Energiekarten aus deinem Ablagestapel beliebig an die Pokémon auf deiner Bank an.",
+      "damage": 130
+    },
+    {
+      "cost": ["Kampf", "Kampf"],
+      "name": "Mega-Mut",
+      "effect": "Während deines nächsten Zuges kann dieses Pokémon Mega-Mut nicht einsetzen.",
+      "damage": 270
+    }
+  ],
+  "weaknesses": [
+    {
+      "type": "Psycho",
+      "value": "×2"
+    }
+  ],
+  "retreat": 2,
+  "regulationMark": "I",
+  "legal": {
+    "standard": true,
+    "expanded": true
+  },
+  "updated": "2026-06-14T19:07:08+01:00",
+  "pricing": {
+    "cardmarket": {
+      "updated": "2026-11-11T23:49:36.426Z",
+      "unit": "EUR",
+      "idProduct": 851148,
+      "avg": 1.06,
+      "low": 0.1,
+      "trend": 0.91,
+      "avg1": 0.91,
+      "avg7": 0.89,
+      "avg30": 1.03,
+      "avg-holo": null,
+      "low-holo": null,
+      "trend-holo": 0,
+      "avg1-holo": null,
+      "avg7-holo": null,
+      "avg30-holo": null
+    },
+    "tcgplayer": {
+      "unit": "USD",
+      "updated": "2026-11-11T23:49:51.485Z",
+      "holofoil": {
+        "productId": 654416,
+        "lowPrice": 0.25,
+        "midPrice": 0.97,
+        "highPrice": 999,
+        "marketPrice": 0.73,
+        "directLowPrice": null
+      }
+    }
+  }
+}

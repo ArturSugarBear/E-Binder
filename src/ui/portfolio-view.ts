@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { holdingPrice } from '../data/holding-prices';
 import {
   portfolioQuoteKey,
@@ -55,6 +56,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
   let loading = false;
   let connectionError = false;
   const failed = new Set<string>();
+  const reasons = new Map<string, string>();
   const artworkCache = new Map<
     string,
     { signature: string; element: HTMLElement }
@@ -460,7 +462,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           el(
             'div',
             'w-portfolio-leader-info',
-            el('strong', '', holding.card.name),
+            el('strong', '', localizedCardName(holding.card)),
             el(
               'span',
               'w-portfolio-overline',
@@ -504,17 +506,20 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         .filter((item) => item.unitValue === null)
         .slice(0, 12)) {
         const card = row.holding.card;
-        const reason = !row.quoteKey
-          ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
-          : !attempted.has(row.quoteKey)
-            ? 'Preis wird noch geprüft'
-            : failed.has(row.quoteKey)
-              ? 'Preis momentan nicht erreichbar'
-              : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
-                ? 'Druckvariante noch nicht eindeutig bepreist'
-                : row.holding.variantNote
-                  ? 'Sonderauflage ohne gesicherten Vergleichspreis'
-                  : 'Für diese Ausgabe noch keine Preisreferenz';
+        const reason =
+          (row.quoteKey && reasons.get(row.quoteKey)) ||
+          (!row.quoteKey
+            ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
+            : !attempted.has(row.quoteKey)
+              ? 'Preis wird noch geprüft'
+              : failed.has(row.quoteKey)
+                ? 'Preis momentan nicht erreichbar'
+                : row.holding.finish !== 'normal' &&
+                    row.holding.finish !== 'holo'
+                  ? 'Druckvariante noch nicht eindeutig bepreist'
+                  : row.holding.variantNote
+                    ? 'Sonderauflage ohne gesicherten Vergleichspreis'
+                    : 'Für diese Ausgabe noch keine Preisreferenz');
         const button = action(
           `${card.name} ansehen`,
           () => ctx.openHolding(row.holding.id),
@@ -530,7 +535,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           el(
             'span',
             'w-portfolio-missing-copy',
-            el('strong', '', card.name),
+            el('strong', '', localizedCardName(card)),
             el('small', '', `${card.setName} · ${card.number}`),
             el('small', '', reason),
           ),
@@ -702,7 +707,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           failed.add(target.key);
         } else if (result.value.value.status === 'priced') {
           quotes.set(target.key, result.value.value.quote);
-        } else quotes.delete(target.key);
+        } else {
+          quotes.delete(target.key);
+          if (result.value.value.reason)
+            reasons.set(target.key, result.value.value.reason);
+        }
       }
       // Keep cards, scroll position and focus intact while the bounded queue
       // runs. Only real processed counts update; publish values together.

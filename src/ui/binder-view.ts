@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import {
   addWish,
   availableUnits,
@@ -682,7 +683,7 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
         el(
           'div',
           '',
-          el('h3', '', card.name),
+          el('h3', '', localizedCardName(card)),
           el('p', 'w-muted', `${card.setName} · ${card.number}`),
           message(
             slot?.kind === 'planned'
@@ -868,7 +869,7 @@ function openSlot(ctx: WorkspaceContext, pageId: string, index: number): void {
         el(
           'span',
           '',
-          el('strong', '', holding.card.name),
+          el('strong', '', localizedCardName(holding.card)),
           el(
             'small',
             '',

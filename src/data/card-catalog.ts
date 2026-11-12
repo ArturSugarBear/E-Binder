@@ -140,6 +140,8 @@ export interface CatalogEntry {
   holoPrice?: MarketPrice;
   cardmarketUrl?: string;
   priceIssue?: 'suspect';
+  priceDiagnostic?: string;
+  cardmarketProductId?: number;
   tcgplayer?: Partial<Record<'normal' | 'holo', TcgplayerReference>>;
 }
 export const catalogSetSchema = z.object({
@@ -696,6 +698,10 @@ export async function catalogEntry(
     );
     if (paired[0]?.image) card.image = catalogArtworkUrl(paired[0].image);
   }
+  if (imageFallback && !card.image && language === 'ja') {
+    const art = await secondaryCardArt(card);
+    if (art) card.image = art.url;
+  }
   const quote = raw.pricing?.cardmarket;
   const updated = observedPriceDate(quote?.updated);
   const bestQuote = (foil: boolean): MarketPrice | undefined => {
@@ -807,6 +813,18 @@ export async function catalogEntry(
     holoPrice,
     cardmarketUrl,
     priceIssue: (suspect || wrongProduct) && !price ? 'suspect' : undefined,
+    cardmarketProductId: verified?.productId ?? quote?.idProduct,
+    priceDiagnostic: price
+      ? undefined
+      : verified
+        ? 'Verifizierter Preis abgelaufen oder im Preisguide nicht verfügbar'
+        : suspect || wrongProduct
+          ? 'Produktzuordnung widersprüchlich: andere Druckausgabe'
+          : !quote
+            ? 'Provider liefert keinen Cardmarket-Preis'
+            : !updated
+              ? 'Preiszeitpunkt fehlt oder ist ungültig'
+              : 'Keine positive EUR-Referenz für diese Druckvariante',
     ...(Object.keys(tcgplayer).length ? { tcgplayer } : {}),
   };
 }

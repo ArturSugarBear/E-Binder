@@ -403,7 +403,9 @@ test('card details expose a dated EUR trend and an exact external listing withou
   await page.keyboard.press('Escape');
   await expect(card).toBeFocused();
   await main.locator('.w-search-results button').nth(1).click();
-  await expect(dialog).toContainText('kein datierter EUR-Preis');
+  await expect(dialog).toContainText(
+    'Keine positive EUR-Referenz für diese Druckvariante',
+  );
   await expect(dialog.locator('a')).toHaveCount(0);
   await expect(dialog).not.toContainText('0,00');
   await page.keyboard.press('Escape');

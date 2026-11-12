@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
@@ -591,7 +592,7 @@ export function openPageScanner(
         el(
           'span',
           'w-page-scan-candidate-caption',
-          el('strong', '', card.name),
+          el('strong', '', localizedCardName(card)),
           el('small', '', `${card.setName} · ${card.number}`),
         ),
       );

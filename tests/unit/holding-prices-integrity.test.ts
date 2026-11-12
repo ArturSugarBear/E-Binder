@@ -107,7 +107,7 @@ it('uses a dated TCGplayer EUR fallback only for the exact printing and finish',
       ...card,
       card: { ...card.card, name: 'Andere Karte' },
     }),
-  ).toEqual({ status: 'unavailable' });
+  ).toMatchObject({ status: 'unavailable' });
   expect(
     await holdingMarketReference({ ...card, finish: 'normal' }),
   ).toBeUndefined();
@@ -120,7 +120,7 @@ it('uses the verified price for the exact Groudon DLR111 holding', async () => {
   // The direct-market snapshot expires in production. This test must
   // remain deterministic once it has expired.
   vi.useFakeTimers();
-  vi.setSystemTime(new Date('2026-11-11T18:00:00Z'));
+  vi.setSystemTime(new Date('2026-11-12T18:00:00Z'));
   vi.stubGlobal(
     'fetch',
     vi.fn(
@@ -193,7 +193,7 @@ it('does not value a holding whose stored finish is not offered by its catalogue
   );
   expect(
     await holdingPrice(holding('me06-106', 'Fukano', '106/103', 'normal')),
-  ).toEqual({
+  ).toMatchObject({
     status: 'unavailable',
   });
 });

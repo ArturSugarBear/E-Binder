@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { action, el, icon } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 
@@ -195,7 +196,7 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       el(
         'div',
         '',
-        el('strong', '', holding.card.name),
+        el('strong', '', localizedCardName(holding.card)),
         el('small', '', `${holding.card.setName} · ${holding.card.number}`),
       ),
     );

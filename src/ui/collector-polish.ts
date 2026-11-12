@@ -13,6 +13,19 @@ const prefersOpaque = () =>
  */
 export function initCollectorMaterial(): void {
   const nav = document.querySelector<HTMLElement>('.w-mobile-nav');
+  if (nav) {
+    const updateClearance = () => {
+      const box = nav.getBoundingClientRect();
+      document.documentElement.style.setProperty(
+        '--mobile-nav-clearance',
+        `${Math.max(0, window.innerHeight - box.top)}px`,
+      );
+    };
+    new ResizeObserver(updateClearance).observe(nav);
+    window.addEventListener('resize', updateClearance);
+    updateClearance();
+  }
+
   if (!nav || nav.querySelector('.w-liquid-optic') || prefersOpaque()) return;
   const optic = document.createElement('liquid-glass');
   optic.className = 'w-liquid-optic';
