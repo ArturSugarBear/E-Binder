@@ -174,6 +174,9 @@ test('deep links restore filters and paging; wish actions retain the catalogue w
   );
   await main.locator('.w-search-results button').click();
   const preview = page.getByRole('dialog');
+  const extra = preview.locator('.w-collector-card-extras');
+  await expect(extra).not.toHaveAttribute('open');
+  await extra.locator('summary').click();
   await expect(preview).toContainText('Noch nicht im Bestand');
   await preview
     .getByRole('button', { name: 'Auf die Wunschliste', exact: true })
