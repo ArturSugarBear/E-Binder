@@ -47,6 +47,7 @@ import {
   type PocketDecision,
 } from '../domain/binder-scan-review';
 import { recordBetaEvent } from '../data/beta-diagnostics';
+import { donateBetaScanPhoto } from '../data/beta-scan-donation';
 import type { WorkspaceContext } from './workspace-context';
 
 type Decision = PocketDecision;
@@ -1202,6 +1203,7 @@ export function openPageScanner(
       const tiles = await extractPagePockets(aligned.blob, lifetime.signal);
       if (closed || lifetime.signal.aborted) return;
       buildGrid(tiles);
+      void donateBetaScanPhoto(aligned.blob, 'page');
       void recognizeAll(tiles);
     } catch (error) {
       if (!closed) {
