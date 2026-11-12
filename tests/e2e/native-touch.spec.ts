@@ -128,6 +128,7 @@ test('the collection preview browses cards with swipes but protects unsaved edit
   await expect
     .poll(async () => (await pager.textContent())?.trim())
     .not.toBe(before);
+  await sheet.locator('.w-collector-card-extras > summary').click();
   await sheet.getByLabel('Deine Notiz').fill('Vorläufige Notiz');
   const current = (await pager.textContent())?.trim();
   const backEnabled = await sheet
