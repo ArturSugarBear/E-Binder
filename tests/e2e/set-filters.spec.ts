@@ -139,9 +139,16 @@ test('set filters exclude impossible rarities and show a genuine example beyond 
     .click();
   const dialog = page.getByRole('dialog');
   await expect(
-    dialog.getByRole('heading', { name: 'Testkarte 25', exact: true }),
+    dialog.getByRole('heading', {
+      name: 'Testkarte 25',
+      exact: true,
+      level: 2,
+    }),
   ).toBeVisible();
-  await expect(dialog).toContainText('025/132 · DE');
+  await expect(dialog.locator('.w-collector-card-number')).toHaveText(
+    '025/132',
+  );
+  await expect(dialog.locator('.w-art-language')).toHaveText('Bild: DE');
   await expect(dialog).toContainText('Artist B');
   await dialog
     .getByRole('button', { name: 'Testkarte 25 schließen', exact: true })
