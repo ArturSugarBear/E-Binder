@@ -185,6 +185,60 @@ await pool(english, async (set) => {
       report.errors.push(String(error));
     }
   }
+  // TCGdex does not host artwork for 30th-c (upstream issue #2341).
+  // This curated mapping is keyed by its sequential 001–030 printing ID,
+  // never by historical collector number: e.g. 11 and 106 occur repeatedly.
+  if (set.id === '30th-c') {
+    try {
+      const curated = JSON.parse(await readFile(`${root}/30th-c.json`, 'utf8'));
+      const summaries = full.cards ?? [];
+      const expected = summaries.map((card) => {
+        if (!card.id?.startsWith('30th-c-'))
+          throw new Error('Unexpected Classic Collection printing ID');
+        return card.id.slice('30th-c-'.length);
+      });
+      const ids = Object.keys(curated.cards ?? {});
+      if (
+        curated.setId !== set.id ||
+        curated.providerSet !== 'me55c' ||
+        summaries.length !== 30 ||
+        new Set(expected).size !== 30 ||
+        ids.length !== 30 ||
+        expected.some((id) => !Object.hasOwn(curated.cards, id))
+      )
+        throw new Error('Classic Collection catalogue / mapping mismatch');
+      const mapped = Object.values(curated.cards);
+      if (new Set(mapped.map((card) => card.providerId)).size !== 30)
+        throw new Error('Classic Collection has duplicated provider IDs');
+      for (const card of mapped) {
+        if (
+          card.language !== 'en' ||
+          !/^me55c-[0-9]+[a-z]?$/.test(card.providerId) ||
+          card.url !==
+            `https://images.scrydex.com/pokemon/${card.providerId}/large`
+        )
+          throw new Error('Unverified Classic Collection art identity');
+      }
+      const available = await Promise.all(
+        mapped.map((card) => probe(card.url)),
+      );
+      if (available.some((good) => !good))
+        throw new Error('One or more Classic Collection images unavailable');
+      entry.providerSet = 'me55c';
+      entry.cards = '30th-c.json';
+      row.indexedCards = 30;
+      row.classicCollectionAudit = {
+        source: curated.source,
+        catalogueCards: summaries.length,
+        verifiedImageUrls: 30,
+        note: 'Exact sequential printing IDs, including distinct historical number collisions; URLs validated as image responses.',
+      };
+    } catch (error) {
+      report.errors.push(
+        `Classic Collection artwork audit failed: ${String(error)}`,
+      );
+    }
+  }
   if (set.id === 'mep') {
     try {
       const headers = {
