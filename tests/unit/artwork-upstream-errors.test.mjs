@@ -7,9 +7,12 @@ describe('release artwork transient upstream classification', () => {
     'Set metadata unavailable (de:sv08.5): Error: 429: https://api.tcgdex.net/v2/de/sets/sv08.5',
     'Promo artwork audit failed: Error: 503: https://api.tcgdex.net/v2/en/cards/mep-028',
     'Promo artwork audit failed: Error: 502: https://api.tcgdex.net/v2/en/cards/mep-099',
-  ])('allows only genuine transient TCGdex metadata failures: %s', (message) => {
-    expect(isTransientArtworkUpstreamFailure(message)).toBe(true);
-  });
+  ])(
+    'allows only genuine transient TCGdex metadata failures: %s',
+    (message) => {
+      expect(isTransientArtworkUpstreamFailure(message)).toBe(true);
+    },
+  );
 
   it.each([
     'Set metadata unavailable (en:base1): Error: 503: https://api.tcgdex.net/v2/de/sets/base1',
