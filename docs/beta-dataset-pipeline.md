@@ -21,7 +21,7 @@ Primär: **Exact Printing Top-1** aus Set, Sammlernummer, vollständigem Namen, 
 - Keine Client-Service-Role-Keys und kein öffentliches Storage.
 - Maximal 1,5 MB JPEG pro Objekt und ein benutzergebundener UUID-Pfad.
 - Fotos nur für den erklärten Zweck, kein Verkauf oder Weitergeben ohne separate Rechteklärung.
-- Retention und Widerruf müssen auch das tatsächliche Storage-Objekt erfassen.
+- Retention und Widerruf müssen auch das tatsächliche Storage-Objekt erfassen; die Profil-Löschung umfasst ausstehende sowie bereits bewertete Aufnahmen.
 - Produktionsgewichte erst nach erfolgreicher unabhängiger Benchmarkprüfung ändern.
 
 ## Der aktuelle Implementierungsstand
