@@ -35,7 +35,15 @@ export function suggestCardCorners(
   // Preserve the existing good path for high-contrast, nearly full-frame
   // cards, but never use a page quad with non-card proportions.
   const page = suggestPageCorners(rgba, width, height);
-  if (page && plausibleCardQuad(page, width, height)) return page;
+  const whollyVisible = (quad: Quad): boolean =>
+    quad.every((point) =>
+      point.x > 0.07 &&
+      point.x < 0.93 &&
+      point.y > 0.07 &&
+      point.y < 0.93,
+    );
+  if (page && plausibleCardQuad(page, width, height) && whollyVisible(page))
+    return page;
 
   const gray = new Uint8Array(width * height);
   for (let i = 0; i < gray.length; i++) {
@@ -136,18 +144,20 @@ export function suggestCardCorners(
             crossing(r, b),
             crossing(l, b),
           ];
-          if (!plausibleCardQuad(corners, width, height)) continue;
+          if (
+            !plausibleCardQuad(corners, width, height) ||
+            !whollyVisible(corners)
+          )
+            continue;
           try {
             cardProjection(corners);
           } catch {
             continue;
           }
-          const area =
-            ((r.position - l.position) * (b.position - t.position));
+          const area = (r.position - l.position) * (b.position - t.position);
           // Prefer a complete visible outer border over a stronger inner
           // artwork frame; the physical shape is still validated above.
-          const score =
-            l.score + r.score + t.score + b.score + area * 70;
+          const score = l.score + r.score + t.score + b.score + area * 70;
           if (score > bestScore) {
             best = corners;
             bestScore = score;
