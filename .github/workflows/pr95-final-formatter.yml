@@ -1,0 +1,43 @@
+name: Temporary PR95 full formatter
+on:
+  push:
+    branches:
+      - fix/30th-classic-art-and-live-scanner-20261112
+permissions:
+  contents: write
+jobs:
+  format:
+    if: "!contains(github.event.head_commit.message, '[formatted-ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Apply project Prettier rules
+        run: |
+          npx prettier --write \
+            scripts/audit-catalog-art.mjs \
+            scripts/audit-catalog-card-coverage.mjs \
+            src/data/japanese-catalog.ts \
+            src/data/artwork-fallbacks.ts \
+            src/data/card-images.ts \
+            src/domain/card-outline.ts \
+            src/ui/live-scan.ts \
+            tests/unit/p0-resolvers.test.ts \
+            tests/unit/artwork-fallbacks.test.ts \
+            tests/unit/card-outline.test.ts \
+            tests/e2e/classic-collection.spec.ts \
+            .github/workflows/pages.yml \
+            package.json
+      - name: Commit formatted code
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/pages.yml package.json scripts src tests
+          if ! git diff --cached --quiet; then
+            git commit -m "style: apply PR95 formatting [formatted-ci]"
+            git push origin HEAD:fix/30th-classic-art-and-live-scanner-20261112
+          fi
