@@ -858,6 +858,7 @@ export function openPageScanner(
         (label) => {
           status.textContent = 'Binderkarten werden gelesen · ' + label;
         },
+        { language: () => language.value },
       );
       // Start loading ONNX immediately, before per-card quality inspection.
       sharedRecognition.warmup();

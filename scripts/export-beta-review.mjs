@@ -84,7 +84,11 @@ const samples = selected
       current.has(s.userId) &&
       current.get(s.userId).consented_at === s.consentedAt,
   )
-  .map(({ userId: _, ...s }) => s);
+  .map((s) => {
+    const record = { ...s };
+    delete record.userId;
+    return record;
+  });
 if (!samples.length)
   throw new Error('No currently consented samples available');
 const key = randomBytes(32),

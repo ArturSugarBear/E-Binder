@@ -72,3 +72,32 @@ describe('versioned scanner benchmark results', () => {
     expect(percentile([100, 500, 300], 0.5)).toBe(300);
   });
 });
+
+it('reports per-language misses, latency and incorrect automatic identities without calling ranked guesses confident', () => {
+  const reports = [
+    {
+      language: 'ja',
+      expectedKey: 'tcgdex:ja:M1L-088',
+      conditions: [],
+      automaticKey: 'tcgdex:ja:M1S-088',
+      ...rankMatch('tcgdex:ja:M1L-088', ['tcgdex:ja:M1S-088']),
+      resultStatus: 'candidates',
+      durationMs: 100,
+      phasesMs: { recognitionAndReview: 80 },
+    },
+    {
+      language: 'de',
+      expectedKey: 'tcgdex:de:sv01-001',
+      conditions: [],
+      automaticKey: null,
+      ...rankMatch('tcgdex:de:sv01-001', []),
+      resultStatus: 'no-candidates',
+      durationMs: 200,
+    },
+  ];
+  const summary = cardSummary(reports);
+  expect(summary.byLanguage.ja.incorrectConfidentMatches).toBe(1);
+  expect(summary.byLanguage.ja.p95RecognitionMs).toBe(80);
+  expect(summary.byLanguage.de.noMatchRate).toBe(1);
+  expect(summary.byLanguage.en.top1Rate).toBeNull();
+});

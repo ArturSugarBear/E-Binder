@@ -242,12 +242,20 @@ test('exact Japanese printing suggestions render safely and can be reviewed as a
     class FixedOcr {
       onmessage:
         | ((
-            event: MessageEvent<{ type: string; id: number; text: string }>,
+            event: MessageEvent<{ type: string; id?: number; text?: string }>,
           ) => void)
         | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id?: number; warmup?: boolean }) {
-        if (data.warmup || typeof data.id !== 'number') return;
+        if (data.warmup) {
+          queueMicrotask(() =>
+            this.onmessage?.(
+              new MessageEvent('message', { data: { type: 'ready' } }),
+            ),
+          );
+          return;
+        }
+        if (typeof data.id !== 'number') return;
         const id = data.id;
         setTimeout(() => {
           this.onmessage?.(

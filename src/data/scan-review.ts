@@ -41,7 +41,7 @@ export function scanEvidence(
     clues.some(
       (clue) =>
         Boolean(clue.setId) &&
-        clue.setId === card.setId &&
+        clue.setId?.toLowerCase() === card.setId.toLowerCase() &&
         numberKey(clue.number) === numberKey(card.number) &&
         (!clue.language || clue.language === card.language),
     ),
