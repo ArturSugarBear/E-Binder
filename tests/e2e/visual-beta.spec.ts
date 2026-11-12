@@ -16,9 +16,7 @@ test('visual AI beta is explicitly opt-in, model is real, and private photos sta
   ).toBeVisible();
   await expect(page.getByText('9 geprüften Kartenmotiven')).toBeVisible();
   // A local beta choice is NOT the separate remote training-photo consent.
-  await page
-    .getByRole('button', { name: 'Visuelle KI Beta testen' })
-    .click();
+  await page.getByRole('button', { name: 'Visuelle KI Beta testen' }).click();
   await expect(
     page.getByRole('button', { name: 'Visuelle KI Beta ausschalten' }),
   ).toBeVisible();
@@ -56,7 +54,9 @@ test('visual AI beta is explicitly opt-in, model is real, and private photos sta
     .toBeGreaterThan(0);
   // Opening the scanner never creates inventory.
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Karten hinzufügen schließen' }).click();
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen schließen' })
+    .click();
   await page.goto('./#profil');
   await page
     .getByRole('button', { name: 'Visuelle KI Beta ausschalten' })

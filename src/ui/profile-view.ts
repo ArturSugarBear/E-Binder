@@ -94,16 +94,22 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       el(
         'p',
         'w-muted',
-        'Testmodell mit ' + VISUAL_BETA_REFERENCE_COUNT +
+        'Testmodell mit ' +
+          VISUAL_BETA_REFERENCE_COUNT +
           ' geprüften Kartenmotiven. Es kann keine beliebigen Pokémon-Karten erkennen. ' +
           'Bildähnlichkeit ergänzt OCR nur bei der Prüfung einer Einzelkarte oder Binderseite. ' +
           'Keine automatische Bestandsübernahme und kein Upload für die Bildsuche.',
       ),
       action(
-        visualActive ? 'Visuelle KI Beta ausschalten' : 'Visuelle KI Beta testen',
+        visualActive
+          ? 'Visuelle KI Beta ausschalten'
+          : 'Visuelle KI Beta testen',
         () => {
           if (!setVisualBetaEnabled(!visualActive)) {
-            ctx.notify('Die Einstellung konnte nicht gespeichert werden.', true);
+            ctx.notify(
+              'Die Einstellung konnte nicht gespeichert werden.',
+              true,
+            );
             return;
           }
           ctx.notify(

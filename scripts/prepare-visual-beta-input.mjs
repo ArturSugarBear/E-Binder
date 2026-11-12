@@ -10,10 +10,17 @@
 import { readFile, writeFile, stat } from 'node:fs/promises';
 
 const source = await readFile('src/data/verified-images.ts', 'utf8');
-const matches = [...source.matchAll(/^\s*'([a-zA-Z0-9]+-[a-zA-Z0-9]+)': '([a-zA-Z0-9]+-[a-zA-Z0-9]+)',?$/gm)];
-if (matches.length !== 9) throw Error('Visual pilot list changed; explicit review required.');
+const matches = [
+  ...source.matchAll(
+    /^\s*'([a-zA-Z0-9]+-[a-zA-Z0-9]+)': '([a-zA-Z0-9]+-[a-zA-Z0-9]+)',?$/gm,
+  ),
+];
+if (matches.length !== 9)
+  throw Error('Visual pilot list changed; explicit review required.');
 const collection = JSON.parse(await readFile('public/collection.json', 'utf8'));
-const cards = new Map(collection.flatMap((chapter) => chapter.cards).map((card) => [card.id, card]));
+const cards = new Map(
+  collection.flatMap((chapter) => chapter.cards).map((card) => [card.id, card]),
+);
 const references = [];
 for (const [, sourceId, stem] of matches) {
   const card = cards.get(stem);
@@ -24,7 +31,8 @@ for (const [, sourceId, stem] of matches) {
   if (Number(suffix) !== Number(printed))
     throw Error('Card number mismatch for ' + sourceId);
   const path = 'public/assets/cards/' + stem + '.webp';
-  if (!(await stat(path)).isFile()) throw Error('Artwork file missing: ' + stem);
+  if (!(await stat(path)).isFile())
+    throw Error('Artwork file missing: ' + stem);
   references.push({
     id: 'de:' + sourceId,
     language: 'de',
@@ -35,9 +43,16 @@ for (const [, sourceId, stem] of matches) {
 }
 if (new Set(references.map((item) => item.id)).size !== references.length)
   throw Error('Duplicate visual reference');
-await writeFile('visual-beta-reference-input.json', JSON.stringify({
-  modelId: 'dinov2-small-onnx-08c606e-int8-beta9',
-  preprocessing: 'imagenet-meanstd-chw-stretch',
-  references,
-}, null, 2) + '\n');
+await writeFile(
+  'visual-beta-reference-input.json',
+  JSON.stringify(
+    {
+      modelId: 'dinov2-small-onnx-08c606e-int8-beta9',
+      preprocessing: 'imagenet-meanstd-chw-stretch',
+      references,
+    },
+    null,
+    2,
+  ) + '\n',
+);
 console.log('Prepared ' + references.length + ' exact-print pilot references.');

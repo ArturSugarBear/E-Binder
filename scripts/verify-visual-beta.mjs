@@ -13,7 +13,9 @@ if (
   manifest.pooling !== 'cls' ||
   manifest.modelId !== 'dinov2-small-onnx-08c606e-int8-beta9'
 )
-  throw Error('Visual beta manifest is unverified or claims incorrect coverage');
+  throw Error(
+    'Visual beta manifest is unverified or claims incorrect coverage',
+  );
 for (const [file, hash] of [
   [manifest.modelFile, manifest.modelSha256],
   [manifest.indexFile, manifest.indexSha256],
@@ -30,11 +32,21 @@ if ((await stat(root + manifest.modelFile)).size !== 24427763)
 if ((await stat(root + manifest.indexFile)).size !== 9 * 384)
   throw Error('Wrong index vector dimensions');
 const refs = JSON.parse(await readFile(root + manifest.referencesFile, 'utf8'));
-if (!Array.isArray(refs) || refs.length !== 9 ||
-    new Set(refs.map((r) => r.id)).size !== 9 ||
-    refs.some((r) => r.language !== 'de' ||
+if (
+  !Array.isArray(refs) ||
+  refs.length !== 9 ||
+  new Set(refs.map((r) => r.id)).size !== 9 ||
+  refs.some(
+    (r) =>
+      r.language !== 'de' ||
       !/^de:sv0[123]-\d{3}$/.test(r.id) ||
       r.id.split(':')[1].split('-')[0] !== r.setId ||
-      !/^[0-9]{3}\/[0-9]{3}$/.test(r.number)))
-  throw Error('Unreviewed visual references: beta must contain nine exact DE printings');
-console.log('Visual pilot checks passed: 9 exact printings; model and index integrity confirmed.');
+      !/^[0-9]{3}\/[0-9]{3}$/.test(r.number),
+  )
+)
+  throw Error(
+    'Unreviewed visual references: beta must contain nine exact DE printings',
+  );
+console.log(
+  'Visual pilot checks passed: 9 exact printings; model and index integrity confirmed.',
+);
