@@ -48,7 +48,7 @@ export function trustedArtwork(url: string): boolean {
 export async function secondaryCardArt(
   card: PersonalCard,
 ): Promise<Art | undefined> {
-  if (card.language === 'ja') {
+  if (card.language === 'ja' || /^(?:M1L|M1S)$/i.test(card.setId)) {
     try {
       const match = await japanesePrinting(card);
       if (match)
