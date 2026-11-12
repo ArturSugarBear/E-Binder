@@ -372,9 +372,6 @@ export function openPageScanner(
     const matches = pockets.filter(
       (pocket) => pocket.decision === 'card',
     ).length;
-    const empty = pockets.filter(
-      (pocket) => pocket.decision === 'empty',
-    ).length;
     const open = pockets.filter(
       (pocket) => pocket.decision === 'pending',
     ).length;
