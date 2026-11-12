@@ -46,7 +46,7 @@ function frame(
 it('recognizes a centered physical card rather than requiring a full binder page', () => {
   const result = suggestCardCorners(frame('card'), 192, 256);
   expect(result).not.toBeNull();
-  expect(result![0]!.x).toBeGreaterThan(0.10);
+  expect(result![0]!.x).toBeGreaterThan(0.1);
   expect(result![0]!.x).toBeLessThan(0.27);
   expect(result![0]!.y).toBeGreaterThan(0.07);
   expect(result![0]!.y).toBeLessThan(0.22);

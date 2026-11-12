@@ -76,9 +76,12 @@ it('rejects arbitrary hosts and ambiguous collector numbers', async () => {
 
 it('maps all 30 Classic Collection printings by TCGdex ID, not reused historical number', async () => {
   vi.resetModules();
-  const { default: classic } = await import('../../public/catalog-art/30th-c.json');
+  const { default: classic } =
+    await import('../../public/catalog-art/30th-c.json');
   expect(Object.keys(classic.cards)).toHaveLength(30);
-  expect(new Set(Object.values(classic.cards).map((art) => art.providerId)).size).toBe(30);
+  expect(
+    new Set(Object.values(classic.cards).map((art) => art.providerId)).size,
+  ).toBe(30);
   expect(classic.cards['003'].providerId).toBe('me55c-11');
   expect(classic.cards['004'].providerId).toBe('me55c-11g');
   expect(classic.cards['022'].providerId).toBe('me55c-106p');

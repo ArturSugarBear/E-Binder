@@ -190,9 +190,7 @@ await pool(english, async (set) => {
   // never by historical collector number: e.g. 11 and 106 occur repeatedly.
   if (set.id === '30th-c') {
     try {
-      const curated = JSON.parse(
-        await readFile(`${root}/30th-c.json`, 'utf8'),
-      );
+      const curated = JSON.parse(await readFile(`${root}/30th-c.json`, 'utf8'));
       const summaries = full.cards ?? [];
       const expected = summaries.map((card) => {
         if (!card.id?.startsWith('30th-c-'))
@@ -236,7 +234,9 @@ await pool(english, async (set) => {
         note: 'Exact sequential printing IDs, including distinct historical number collisions; URLs validated as image responses.',
       };
     } catch (error) {
-      report.errors.push(`Classic Collection artwork audit failed: ${String(error)}`);
+      report.errors.push(
+        `Classic Collection artwork audit failed: ${String(error)}`,
+      );
     }
   }
   if (set.id === 'mep') {

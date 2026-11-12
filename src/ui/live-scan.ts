@@ -520,7 +520,8 @@ export function openLiveScanner(
     if (busy || document.hidden || time - sampled < 280) return;
     if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
       if (time - cameraReadyAt > 3000)
-        status.textContent = 'Warte auf ein Kamerabild · Kamera und Berechtigung prüfen';
+        status.textContent =
+          'Warte auf ein Kamerabild · Kamera und Berechtigung prüfen';
       return;
     }
     sampled = time;

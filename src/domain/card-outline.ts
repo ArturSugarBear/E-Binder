@@ -36,11 +36,9 @@ export function suggestCardCorners(
   // cards, but never use a page quad with non-card proportions.
   const page = suggestPageCorners(rgba, width, height);
   const whollyVisible = (quad: Quad): boolean =>
-    quad.every((point) =>
-      point.x > 0.07 &&
-      point.x < 0.93 &&
-      point.y > 0.07 &&
-      point.y < 0.93,
+    quad.every(
+      (point) =>
+        point.x > 0.07 && point.x < 0.93 && point.y > 0.07 && point.y < 0.93,
     );
   if (page && plausibleCardQuad(page, width, height) && whollyVisible(page))
     return page;
@@ -49,9 +47,7 @@ export function suggestCardCorners(
   for (let i = 0; i < gray.length; i++) {
     const n = i * 4;
     gray[i] = Math.round(
-      0.2126 * rgba[n]! +
-        0.7152 * rgba[n + 1]! +
-        0.0722 * rgba[n + 2]!,
+      0.2126 * rgba[n]! + 0.7152 * rgba[n + 1]! + 0.0722 * rgba[n + 2]!,
     );
   }
 
@@ -72,8 +68,7 @@ export function suggestCardCorners(
           const p = position + slope * (t - 0.5);
           const x = Math.round((axis === 'vertical' ? p : t) * (width - 1));
           const y = Math.round((axis === 'vertical' ? t : p) * (height - 1));
-          if (x < 3 || x >= width - 3 || y < 3 || y >= height - 3)
-            continue;
+          if (x < 3 || x >= width - 3 || y < 3 || y >= height - 3) continue;
           const before =
             axis === 'vertical'
               ? gray[y * width + x - 2]!
@@ -92,8 +87,7 @@ export function suggestCardCorners(
         const coverage = strong / count;
         const coherence = Math.abs(signed) / magnitude;
         const strength = magnitude / count;
-        if (coverage < 0.57 || coherence < 0.66 || strength < 32)
-          continue;
+        if (coverage < 0.57 || coherence < 0.66 || strength < 32) continue;
         const score = strength * (0.4 + 0.6 * coverage) * coherence;
         candidates.push({ position, slope, score });
       }
@@ -126,8 +120,7 @@ export function suggestCardCorners(
     const denominator = 1 - vertical.slope * horizontal.slope;
     const x =
       (vertical.position +
-        vertical.slope *
-          (horizontal.position - 0.5 - horizontal.slope * 0.5)) /
+        vertical.slope * (horizontal.position - 0.5 - horizontal.slope * 0.5)) /
       denominator;
     return { x, y: horizontal.position + horizontal.slope * (x - 0.5) };
   }
