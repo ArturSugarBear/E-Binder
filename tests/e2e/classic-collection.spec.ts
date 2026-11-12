@@ -63,6 +63,14 @@ test('30th Classic Collection displays exact Scrydex images despite reused histo
   await expect(results.locator('button')).toHaveCount(6, {
     timeout: 20000,
   });
+  // Regression: the old gallery forced a text-only layout whenever TCGdex
+  // omitted image fields, ignoring the published 30 exact-print index.
+  await expect(results).not.toHaveClass(/w-text-results/);
+  await expect(results.locator('.card-art')).toHaveCount(6);
+  await expect(results).not.toContainText('Ohne geprüftes Katalogbild');
+  await expect(page.locator('.w-set-filter-status')).toContainText(
+    'geprüfte alternative Kartenbilder',
+  );
   for (const [localId, name, providerId] of records) {
     const card = results.locator('button').filter({ hasText: name });
     await expect(card.locator('.card-art img')).toHaveAttribute(
