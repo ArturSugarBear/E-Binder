@@ -27,6 +27,7 @@ type MatchRequest = {
   id: number;
   photo: Blob;
   manifestUrl: string;
+  warmup?: boolean;
 };
 const scope = self as unknown as {
   onmessage: ((event: MessageEvent<MatchRequest>) => void) | null;
@@ -236,7 +237,15 @@ let sequence = Promise.resolve();
 scope.onmessage = (event) => {
   const request = event.data;
   sequence = sequence
-    .then(() => match(request))
+    .then(async () => {
+      // Load and verify the same-origin ONNX weights/index while the collector
+      // is preparing a photo. No private pixels are passed during warmup.
+      if (request.warmup) {
+        await load(request.manifestUrl);
+        return;
+      }
+      await match(request);
+    })
     .catch((error: unknown) => {
       scope.postMessage({
         id: request.id,
