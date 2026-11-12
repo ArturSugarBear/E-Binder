@@ -266,7 +266,10 @@ export function openAddCards(
           return 'added';
         },
         () => camera.click(),
-        () => pendingScanCount(ctx.state.captures.filter((shot) => transientPhotos.has(shot.id))),
+        () =>
+          pendingScanCount(
+            ctx.state.captures.filter((shot) => transientPhotos.has(shot.id)),
+          ),
         () => {
           sheet.close();
           ctx.openPageScan();
@@ -347,9 +350,23 @@ export function openAddCards(
       'section',
       'w-quick-finished-panel',
       el('h3', '', 'Karte übernommen'),
-      el('p', 'w-muted', 'Du kannst sofort weiterscannen oder zur Sammlung zurückkehren.'),
-      action('Nächste Karte scannen', () => takePhoto.click(), 'primary', 'camera'),
-      action('Fertig · Sammlung ansehen', () => sheet.close(), 'secondary', 'check'),
+      el(
+        'p',
+        'w-muted',
+        'Du kannst sofort weiterscannen oder zur Sammlung zurückkehren.',
+      ),
+      action(
+        'Nächste Karte scannen',
+        () => takePhoto.click(),
+        'primary',
+        'camera',
+      ),
+      action(
+        'Fertig · Sammlung ansehen',
+        () => sheet.close(),
+        'secondary',
+        'check',
+      ),
     ),
   );
   sheet.footer.append(
@@ -475,7 +492,9 @@ export function openAddCards(
       queue.classList.remove('is-expanded');
       const current = currentPending();
       if (!current.length) return;
-      queue.append(el('p', 'w-eyebrow', current.length + ' offen · zur Prüfung'));
+      queue.append(
+        el('p', 'w-eyebrow', current.length + ' offen · zur Prüfung'),
+      );
       const tabs = el('div', 'w-quick-review-tabs');
       for (const [index, shot] of current.entries()) {
         const tab = action(
@@ -610,8 +629,7 @@ export function openAddCards(
   };
 
   let liveProgressHook:
-    | ((active: boolean, detail?: string) => void)
-    | undefined;
+    ((active: boolean, detail?: string) => void) | undefined;
   function prepareLiveOcr(): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrSession) return;
     try {
@@ -642,7 +660,10 @@ export function openAddCards(
     const started = performance.now();
     liveProgressHook = onAnalysisState;
     onAnalysisState(true);
-    onAnalysisState(true, 'Erkennungsmodell und Kartendetails werden lokal geprüft …');
+    onAnalysisState(
+      true,
+      'Erkennungsmodell und Kartendetails werden lokal geprüft …',
+    );
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
@@ -1287,9 +1308,11 @@ export function openAddCards(
     sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
     showQueue();
     showCapture();
-    tell(captureId
-      ? 'Karte übernommen · nächste Karte prüfen.'
-      : 'Karte übernommen · fertig oder nächste Karte scannen.');
+    tell(
+      captureId
+        ? 'Karte übernommen · nächste Karte prüfen.'
+        : 'Karte übernommen · fertig oder nächste Karte scannen.',
+    );
     if (reviewingLiveQueue && !captureId) {
       sheet.dialog.classList.add('w-quick-finished');
     }
@@ -2118,9 +2141,11 @@ export function openAddCards(
           results.replaceChildren();
           showQueue();
           showCapture();
-          tell(captureId
-            ? 'Karte übernommen · nächste Karte prüfen.'
-            : 'Karte übernommen · fertig oder nächste Karte scannen.');
+          tell(
+            captureId
+              ? 'Karte übernommen · nächste Karte prüfen.'
+              : 'Karte übernommen · fertig oder nächste Karte scannen.',
+          );
           if (reviewingLiveQueue && !captureId) {
             sheet.dialog.classList.add('w-quick-finished');
           }

@@ -43,9 +43,7 @@ import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
 import { rankScanCandidates } from '../data/scan-review';
 import { discoverNumberedCards } from '../data/scan-auto-resolve';
-import {
-  type PocketDecision,
-} from '../domain/binder-scan-review';
+import { type PocketDecision } from '../domain/binder-scan-review';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import type { WorkspaceContext } from './workspace-context';
 
@@ -250,7 +248,9 @@ export function openPageScanner(
         chosen++;
       }
       if (chosen) {
-        status.textContent = chosen + ' Vorschläge ausgewählt. Prüfe die Kartenausgaben im Raster und tippe erst danach auf „Karten übernehmen“.';
+        status.textContent =
+          chosen +
+          ' Vorschläge ausgewählt. Prüfe die Kartenausgaben im Raster und tippe erst danach auf „Karten übernehmen“.';
         updateSave();
       }
     },
@@ -388,15 +388,19 @@ export function openPageScanner(
           ? 'Deine Karten werden geprüft …'
           : 'Noch keine Karte sicher zugeordnet. Tippe auf ein Fach, um einen Vorschlag zu prüfen.'
       : 'Bereit für deine Binderseite.';
-    save.querySelector('span')!.textContent = matches > 0
-      ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
-      : 'Noch keine Karten gefunden';
+    save.querySelector('span')!.textContent =
+      matches > 0
+        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
+        : 'Noch keine Karten gefunden';
     const suggestedCount = pockets.filter(
       (pocket) => pocket.decision === 'pending' && pocket.suggested,
     ).length;
     acceptSuggestions.hidden = processing || suggestedCount === 0;
     acceptSuggestions.querySelector('span')!.textContent =
-      suggestedCount + ' eindeutige ' + (suggestedCount === 1 ? 'Ausgabe' : 'Ausgaben') + ' auswählen';
+      suggestedCount +
+      ' eindeutige ' +
+      (suggestedCount === 1 ? 'Ausgabe' : 'Ausgaben') +
+      ' auswählen';
     skipUnresolved.hidden = open === 0;
     skipUnresolved.disabled = processing || reAligning || open === 0;
     const emptyHints = pockets.filter(

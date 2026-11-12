@@ -230,7 +230,6 @@ test('a distorted photo is split into nine reviewable positions without changing
   ).toBeVisible();
 });
 
-
 test('exact Japanese printing suggestions render safely and can be reviewed as a page', async ({
   page,
 }) => {
@@ -241,14 +240,24 @@ test('exact Japanese printing suggestions render safely and can be reviewed as a
   await page.addInitScript(() => {
     const NativeWorker = window.Worker;
     class FixedOcr {
-      onmessage: ((event: MessageEvent<{ type: string; id: number; text: string }>) => void) | null = null;
+      onmessage:
+        | ((
+            event: MessageEvent<{ type: string; id: number; text: string }>,
+          ) => void)
+        | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id?: number; warmup?: boolean }) {
         if (data.warmup || typeof data.id !== 'number') return;
         setTimeout(() => {
-          this.onmessage?.(new MessageEvent('message', {
-            data: { type: 'done', id: data.id, text: 'M1L 088/063\nメガルカリオex' },
-          }));
+          this.onmessage?.(
+            new MessageEvent('message', {
+              data: {
+                type: 'done',
+                id: data.id,
+                text: 'M1L 088/063\nメガルカリオex',
+              },
+            }),
+          );
         }, 15);
       }
       terminate() {}
@@ -260,20 +269,27 @@ test('exact Japanese printing suggestions render safely and can be reviewed as a
         super(url, options);
       }
     }
-    Object.defineProperty(window, 'Worker', { configurable: true, value: InterceptWorker });
+    Object.defineProperty(window, 'Worker', {
+      configurable: true,
+      value: InterceptWorker,
+    });
   });
   await page.route('https://api.tcgdex.net/v2/**', (route) => {
     const path = new URL(route.request().url()).pathname;
-    const set = { id: 'M1L', name: 'メガブレイブ', cardCount: { official: 63 } };
+    const set = {
+      id: 'M1L',
+      name: 'メガブレイブ',
+      cardCount: { official: 63 },
+    };
     const card = { id: 'M1L-088', localId: '088', name: 'メガルカリオex' };
     if (path.endsWith('/ja/sets/M1L'))
       return route.fulfill({ json: { ...set, cards: [card] } });
     if (path.endsWith('/ja/cards/M1L-088'))
-      return route.fulfill({ json: { ...card, set, variants: { holo: true } } });
-    if (path.endsWith('/ja/sets'))
-      return route.fulfill({ json: [set] });
-    if (path.endsWith('/ja/cards'))
-      return route.fulfill({ json: [card] });
+      return route.fulfill({
+        json: { ...card, set, variants: { holo: true } },
+      });
+    if (path.endsWith('/ja/sets')) return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/cards')) return route.fulfill({ json: [card] });
     return route.fulfill({ json: [] });
   });
   await page.goto('./#binder');
@@ -302,31 +318,52 @@ test('exact Japanese printing suggestions render safely and can be reviewed as a
     mimeType: 'image/jpeg',
     buffer: Buffer.from(photo, 'base64'),
   });
-  await expect.poll(async () =>
-    (await dialog.locator('.w-page-scan-pocket').count()) === 9 ||
-    (await dialog.locator('.w-page-scan-grid').getAttribute('data-scan-state')) === 'needs-adjustment',
-    { timeout: 30_000 },
-  ).toBe(true);
-  if ((await dialog.locator('.w-page-scan-grid').getAttribute('data-scan-state')) === 'needs-adjustment') {
-    await dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }).click();
+  await expect
+    .poll(
+      async () =>
+        (await dialog.locator('.w-page-scan-pocket').count()) === 9 ||
+        (await dialog
+          .locator('.w-page-scan-grid')
+          .getAttribute('data-scan-state')) === 'needs-adjustment',
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+  if (
+    (await dialog
+      .locator('.w-page-scan-grid')
+      .getAttribute('data-scan-state')) === 'needs-adjustment'
+  ) {
+    await dialog
+      .getByRole('button', { name: 'Binderseite jetzt ausrichten' })
+      .click();
     const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
     await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
     await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
   }
   await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9);
-  await expect(dialog.locator('.w-page-scan-grid')).toHaveAttribute('data-scan-state', 'complete', {
-    timeout: 60_000,
-  });
+  await expect(dialog.locator('.w-page-scan-grid')).toHaveAttribute(
+    'data-scan-state',
+    'complete',
+    {
+      timeout: 60_000,
+    },
+  );
   await expect(dialog.locator('.w-page-scan-pocket').first()).toContainText(
     'Vorschlag: メガルカリオex',
   );
   await expect(dialog.locator('.w-page-scan-pocket').first()).not.toContainText(
     'Erkennung fehlgeschlagen',
   );
-  const bulk = dialog.getByRole('button', { name: /eindeutige Ausgaben auswählen/ });
+  const bulk = dialog.getByRole('button', {
+    name: /eindeutige Ausgaben auswählen/,
+  });
   await expect(bulk).toBeVisible();
-  await expect(dialog.locator('.w-dialog-footer .w-button-primary')).toBeDisabled();
+  await expect(
+    dialog.locator('.w-dialog-footer .w-button-primary'),
+  ).toBeDisabled();
   await bulk.click();
-  await expect(dialog.locator('.w-dialog-footer .w-button-primary')).toBeEnabled();
+  await expect(
+    dialog.locator('.w-dialog-footer .w-button-primary'),
+  ).toBeEnabled();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });

@@ -388,8 +388,12 @@ for (const width of [320, 390, 430]) {
     // historical capture-management wall appears after the camera closes.
     await expect(add).toHaveClass(/w-quick-review/);
     await expect(add.locator('.w-original-photo img')).toHaveCount(1);
-    await expect(add.locator('.w-original-photo')).not.toContainText('Kein Foto gespeichert');
-    await expect(add.locator('.w-capture-queue')).not.toContainText('Live-Scan-');
+    await expect(add.locator('.w-original-photo')).not.toContainText(
+      'Kein Foto gespeichert',
+    );
+    await expect(add.locator('.w-capture-queue')).not.toContainText(
+      'Live-Scan-',
+    );
     await add
       .getByRole('button', { name: 'Karten hinzufügen schließen' })
       .click();
@@ -397,7 +401,9 @@ for (const width of [320, 390, 430]) {
     // A restart must never expose dead image placeholders or demand cleanup.
     await page.reload();
     await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Erfassung fortsetzen' })).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: 'Erfassung fortsetzen' }),
+    ).toHaveCount(0);
   });
 }
 
