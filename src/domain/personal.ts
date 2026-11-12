@@ -41,6 +41,7 @@ const safeImage = z
           'assets.pokemon.com',
           'images.pokemontcg.io',
           'images.scrydex.com',
+          'tcgplayer-cdn.tcgplayer.com',
         ].includes(url.hostname)
       );
     } catch {

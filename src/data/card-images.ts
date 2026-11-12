@@ -186,7 +186,11 @@ export class CardImages {
     void this.url(card)
       .then((url) => {
         if (url) {
-          if (/^https:\/\/images\.(pokemontcg\.io|scrydex\.com)\//.test(url))
+          if (
+            /^https:\/\/(?:images\.(?:pokemontcg\.io|scrydex\.com)|tcgplayer-cdn\.tcgplayer\.com)\//.test(
+              url,
+            )
+          )
             frame.dataset.imageSource = 'secondary';
           image.src = url;
           labelLanguage(url);

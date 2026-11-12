@@ -3,6 +3,12 @@
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import {
+  promoArtwork,
+  promoGroup,
+  jumboGroup,
+  validatePromoGroup,
+} from './promo-artwork.mjs';
 const root = resolve('public/catalog-art');
 await mkdir(root, { recursive: true });
 const source =
@@ -10,16 +16,19 @@ const source =
 const report = {
   checkedAt: new Date().toISOString(),
   scope:
-    'Bundled cards and all DE/EN set logos/symbols; dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.',
+    'Bundled cards, all DE/EN set logos/symbols and the MEP promo image index. Other dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.',
   sets: [],
   bundledCards: [],
   errors: [],
 };
-async function json(url) {
+async function json(url, options = {}) {
   for (let attempt = 0; ; attempt++) {
     let retryable = true;
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      const response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(20000),
+      });
       if (!response.ok) {
         retryable = response.status === 429 || response.status >= 500;
         throw new Error(`${response.status}: ${url}`);
@@ -40,6 +49,7 @@ const allowed = (value) => {
         'images.pokemontcg.io',
         'images.scrydex.com',
         'assets.tcgdex.net',
+        'tcgplayer-cdn.tcgplayer.com',
       ].includes(u.hostname)
     );
   } catch {
@@ -173,6 +183,147 @@ await pool(english, async (set) => {
       row.indexedCards = Object.values(entries).filter(Boolean).length;
     } catch (error) {
       report.errors.push(String(error));
+    }
+  }
+  if (set.id === 'mep') {
+    try {
+      const headers = {
+        'User-Agent':
+          'E-Binder/1.0 (catalogue artwork audit; github.com/ArturSugarBear/E-Binder)',
+      };
+      const timestamp = await fetch('https://tcgcsv.com/last-updated.txt', {
+        headers,
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!timestamp.ok) throw new Error('Promo source revision unavailable');
+      const sourceUpdated = (await timestamp.text()).trim();
+      if (!Number.isFinite(Date.parse(sourceUpdated)))
+        throw new Error('Invalid promo source revision');
+      let cached;
+      try {
+        cached = JSON.parse(
+          await readFile(`${root}/promo-source.json`, 'utf8'),
+        );
+      } catch {
+        /* First build. */
+      }
+      if (cached?.sourceUpdated !== sourceUpdated) {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+        const groups = await json('https://tcgcsv.com/tcgplayer/3/groups', {
+          headers,
+        });
+        if (!groups.success || !validatePromoGroup(groups.results))
+          throw new Error('Unverified MEP provider group');
+        const products = [];
+        for (const group of [promoGroup, jumboGroup]) {
+          if (
+            !groups.results.some(
+              (item) =>
+                item.groupId === group.groupId &&
+                item.categoryId === group.categoryId &&
+                item.name === group.name,
+            )
+          )
+            throw new Error('Unverified promo group');
+          await new Promise((resolve) => setTimeout(resolve, 120));
+          const result = await json(
+            `https://tcgcsv.com/tcgplayer/3/${group.groupId}/products`,
+            { headers },
+          );
+          if (!result.success || !Array.isArray(result.results))
+            throw new Error('Promo products unavailable');
+          products.push(
+            ...result.results.filter(
+              (item) => group === promoGroup || item.productId === 678659,
+            ),
+          );
+        }
+        cached = {
+          sourceUpdated,
+          groups: groups.results
+            .filter((item) =>
+              [promoGroup.groupId, jumboGroup.groupId].includes(item.groupId),
+            )
+            .map(({ categoryId, groupId, name, abbreviation }) => ({
+              categoryId,
+              groupId,
+              name,
+              abbreviation,
+            })),
+          products: products.map(
+            ({
+              productId,
+              categoryId,
+              groupId,
+              name,
+              imageUrl,
+              extendedData,
+            }) => ({
+              productId,
+              categoryId,
+              groupId,
+              name,
+              imageUrl,
+              extendedData,
+            }),
+          ),
+        };
+        await writeFile(`${root}/promo-source.json`, JSON.stringify(cached));
+      }
+      if (
+        !validatePromoGroup(cached.groups) ||
+        !cached.groups.some(
+          (item) =>
+            item.groupId === jumboGroup.groupId &&
+            item.name === jumboGroup.name &&
+            item.categoryId === 3,
+        ) ||
+        !Array.isArray(cached.products)
+      )
+        throw new Error('Invalid cached promo source');
+      const entries = {};
+      const unresolved = [];
+      await pool(
+        full.cards ?? [],
+        async (summary) => {
+          const card = await json(
+            `https://api.tcgdex.net/v2/en/cards/${summary.id}`,
+          );
+          if (card.id !== summary.id || card.localId !== summary.localId)
+            throw new Error(`Promo metadata mismatch: ${summary.id}`);
+          const art = promoArtwork(card, cached.products);
+          const available = art ? await probe(art.url) : false;
+          entries[summary.localId] = available ? art : null;
+          if (!available) unresolved.push(summary.id);
+        },
+        4,
+      );
+      const ordered = Object.fromEntries(
+        Object.entries(entries).sort(([a], [b]) => a.localeCompare(b)),
+      );
+      await writeFile(
+        `${root}/mep.json`,
+        JSON.stringify({
+          setId: 'mep',
+          providerSet: `tcgplayer:${promoGroup.groupId}`,
+          source: 'https://tcgcsv.com/docs',
+          cards: ordered,
+        }),
+      );
+      entry.cards = 'mep.json';
+      row.indexedCards = Object.values(ordered).filter(Boolean).length;
+      row.promoAudit = {
+        source: 'https://tcgcsv.com/docs',
+        providerGroup: promoGroup.groupId,
+        sourceUpdated,
+        catalogueCards: full.cards?.length ?? 0,
+        verifiedImageUrls: row.indexedCards,
+        unresolved: unresolved.sort(),
+        imageLanguage: 'en',
+        note: 'TCGdex product IDs or reviewed mappings, matching provider group/name/number; one explicit unnumbered jumbo. Fetched image responses, not a worldwide coverage claim or stamp/finish certification.',
+      };
+    } catch (error) {
+      report.errors.push(`Promo artwork audit failed: ${String(error)}`);
     }
   }
   if (

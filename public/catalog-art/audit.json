@@ -1,6 +1,6 @@
 {
-  "checkedAt": "2026-11-11T08:25:24.183Z",
-  "scope": "Bundled cards and all DE/EN set logos/symbols; dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.",
+  "checkedAt": "2026-11-12T05:55:26.613Z",
+  "scope": "Bundled cards, all DE/EN set logos/symbols and the MEP promo image index. Other dynamic cards use exact-print runtime fallback. Not an exhaustive HTTP probe of every worldwide card.",
   "sets": [
     {
       "id": "2011bw",
@@ -2259,6 +2259,19 @@
         "logo",
         "symbol"
       ],
+      "indexedCards": 111,
+      "promoAudit": {
+        "source": "https://tcgcsv.com/docs",
+        "providerGroup": 24451,
+        "sourceUpdated": "2026-11-11T20:05:27+0000",
+        "catalogueCards": 112,
+        "verifiedImageUrls": 111,
+        "unresolved": [
+          "mep-120"
+        ],
+        "imageLanguage": "en",
+        "note": "TCGdex product IDs or reviewed mappings, matching provider group/name/number; one explicit unnumbered jumbo. Fetched image responses, not a worldwide coverage claim or stamp/finish certification."
+      },
       "displayFallback": "neutral-set-identifier"
     },
     {

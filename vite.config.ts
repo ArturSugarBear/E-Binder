@@ -81,7 +81,7 @@ export default defineConfig({
           },
           {
             urlPattern:
-              /^https:\/\/(?:images\.pokemontcg\.io|images\.scrydex\.com)\//,
+              /^https:\/\/(?:images\.pokemontcg\.io|images\.scrydex\.com|tcgplayer-cdn\.tcgplayer\.com)\//,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'e-binder-secondary-artwork',

@@ -24,6 +24,7 @@ const quoteBasisLabel: Record<NonNullable<PortfolioQuote['basis']>, string> = {
   avg7: '7-Tage-Durchschnitt',
   avg30: '30-Tage-Durchschnitt',
   avg: 'Verkaufsdurchschnitt',
+  market: 'Marktpreis · in EUR umgerechnet',
 };
 
 function shownValue(value: number, covered: number): string {
@@ -154,7 +155,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             ? 'Preisreferenzen werden geprüft'
             : count && priced < count
               ? 'Erfasster Teilwert · nicht vollständig bewertet'
-              : 'Erfasste Cardmarket-Preisreferenzen',
+              : 'Erfasste Marktpreisreferenzen · EUR',
         ),
         el('p', 'w-portfolio-balance', value),
         el(
@@ -308,7 +309,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'Einige Katalogpreise sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
     else
       status.textContent = targets.length
-        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} Ausgaben mit EUR-Preisreferenz · Cardmarket via TCGdex.`
+        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} Ausgaben mit EUR-Preisreferenz · Cardmarket / TCGplayer via TCGdex.`
         : 'Für deine Sonderausgaben oder unbestimmten Varianten liegen noch keine eindeutig passenden Preisreferenzen vor.';
 
     const retry = action(
@@ -474,7 +475,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el(
               'small',
               '',
-              `${euros.format(row.unitValue!)} je Exemplar · ${basis}`,
+              `${euros.format(row.unitValue!)} je Exemplar · ${quote?.source === 'tcgplayer' ? 'TCGplayer · ' : ''}${basis}`,
             ),
           ),
         );
@@ -633,7 +634,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     const foot = el(
       'p',
       'w-portfolio-footnote',
-      'Wichtig: TCGdex-Cardmarket-Katalogtrends sind nicht nach Near Mint und Sprache gefiltert. Ausgaben mit verdächtiger Produktzuordnung werden nicht bewertet. Nur verfügbare, plausible EUR-Referenzen gehen in die angezeigte Summe ein. Reverse-Holo, unbekannte Druckvarianten und Grading bleiben unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine gesicherten Verkaufserlöse.',
+      'Cardmarket wird bevorzugt. Fehlt eine verlässliche EUR-Referenz, wird TCGplayer mit einem datierten EZB-Kurs in EUR umgerechnet. Katalogwerte sind nicht nach Sprache und Zustand deines Exemplars gefiltert. Reverse-Holo, unbekannte Druckvarianten und Grading bleiben unbewertet. Fehlende Preise zählen nicht als 0 €. Das sind keine gesicherten Verkaufserlöse.',
     );
     if (!count) {
       leaders.querySelector('.w-portfolio-section-head')?.remove();

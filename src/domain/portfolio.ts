@@ -3,11 +3,19 @@ import { numberKey, type Holding, type PersonalState } from './personal';
 export interface PortfolioQuote {
   amount: number;
   updated: string;
-  source: 'cardmarket';
+  source: 'cardmarket' | 'tcgplayer';
+  currency?: 'EUR';
   variant: 'normal' | 'holo';
-  basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
+  basis?: 'trend' | 'avg7' | 'avg30' | 'avg' | 'market';
   provenance?: 'verified-snapshot';
   productUrl?: string;
+  conversion?: {
+    from: 'USD';
+    amount: number;
+    rate: number;
+    date: string;
+    provider: 'ECB';
+  };
 }
 
 export interface PortfolioHolding {
@@ -16,6 +24,7 @@ export interface PortfolioHolding {
   unitValue: number | null;
   totalValue: number | null;
   priceBasis?: PortfolioQuote['basis'];
+  priceSource?: PortfolioQuote['source'];
 }
 
 export interface PortfolioPage {
@@ -59,7 +68,7 @@ export function portfolioQuoteKey(holding: Holding): string | null {
     card.key.startsWith('tcgdex:de:');
   if (
     (card.source !== 'tcgdex' && !verifiedEditorial) ||
-    card.language !== 'de' ||
+    !['de', 'en', 'ja'].includes(card.language) ||
     (finish !== 'normal' && finish !== 'holo') ||
     variantNote.trim() ||
     !card.sourceId ||
@@ -87,14 +96,53 @@ export function isUsableQuote(
 ): quote is PortfolioQuote {
   if (!quote || !key) return false;
   const variant = key.split(':').at(-1);
+  const fx = quote.conversion;
+  const conversionValid =
+    quote.source === 'tcgplayer' &&
+    quote.currency === 'EUR' &&
+    quote.basis === 'market' &&
+    fx?.from === 'USD' &&
+    fx.provider === 'ECB' &&
+    isRecentExchangeDate(fx.date) &&
+    euroAmountFromUsd(fx.amount, fx.rate) === quote.amount;
   return (
-    quote.source === 'cardmarket' &&
+    ((quote.source === 'cardmarket' &&
+      !fx &&
+      (!quote.currency || quote.currency === 'EUR')) ||
+      conversionValid) &&
     quote.variant === variant &&
     Number.isFinite(quote.amount) &&
     quote.amount > 0 &&
     Number.isFinite(Date.parse(quote.updated)) &&
     Date.parse(quote.updated) <= Date.now()
   );
+}
+
+export function isRecentExchangeDate(date: unknown): date is string {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+    return false;
+  const timestamp = Date.parse(`${date}T00:00:00Z`);
+  return (
+    Number.isFinite(timestamp) &&
+    new Date(timestamp).toISOString().slice(0, 10) === date &&
+    timestamp <= Date.now() &&
+    Date.now() - timestamp <= 7 * 24 * 60 * 60 * 1000
+  );
+}
+
+/** Round the unit quote once so collection, details and totals agree. */
+export function euroAmountFromUsd(amount: number, rate: number): number | null {
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    !Number.isFinite(rate) ||
+    rate <= 0
+  )
+    return null;
+  const value = amount * rate;
+  const rounded =
+    Math.round((value + Math.abs(value) * Number.EPSILON) * 100) / 100;
+  return Number.isFinite(rounded) && rounded > 0 ? rounded : null;
 }
 
 /**
@@ -117,6 +165,7 @@ export function summarizePortfolio(
       unitValue,
       totalValue: unitValue === null ? null : unitValue * holding.quantity,
       priceBasis: unitValue === null ? undefined : candidate?.basis,
+      priceSource: unitValue === null ? undefined : candidate?.source,
     };
   });
   const lookup = new Map(holdings.map((row) => [row.holding.id, row]));

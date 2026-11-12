@@ -1,5 +1,6 @@
 import type { CatalogEntry, TcgplayerReference } from '../data/card-catalog';
 import { el, icon } from './workspace-dom';
+import { convertedMarketReference, usdEurRate } from '../data/exchange-rates';
 
 /** Public catalogue observations, never a valuation of the collector's copy. */
 export function cardMarket(entry: CatalogEntry): HTMLElement {
@@ -86,64 +87,85 @@ export function tcgplayerMarket(
   references: readonly TcgplayerReference[],
 ): HTMLElement {
   const section = el('section', 'w-tcgplayer-market');
-  section.setAttribute('aria-label', 'TCGplayer · USD-Marktvergleich');
-  section.append(el('p', 'w-label', 'TCGplayer · USD-Marktvergleich'));
+  section.setAttribute('aria-label', 'TCGplayer · EUR-Referenz');
+  section.append(el('p', 'w-label', 'TCGplayer · EUR-Referenz'));
+  const values = el('div', 'w-tcgplayer-values');
+  section.append(values);
   if (!references.length)
-    section.append(
+    values.append(
       el(
         'p',
         'w-muted',
-        'Für diese Ausgabe ist derzeit keine datierte USD-Referenz verfügbar.',
+        'Für diese Ausgabe ist derzeit keine verlässliche TCGplayer-Referenz verfügbar.',
       ),
     );
-  for (const reference of references) {
-    const time = el(
-      'time',
-      'w-muted',
-      `Stand ${new Date(reference.updated).toLocaleDateString('de-DE')}`,
-    );
-    time.dateTime = reference.updated;
-    section.append(
-      el(
-        'div',
-        'w-market-quote',
+  if (references.length) {
+    values.append(el('p', 'w-muted', 'EUR-Referenz wird geladen …'));
+    void usdEurRate().then((rate) => {
+      if (!section.isConnected) return;
+      values.replaceChildren();
+      if (!rate) {
+        values.append(
+          el(
+            'p',
+            'w-muted',
+            'Die EUR-Umrechnung ist momentan nicht verfügbar.',
+          ),
+        );
+        return;
+      }
+      for (const reference of references) {
+        const converted = convertedMarketReference(reference, rate);
+        if (!converted) continue;
+        const time = el(
+          'time',
+          'w-muted',
+          `Stand ${new Date(reference.updated).toLocaleDateString('de-DE')}`,
+        );
+        time.dateTime = reference.updated;
+        values.append(
+          el(
+            'div',
+            'w-market-quote',
+            el(
+              'strong',
+              '',
+              new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+              }).format(converted.amount),
+            ),
+            el(
+              'span',
+              '',
+              reference.variant === 'holo'
+                ? 'Holo · Marktpreis'
+                : 'Normal · Marktpreis',
+            ),
+            time,
+          ),
+        );
+        if (reference.productUrl) {
+          const link = el(
+            'a',
+            'w-button w-button-secondary',
+            'Auf TCGplayer ansehen',
+            icon('external'),
+          );
+          link.href = reference.productUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          values.append(link);
+        }
+      }
+      values.append(
         el(
-          'strong',
-          '',
-          new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(reference.amount),
+          'p',
+          'w-help',
+          `Aus USD mit EZB-Referenzkurs vom ${new Date(rate.date).toLocaleDateString('de-DE')} umgerechnet. Sprache und Zustand deines Exemplars können abweichen.`,
         ),
-        el(
-          'span',
-          '',
-          reference.variant === 'holo'
-            ? 'Holo · Marktpreis'
-            : 'Normal · Marktpreis',
-        ),
-        time,
-      ),
-    );
-    if (reference.productUrl) {
-      const link = el(
-        'a',
-        'w-button w-button-secondary',
-        'Auf TCGplayer ansehen',
-        icon('external'),
       );
-      link.href = reference.productUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      section.append(link);
-    }
+    });
   }
-  section.append(
-    el(
-      'p',
-      'w-help',
-      'US-Marktvergleich, nicht auf Sprache oder Zustand deines Exemplars gefiltert. Keine Umrechnung und kein Bestandteil deines EUR-Portfolios.',
-    ),
-  );
   return section;
 }
