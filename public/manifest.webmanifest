@@ -1,0 +1,24 @@
+{
+  "name": "Rare Room — E-Binder",
+  "short_name": "E-Binder",
+  "description": "Dein digitales Sammelalbum für Trading Cards.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#141519",
+  "theme_color": "#141519",
+  "icons": [
+    {
+      "src": "./brand/rare-room-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
