@@ -1,0 +1,44 @@
+name: Temporary beta branch formatter
+on:
+  push:
+    branches:
+      - feat/beta-ux-opt-in-dataset-20261112
+permissions:
+  contents: write
+jobs:
+  prettier:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format scoped beta files
+        run: >-
+          npx prettier --write README.md
+          docs/beta-rollout.md
+          docs/beta-dataset-pipeline.md
+          docs/reviews/2026-11-12-beta-release-readiness.md
+          src/data/beta-scan-donation.ts
+          src/ui/workspace.ts
+          src/ui/add-cards.ts
+          src/ui/page-scan.ts
+          src/ui/profile-view.ts
+          scripts/beta-dataset-audit.mjs
+          tests/e2e/beta-mobile-ergonomics.spec.ts
+          .github/workflows/pages.yml
+          .github/workflows/beta-dataset-audit.yml
+      - name: Commit formatting changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md docs src scripts tests .github/workflows/pages.yml .github/workflows/beta-dataset-audit.yml
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format beta opt-in implementation and docs'
+            git push
+          fi
