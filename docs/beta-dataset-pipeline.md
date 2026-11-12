@@ -33,6 +33,12 @@ Die Upload- und RLS-Schicht stellt **unbewertete** private Samples bereit. Es gi
 Nach schriftlich belegter Einwilligung und unabhängiger Prüfung werden die **gleichen** privaten Fotos in zwei Läufen von `scripts/benchmark-card-scans.mjs` untersucht: Beta-Schalter aus (OCR allein), danach eingeschaltet (OCR + visueller ONNX-Index). Die Ausgabe enthält nur Metadaten und Messwerte, keine Originalbilder.
 
 ```sh
+CARD_SCAN_BENCHMARK_OUT=/private/baseline.json \
+  node scripts/benchmark-card-scans.mjs /private/ground-truth.json
+
+CARD_SCAN_VISUAL_BETA=1 CARD_SCAN_BENCHMARK_OUT=/private/visual.json \
+  node scripts/benchmark-card-scans.mjs /private/ground-truth.json
+
 npm run audit:beta-model -- /private/baseline.json /private/visual.json --gate
 ```
 
