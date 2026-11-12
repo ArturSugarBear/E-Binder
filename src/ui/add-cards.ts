@@ -1050,6 +1050,7 @@ export function openAddCards(
     details.replaceChildren();
     results.replaceChildren();
     results.dataset.scanState = 'running';
+    sheet.dialog.classList.add('w-scan-analyzing');
     results.dataset.scanRankedKeys = '[]';
     results.dataset.scanSuggestedKey = '';
     results.dataset.scanVisualModelCandidates = '0';
@@ -1284,6 +1285,7 @@ export function openAddCards(
       );
       tell(text, true);
     } finally {
+      sheet.dialog.classList.remove('w-scan-analyzing');
       if (results.dataset.scanState === 'running')
         results.dataset.scanState = 'cancelled';
     }
