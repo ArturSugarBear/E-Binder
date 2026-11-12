@@ -81,7 +81,11 @@ export async function createVisualSearchSession(
       close();
     }
   };
-  const match = (photo: Blob, timeoutMs = 45000): Promise<VisualHit[]> =>
+  // Serialise live captures so concurrent photos share one ONNX worker.
+  // Bound the queue to prevent unbounded photo retention on old iPhones.
+  let matchQueue: Promise<void> = Promise.resolve();
+  let queuedMatches = 0;
+  const matchOnce = (photo: Blob, timeoutMs: number): Promise<VisualHit[]> =>
     new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
@@ -107,6 +111,23 @@ export async function createVisualSearchSession(
       worker.postMessage({ id, photo, manifestUrl });
     });
   signal.addEventListener('abort', close, { once: true });
+  const match = (photo: Blob, timeoutMs = 45000): Promise<VisualHit[]> => {
+    if (disposed || signal.aborted)
+      return Promise.reject(new DOMException('Abgebrochen', 'AbortError'));
+    if (queuedMatches >= 5)
+      return Promise.reject(new Error('Zu viele gleichzeitige Bildsuchen.'));
+    queuedMatches++;
+    const result = matchQueue
+      .catch(() => undefined)
+      .then(() => matchOnce(photo, timeoutMs));
+    matchQueue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result.finally(() => {
+      queuedMatches--;
+    });
+  };
   if (signal.aborted) close();
   return { match, close };
 }
