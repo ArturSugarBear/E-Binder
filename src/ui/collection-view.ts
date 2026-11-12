@@ -31,7 +31,10 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import { enableSwipe } from './swipe';
 import { enableSheetDrag } from './sheet-gestures';
-import { collectorCardOverview, collectorCardExtras } from './collector-card-overview';
+import {
+  collectorCardOverview,
+  collectorCardExtras,
+} from './collector-card-overview';
 
 const euro = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -547,12 +550,14 @@ export function openHolding(
   sheet.body.append(overview, price.element, extra);
   void price.load().then(() => {
     // TCGplayer references are valuable provenance, but not first-screen UI.
-    const supplement =
-      price.element.querySelector<HTMLElement>('.w-tcgplayer-market');
+    const supplement = price.element.querySelector<HTMLElement>(
+      '.w-tcgplayer-market',
+    );
     if (supplement) extra.append(supplement);
   });
-  const cardSurface =
-    overview.querySelector<HTMLElement>('.w-collector-card-stage');
+  const cardSurface = overview.querySelector<HTMLElement>(
+    '.w-collector-card-stage',
+  );
   if (cardSurface) {
     cardSurface.classList.add('w-card-swipe-zone');
     enableSheetDrag(sheet.dialog, sheet.dialog, [cardSurface]);

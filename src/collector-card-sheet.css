@@ -79,7 +79,9 @@
   font-size: 13px;
   line-height: 1.5;
 }
-.w-collector-card-subtitle:empty { display: none; }
+.w-collector-card-subtitle:empty {
+  display: none;
+}
 .w-collector-card-dialog .w-card-market,
 .w-collector-card-dialog .w-holding-price {
   min-width: 0;

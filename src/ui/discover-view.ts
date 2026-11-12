@@ -1,7 +1,10 @@
 import { localizedCardName } from '../data/japanese-catalog';
 import { enableSheetDrag } from './sheet-gestures';
 import { enableSwipe } from './swipe';
-import { collectorCardOverview, collectorCardExtras } from './collector-card-overview';
+import {
+  collectorCardOverview,
+  collectorCardExtras,
+} from './collector-card-overview';
 import type { CatalogEntry } from '../data/card-catalog';
 import { cardMarket } from './card-market';
 import { addWish, sameCard, type PersonalCard } from '../domain/personal';
@@ -211,7 +214,10 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     status.replaceChildren();
     const view = modal(card.name);
     view.dialog.querySelector('h2')?.replaceChildren(localizedCardName(card));
-    view.dialog.classList.add('w-card-detail-dialog', 'w-collector-card-dialog');
+    view.dialog.classList.add(
+      'w-card-detail-dialog',
+      'w-collector-card-dialog',
+    );
     closePreview = view.close;
     const owned = el('p', 'w-muted');
     const wish = action(
@@ -242,12 +248,20 @@ export function createDiscoverView(ctx: WorkspaceContext) {
     // Reuse the demo-binder's card-first hierarchy across the workspace.
     const overview = collectorCardOverview(ctx, card, entry.rarity);
     overview.classList.add('w-discover-card');
-    const stage = overview.querySelector<HTMLElement>('.w-collector-card-stage')!;
+    const stage = overview.querySelector<HTMLElement>(
+      '.w-collector-card-stage',
+    )!;
     stage.classList.add('w-discover-stage', 'w-card-touch-surface');
-    overview.querySelector<HTMLElement>('.w-collector-card-heading')!
+    overview
+      .querySelector<HTMLElement>('.w-collector-card-heading')!
       .classList.add('w-discover-info');
     const market = cardMarket(entry);
-    const extraActions = el('div', 'w-collector-card-extra-actions', owned, wish);
+    const extraActions = el(
+      'div',
+      'w-collector-card-extra-actions',
+      owned,
+      wish,
+    );
     const extra = collectorCardExtras('Weitere Details', extraActions);
     // Keep market data provenance and secondary provider information available
     // without filling the default card detail with long technical diagnostics.
