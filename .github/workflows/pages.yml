@@ -85,6 +85,15 @@ jobs:
             # The live camera is an iPhone-first surface. Exercise its
             # repeat-scan, camera-rejection and track-cleanup regressions
             # once on mobile Chromium instead of duplicating on desktop.
+            # The next Playwright invocation clears test-results. Preserve
+            # the first suite's real responsive screenshots before it starts.
+            mkdir -p rare-room-screenshots
+            find test-results -type f -name 'rare-room-*.png' -print0 |
+              while IFS= read -r -d '' screenshot; do
+                output="rare-room-screenshots/${screenshot#test-results/}"
+                mkdir -p "$(dirname "$output")"
+                cp "$screenshot" "$output"
+              done
             npx playwright test \
               tests/e2e/live-scan.spec.ts \
               tests/e2e/live-scan-battle.spec.ts \
@@ -92,6 +101,14 @@ jobs:
           else
             npm run test:e2e
           fi
+          # Persist final master/WebKit evidence as well as first PR suite.
+          mkdir -p rare-room-screenshots
+          find test-results -type f -name 'rare-room-*.png' -print0 |
+            while IFS= read -r -d '' screenshot; do
+              output="rare-room-screenshots/${screenshot#test-results/}"
+              mkdir -p "$(dirname "$output")"
+              cp "$screenshot" "$output"
+            done
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -105,8 +122,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rare-room-browser-qa
-          path: test-results/**/rare-room-*.png
-          if-no-files-found: ignore
+          path: |
+            rare-room-screenshots/
+            test-results/**/rare-room-*.png
+          if-no-files-found: warn
           retention-days: 14
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request'
