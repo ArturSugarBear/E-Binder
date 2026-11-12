@@ -40,7 +40,9 @@ export async function createVisualSearchSession(
   });
   void warmed.catch(() => undefined);
   const warmupTimer = setTimeout(() => {
-    const error = new Error('Das Bildmodell konnte nicht rechtzeitig geladen werden.');
+    const error = new Error(
+      'Das Bildmodell konnte nicht rechtzeitig geladen werden.',
+    );
     finishWarmup(error);
     close();
   }, 60000);

@@ -75,9 +75,7 @@ it('keeps local writes and blocks further cloud calls after version conflict', a
 
 it('repairs a stale marker when the full remote and local state already agree', async () => {
   const cached = { ...emptyState('personal'), revision: 3 };
-  const remote = Object.fromEntries(
-    Object.entries(cached).reverse(),
-  );
+  const remote = Object.fromEntries(Object.entries(cached).reverse());
   const markers = new Map([
     ['e-binder-sync:user-test', JSON.stringify({ version: 4, revision: 2 })],
   ]);

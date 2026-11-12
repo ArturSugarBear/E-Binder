@@ -22,8 +22,7 @@ const rowSchema = z.object({
  */
 function sameSnapshot(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
-  if (!a || !b || typeof a !== 'object' || typeof b !== 'object')
-    return false;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
   if (Array.isArray(a) !== Array.isArray(b)) return false;
   if (Array.isArray(a) && Array.isArray(b))
     return (
@@ -87,7 +86,10 @@ export class CloudStore extends PersonalStore {
           // revision equality alone is never enough evidence.
           if (
             remoteState?.mode === 'personal' &&
-            sameSnapshot(metadataOnlyState(cached), metadataOnlyState(remoteState))
+            sameSnapshot(
+              metadataOnlyState(cached),
+              metadataOnlyState(remoteState),
+            )
           ) {
             this.version = remote!.version;
             this.remember(cached);

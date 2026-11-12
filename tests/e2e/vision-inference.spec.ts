@@ -11,9 +11,7 @@ test('real local vision Worker retrieves a bundled reference twice', async ({
 }) => {
   test.setTimeout(180_000);
   await page.goto('./#profil');
-  await page
-    .getByRole('button', { name: 'Visuelle KI Beta testen' })
-    .click();
+  await page.getByRole('button', { name: 'Visuelle KI Beta testen' }).click();
 
   const workerCreated = page.waitForEvent('worker', {
     predicate: (worker) => worker.url().includes('visual-worker'),
@@ -32,10 +30,8 @@ test('real local vision Worker retrieves a bundled reference twice', async ({
     const response = await fetch('./assets/cards/svi-211.webp');
     if (!response.ok) throw new Error('Pilot reference unavailable');
     const image = await response.blob();
-    const manifestUrl = new URL(
-      './assets/vision/manifest.json',
-      location.href,
-    ).href;
+    const manifestUrl = new URL('./assets/vision/manifest.json', location.href)
+      .href;
     const worker = new Worker(url, { type: 'module' });
     type Hit = {
       reference: { id: string };
