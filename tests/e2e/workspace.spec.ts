@@ -93,6 +93,7 @@ test('confirmed totals, edition corrections, wishes and undo survive reload', as
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
   await expect(page.locator('.w-quantity-badge')).toHaveText('2×');
   await page.locator('.w-owned-grid button').click();
+  await page.locator('.w-collector-card-extras > summary').click();
   await page.getByRole('dialog').getByLabel('Bestätigte Gesamtmenge').fill('3');
   await page.getByRole('button', { name: 'Änderungen speichern' }).click();
   await expect(page.locator('.w-quantity-badge')).toHaveText('3×');
@@ -104,6 +105,7 @@ test('confirmed totals, edition corrections, wishes and undo survive reload', as
   await page.reload();
   await expect(page.locator('.w-quantity-badge')).toHaveText('2×');
   await page.locator('.w-owned-grid button').click();
+  await page.locator('.w-collector-card-extras > summary').click();
   await page.getByRole('button', { name: 'Auch auf die Wunschliste' }).click();
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Wunschliste', exact: true }).click();
@@ -111,6 +113,7 @@ test('confirmed totals, edition corrections, wishes and undo survive reload', as
   await openVault(page, 'sammlung');
   await expect(page.locator('.w-quantity-badge')).toHaveText('2×');
   await page.locator('.w-owned-grid button').click();
+  await page.locator('.w-collector-card-extras > summary').click();
   await page
     .getByRole('button', { name: 'Ausgabe korrigieren', exact: true })
     .click();
@@ -170,6 +173,7 @@ test('templates create planned slots without possession, owned copies cannot be 
   await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
   await page.locator('.w-owned-grid button').click();
+  await page.locator('.w-collector-card-extras > summary').click();
   await page
     .getByRole('dialog')
     .getByLabel('Davon ausdrücklich zum Tausch')
