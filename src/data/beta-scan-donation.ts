@@ -150,8 +150,8 @@ export async function donateBetaScanPhoto(
   }
 }
 
-/** Remove a user's unreviewed donations, including private Storage objects. */
-export async function deletePendingBetaScanPhotos(): Promise<number> {
+/** Delete all of this account's donations, including private Storage objects. */
+export async function deleteBetaScanPhotos(): Promise<number> {
   if (!accountId || !cloudClient)
     throw new Error('Bitte melde dich zuerst an.');
   let deleted = 0;
@@ -160,7 +160,6 @@ export async function deletePendingBetaScanPhotos(): Promise<number> {
       .from('beta_scan_samples')
       .select('id, object_path')
       .eq('user_id', accountId)
-      .eq('review_status', 'pending')
       .limit(100);
     if (error)
       throw new Error('Deine Testaufnahmen konnten nicht abgerufen werden.');
