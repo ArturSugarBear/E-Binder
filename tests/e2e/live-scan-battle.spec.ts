@@ -384,6 +384,12 @@ for (const width of [320, 390, 430]) {
       })
       .toBe(true);
     await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+    // Only live photos from this session are reviewable. No filenames or
+    // historical capture-management wall appears after the camera closes.
+    await expect(add).toHaveClass(/w-quick-review/);
+    await expect(add.locator('.w-original-photo img')).toHaveCount(1);
+    await expect(add.locator('.w-original-photo')).not.toContainText('Kein Foto gespeichert');
+    await expect(add.locator('.w-capture-queue')).not.toContainText('Live-Scan-');
     await add
       .getByRole('button', { name: 'Karten hinzufügen schließen' })
       .click();
