@@ -946,7 +946,14 @@ export function openPageScanner(
           if (visual && !visualFailure) {
             try {
               pocket.status.textContent = 'Kartenmotiv wird lokal verglichen …';
-              visualHits = await visual.match(tiles[index]!);
+              visualHits = await visual.match(tiles[index]!, 9000);
+              recordBetaEvent(
+                'scan_result',
+                'scan',
+                'visual_beta_page_candidates',
+                visualHits.length ? 'ok' : 'unknown',
+                { metric: visualHits.length },
+              );
               if (closed || abort.signal.aborted) break;
             } catch {
               visualFailure = true;
