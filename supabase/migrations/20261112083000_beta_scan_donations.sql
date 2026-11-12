@@ -17,11 +17,15 @@ begin
     if tg_op = 'INSERT' or old.enabled is distinct from true
        or old.consent_version is distinct from new.consent_version then
       new.consented_at := now();
+    else
+      new.consented_at := old.consented_at;
     end if;
     new.withdrawn_at := null;
   else
     if tg_op = 'UPDATE' and old.enabled is true then
       new.withdrawn_at := now();
+    else
+      if tg_op = 'UPDATE' then new.withdrawn_at := old.withdrawn_at; end if;
     end if;
     new.consented_at := null;
   end if;
