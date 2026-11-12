@@ -96,6 +96,22 @@ export async function startWorkspace(): Promise<void> {
     status.textContent = 'Speicher nicht erreichbar';
     return;
   }
+  // Photo pixels are intentionally never persisted. Pending scan metadata
+  // cannot be resumed after reload, and showing a stale capture list would
+  // force collectors to remove broken entries manually.
+  if (initial.captures.some((shot) => shot.status !== 'confirmed')) {
+    initial = changeState(initial, (next) => {
+      next.captures = next.captures.filter(
+        (shot) => shot.status === 'confirmed',
+      );
+    });
+    try {
+      await store.save(initial);
+    } catch {
+      // Keep the in-memory collection usable. The same orphan cleanup is
+      // repeated on the next load if a remote write was unavailable.
+    }
+  }
   const history: { state: PersonalState; label: string }[] = [];
   let saving: Promise<void> = Promise.resolve();
   let saveFailed = false;
