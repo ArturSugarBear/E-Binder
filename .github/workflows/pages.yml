@@ -41,7 +41,11 @@ jobs:
           name: card-image-coverage-smoke
           path: artifacts/card-artwork-coverage.json
           retention-days: 14
+      # External catalogues intermittently return HTTP 503. A push should
+      # deploy the already validated, dated snapshots; the scheduled/manual
+      # run refreshes and revalidates live third-party data separately.
       - name: Refresh and build dated Cardmarket price guide
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           node scripts/refresh-cardmarket.mjs
           node scripts/refresh-japanese-catalog.mjs M1L M1S
