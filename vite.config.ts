@@ -89,10 +89,16 @@ export default defineConfig({
           new RegExp('^' + basePattern + '(?:index\\.html)?$'),
         ],
         runtimeCaching: [
-          // Never cache current-release proof. Even stale installed PWAs
-          // must fetch version.json from the actual Pages deployment.
+          // This endpoint is the truth source for the *deployed* release.
+          // Never precache: installed PWAs must detect a newer Pages build.
           {
-            urlPattern: new RegExp(basePattern + 'version\\.json
+            urlPattern: new RegExp(basePattern + 'version\\.json$'),
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: new RegExp(
+              basePattern + 'catalog-products/tcgplayer/[0-9]+\\.json$',
+            ),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'e-binder-verified-products',
