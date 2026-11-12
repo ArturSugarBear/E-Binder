@@ -25,7 +25,7 @@ async function json(url: string): Promise<Record<string, unknown>> {
 export async function japanesePrinting(card: PersonalCard) {
   if (
     card.source !== 'tcgdex' ||
-    card.language !== 'ja' ||
+    (card.language !== 'ja' && !/^(?:M1L|M1S)$/i.test(card.setId)) ||
     !card.sourceId.startsWith(`${card.setId}-`) ||
     numberKey(card.sourceId.slice(card.setId.length + 1)) !==
       numberKey(card.number).split('/')[0]
@@ -39,7 +39,6 @@ export async function japanesePrinting(card: PersonalCard) {
   if (
     raw.id !== card.sourceId ||
     set?.id !== card.setId ||
-    raw.name !== card.name ||
     (card.number.includes('/')
       ? numberKey(`${raw.localId}/${set.cardCount?.official}`) !==
         numberKey(card.number)
@@ -63,7 +62,18 @@ export async function japanesePrinting(card: PersonalCard) {
   );
   const attributes = product.customAttributes as
     { number?: string } | undefined;
+  // Imported Japanese printings may carry a verified English display name
+  // (e.g. Riolu) while TCGdex stores リオル. Accept that alias only when
+  // independently present in the *same* TCGplayer product identity.
+  const providerName = String(product.productName ?? '')
+    .replace(/\s*-\s*\d+\s*\/\s*\d+.*$/, '')
+    .trim();
+  const nameMatches =
+    raw.name === card.name ||
+    (/^(?:M1L|M1S)$/i.test(card.setId) &&
+      normalize(providerName) === normalize(card.name));
   if (
+    !nameMatches ||
     product.productId !== productId ||
     product.productLineName !== 'Pokemon Japan' ||
     product.productTypeName !== 'Cards' ||

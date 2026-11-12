@@ -64,6 +64,12 @@ export class CardImages {
       card.sourceId &&
       !exactPrimaryArtwork(card)
     ) {
+      // M1L/M1S are Japanese physical sets, even if a saved record carries
+      // an English UI label. Do not first wait for an invalid EN card lookup.
+      if (/^(?:M1L|M1S)$/i.test(card.setId)) {
+        const verified = await secondaryCardArt(card);
+        if (verified) return verified.url;
+      }
       try {
         const resolved = (await catalogEntry(card.sourceId, card.language))
           .card;
@@ -99,7 +105,7 @@ export class CardImages {
     language.hidden = true;
     const labelLanguage = (url: string) => {
       const displayed =
-        card.language === 'ja' &&
+        (card.language === 'ja' || /^(?:M1L|M1S)$/i.test(card.setId)) &&
         url.startsWith('https://tcgplayer-cdn.tcgplayer.com/product/')
           ? 'ja'
           : imageLanguage(url);
