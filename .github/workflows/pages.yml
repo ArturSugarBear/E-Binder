@@ -79,6 +79,7 @@ jobs:
               tests/e2e/mobile-binder-entry.spec.ts \
               tests/e2e/pwa.spec.ts \
               tests/e2e/catalog-images.spec.ts \
+              tests/e2e/compact-card-sheet.spec.ts \
               tests/e2e/set-art-fallback.spec.ts \
               tests/e2e/liquid-collector.spec.ts \
               tests/e2e/beta-mobile-ergonomics.spec.ts \
