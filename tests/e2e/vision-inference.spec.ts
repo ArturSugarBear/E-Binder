@@ -65,7 +65,10 @@ test('real local vision Worker retrieves a bundled reference twice', async ({
               hits: event.data.hits ?? [],
               ms: performance.now() - start,
             });
-          else reject(new Error(event.data.message ?? 'Model inference failed'));
+          else {
+            const reason = event.data.message ?? 'Model inference failed';
+            reject(new Error(reason));
+          }
         };
         worker.addEventListener('message', onMessage);
         worker.postMessage({ id, photo: image, manifestUrl });
