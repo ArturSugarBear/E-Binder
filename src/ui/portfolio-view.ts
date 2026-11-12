@@ -500,10 +500,12 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       ),
     );
     if (overview.missingCopies) {
+      const missingRows = overview.holdings.filter(
+        (item) => item.unitValue === null,
+      );
+      const visibleRows = missingRows.slice(0, 12);
       const list = el('div', 'w-portfolio-missing-grid');
-      for (const row of overview.holdings
-        .filter((item) => item.unitValue === null)
-        .slice(0, 12)) {
+      for (const row of visibleRows) {
         const card = row.holding.card;
         const reason =
           (row.quoteKey && reasons.get(row.quoteKey)) ||
@@ -542,6 +544,44 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         list.append(button);
       }
       missing.append(list);
+      if (missingRows.length > visibleRows.length) {
+        const showAll = action(
+          `Alle ${missingRows.length} offenen Ausgaben anzeigen`,
+          () => {
+            // Show the full list only on demand; large collections stay fast.
+            for (const row of missingRows.slice(visibleRows.length)) {
+              const card = row.holding.card;
+              const reason =
+                (row.quoteKey && reasons.get(row.quoteKey)) ||
+                (!row.quoteKey
+                  ? 'Druckvariante oder Katalogidentität nicht eindeutig'
+                  : failed.has(row.quoteKey)
+                    ? 'Preis momentan nicht erreichbar'
+                    : 'Für diese Ausgabe noch keine Preisreferenz');
+              const button = action(
+                `${card.name} ansehen`,
+                () => ctx.openHolding(row.holding.id),
+                'secondary',
+              );
+              button.classList.add('w-portfolio-missing-card');
+              button.replaceChildren(
+                el('span', 'w-portfolio-missing-art', artwork(row.holding, 'missing')),
+                el(
+                  'span',
+                  'w-portfolio-missing-copy',
+                  el('strong', '', localizedCardName(card)),
+                  el('small', '', `${card.setName} · ${card.number}`),
+                  el('small', '', reason),
+                ),
+              );
+              list.append(button);
+            }
+            showAll.remove();
+          },
+          'secondary',
+        );
+        missing.append(showAll);
+      }
     }
 
     const book = el(
