@@ -140,6 +140,27 @@ describe('P08 visual print resolution', () => {
     expect(result.basis).toBe('visual-review');
   });
 
+  it('uses a bounded larger visual budget for consecutive live-camera photos', async () => {
+    const local = card('de', 'sv01-211', '211/198');
+    const session = {
+      match: vi.fn(async () => [hit('de', 'sv01-211', '211/198', 1)]),
+      close: vi.fn(),
+    };
+    const result = await resolvePhotoScan(
+      new Blob(['live-image']),
+      '',
+      [local],
+      'de',
+      new AbortController().signal,
+      session,
+      12000,
+    );
+    expect(session.match).toHaveBeenCalledWith(expect.any(Blob), 12000);
+    expect(result.basis).toBe('visual-review');
+    expect(result.candidates[0]?.key).toBe(local.key);
+    expect(result.suggested).toBeUndefined();
+  });
+
   it('surfaces image candidate alternatives when OCR could not read any text, without automatic confirmation', async () => {
     const de = card('de', 'me06-111', '111/103');
     const en = card('en', 'me06-111', '111/103');
