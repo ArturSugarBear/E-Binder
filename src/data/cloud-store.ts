@@ -19,6 +19,8 @@ const rowSchema = z.object({
 export class CloudStore extends PersonalStore {
   syncError = '';
   conflict = false;
+  pendingSyncCount = 0;
+  onSyncStatusChange?: () => void;
   private version = 0;
   private remoteQueue = Promise.resolve();
   private markerKey: string;
@@ -81,14 +83,23 @@ export class CloudStore extends PersonalStore {
       return cached;
     }
   }
+  private notifySyncStatus(): void {
+    try {
+      this.onSyncStatusChange?.();
+    } catch {
+      // Rendering must never interrupt local or remote persistence.
+    }
+  }
   save(state: PersonalState): Promise<void> {
     const snapshot = structuredClone(state);
     const local = super.save(snapshot);
+    if (snapshot.mode !== 'personal') return local;
+    this.pendingSyncCount++;
+    this.notifySyncStatus();
     const operation = this.remoteQueue
       .catch(() => undefined)
       .then(async () => {
         await local;
-        if (snapshot.mode !== 'personal') return;
         try {
           await this.push(snapshot);
         } catch (error) {
@@ -101,8 +112,12 @@ export class CloudStore extends PersonalStore {
         }
       });
     this.remoteQueue = operation;
-    // A remote request must never hold up a local inventory write or the next
-    // camera capture. The serialized queue still runs in the background.
+    const settled = () => {
+      this.pendingSyncCount = Math.max(0, this.pendingSyncCount - 1);
+      this.notifySyncStatus();
+    };
+    void operation.then(settled, settled);
+    // The next scan only awaits local IndexedDB durability, not cloud latency.
     return local;
   }
   private async push(state: PersonalState): Promise<void> {
