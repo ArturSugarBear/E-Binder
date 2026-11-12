@@ -184,15 +184,20 @@ export async function resolvePhotoScan(
   preferredLanguage: string,
   signal: AbortSignal,
   visualSession?: VisualSearchSession | null,
+  visualTimeoutMs = 4700,
 ): Promise<AutomaticScanResult> {
   // The optional ONNX index is the only path capable of finding printings
   // when set/name OCR is unreadable. Start it beside catalogue discovery,
   // not after a potentially long network lookup. Missing licensed assets,
   // expired manifests or visual timeouts leave ordinary OCR functional.
-  const visualBudget = AbortSignal.any([signal, AbortSignal.timeout(4800)]);
+  const boundedVisualMs = Math.max(1000, Math.min(12000, visualTimeoutMs));
+  const visualBudget = AbortSignal.any([
+    signal,
+    AbortSignal.timeout(boundedVisualMs + 100),
+  ]);
   const visualCards = visualSession
     ? visualSession
-        .match(photo, 4700)
+        .match(photo, boundedVisualMs)
         .then((hits) =>
           reviewVisualCandidates(hits, visualNumberClues(text), 5),
         )
