@@ -242,6 +242,9 @@ scope.onmessage = (event) => {
       // is preparing a photo. No private pixels are passed during warmup.
       if (request.warmup) {
         await load(request.manifestUrl);
+        // Cold-start downloads are separate from per-image inference time.
+        // The main thread must not start a match timer before this ack.
+        scope.postMessage({ id: request.id, type: 'ready' });
         return;
       }
       await match(request);
