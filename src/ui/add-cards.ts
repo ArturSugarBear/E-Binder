@@ -10,6 +10,7 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
+import { donateBetaScanPhoto } from '../data/beta-scan-donation';
 import {
   createVisualSearchSession,
   type VisualSearchSession,
@@ -791,6 +792,7 @@ export function openAddCards(
         }
         first ??= shot.id;
         added++;
+        void donateBetaScanPhoto(file, 'card');
       }
       if (!closed) {
         if (!queuedLive) {
