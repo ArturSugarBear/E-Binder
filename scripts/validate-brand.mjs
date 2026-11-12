@@ -25,7 +25,10 @@ for (const [name, build, source] of [
 }
 assert.equal(appIcon('rare'), original.appIcon('rare'));
 const approvedMark = readFileSync('public/brand/rare-room-mark.svg', 'utf8');
-const approvedLockup = readFileSync('public/brand/rare-room-lockup.svg', 'utf8');
+const approvedLockup = readFileSync(
+  'public/brand/rare-room-lockup.svg',
+  'utf8',
+);
 assert.ok(approvedMark.includes('viewBox="0 0 128 128"'));
 assert.ok(approvedLockup.includes('Rare Room — E-Binder'));
 assert.ok(approvedLockup.includes('E-BINDER'));
