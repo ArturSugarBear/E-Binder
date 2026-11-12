@@ -159,6 +159,36 @@ jobs:
           name: card-image-coverage-full
           path: artifacts/card-artwork-coverage.json
           retention-days: 30
+  format-pr104:
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/release-provenance-and-classic-gallery-20261112'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Format only PR104 changed source
+        run: |
+          npx prettier --write index.html vite.config.ts src/pwa.ts src/workspace.css \
+            src/data/app-version.ts src/data/artwork-fallbacks.ts \
+            src/ui/catalog-browser.ts src/ui/profile-view.ts \
+            tests/e2e/release-provenance.spec.ts tests/e2e/classic-collection.spec.ts
+      - name: Push formatted changes once
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html vite.config.ts src/pwa.ts src/workspace.css src/data/app-version.ts src/data/artwork-fallbacks.ts src/ui/catalog-browser.ts src/ui/profile-view.ts tests/e2e/release-provenance.spec.ts tests/e2e/classic-collection.spec.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "style: apply release104 Prettier rules"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: build
