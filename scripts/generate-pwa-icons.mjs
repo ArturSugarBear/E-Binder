@@ -1,8 +1,14 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { Resvg } from '@resvg/resvg-js';
-import { T, mark, word, lockup, appIcon } from './rare-room-v2.mjs';
+import { T, mark, word } from './rare-room-v2.mjs';
 mkdirSync('public/brand', { recursive: true });
 mkdirSync('public/icons', { recursive: true });
+// Approved Retro-Futurism vectors are the shipping source of truth.
+const finalMark = readFileSync('public/brand/rare-room-mark.svg', 'utf8');
+const finalLockup = readFileSync('public/brand/rare-room-lockup.svg', 'utf8');
+const recolor = (svg, colors) =>
+  svg.replace(/#[0-9a-f]{6}/gi, (hex) => colors[hex.toLowerCase()] ?? hex);
+
 for (const [variant, colors] of Object.entries({
   default: T.rare.neg,
   positive: T.rare.pos,
@@ -12,7 +18,24 @@ for (const [variant, colors] of Object.entries({
   for (const [name, svg] of Object.entries({
     symbol: mark('rare', colors.ink, colors.acc),
     wordmark: word('rare', colors.ink, colors.acc),
-    lockup: lockup('rare', 'h', colors.ink, colors.acc),
+    lockup:
+      variant === 'default'
+        ? finalLockup
+        : recolor(
+            finalLockup,
+            variant === 'mono'
+              ? { '#d8f25a': '#f4f1ea', '#b9a6ff': '#f4f1ea' }
+              : variant === 'positive'
+                ? {
+                    '#ffffff': '#141519',
+                    '#d6d2e8': '#303038',
+                    '#8e829f': '#65606f',
+                    '#f4f1ea': '#141519',
+                    '#d8f25a': '#648100',
+                    '#b9a6ff': '#6f52aa',
+                  }
+                : {},
+          ),
   })) {
     writeFileSync(
       `public/brand/rare-room-${name}${variant === 'default' ? '' : '-' + variant}.svg`,
@@ -20,7 +43,7 @@ for (const [variant, colors] of Object.entries({
     );
   }
 }
-writeFileSync('public/brand/rare-room-app.svg', appIcon('rare'));
+writeFileSync('public/brand/rare-room-app.svg', finalMark);
 for (const [name, size] of [
   ['icon-180.png', 180],
   ['icon-192.png', 192],
@@ -29,8 +52,13 @@ for (const [name, size] of [
 ]) {
   // Maskable artwork stays inside the central 80%-diameter safe circle.
   const svg = name.includes('maskable')
-    ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(5 5) scale(.9)">${appIcon('rare', '', 100)}</g></svg>`
-    : appIcon('rare', '', size);
+    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" fill="#141519"/><svg x="20" y="20" width="88" height="88" viewBox="0 0 128 128">' +
+      finalMark.slice(
+        finalMark.indexOf('>') + 1,
+        finalMark.lastIndexOf('</svg>'),
+      ) +
+      '</svg></svg>'
+    : finalMark;
   writeFileSync(
     'public/icons/' + name,
     new Resvg(svg, {

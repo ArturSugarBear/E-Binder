@@ -33,6 +33,8 @@ jobs:
           path: public/catalog-art/audit.json
           retention-days: 14
       - run: npm run check
+      - name: Verify Rare Room brand source
+        run: node scripts/validate-brand.mjs
       - name: Refresh and build dated Cardmarket price guide
         run: |
           node scripts/refresh-cardmarket.mjs
@@ -78,6 +80,7 @@ jobs:
               tests/e2e/set-art-fallback.spec.ts \
               tests/e2e/liquid-collector.spec.ts \
               tests/e2e/beta-mobile-ergonomics.spec.ts \
+              tests/e2e/rare-room-release.spec.ts \
               --project=chromium --project=mobile-chromium
             # The live camera is an iPhone-first surface. Exercise its
             # repeat-scan, camera-rejection and track-cleanup regressions
@@ -97,6 +100,14 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+      - name: Capture Rare Room responsive QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rare-room-browser-qa
+          path: test-results/**/rare-room-*.png
+          if-no-files-found: ignore
+          retention-days: 14
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request'
         with:
