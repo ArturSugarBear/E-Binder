@@ -3,18 +3,30 @@ import { resolve } from 'node:path';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const base = process.env.VITE_BASE_PATH || '/E-Binder/';
+const appVersion = process.env.npm_package_version || '1.0.0';
+const buildId = process.env.GITHUB_SHA?.slice(0, 12) || 'local';
 const basePattern = base.replace(/[\\.*+?^$()|[\]{}]/g, '\\$&');
 
 export default defineConfig({
   base,
   define: {
-    __E_BINDER_BUILD__: JSON.stringify(
-      process.env.GITHUB_SHA?.slice(0, 12) ?? 'local',
-    ),
+    __E_BINDER_BUILD__: JSON.stringify(buildId),
+    __E_BINDER_VERSION__: JSON.stringify(appVersion),
   },
   server: { allowedHosts: ['terminal.local'] },
   preview: { allowedHosts: ['terminal.local'] },
   plugins: [
+    {
+      name: 'e-binder-build-manifest',
+      apply: 'build' as const,
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify({ version: appVersion, build: buildId }),
+        });
+      },
+    },
     VitePWA({
       base,
       registerType: 'prompt',
