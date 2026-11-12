@@ -1,4 +1,4 @@
-import { numberKey } from '../domain/personal';
+import { normalize, numberKey } from '../domain/personal';
 import type { Palette, PersonalCard, PersonalState } from '../domain/personal';
 import type { PersonalStore } from './personal-store';
 import {
@@ -70,7 +70,7 @@ export class CardImages {
         const apiImage =
           resolved.setId === card.setId &&
           numberKey(resolved.number) === numberKey(card.number) &&
-          resolved.name === card.name
+          normalize(resolved.name) === normalize(card.name)
             ? resolved.image
             : '';
         if (apiImage) return apiImage;

@@ -95,6 +95,9 @@ test('all catalogue prices load in a bounded queue even when only the FX service
       updatedAt: '2026-11-10T12:00:00Z',
     };
   });
+  // A stored card can have no image URL while artwork resolves via catalog fallback.
+  // It must still be eligible for the portfolio hero.
+  state.holdings[4]!.card.image = '';
   await page.goto('./#home');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
@@ -137,6 +140,9 @@ test('all catalogue prices load in a bounded queue even when only the FX service
   await expect(progress).toHaveCount(0);
   await expect(page.locator('.w-portfolio-balance')).toHaveText(/76,00\s*€/);
   await expect(page.locator('.w-portfolio-caption')).toContainText('38 von 42');
+  await expect(
+    page.locator('.w-portfolio-hero-art .w-portfolio-art-card'),
+  ).toHaveCount(3);
   expect(fxRequests).toBe(1);
   expect(peak).toBeLessThanOrEqual(4);
   await expect(
