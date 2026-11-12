@@ -1,4 +1,5 @@
 import type { VisualHit } from '../domain/visual-retrieval';
+import { visualBetaEnabled } from './visual-beta';
 
 export interface VisualSearchSession {
   match: (photo: Blob, timeoutMs?: number) => Promise<VisualHit[]>;
@@ -12,7 +13,7 @@ export interface VisualSearchSession {
 export async function createVisualSearchSession(
   signal: AbortSignal,
 ): Promise<VisualSearchSession | null> {
-  if (signal.aborted) return null;
+  if (signal.aborted || !visualBetaEnabled()) return null;
   const manifestUrl = `${import.meta.env.BASE_URL}assets/vision/manifest.json`;
   try {
     const response = await fetch(manifestUrl, {
@@ -26,6 +27,14 @@ export async function createVisualSearchSession(
   if (signal.aborted) return null;
   const worker = new Worker(new URL('./visual-worker.ts', import.meta.url), {
     type: 'module',
+  });
+  // Warm the real model, in parallel with the collector's normal alignment
+  // and OCR setup. The first inference can still be slow on older iPhones.
+  worker.postMessage({
+    id: 0,
+    warmup: true,
+    photo: new Blob(),
+    manifestUrl,
   });
   let disposed = false;
   let nextId = 0;

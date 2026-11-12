@@ -24,6 +24,30 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # This pilot is opt-in, not a universal image recognizer.
+      # Build model/index from the SAME pinned ONNX weights and exactly nine
+      # publisher-checked, already bundled image references. No donor JPEGs.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install and verify local visual AI beta
+        run: |
+          python -m pip install --disable-pip-version-check 'numpy==2.2.6' 'pillow==11.3.0' 'onnxruntime==1.23.2'
+          curl --fail --location --retry 3 --retry-delay 3 --max-time 180 \
+            'https://huggingface.co/onnx-community/dinov2-small-ONNX/resolve/08c606e/onnx/model_quantized.onnx' \
+            -o /tmp/ebinder-dinov2-small-beta.onnx
+          echo '7cfc69bd1874d20b9dbecdab057f21aeac7b90c2f560bd0fb66af86c78024f62  /tmp/ebinder-dinov2-small-beta.onnx' | sha256sum --check
+          node scripts/prepare-visual-beta-input.mjs
+          python scripts/embed-card-references.py \
+            visual-beta-reference-input.json \
+            /tmp/ebinder-dinov2-small-beta.onnx \
+            /tmp/ebinder-visual-vectors.json
+          node scripts/pack-visual-index.mjs \
+            /tmp/ebinder-visual-vectors.json \
+            /tmp/ebinder-dinov2-small-beta.onnx \
+            public/assets/vision
+          node scripts/verify-visual-beta.mjs
+          rm visual-beta-reference-input.json
       - name: Resolve and audit release artwork
         run: node scripts/release-artwork-gate.mjs
       - uses: actions/upload-artifact@v4
@@ -88,6 +112,7 @@ jobs:
               tests/e2e/pwa.spec.ts \
               tests/e2e/catalog-images.spec.ts \
               tests/e2e/compact-card-sheet.spec.ts \
+              tests/e2e/visual-beta.spec.ts \
               tests/e2e/classic-collection.spec.ts \
               tests/e2e/binder-card-artwork.spec.ts \
               tests/e2e/set-art-fallback.spec.ts \

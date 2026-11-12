@@ -10,6 +10,7 @@ it('falls back to the existing OCR path when no licensed local embedding bundle 
   const worker = vi.fn(() => {
     throw new Error('A missing model must never start an ONNX worker');
   });
+  vi.stubGlobal('localStorage', { getItem: vi.fn(() => 'on') });
   vi.stubGlobal('fetch', request);
   vi.stubGlobal('Worker', worker);
   const session = await createVisualSearchSession(new AbortController().signal);

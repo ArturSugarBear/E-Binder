@@ -29,7 +29,7 @@ Kostenlose, installierbare Pokémon-TCG-Web-App mit Live-Kartenscanner, 3×3-Bin
 2. **Prüfen:** OCR-Kandidaten und tatsächlich gedruckte Ausgabe vergleichen; bei Bedarf korrigieren.
 3. **Bestätigen:** Erst deine Auswahl wird als Bestand übernommen.
 
-PaddleOCR PP-OCRv4 mit ONNX Runtime arbeitet lokal im Browser. Ein universell validierter visueller Fotoindex und neue trainierte Modellgewichte sind **noch nicht** produktiv nachgewiesen. Ähnlichkeit ist keine sichere Druckausgabe.
+PaddleOCR PP-OCRv4 mit ONNX Runtime arbeitet lokal im Browser. Unter **Profil → Visuelle KI · begrenzter Test** kann optional ein echtes DINOv2-ONNX-Bildmodell mit **nur neun geprüften deutschen Druckausgaben** getestet werden. Das ist kein universeller Fotoindex; für andere Karten bleibt OCR/Katalogsuche zuständig. Die Beta-Fotos trainieren die Gewichte noch nicht. [Grenzen und Testanleitung](docs/visual-beta-pilot.md).
 
 ## Mit deinen Beta-Scans die Erkennung verbessern
 

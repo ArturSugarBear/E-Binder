@@ -1,4 +1,9 @@
 import { action, el, icon } from './workspace-dom';
+import {
+  visualBetaEnabled,
+  setVisualBetaEnabled,
+  VISUAL_BETA_REFERENCE_COUNT,
+} from '../data/visual-beta';
 import type { WorkspaceContext } from './workspace-context';
 import {
   betaScanDonationState,
@@ -80,6 +85,51 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
     ),
   );
   root.append(account, scanner);
+  const visualActive = visualBetaEnabled();
+  root.append(
+    el(
+      'section',
+      'w-profile-group',
+      el('h2', '', 'Visuelle KI · begrenzter Test'),
+      el(
+        'p',
+        'w-muted',
+        'Testmodell mit ' +
+          VISUAL_BETA_REFERENCE_COUNT +
+          ' geprüften Kartenmotiven. Es kann keine beliebigen Pokémon-Karten erkennen. ' +
+          'Bildähnlichkeit ergänzt OCR nur bei der Prüfung einer Einzelkarte oder Binderseite. ' +
+          'Keine automatische Bestandsübernahme und kein Upload für die Bildsuche.',
+      ),
+      action(
+        visualActive
+          ? 'Visuelle KI Beta ausschalten'
+          : 'Visuelle KI Beta testen',
+        () => {
+          if (!setVisualBetaEnabled(!visualActive)) {
+            ctx.notify(
+              'Die Einstellung konnte nicht gespeichert werden.',
+              true,
+            );
+            return;
+          }
+          ctx.notify(
+            visualActive
+              ? 'Visuelle KI ist auf diesem Gerät ausgeschaltet.'
+              : 'Visuelle KI ist aktiviert. Sie wird bei der nächsten Foto-Auswertung zusätzlich zu OCR genutzt.',
+          );
+          ctx.render();
+        },
+        'secondary',
+      ),
+      el(
+        'p',
+        'w-muted',
+        visualActive
+          ? 'Aktiv auf diesem Gerät · ausschließlich experimentelle Vorschläge'
+          : 'Aus · Standard bleibt die bestehende OCR-Erkennung',
+      ),
+    ),
+  );
   if (betaDiagnosticsAuthorized()) {
     const suspended = betaDiagnosticsPaused();
     root.append(
