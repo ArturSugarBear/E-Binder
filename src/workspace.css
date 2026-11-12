@@ -5460,3 +5460,47 @@ textarea.w-input,
   height: 4px;
   margin: 0;
 }
+
+/* Meaningful scan feedback while real OCR/candidate verification is running.
+ * No fake time-based percent; the existing progress widget owns milestones.
+ * The shimmer stops immediately when the scan exits its running state. */
+.w-scan-analyzing .w-photo-comparison {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.w-scan-analyzing .w-photo-comparison::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(216 242 90 / 0.22) 48%,
+    rgb(216 242 90 / 0.38) 51%,
+    transparent 64%
+  );
+  transform: translateX(-110%);
+  animation: scan-photo-shimmer 2.15s ease-in-out infinite;
+}
+@keyframes scan-photo-shimmer {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-scan-analyzing .w-photo-comparison::after {
+    animation: none;
+    background: none;
+  }
+}
+.w-scan-recovery .w-button {
+  width: 100%;
+  min-height: 46px;
+  justify-content: center;
+}
