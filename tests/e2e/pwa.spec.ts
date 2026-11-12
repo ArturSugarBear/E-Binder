@@ -200,3 +200,64 @@ test('iPhone browser viewport is contained and install guidance is dismissible',
   await page.reload();
   await expect(page.locator('[data-pwa-banner="install"]')).toHaveCount(0);
 });
+
+test('both OCR model/dictionary pairs remain available offline after on-demand use', async ({
+  page,
+  context,
+}, info) => {
+  test.skip(
+    info.project.name === 'webkit',
+    'Desktop WebKit does not simulate installed iOS PWAs.',
+  );
+  await page.goto('./');
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await page.reload();
+  await expect
+    .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
+    .toBe(true);
+  const files = [
+    'ppocrv4-rec.onnx',
+    'ppocr-keys.txt',
+    'ppocrv3-ja-rec.onnx',
+    'ppocr-ja-keys.txt',
+  ];
+  const loaded = await page.evaluate(
+    async (files) =>
+      Promise.all(
+        files.map(async (file) => {
+          const r = await fetch(new URL('assets/ocr/' + file, location.href));
+          return {
+            status: r.status,
+            bytes: (await r.arrayBuffer()).byteLength,
+          };
+        }),
+      ),
+    files,
+  );
+  for (const item of loaded) {
+    expect(item.status).toBe(200);
+    expect(item.bytes).toBeGreaterThan(1000);
+  }
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const cache = await caches.open('e-binder-on-demand-ocr');
+        return (await cache.keys()).length;
+      }),
+    )
+    .toBe(4);
+  await context.setOffline(true);
+  const offline = await page.evaluate(
+    async (files) =>
+      Promise.all(
+        files.map(async (file) => {
+          const r = await fetch(new URL('assets/ocr/' + file, location.href));
+          return r.arrayBuffer().then((b) => b.byteLength);
+        }),
+      ),
+    files,
+  );
+  expect(offline).toEqual(loaded.map((r) => r.bytes));
+});

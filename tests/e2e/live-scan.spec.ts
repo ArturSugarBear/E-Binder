@@ -229,7 +229,7 @@ test('P09 pauses a full batch before requesting camera and keeps reviewable capt
     'queue-full',
   );
   await expect(
-    live.getByRole('button', { name: 'Jetzt aufnehmen' }),
+    live.getByRole('button', { name: 'Manuell aufnehmen' }),
   ).toBeHidden();
   await expect(
     live.getByRole('button', { name: /Ergebnisse prüfen \(24\)/ }),

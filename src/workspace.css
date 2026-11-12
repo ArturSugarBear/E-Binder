@@ -5394,3 +5394,44 @@ textarea.w-input,
     scroll-margin-bottom: calc(var(--mobile-nav-clearance, 110px) + 24px);
   }
 }
+
+/* Auto-first capture: recovery is outside the camera and only shown on demand. */
+.w-live-scan-minimal .w-live-manual-capture:not([hidden]) {
+  min-height: 44px;
+  width: auto;
+  justify-self: center;
+  grid-column: 1 / -1;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+.w-live-scan-minimal .w-dialog-body > .w-live-status {
+  position: static;
+  inset: auto;
+  transform: none;
+  margin: 0;
+  max-width: none;
+  padding: 8px 12px;
+  text-align: center;
+}
+.w-live-scan-minimal .w-live-analysis:not([hidden]) {
+  position: static;
+  inset: auto;
+  margin: 0;
+}
+.w-live-scan-minimal .w-live-analysis-line,
+.w-live-scan-minimal .w-live-analysis:not([hidden]) .w-live-analysis-line {
+  display: none;
+  animation: none;
+}
+.w-live-scan-minimal .w-live-stage.is-analyzing .w-live-frame-guide::before {
+  display: none;
+}
+
+.w-live-scan-minimal .w-dialog-footer {
+  grid-template-rows: 32px 44px;
+}
+.w-live-scan-minimal .w-live-progress {
+  display: block;
+  height: 4px;
+  margin: 0;
+}

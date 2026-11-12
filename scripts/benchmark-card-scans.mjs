@@ -38,6 +38,11 @@ async function benchmark(manifestPath) {
     throw new Error('A manifest needs 1–200 local photo samples.');
   for (const [index, sample] of manifest.samples.entries()) {
     if (
+      sample.verification?.independent !== true ||
+      !['human-visual-catalog', 'assisted-visual-catalog'].includes(
+        sample.verification?.method,
+      ) ||
+      !sample.verification?.evidence ||
       typeof sample.photo !== 'string' ||
       !sample.photo.trim() ||
       typeof sample.rights !== 'string' ||
@@ -75,7 +80,17 @@ async function benchmark(manifestPath) {
     if ((await stat(photoPath)).size > 12_000_000)
       throw new Error("Single photo exceeds the app's 12 MB capture limit.");
   }
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.CARD_SCAN_PROXY
+      ? {
+          proxy: {
+            server: process.env.CARD_SCAN_PROXY,
+            bypass: '127.0.0.1,localhost',
+          },
+        }
+      : {}),
+  });
   const browserVersion = browser.version();
   const reports = [];
   try {
@@ -94,6 +109,7 @@ async function benchmark(manifestPath) {
         url.hash = 'sammlung';
         await page.goto(url.toString(), { waitUntil: 'domcontentloaded' });
         await page.locator('#workspace-main[data-ready="true"]').waitFor();
+        console.log('Benchmark phase: application ready');
         const readyAt = performance.now();
         const online = await page.evaluate(() => navigator.onLine);
         await page
@@ -104,7 +120,15 @@ async function benchmark(manifestPath) {
           exact: true,
         });
         if (sample.language)
-          await add.getByLabel('Katalogsprache').selectOption(sample.language);
+          await add
+            .getByRole('group', { name: 'Katalogsprache', exact: true })
+            .getByRole('radio', {
+              name: { de: 'Deutsch', en: 'Englisch', ja: 'Japanisch' }[
+                sample.language
+              ],
+              exact: true,
+            })
+            .check();
         await add
           .locator('input[type=file][multiple]')
           .setInputFiles(photoPath);
@@ -130,19 +154,30 @@ async function benchmark(manifestPath) {
         }
         await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
         const alignedAt = performance.now();
+        console.log('Benchmark phase: aligned image');
         await crop
           .getByRole('button', { name: 'Texterkennung starten' })
           .click();
         await add
-          .locator('.w-search-results[data-scan-state="complete"]')
-          .waitFor({ timeout: 180_000 });
+          .locator(
+            '.w-search-results[data-scan-state="complete"], .w-search-results[data-scan-state="error"]',
+          )
+          .waitFor({ state: 'attached', timeout: 180_000 });
+        if (
+          (await add
+            .locator('.w-search-results')
+            .getAttribute('data-scan-state')) === 'error'
+        )
+          throw new Error('Real OCR or catalogue execution failed');
         const finishedAt = performance.now();
+        console.log('Benchmark phase: recognition finished');
         const payload = await add
           .locator('.w-search-results')
           .evaluate((node) => ({
             version: node.dataset.scanResultContract,
             keys: node.dataset.scanRankedKeys,
             modelCandidates: node.dataset.scanVisualModelCandidates,
+            automaticKey: node.dataset.scanSuggestedKey,
           }));
         const ranked = readRankedKeys(payload.version, payload.keys);
         const owned = await page.locator('.w-owned-grid button').count();
@@ -159,10 +194,15 @@ async function benchmark(manifestPath) {
           ...rankMatch(sample.expectedKey, ranked),
           resultStatus: ranked.length ? 'candidates' : 'no-candidates',
           rankedKeys: ranked,
+          automaticKey: payload.automaticKey || null,
+          automaticIdentityMeasured: payload.automaticKey !== undefined,
           candidates: ranked.length,
           // An actual licensed/indexed visual model may return no matches;
           // zero is not a failed measurement or proof of OCR-only success.
           visualModelCandidates: Number(payload.modelCandidates ?? 0),
+          ...(process.env.CARD_SCAN_DEBUG_OCR === '1'
+            ? { debugOcr: await add.locator('.w-ocr-text').allTextContents() }
+            : {}),
           online,
           geometryMode: sample.corners ? 'corrected' : 'manual-default',
           phasesMs: {
@@ -177,12 +217,16 @@ async function benchmark(manifestPath) {
           photo: basename(photoPath),
           conditions: sample.conditions ?? [],
           rights: sample.rights,
+          language: sample.language ?? 'de',
           expectedKey: sample.expectedKey,
           durationMs: Math.round(performance.now() - start),
           resultStatus: 'technical-error',
           error: error instanceof Error ? error.message : String(error),
         });
       } finally {
+        console.log(
+          `Evaluated ${reports.length}/${manifest.samples.length} samples; latest status ${reports.at(-1)?.resultStatus}`,
+        );
         await context.close();
       }
     }
@@ -195,13 +239,16 @@ async function benchmark(manifestPath) {
     measuredAt: new Date().toISOString(),
     provenance: {
       commit: process.env.GIT_COMMIT_SHA ?? null,
-      modelVersion: null,
+      modelVersion: process.env.CARD_SCAN_MODEL_VERSION ?? 'unreported',
       indexVersion: null,
       browser: 'chromium',
       browserVersion,
       viewport: '390x844',
       serviceWorkers: 'blocked',
       recognition: 'real-worker-no-stubs',
+      datasetKind: manifest.kind ?? 'unspecified',
+      automaticIdentityDefinition:
+        'Resolver-suggested printing before human confirmation; not a probability',
       geometry: 'manual-photo-alignment',
     },
     summary,

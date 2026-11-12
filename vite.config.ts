@@ -61,6 +61,7 @@ export default defineConfig({
         globIgnores: [
           '**/assets/cards/**',
           '**/catalog-art/**',
+          '**/catalog-products/**',
           '**/assets/ocr/**',
           '**/assets/vision/**',
           '**/*.map',
@@ -71,6 +72,18 @@ export default defineConfig({
           new RegExp('^' + basePattern + '(?:index\\.html)?$'),
         ],
         runtimeCaching: [
+          {
+            urlPattern: new RegExp(
+              basePattern + 'catalog-products/tcgplayer/[0-9]+\\.json$',
+            ),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'e-binder-verified-products',
+              networkTimeoutSeconds: 3,
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
           {
             urlPattern: new RegExp(basePattern + 'catalog-art/.*\\.json$'),
             handler: 'NetworkFirst',
@@ -172,14 +185,14 @@ export default defineConfig({
           {
             urlPattern: new RegExp(
               basePattern +
-                'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt)$',
+                'assets/ocr/(?:ppocrv4-rec\\.onnx|ppocr-keys\\.txt|ppocrv3-ja-rec\\.onnx|ppocr-ja-keys\\.txt)$',
             ),
             handler: 'CacheFirst',
             options: {
               cacheName: 'e-binder-on-demand-ocr',
               cacheableResponse: { statuses: [200] },
               expiration: {
-                maxEntries: 2,
+                maxEntries: 4,
                 maxAgeSeconds: 60 * 24 * 60 * 60,
                 purgeOnQuotaError: true,
               },

@@ -53,3 +53,36 @@ describe('live background OCR safety budget', () => {
     expect(SilentWorker.latest?.terminated).toBe(true);
   });
 });
+
+it('observes cold readiness separately, then retains the full bounded inference attempt', async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal('Worker', SilentWorker);
+  const controller = new AbortController();
+  const session = createRecognitionSession(controller.signal, () => undefined, {
+    fast: true,
+    timeoutMs: 5600,
+    language: 'ja',
+  });
+  const ready = session.warmup();
+  expect(SilentWorker.latest?.messages[0]).toMatchObject({
+    language: 'ja',
+    modelUrl: expect.stringContaining('ppocrv3-ja-rec.onnx'),
+    dictionaryUrl: expect.stringContaining('ppocr-ja-keys.txt'),
+  });
+  await vi.advanceTimersByTimeAsync(8000);
+  expect(SilentWorker.latest?.terminated).toBe(false);
+  SilentWorker.latest?.onmessage?.(
+    new MessageEvent('message', { data: { type: 'ready' } }),
+  );
+  await ready;
+  const recognized = session.recognize(new Blob(['card']));
+  await vi.advanceTimersByTimeAsync(5500);
+  expect(SilentWorker.latest?.terminated).toBe(false);
+  SilentWorker.latest?.onmessage?.(
+    new MessageEvent('message', {
+      data: { type: 'done', id: 1, text: 'M1L 088/063' },
+    }),
+  );
+  expect(await recognized).toBe('M1L 088/063');
+  session.close();
+});

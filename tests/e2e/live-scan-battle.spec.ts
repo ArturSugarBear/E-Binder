@@ -6,8 +6,8 @@ import type { Page } from '@playwright/test';
  * generated MediaStream. The OCR worker is deliberately stubbed so these
  * tests measure camera/edge/queue lifecycle, NOT recognition accuracy.
  */
-async function installCameraRig(page: Page): Promise<void> {
-  await page.addInitScript(() => {
+async function installCameraRig(page: Page, warmupDelayMs = 0): Promise<void> {
+  await page.addInitScript((warmupDelayMs: number) => {
     type Rig = {
       setMode: (mode: string) => void;
       trackStates: () => string[];
@@ -74,14 +74,24 @@ async function installCameraRig(page: Page): Promise<void> {
     class StubOCR {
       onmessage:
         | ((
-            event: MessageEvent<{ type: string; id: number; text: string }>,
+            event: MessageEvent<{ type: string; id?: number; text?: string }>,
           ) => void)
         | null = null;
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id?: number; warmup?: boolean }) {
         // A model warmup is not a recognized photo and must not inflate
         // measured live OCR calls or simulate a result.
-        if (data.warmup || typeof data.id !== 'number') return;
+        if (data.warmup) {
+          setTimeout(
+            () =>
+              this.onmessage?.(
+                new MessageEvent('message', { data: { type: 'ready' } }),
+              ),
+            warmupDelayMs,
+          );
+          return;
+        }
+        if (typeof data.id !== 'number') return;
         const id = data.id;
         ocrCalls++;
         setTimeout(() => {
@@ -109,7 +119,7 @@ async function installCameraRig(page: Page): Promise<void> {
       configurable: true,
       value: InterceptWorker,
     });
-  });
+  }, warmupDelayMs);
   // Catalogue lookups are optional, but must not make the lifecycle
   // benchmark dependent on a live external HTTP service.
   await page.route('https://api.tcgdex.net/**', (route) =>
@@ -155,8 +165,8 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await mode(page, 'square');
   await page.waitForTimeout(1300);
   await expect(
-    live.getByRole('button', { name: 'Jetzt aufnehmen' }),
-  ).toBeVisible();
+    live.getByRole('button', { name: 'Manuell aufnehmen' }),
+  ).toBeVisible({ timeout: 10000 });
   await expect(live.locator('.w-live-progress')).toHaveJSProperty('value', 0);
   await expect(add.locator('.w-capture-queue')).toBeEmpty();
   await mode(page, 'landscape');
@@ -523,3 +533,66 @@ for (const width of [320, 390, 430]) {
     });
   });
 }
+
+test('cold model loading and queued photos do not consume their inference windows or cover the preview', async ({
+  page,
+}, info) => {
+  test.skip(
+    info.project.name === 'webkit',
+    'Canvas MediaStream simulator is Chromium-specific.',
+  );
+  await installCameraRig(page, 8000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    includeHidden: true,
+  });
+  await add
+    .getByRole('button', { name: 'Karte live scannen', exact: true })
+    .click();
+  const live = page.getByRole('dialog', {
+    name: 'Karte live scannen',
+    exact: true,
+  });
+  await mode(page, 'card');
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    '1 offene Aufnahme',
+    { timeout: 15000 },
+  );
+  await expect(live.locator('.w-live-analysis')).toBeVisible();
+  await expect(live.locator('.w-live-manual-capture')).toBeHidden();
+  const camera = await live.locator('.w-live-stage').boundingBox(),
+    caption = await live.locator('.w-live-analysis-caption').boundingBox();
+  expect(caption!.y).toBeGreaterThanOrEqual(camera!.y + camera!.height);
+  await mode(page, 'blank');
+  await expect(live.locator('.w-live-stage')).toHaveAttribute(
+    'data-scan-phase',
+    'ready',
+  );
+  await mode(page, 'card2');
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    '2 offene Aufnahmen',
+  );
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() =>
+          (
+            window as typeof window & {
+              __scanRig: { ocrRequests: () => number };
+            }
+          ).__scanRig.ocrRequests(),
+        ),
+      { timeout: 20000 },
+    )
+    .toBe(6);
+  await expect(live.locator('.w-live-analysis')).toBeHidden({ timeout: 10000 });
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  await live
+    .getByRole('button', { name: 'Karte live scannen schließen' })
+    .click();
+});

@@ -1,3 +1,4 @@
+import { manualCaptureAvailable } from '../domain/live-capture-ui';
 import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
@@ -184,7 +185,7 @@ export function openLiveScanner(
   );
   analysis.setAttribute('role', 'status');
   analysis.hidden = true;
-  stage.append(analysis);
+
   let ongoingAnalysis = 0;
   const onAnalysisState = (active: boolean, detail?: string) => {
     if (closed) return;
@@ -196,6 +197,7 @@ export function openLiveScanner(
     }
     ongoingAnalysis = Math.max(0, ongoingAnalysis + (active ? 1 : -1));
     analysis.hidden = ongoingAnalysis === 0;
+    if (ongoingAnalysis > 0) trigger.hidden = true;
     stage.classList.toggle('is-analyzing', ongoingAnalysis > 0);
     if (!ongoingAnalysis)
       analysisCaption.textContent = 'Kartendetails werden lokal geprüft …';
@@ -213,11 +215,11 @@ export function openLiveScanner(
     'Karte aufrecht halten, Spiegelungen vermeiden. Die Umrandung zeigt erkannte Ecken. Jede Aufnahme bleibt bis zu deiner Bestätigung offen.',
   );
   const trigger = action(
-    'Jetzt aufnehmen',
+    'Manuell aufnehmen',
     () => {
       void captureCard();
     },
-    'primary',
+    'secondary',
     'camera',
   );
   const next = action(
@@ -315,12 +317,20 @@ export function openLiveScanner(
   cameraFallback.classList.add('w-live-fallback-primary');
   cameraFallback.hidden = true;
   // Camera, status, shutter, review: everything else is optional.
-  stage.append(status);
-  trigger.classList.add('w-live-shutter');
+  trigger.hidden = true;
+  trigger.classList.add('w-live-manual-capture');
   next.classList.add('w-live-next');
   finish.classList.add('w-live-review');
   sheet.dialog.classList.add('w-live-scan-minimal');
-  sheet.body.append(mode, stage, journey.element, progress, options);
+  sheet.body.append(
+    mode,
+    stage,
+    status,
+    analysis,
+    journey.element,
+    progress,
+    options,
+  );
   sheet.footer.append(reviewSummary, trigger, next, finish, cameraFallback);
 
   // A sticky review footer can occlude a status overlay inside the camera
@@ -333,7 +343,8 @@ export function openLiveScanner(
     sheet.dialog.classList.add('has-camera-alert');
   };
   const restoreCameraStatus = () => {
-    if (status.parentElement !== stage) stage.append(status);
+    if (status.parentElement !== sheet.body)
+      sheet.body.insertBefore(status, analysis);
     stage.classList.remove('has-camera-alert');
     sheet.dialog.classList.remove('has-camera-alert');
   };
@@ -352,6 +363,7 @@ export function openLiveScanner(
   let last: Quad | null = null;
   let reliable: Quad | null = null;
   let sampled = 0;
+  let cameraReadyAt = 0;
   const sample = document.createElement('canvas');
   sample.width = 192;
   sample.height = 256;
@@ -359,6 +371,7 @@ export function openLiveScanner(
   function stopCamera(): void {
     cameraGeneration++;
     running = false;
+    trigger.hidden = true;
     stage.dataset.scanPhase = 'paused';
     cancelAnimationFrame(frameId);
     for (const acquired of acquiredStreams) {
@@ -384,9 +397,10 @@ export function openLiveScanner(
     stage.dataset.scanPhase = 'ready';
     stageLabel.textContent = 'Nächste Karte ausrichten';
     status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
-    trigger.hidden = false;
+    trigger.hidden = true;
     next.hidden = true;
     progress.value = 0;
+    cameraReadyAt = performance.now();
   }
 
   async function captureCard(): Promise<void> {
@@ -403,6 +417,7 @@ export function openLiveScanner(
       return;
     }
     busy = true;
+    trigger.hidden = true;
     trigger.disabled = true;
     journey.update('capture', 'Aufnahme wird ausgerichtet …', 0);
     stage.dataset.scanPhase = 'capture';
@@ -492,6 +507,14 @@ export function openLiveScanner(
   function inspectFrame(time: number): void {
     if (!running || closed) return;
     frameId = requestAnimationFrame(inspectFrame);
+    trigger.hidden = !manualCaptureAvailable({
+      running,
+      busy,
+      analyzing: ongoingAnalysis > 0,
+      waitingForRemoval,
+      stableFrames: observations,
+      elapsedMs: time - cameraReadyAt,
+    });
     if (busy || document.hidden || time - sampled < 280 || video.readyState < 2)
       return;
     sampled = time;
@@ -572,7 +595,7 @@ export function openLiveScanner(
     next.hidden = true;
     next.querySelector('span')!.textContent = 'Nächste Karte scannen';
     refreshReview();
-    trigger.hidden = false;
+    trigger.hidden = true;
     trigger.disabled = true;
     observations = 0;
     last = null;
@@ -619,6 +642,7 @@ export function openLiveScanner(
         return;
       }
       running = true;
+      cameraReadyAt = performance.now();
       trigger.disabled = false;
       status.textContent = 'Kamera bereit · Karte in den Rahmen halten';
       frameId = requestAnimationFrame(inspectFrame);
