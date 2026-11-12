@@ -140,7 +140,9 @@ test('all catalogue prices load in a bounded queue even when only the FX service
   await expect(progress).toHaveCount(0);
   await expect(page.locator('.w-portfolio-balance')).toHaveText(/76,00\s*€/);
   await expect(page.locator('.w-portfolio-caption')).toContainText('38 von 42');
-  await expect(page.locator('.w-portfolio-hero-art .w-portfolio-art-card')).toHaveCount(3);
+  await expect(
+    page.locator('.w-portfolio-hero-art .w-portfolio-art-card'),
+  ).toHaveCount(3);
   expect(fxRequests).toBe(1);
   expect(peak).toBeLessThanOrEqual(4);
   await expect(
