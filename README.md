@@ -33,9 +33,9 @@ PaddleOCR PP-OCRv4 mit ONNX Runtime arbeitet lokal im Browser. Unter **Profil �
 
 ## Mit deinen Beta-Scans die Erkennung verbessern
 
-Die Teilnahme ist **standardmäßig aus**. Nach Anmeldung findest du in **Profil → Beta · Bilderkennung verbessern** eine gesonderte, freiwillige Foto-Einwilligung.
+Die Teilnahme ist **standardmäßig aus**. Unter **Profil → Beta · Bilderkennung verbessern** gibt es eine separate, freiwillige Foto-Einwilligung – auch für Gäste ohne E-Binder-Konto. Nach ihrem Klick wird eine getrennte anonyme Testidentität für private Uploads angelegt; der lokale Bestand bleibt lokal.
 
-Nur dann werden **neue** Fotos durch JPEG-Neukodierung ohne EXIF-/Standortdaten verkleinert und verschlüsselt in einen **privaten** Storage-Bucket geschickt. Die lokale OCR und dein Bestand funktionieren ohne Übertragung. Teilnahme stoppen und alle eigenen gespendeten Bilder löschen sind im Profil möglich. Kein Foto wird automatisch als richtiges Trainingslabel behandelt.
+Nur dann werden **neue** Fotos durch JPEG-Neukodierung ohne EXIF-/Standortdaten verkleinert und verschlüsselt in einen **privaten** Storage-Bucket geschickt. Die lokale OCR und dein Bestand funktionieren ohne Übertragung. Teilnahme stoppen und alle eigenen gespendeten Bilder löschen sind im Profil möglich. Bestätigte Kartenausgaben sind zunächst nur ungeprüfte Hinweise. Kein Foto und keine Nutzerbestätigung wird automatisch zu einem gültigen Trainingslabel. Bei null OCR-Treffern bleibt das aktuelle Foto erhalten, damit Set und Nummer oder der Name ohne neue Aufnahme nachgesucht werden können.
 
 [Beta-Ablauf und Datenschutzgrenzen](docs/beta-rollout.md) · [Technisches Dataset-Konzept](docs/beta-dataset-pipeline.md)
 
