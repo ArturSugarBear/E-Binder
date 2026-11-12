@@ -1,0 +1,66 @@
+import { expect, test } from './fixtures';
+
+const routes = ['home', 'entdecken', 'binder', 'portfolio', 'profil'] as const;
+const widths = [320, 375, 390, 430] as const;
+
+test('Rare Room mobile surfaces fit and central scan remains accessible', async ({
+  page,
+}, info) => {
+  test.skip(
+    info.project.name === 'chromium',
+    'Phone viewport checks run on mobile Chromium and WebKit.',
+  );
+  test.setTimeout(180_000);
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: async () => {
+          throw new DOMException('Denied', 'NotAllowedError');
+        },
+      },
+    });
+  });
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const route of routes) {
+      await page.goto('./#' + route);
+      await expect(page.locator('#workspace-main')).toHaveAttribute(
+        'data-ready',
+        'true',
+      );
+      const { inner, scroll } = await page.evaluate(() => ({
+        inner: window.innerWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(
+        scroll,
+        'Unexpected horizontal overflow at ' + width + 'px on ' + route,
+      ).toBeLessThanOrEqual(inner + 1);
+      await page.screenshot({
+        path: info.outputPath('rare-room-' + width + '-' + route + '.png'),
+        fullPage: true,
+      });
+    }
+    await page.goto('./#home');
+    await expect(page.locator('#workspace-main')).toHaveAttribute(
+      'data-ready',
+      'true',
+    );
+    await page.locator('#workspace-mobile-add').click();
+    await expect(
+      page.getByRole('dialog', {
+        name: 'Karte live scannen',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.screenshot({
+      path: info.outputPath('rare-room-' + width + '-scan.png'),
+      fullPage: true,
+    });
+    await page.keyboard.press('Escape');
+  }
+  expect(pageErrors, 'Uncaught browser errors').toEqual([]);
+});
