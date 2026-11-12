@@ -147,3 +147,49 @@ it.each(['number', 'setCode', 'productLineName'])(
     ).toBeUndefined();
   },
 );
+
+it('resolves English-labeled Riolu to the exact Japanese M1L-068 art rare, not the M1S card', async () => {
+  vi.resetModules();
+  const riolu = {
+    id: 'M1L-068',
+    localId: '068',
+    name: 'リオル',
+    set: { id: 'M1L', name: 'Mega Brave', cardCount: { official: 63 } },
+    thirdParty: { tcgplayer: 647177 },
+    variants_detailed: [],
+  };
+  const product = {
+    productId: 647177,
+    productLineName: 'Pokemon Japan',
+    productTypeName: 'Cards',
+    sealed: false,
+    setCode: 'm1L',
+    productName: 'Riolu - 068/063',
+    customAttributes: { number: '068/063' },
+  };
+  const fetcher = vi.fn(async (url: string) =>
+    Response.json(url.includes('catalog-products/tcgplayer') ? product : riolu),
+  );
+  vi.stubGlobal('fetch', fetcher);
+  const { secondaryCardArt } = await import('../../src/data/artwork-fallbacks');
+  const card = {
+    source: 'tcgdex',
+    sourceId: 'M1L-068',
+    setId: 'M1L',
+    number: '068/063',
+    name: 'Riolu',
+    language: 'en',
+  } as import('../../src/domain/personal').PersonalCard;
+  expect(await secondaryCardArt(card)).toEqual({
+    url: 'https://tcgplayer-cdn.tcgplayer.com/product/647177_in_1000x1000.jpg',
+    language: 'ja',
+    providerId: '647177',
+  });
+  expect(
+    await secondaryCardArt({ ...card, number: '068/064' }),
+  ).toBeUndefined();
+  expect(await secondaryCardArt({ ...card, setId: 'M1S' })).toBeUndefined();
+  expect(
+    await secondaryCardArt({ ...card, name: 'Mega-Lucario-ex' }),
+  ).toBeUndefined();
+});
