@@ -11,22 +11,9 @@ const directory = new URL(
 );
 await mkdir(directory, { recursive: true });
 async function json(url) {
-  // Upstream TCGdex/TCGplayer occasionally responds 429/502/503 under CI
-  // concurrency. Retry transient outages rather than rejecting the release
-  // on the first request; still reject permanent missing/invalid identities.
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(20000) });
-      if (r.ok) return r.json();
-      if (![429, 500, 502, 503, 504].includes(r.status) || attempt === 4)
-        throw new Error(`${r.status}: ${url}`);
-    } catch (error) {
-      if (attempt === 4 || /^(4(?:0[0-9]|1[0-9]|2[0-8])):/.test(String(error.message)))
-        throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1200 * 2 ** attempt));
-  }
-  throw new Error(`Provider unavailable: ${url}`);
+  const r = await fetch(url, { signal: AbortSignal.timeout(20000) });
+  if (!r.ok) throw new Error(`${r.status}: ${url}`);
+  return r.json();
 }
 const report = {
   checkedAt: new Date().toISOString(),
@@ -40,7 +27,7 @@ for (const setId of sets) {
   if (set.id !== setId) throw new Error('Set mismatch');
   let index = 0;
   await Promise.all(
-    Array.from({ length: 3 }, async () => {
+    Array.from({ length: 6 }, async () => {
       while (index < set.cards.length) {
         const c = set.cards[index++];
         try {
