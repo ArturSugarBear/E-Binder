@@ -114,6 +114,7 @@ jobs:
               tests/e2e/compact-card-sheet.spec.ts \
               tests/e2e/visual-beta.spec.ts \
               tests/e2e/guest-beta-consent.spec.ts \
+              tests/e2e/scan-zero-match-recovery.spec.ts \
               tests/e2e/classic-collection.spec.ts \
               tests/e2e/binder-card-artwork.spec.ts \
               tests/e2e/set-art-fallback.spec.ts \
