@@ -189,3 +189,7 @@
     max-height: min(50dvh, 425px);
   }
 }
+
+.w-collector-card-dialog .w-holding-preview.w-collector-card-overview {
+  grid-template-columns: minmax(0, 1fr);
+}
