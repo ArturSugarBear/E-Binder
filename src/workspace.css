@@ -5558,3 +5558,33 @@ textarea.w-input,
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Rare Room icon language: consistent geometry, optical alignment and glow. */
+.w-mobile-nav > a > svg,
+.w-mobile-add-symbol svg,
+.w-header-actions svg {
+  flex-shrink: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    filter 240ms ease,
+    transform 240ms var(--ease);
+}
+.w-mobile-nav > a[aria-current='page'] > svg,
+.w-mobile-nav > a.is-active > svg {
+  filter: drop-shadow(0 0 7px var(--rare-glow));
+}
+@media (hover: hover) and (pointer: fine) {
+  .w-mobile-nav > a:hover > svg,
+  .w-mobile-add:hover .w-mobile-add-symbol svg {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-mobile-nav > a > svg,
+  .w-mobile-add-symbol svg,
+  .w-header-actions svg {
+    transition: none;
+  }
+}
