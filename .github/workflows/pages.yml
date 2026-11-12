@@ -33,6 +33,14 @@ jobs:
           path: public/catalog-art/audit.json
           retention-days: 14
       - run: npm run check
+      - name: Verify exact-print artwork fallback (DE / EN / JA)
+        run: npm run audit:card-images
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: card-image-coverage-smoke
+          path: artifacts/card-artwork-coverage.json
+          retention-days: 14
       - name: Refresh and build dated Cardmarket price guide
         run: |
           node scripts/refresh-cardmarket.mjs
@@ -102,6 +110,23 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           path: dist
+  card-image-coverage-full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Scan every TCGdex set and card (DE, EN, JA)
+        run: node scripts/audit-catalog-card-coverage.mjs --full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: card-image-coverage-full
+          path: artifacts/card-artwork-coverage.json
+          retention-days: 30
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: build
