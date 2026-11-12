@@ -181,7 +181,6 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         'div',
         'w-portfolio-hero-art',
         ...top
-          .filter((row) => Boolean(row.holding.card.image))
           .slice(0, 3)
           .map((row) =>
             el('div', 'w-portfolio-art-card', artwork(row.holding, 'hero')),
