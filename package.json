@@ -23,7 +23,8 @@
     "test:e2e": "playwright test",
     "check": "npm run format:check && npm run lint && npm run test && npm run build",
     "audit:artwork": "node scripts/audit-catalog-art.mjs",
-    "audit:providers": "node --import tsx scripts/audit-p0-providers.ts"
+    "audit:providers": "node --import tsx scripts/audit-p0-providers.ts",
+    "audit:card-images": "node scripts/audit-catalog-card-coverage.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
