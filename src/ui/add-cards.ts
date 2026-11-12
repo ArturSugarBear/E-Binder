@@ -158,7 +158,8 @@ export function openAddCards(
   let selected = options.card;
   let captureId = options.captureId;
   let reviewingLiveQueue = Boolean(options.live);
-  if (reviewingLiveQueue) sheet.dialog.classList.add('w-quick-review');
+  // The normal Add dialog remains available if the live camera is closed
+  // before any result is queued; quick review begins only on Results.
   // Every photo belongs to the current sheet, not to a stale saved scan history.
   const currentPending = () =>
     ctx.state.captures.filter(
@@ -2165,7 +2166,7 @@ export function openAddCards(
   }
 
   function manualForm(): void {
-    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming', 'w-quick-review', 'w-quick-search');
     scanSetChoice.replaceChildren();
     setFlowStage(1);
     interrupt();
