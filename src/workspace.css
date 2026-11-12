@@ -5178,3 +5178,185 @@ textarea.w-input,
     opacity: 0.9;
   }
 }
+
+
+/* Beta scanner refinement: the collector sees current cards, not raw file logs. */
+.w-dialog.w-quick-review .w-scan-flow,
+.w-dialog.w-quick-review .w-capture-start,
+.w-dialog.w-quick-review .w-add-capture-intro,
+.w-dialog.w-quick-review .w-add-catalog-advanced,
+.w-dialog.w-quick-review .w-dialog-footer > .w-message {
+  display: none;
+}
+.w-dialog.w-quick-review:not(.w-quick-search) .w-search-line {
+  display: none;
+}
+.w-dialog.w-quick-review .w-dialog-body {
+  gap: 12px;
+}
+.w-dialog.w-quick-review .w-capture-queue:not(:empty),
+.w-dialog.w-quick-review.w-guided-scan .w-capture-queue:not(:empty) {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--w-border);
+  border-radius: 15px;
+  background: var(--raised);
+}
+.w-dialog.w-quick-review .w-capture-queue:empty {
+  display: none;
+}
+.w-quick-review-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 3px;
+  scrollbar-width: thin;
+}
+.w-quick-review-tabs .w-button {
+  flex: 1 0 auto;
+  min-width: 84px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.w-quick-finished-panel {
+  display: none;
+}
+.w-dialog.w-quick-finished .w-quick-finished-panel {
+  display: grid;
+  gap: 15px;
+  padding: clamp(18px, 4vw, 28px);
+  border: 1px solid var(--w-border);
+  border-radius: 18px;
+  background: var(--raised);
+}
+.w-dialog.w-quick-finished .w-capture-queue,
+.w-dialog.w-quick-finished .w-photo-review,
+.w-dialog.w-quick-finished .w-scan-set-choice,
+.w-dialog.w-quick-finished .w-search-results,
+.w-dialog.w-quick-finished .w-add-details {
+  display: none;
+}
+.w-dialog.w-quick-finished .w-quick-finished-panel .w-button {
+  min-height: 56px;
+}
+
+/* Strong Rare Room shimmer: visible only for actual camera/OCR activity. */
+.w-live-scan-minimal .w-live-frame-guide {
+  overflow: hidden;
+}
+.w-live-scan-minimal .w-live-frame-guide::before {
+  content: '';
+  position: absolute;
+  inset: -20% 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 20%,
+    rgb(216 242 90 / 0.09) 35%,
+    rgb(216 242 90 / 0.36) 48%,
+    rgb(238 255 166 / 0.55) 50%,
+    rgb(216 242 90 / 0.14) 54%,
+    transparent 70%
+  );
+  opacity: 0;
+  transform: translateY(-105%);
+}
+.w-live-scan-minimal .w-live-stage.is-analyzing .w-live-frame-guide,
+.w-live-scan-minimal .w-live-stage[data-scan-phase='stable'] .w-live-frame-guide {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 22px rgb(216 242 90 / 0.2), 0 0 15px rgb(216 242 90 / 0.27);
+}
+.w-live-scan-minimal .w-live-stage.is-analyzing .w-live-frame-guide::before {
+  opacity: 1;
+  animation: w-rare-room-scan-shimmer 1.25s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.w-live-scan-minimal .w-live-analysis:not([hidden]) .w-live-analysis-line {
+  background: linear-gradient(90deg, transparent, var(--accent), #ffffff, var(--accent), transparent);
+  background-size: 100% 5px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 12px var(--accent));
+}
+.w-live-scan-minimal .w-live-analysis-caption {
+  border: 1px solid rgb(216 242 90 / 0.65);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.24);
+  font-size: 12px;
+  padding: 9px 12px;
+}
+@keyframes w-rare-room-scan-shimmer {
+  0% { transform: translateY(-105%); }
+  100% { transform: translateY(105%); }
+}
+
+/* Binder scan: progress belongs to the card being processed, not the entire dialog. */
+.w-page-scan-pocket.is-scanning .w-page-scan-photo-frame {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgb(216 242 90 / 0.32), 0 0 22px rgb(216 242 90 / 0.18);
+}
+.w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+  background: linear-gradient(
+    180deg, transparent 8%, rgb(216 242 90 / 0.12) 30%,
+    rgb(232 253 122 / 0.56) 49%, rgb(216 242 90 / 0.13) 67%, transparent 93%
+  );
+  opacity: 0.95;
+}
+.w-page-scan-pocket > .w-muted {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.32;
+}
+.w-page-scan-bulk-actions {
+  display: block;
+  border: 1px solid var(--w-border);
+  border-radius: 12px;
+  padding: 0;
+}
+.w-page-scan-bulk-actions > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  color: var(--ink-2);
+}
+.w-page-scan-bulk-actions > .w-action-row {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.w-page-scan-dialog .w-dialog-footer {
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+}
+.w-page-scan-dialog .w-dialog-footer .w-button-primary {
+  min-height: 56px;
+  flex: 1 1 100%;
+}
+@media (max-width: 640px) {
+  .w-dialog.w-quick-review .w-dialog-head,
+  .w-page-scan-dialog .w-dialog-head {
+    padding-block: 14px;
+  }
+  .w-dialog.w-quick-review .w-dialog-body {
+    padding: 14px 16px;
+  }
+  .w-page-scan-pocket > .w-muted {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-live-scan-minimal .w-live-frame-guide::before,
+  .w-page-scan-pocket.is-scanning .w-page-scan-photo-frame::after {
+    animation: none !important;
+    transform: none;
+    opacity: 0.26;
+  }
+}
