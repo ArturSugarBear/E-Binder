@@ -524,7 +524,6 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'div',
     'w-binder-workspace',
     title,
-    paper,
     el(
       'nav',
       'w-page-pager',
@@ -532,6 +531,7 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
       el('span', 'w-mono', `${pageIndex + 1} / ${binder.pages.length}`),
       next,
     ),
+    paper,
     pageRail,
     toolbar,
     info,

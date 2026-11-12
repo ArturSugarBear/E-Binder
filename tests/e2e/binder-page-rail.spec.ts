@@ -21,6 +21,13 @@ test('mobile binder opens on the physical 3x3 page and adds a page from the rail
   await expect(paper.locator('img')).toHaveCount(9);
   await expect(rail.locator('.w-binder-page-thumb')).toHaveCount(1);
   const first = await paper.locator('.w-pocket').first().boundingBox();
+  const pager = page.locator('.w-page-pager');
+  const pagerBox = await pager.boundingBox();
+  const paperBox = await paper.boundingBox();
+  expect(pagerBox!.y + pagerBox!.height).toBeLessThanOrEqual(paperBox!.y);
+  await expect(
+    pager.getByRole('button', { name: 'Nächste Seite' }),
+  ).toBeVisible();
   const dock = await page.locator('.w-mobile-nav').boundingBox();
   expect(first).not.toBeNull();
   expect(dock).not.toBeNull();

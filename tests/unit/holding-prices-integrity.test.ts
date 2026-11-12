@@ -1,5 +1,8 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { holdingPrice } from '../../src/data/holding-prices';
+import {
+  holdingPrice,
+  holdingMarketReference,
+} from '../../src/data/holding-prices';
 import type { Holding } from '../../src/domain/personal';
 
 afterEach(() => {
@@ -39,6 +42,56 @@ const holding = (
   confirmed: true,
   createdAt: '2026-11-09T12:00:00Z',
   updatedAt: '2026-11-09T12:00:00Z',
+});
+
+it('offers a dated USD reference separately without valuing an unavailable EUR price', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'me06-082',
+            localId: '082',
+            name: 'Testkarte',
+            set: {
+              id: 'me06',
+              name: 'Delta-Herrschaft',
+              cardCount: { official: 103 },
+            },
+            variants: { normal: false, holo: true },
+            pricing: {
+              tcgplayer: {
+                unit: 'USD',
+                updated: '2026-11-10T12:00:00Z',
+                holofoil: { marketPrice: 12.5, productId: 123456 },
+              },
+            },
+          }),
+        ),
+    ),
+  );
+  const card = holding('me06-082', 'Testkarte', '082/103', 'holo');
+  expect(await holdingPrice(card)).toEqual({ status: 'unavailable' });
+  expect(await holdingMarketReference(card)).toMatchObject({
+    source: 'tcgplayer',
+    currency: 'USD',
+    variant: 'holo',
+    amount: 12.5,
+    productUrl: 'https://www.tcgplayer.com/product/123456',
+  });
+  expect(
+    await holdingMarketReference({
+      ...card,
+      card: { ...card.card, name: 'Andere Karte' },
+    }),
+  ).toBeUndefined();
+  expect(
+    await holdingMarketReference({ ...card, finish: 'normal' }),
+  ).toBeUndefined();
+  expect(
+    await holdingMarketReference({ ...card, variantNote: '1st Edition' }),
+  ).toBeUndefined();
 });
 
 it('uses the verified price for the exact Groudon DLR111 holding', async () => {

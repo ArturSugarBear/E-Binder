@@ -52,11 +52,38 @@ export function createPortfolioView(ctx: WorkspaceContext) {
   const attempted = new Set<string>();
   let closed = false;
   let loading = false;
-  let limit = 40;
   let connectionError = false;
+  const failed = new Set<string>();
+  const artworkCache = new Map<
+    string,
+    { signature: string; element: HTMLElement }
+  >();
   let chartRevealed = false;
   let historyRange: 7 | 30 | 90 = 30;
   const expandedBinders = new Set<string>();
+
+  function artwork(holding: Holding, role: string): HTMLElement {
+    const key = `${role}:${holding.id}`;
+    const signature = JSON.stringify(holding.card);
+    const cached = artworkCache.get(key);
+    if (cached?.signature === signature) return cached.element;
+    const element = ctx.images.artwork(holding.card);
+    artworkCache.set(key, { signature, element });
+    return element;
+  }
+
+  function loadingStatus(total: number): void {
+    const status = content.querySelector('.w-portfolio-source-status');
+    if (status)
+      status.textContent = `Preise werden geprüft … ${attempted.size} von ${total} Ausgaben.`;
+    const progress = content.querySelector<HTMLProgressElement>(
+      '.w-portfolio-load-progress',
+    );
+    if (progress) {
+      progress.max = total;
+      progress.value = attempted.size;
+    }
+  }
 
   function openBinder(binderId: string, pageId?: string) {
     const chosen = ctx.state.binders.find((item) => item.id === binderId);
@@ -66,7 +93,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       (state) =>
         changeState(state, (next) => {
           next.lastBinderId = binderId;
-          next.lastPageId = pageId ?? chosen.pages[0]?.id;
+          next.lastPageId =
+            pageId ??
+            (chosen.pages.some((page) => page.id === state.lastPageId)
+              ? state.lastPageId
+              : chosen.pages[0]?.id);
         }),
       { undo: false, notify: false },
     );
@@ -80,6 +111,9 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     const priced = overview.pricedCopies;
     const targets = uniqueQuoteTargets(ctx.state.holdings);
     const remaining = targets.filter((target) => !attempted.has(target.key));
+    const pendingCopies = overview.holdings
+      .filter((row) => row.quoteKey && !attempted.has(row.quoteKey))
+      .reduce((sum, row) => sum + row.holding.quantity, 0);
     const top = overview.holdings
       .filter((row) => row.totalValue !== null)
       .sort((a, b) => b.totalValue! - a.totalValue!)
@@ -116,19 +150,23 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         el(
           'p',
           'w-portfolio-hero-label',
-          count && priced < count
-            ? 'Erfasster Teilwert · nicht vollständig bewertet'
-            : 'Erfasste Cardmarket-Preisreferenzen',
+          loading && !priced
+            ? 'Preisreferenzen werden geprüft'
+            : count && priced < count
+              ? 'Erfasster Teilwert · nicht vollständig bewertet'
+              : 'Erfasste Cardmarket-Preisreferenzen',
         ),
         el('p', 'w-portfolio-balance', value),
         el(
           'p',
           'w-portfolio-caption',
           priced
-            ? `${priced} von ${count} Exemplaren bepreist · ${count - priced} ohne Marktwert`
-            : count
-              ? 'Noch keine geeigneten Preisdaten für diese Ausgaben.'
-              : 'Die besten Sammlungen beginnen mit einer Karte.',
+            ? `${priced} von ${count} Exemplaren bepreist · ${pendingCopies ? `${pendingCopies} noch zu prüfen` : `${count - priced} mit offenem Preis`}`
+            : pendingCopies
+              ? `${pendingCopies} Exemplare noch zu prüfen.`
+              : count
+                ? 'Noch keine geeigneten Preisdaten für diese Ausgaben.'
+                : 'Die besten Sammlungen beginnen mit einer Karte.',
         ),
         el(
           'p',
@@ -143,11 +181,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
           .filter((row) => Boolean(row.holding.card.image))
           .slice(0, 3)
           .map((row) =>
-            el(
-              'div',
-              'w-portfolio-art-card',
-              ctx.images.artwork(row.holding.card),
-            ),
+            el('div', 'w-portfolio-art-card', artwork(row.holding, 'hero')),
           ),
       ),
     );
@@ -252,7 +286,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       stat(
         'Ohne Preisreferenz',
         String(overview.missingCopies),
-        'Offen ausgewiesen',
+        pendingCopies ? `${pendingCopies} noch zu prüfen` : 'Offen ausgewiesen',
       ),
       stat(
         'Deine Binder',
@@ -268,48 +302,38 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       status.textContent =
         'Offline: Neue Marktpreise lassen sich erst mit Internet abrufen.';
     else if (loading)
-      status.textContent = `Katalogpreise werden geprüft … ${known} von ${targets.length} Ausgaben verarbeitet.`;
+      status.textContent = `Preise werden geprüft … ${known} von ${targets.length} Ausgaben.`;
     else if (connectionError)
       status.textContent =
         'Einige Katalogpreise sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
     else
       status.textContent = targets.length
-        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} angefragten Druckvarianten mit gültiger EUR-Preisreferenz · Quelle: TCGdex / Cardmarket.`
+        ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} Ausgaben mit EUR-Preisreferenz · Cardmarket via TCGdex.`
         : 'Für deine Sonderausgaben oder unbestimmten Varianten liegen noch keine eindeutig passenden Preisreferenzen vor.';
 
+    const retry = action(
+      'Preise erneut prüfen',
+      () => {
+        attempted.clear();
+        failed.clear();
+        connectionError = false;
+        void loadQuotes();
+      },
+      'secondary',
+    );
+    retry.disabled = loading;
     const source = el(
       'section',
       'w-portfolio-source',
       el('div', '', el('h2', '', 'Marktdaten'), status),
-      el(
-        'div',
-        'w-portfolio-source-actions',
-        action(
-          'Preise erneut prüfen',
-          () => {
-            attempted.clear();
-            quotes.clear();
-            connectionError = false;
-            render();
-            void loadQuotes();
-          },
-          'secondary',
-        ),
-      ),
+      el('div', 'w-portfolio-source-actions', retry),
     );
-    if (loading)
-      source.append(el('progress', 'w-progress w-portfolio-load-progress'));
-    if (!loading && remaining.length && known >= limit) {
-      source.querySelector('.w-portfolio-source-actions')!.append(
-        action(
-          'Weitere 40 Karten prüfen',
-          () => {
-            limit += 40;
-            void loadQuotes();
-          },
-          'secondary',
-        ),
-      );
+    if (loading) {
+      const progress = el('progress', 'w-progress w-portfolio-load-progress');
+      progress.max = targets.length;
+      progress.value = known;
+      progress.setAttribute('aria-label', 'Geprüfte Preisausgaben');
+      source.append(progress);
     }
 
     const bySet = el(
@@ -411,7 +435,9 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     else if (!top.length)
       leaders.append(
         message(
-          'Noch keine exakt passende Preisreferenz verfügbar. Deine Karten sind weiterhin vollständig in der Sammlung vorhanden.',
+          remaining.length
+            ? 'Deine Preisreferenzen werden geprüft. Deine Karten bleiben vollständig in der Sammlung.'
+            : 'Noch keine exakt passende Preisreferenz verfügbar. Deine Karten sind weiterhin vollständig in der Sammlung vorhanden.',
         ),
       );
     else {
@@ -429,11 +455,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         );
         button.classList.add('w-portfolio-leader');
         button.replaceChildren(
-          el(
-            'div',
-            'w-portfolio-leader-image',
-            ctx.images.artwork(holding.card),
-          ),
+          el('div', 'w-portfolio-leader-image', artwork(holding, 'leader')),
           el(
             'div',
             'w-portfolio-leader-info',
@@ -467,7 +489,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       el(
         'div',
         'w-portfolio-section-head',
-        el('h2', '', 'Ohne Marktwert'),
+        el('h2', '', 'Offene Preise'),
         el(
           'span',
           'w-portfolio-overline',
@@ -483,11 +505,15 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         const card = row.holding.card;
         const reason = !row.quoteKey
           ? 'Nicht mit einer eindeutig bepreisten Katalogausgabe verknüpft'
-          : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
-            ? 'Druckvariante noch nicht eindeutig bepreist'
-            : row.holding.variantNote
-              ? 'Sonderauflage ohne gesicherten Vergleichspreis'
-              : 'Für diese Ausgabe noch keine Preisreferenz';
+          : !attempted.has(row.quoteKey)
+            ? 'Preis wird noch geprüft'
+            : failed.has(row.quoteKey)
+              ? 'Preis momentan nicht erreichbar'
+              : row.holding.finish !== 'normal' && row.holding.finish !== 'holo'
+                ? 'Druckvariante noch nicht eindeutig bepreist'
+                : row.holding.variantNote
+                  ? 'Sonderauflage ohne gesicherten Vergleichspreis'
+                  : 'Für diese Ausgabe noch keine Preisreferenz';
         const button = action(
           `${card.name} ansehen`,
           () => ctx.openHolding(row.holding.id),
@@ -495,7 +521,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         );
         button.classList.add('w-portfolio-missing-card');
         button.replaceChildren(
-          el('span', 'w-portfolio-missing-art', ctx.images.artwork(card)),
+          el(
+            'span',
+            'w-portfolio-missing-art',
+            artwork(row.holding, 'missing'),
+          ),
           el(
             'span',
             'w-portfolio-missing-copy',
@@ -578,7 +608,15 @@ export function createPortfolioView(ctx: WorkspaceContext) {
             el('span', '', page.title),
             el('small', '', `${page.pricedSlots}/${page.slots} Karten`),
             el('strong', '', shownValue(page.knownValue, page.pricedSlots)),
+            el('span', 'w-portfolio-page-arrow', '›'),
           );
+          row.setAttribute(
+            'aria-label',
+            `${page.title} öffnen · ${page.pricedSlots} von ${page.slots} Karten mit Preisreferenz · ${shownValue(page.knownValue, page.pricedSlots)}`,
+          );
+          row
+            .querySelector('.w-portfolio-page-arrow')!
+            .setAttribute('aria-hidden', 'true');
         }
         details.append(
           pages,
@@ -635,7 +673,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
 
   async function loadQuotes(): Promise<void> {
     if (closed || loading || !navigator.onLine) return;
-    const targets = uniqueQuoteTargets(ctx.state.holdings).slice(0, limit);
+    const targets = uniqueQuoteTargets(ctx.state.holdings);
     const missing = targets.filter((target) => !attempted.has(target.key));
     if (!missing.length) return;
     loading = true;
@@ -655,20 +693,38 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         attempted.add(target.key);
         if (result.status === 'rejected') {
           connectionError = true;
+          failed.add(target.key);
           continue;
         }
         if (result.value.value.status === 'error') {
           connectionError = true;
+          failed.add(target.key);
         } else if (result.value.value.status === 'priced') {
           quotes.set(target.key, result.value.value.quote);
-        }
+        } else quotes.delete(target.key);
       }
-      render();
+      // Keep cards, scroll position and focus intact while the bounded queue
+      // runs. Only real processed counts update; publish values together.
+      loadingStatus(targets.length);
+      // A provider outage must not fan out across the entire collection.
+      // Remaining entries stay explicitly unreviewed until a retry.
+      if (
+        results.every(
+          (result) =>
+            result.status === 'rejected' ||
+            result.value.value.status === 'error',
+        )
+      )
+        break;
     }
     loading = false;
     if (!closed) {
       const all = uniqueQuoteTargets(ctx.state.holdings);
-      if (all.length && all.every((target) => attempted.has(target.key)))
+      if (
+        all.length &&
+        !connectionError &&
+        all.every((target) => attempted.has(target.key))
+      )
         recordPortfolioObservation(
           ctx.state,
           summarizePortfolio(ctx.state, quotes),
@@ -676,6 +732,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         );
     }
     render();
+    if (!closed && !connectionError && navigator.onLine) void loadQuotes();
   }
 
   function refresh() {
@@ -690,6 +747,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
     close: () => {
       closed = true;
       controller.abort();
+      artworkCache.clear();
     },
   };
 }

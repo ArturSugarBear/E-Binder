@@ -2808,7 +2808,7 @@ textarea.w-input,
 }
 .w-portfolio-pages > .w-button {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 14px;
   align-items: center;
   text-align: left;
@@ -2817,9 +2817,29 @@ textarea.w-input,
   padding: 10px 12px;
   border-radius: 10px;
 }
+.w-portfolio-page-arrow {
+  color: var(--accent);
+  font-size: 22px;
+}
+.w-tcgplayer-market {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--w-border);
+}
+.w-tcgplayer-market .w-market-quote strong {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: normal;
+}
 .w-portfolio-pages small {
   color: var(--ink-2);
   font-size: 12px;
+}
+.w-portfolio-pages > .w-button > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .w-portfolio-pages strong {
   font-variant-numeric: tabular-nums;
@@ -2894,7 +2914,8 @@ textarea.w-input,
 }
 @media (max-width: 370px) {
   .w-portfolio-pages > .w-button {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
   }
   .w-portfolio-pages > .w-button small {
     display: none;
@@ -4381,6 +4402,19 @@ textarea.w-input,
   .w-page-pager .w-button {
     min-height: 44px;
     min-width: 44px;
+  }
+  .w-binder-workspace > .w-page-pager {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+    margin: 0 0 10px;
+  }
+  .w-binder-workspace > .w-page-pager .w-button {
+    min-width: 0;
+    padding: 6px;
+    white-space: normal;
+    font-size: 12px;
+    justify-content: center;
   }
 }
 @media (max-width: 720px) and (pointer: coarse) {

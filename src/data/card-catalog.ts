@@ -124,6 +124,15 @@ export interface MarketPrice {
   basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
   provenance?: 'verified-snapshot';
 }
+/** A separately labelled market comparison, never an EUR portfolio quote. */
+export interface TcgplayerReference {
+  source: 'tcgplayer';
+  currency: 'USD';
+  variant: 'normal' | 'holo';
+  amount: number;
+  updated: string;
+  productUrl?: string;
+}
 export interface CatalogEntry {
   card: PersonalCard;
   rarity: string;
@@ -131,6 +140,7 @@ export interface CatalogEntry {
   holoPrice?: MarketPrice;
   cardmarketUrl?: string;
   priceIssue?: 'suspect';
+  tcgplayer?: Partial<Record<'normal' | 'holo', TcgplayerReference>>;
 }
 export const catalogSetSchema = z.object({
   id: z.string().regex(/^[\w.+-]+$/),
@@ -408,19 +418,46 @@ const apiCardSchema = resumeSchema.extend({
             .catch(undefined),
         })
         .nullable()
-        .optional(),
+        .optional()
+        .catch(undefined),
       tcgplayer: z
         .object({
+          unit: z.string().optional().catch(undefined),
+          updated: z
+            .union([z.string(), z.number()])
+            .optional()
+            .catch(undefined),
           normal: z
-            .object({ marketPrice: z.number().nullable().optional() })
-            .optional(),
+            .object({
+              marketPrice: z.number().nullable().optional().catch(undefined),
+              productId: z
+                .number()
+                .int()
+                .positive()
+                .max(Number.MAX_SAFE_INTEGER)
+                .optional()
+                .catch(undefined),
+            })
+            .optional()
+            .catch(undefined),
           holofoil: z
-            .object({ marketPrice: z.number().nullable().optional() })
-            .optional(),
+            .object({
+              marketPrice: z.number().nullable().optional().catch(undefined),
+              productId: z
+                .number()
+                .int()
+                .positive()
+                .max(Number.MAX_SAFE_INTEGER)
+                .optional()
+                .catch(undefined),
+            })
+            .optional()
+            .catch(undefined),
         })
         .passthrough()
         .nullable()
-        .optional(),
+        .optional()
+        .catch(undefined),
     })
     .nullish()
     .catch(undefined),
@@ -611,6 +648,24 @@ async function hasSiblingCardmarketCollision(
   }
 }
 
+function observedPriceDate(
+  value: string | number | undefined,
+): string | undefined {
+  const time =
+    typeof value === 'number'
+      ? value < 1e12
+        ? value * 1000
+        : value
+      : value
+        ? Date.parse(value)
+        : NaN;
+  return Number.isFinite(time) && time > 0 && time <= Date.now()
+    ? typeof value === 'string'
+      ? value
+      : new Date(time).toISOString()
+    : undefined;
+}
+
 export async function catalogEntry(
   id: string,
   language: string,
@@ -636,12 +691,7 @@ export async function catalogEntry(
     if (paired[0]?.image) card.image = catalogArtworkUrl(paired[0].image);
   }
   const quote = raw.pricing?.cardmarket;
-  const updated =
-    typeof quote?.updated === 'number'
-      ? new Date(
-          quote.updated < 1e12 ? quote.updated * 1000 : quote.updated,
-        ).toISOString()
-      : quote?.updated;
+  const updated = observedPriceDate(quote?.updated);
   const bestQuote = (foil: boolean): MarketPrice | undefined => {
     if (
       quote?.unit !== 'EUR' ||
@@ -710,6 +760,40 @@ export async function catalogEntry(
     (!suspect && !wrongProduct && quote?.idProduct
       ? `https://www.cardmarket.com/en/Pokemon/Products?idProduct=${quote.idProduct}`
       : undefined);
+  const us = raw.pricing?.tcgplayer;
+  const usDate = observedPriceDate(us?.updated);
+  const tcgplayer: NonNullable<CatalogEntry['tcgplayer']> = {};
+  if (
+    us?.unit === 'USD' &&
+    usDate &&
+    raw.id.slice(0, raw.id.lastIndexOf('-')) === raw.set.id &&
+    numberKey(raw.id.slice(raw.id.lastIndexOf('-') + 1)) ===
+      numberKey(raw.localId)
+  ) {
+    for (const variant of ['normal', 'holo'] as const) {
+      const value = variant === 'normal' ? us.normal : us.holofoil;
+      if (
+        raw.variants?.[variant] !== true ||
+        !value ||
+        typeof value.marketPrice !== 'number' ||
+        !Number.isFinite(value.marketPrice) ||
+        value.marketPrice <= 0
+      )
+        continue;
+      tcgplayer[variant] = {
+        source: 'tcgplayer',
+        currency: 'USD',
+        variant,
+        amount: value.marketPrice,
+        updated: usDate,
+        ...(value.productId
+          ? {
+              productUrl: `https://www.tcgplayer.com/product/${value.productId}`,
+            }
+          : {}),
+      };
+    }
+  }
   return {
     card,
     rarity: raw.rarity ?? '',
@@ -717,6 +801,7 @@ export async function catalogEntry(
     holoPrice,
     cardmarketUrl,
     priceIssue: (suspect || wrongProduct) && !price ? 'suspect' : undefined,
+    ...(Object.keys(tcgplayer).length ? { tcgplayer } : {}),
   };
 }
 export async function catalogSetCards(

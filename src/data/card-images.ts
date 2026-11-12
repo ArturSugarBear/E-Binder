@@ -11,12 +11,49 @@ import { verifiedLocalArt } from './verified-images';
 
 export class CardImages {
   private palettes = new Map<string, Promise<Palette | undefined>>();
+  private resources = new Map<
+    string,
+    { until: number; value: Promise<string>; loaded?: boolean }
+  >();
   constructor(
     _store: PersonalStore,
     private mode: () => PersonalState['mode'],
   ) {}
   url(card: PersonalCard): Promise<string> {
-    return this.remote(card);
+    const key = this.resourceKey(card);
+    const cached = this.resources.get(key);
+    if (cached && cached.until > Date.now()) return cached.value;
+    const resource = { until: Date.now() + 300_000, value: this.remote(card) };
+    this.remember(key, resource);
+    void resource.value.then(
+      (url) => {
+        if (!url && this.resources.get(key) === resource)
+          resource.until = Date.now() + 30_000;
+      },
+      () => {
+        if (this.resources.get(key) === resource) this.resources.delete(key);
+      },
+    );
+    return resource.value;
+  }
+  private remember(
+    key: string,
+    resource: { until: number; value: Promise<string>; loaded?: boolean },
+  ): void {
+    if (!this.resources.has(key) && this.resources.size >= 500)
+      this.resources.delete(this.resources.keys().next().value!);
+    this.resources.set(key, resource);
+  }
+  private resourceKey(card: PersonalCard): string {
+    return JSON.stringify([
+      this.mode(),
+      card.source,
+      card.sourceId,
+      card.setId,
+      card.number,
+      card.language,
+      card.image,
+    ]);
   }
   private async remote(card: PersonalCard): Promise<string> {
     if (!card.image && card.source === 'tcgdex' && card.sourceId) {
@@ -36,6 +73,7 @@ export class CardImages {
       : card.image;
   }
   artwork(card: PersonalCard, className = ''): HTMLElement {
+    const resourceKey = this.resourceKey(card);
     const frame = document.createElement('span');
     frame.className = `card-art ${className}`;
     const fallback = document.createElement('span');
@@ -105,6 +143,12 @@ export class CardImages {
     image.addEventListener('load', () => {
       fallback.hidden = true;
       frame.dataset.imageState = 'loaded';
+      // Reuse a successful exact-print fallback on the next page visit.
+      this.remember(resourceKey, {
+        until: Date.now() + 300_000,
+        value: Promise.resolve(image.src),
+        loaded: true,
+      });
     });
     image.addEventListener('error', () => {
       if (
@@ -146,6 +190,7 @@ export class CardImages {
             frame.dataset.imageSource = 'secondary';
           image.src = url;
           labelLanguage(url);
+          if (this.resources.get(resourceKey)?.loaded) fallback.hidden = true;
         } else localFallback();
       })
       .catch(localFallback);
