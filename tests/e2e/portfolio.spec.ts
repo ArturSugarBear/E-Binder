@@ -2,7 +2,7 @@ import { openVault } from './navigation';
 import { test, expect } from './fixtures';
 import { emptyState } from '../../src/domain/personal';
 
-test('all catalogue prices load automatically in a bounded queue without replacing in-flight artwork', async ({
+test('all catalogue prices load in a bounded queue even when only the FX service fails, preserving in-flight artwork', async ({
   page,
 }) => {
   let releaseFirst!: () => void;
@@ -16,6 +16,11 @@ test('all catalogue prices load automatically in a bounded queue without replaci
   let requested = 0;
   let active = 0;
   let peak = 0;
+  let fxRequests = 0;
+  await page.route('https://api.frankfurter.dev/**', (route) => {
+    fxRequests++;
+    return route.fulfill({ status: 503, body: 'FX service unavailable' });
+  });
   await page.route('https://api.tcgdex.net/v2/de/cards/**', async (route) => {
     requested++;
     active++;
@@ -35,11 +40,21 @@ test('all catalogue prices load automatically in a bounded queue without replaci
         },
         variants: { normal: true, holo: false },
         pricing: {
-          cardmarket: {
-            unit: 'EUR',
-            updated: '2026-11-10T12:00:00Z',
-            trend: 2,
-          },
+          ...(Number(localId) <= 4
+            ? {
+                tcgplayer: {
+                  unit: 'USD',
+                  updated: '2026-11-10T12:00:00Z',
+                  normal: { marketPrice: 3, productId: 1000 + Number(localId) },
+                },
+              }
+            : {
+                cardmarket: {
+                  unit: 'EUR',
+                  updated: '2026-11-10T12:00:00Z',
+                  trend: 2,
+                },
+              }),
         },
       },
     });
@@ -117,10 +132,9 @@ test('all catalogue prices load automatically in a bounded queue without replaci
   releaseRest();
   await expect.poll(() => requested, { timeout: 30_000 }).toBe(42);
   await expect(progress).toHaveCount(0);
-  await expect(page.locator('.w-portfolio-balance')).toHaveText(/84,00\s*€/);
-  await expect(page.locator('.w-portfolio-source-status')).toContainText(
-    '42 von 42',
-  );
+  await expect(page.locator('.w-portfolio-balance')).toHaveText(/76,00\s*€/);
+  await expect(page.locator('.w-portfolio-caption')).toContainText('38 von 42');
+  expect(fxRequests).toBe(1);
   expect(peak).toBeLessThanOrEqual(4);
   await expect(
     page.getByRole('button', { name: 'Weitere 40 Karten prüfen' }),

@@ -306,7 +306,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       status.textContent = `Preise werden geprüft … ${known} von ${targets.length} Ausgaben.`;
     else if (connectionError)
       status.textContent =
-        'Einige Katalogpreise sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
+        'Einige Preisreferenzen sind derzeit nicht erreichbar. Bereits geprüfte Werte bleiben sichtbar.';
     else
       status.textContent = targets.length
         ? `${targets.filter((target) => quotes.has(target.key)).length} von ${targets.length} Ausgaben mit EUR-Preisreferenz · Cardmarket / TCGplayer via TCGdex.`
@@ -713,7 +713,8 @@ export function createPortfolioView(ctx: WorkspaceContext) {
         results.every(
           (result) =>
             result.status === 'rejected' ||
-            result.value.value.status === 'error',
+            (result.value.value.status === 'error' &&
+              result.value.value.reason !== 'exchange-rate'),
         )
       )
         break;

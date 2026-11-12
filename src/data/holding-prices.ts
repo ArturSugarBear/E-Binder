@@ -13,7 +13,8 @@ import { convertedMarketReference, usdEurRate } from './exchange-rates';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
-  | { status: 'unavailable' | 'suspect' | 'error' };
+  | { status: 'unavailable' | 'suspect' }
+  | { status: 'error'; reason?: 'exchange-rate' };
 
 interface CachedPrice {
   until: number;
@@ -141,7 +142,7 @@ export async function holdingPrice(
             : undefined;
           value = isUsableQuote(converted, key)
             ? { status: 'priced', quote: converted }
-            : { status: 'error' };
+            : { status: 'error', reason: 'exchange-rate' };
         }
       }
       if (value.status !== 'error')
