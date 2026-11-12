@@ -111,11 +111,12 @@ test('camera photo offers alignment, rotation and recoverable cancellation witho
     .click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
-    .click();
-  await expect(page.locator('.w-capture-queue')).toContainText('1 offen');
-  await expect(page.locator('.w-photo-review img')).toHaveCount(0);
+  // Photos are transient, so never invite users to resume an impossible
+  // scan from orphaned metadata after restarting the application.
+  await expect(
+    page.getByRole('button', { name: 'Erfassung fortsetzen', exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
 test('confirming a photo selects the next temporary capture without counting it as owned', async ({
