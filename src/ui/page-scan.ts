@@ -390,7 +390,8 @@ export function openPageScanner(
     } else if (suggestedCount > 0) {
       reviewSummary.textContent = `${suggestedCount} ${suggestedCount === 1 ? 'passender Vorschlag' : 'passende Vorschläge'} gefunden · vor dem Übernehmen auswählen.`;
     } else {
-      reviewSummary.textContent = 'Noch keine eindeutige Ausgabe. Tippe auf ein Fach, um die Karte zu prüfen.';
+      reviewSummary.textContent =
+        'Noch keine eindeutige Ausgabe. Tippe auf ein Fach, um die Karte zu prüfen.';
     }
     save.querySelector('span')!.textContent =
       matches > 0
