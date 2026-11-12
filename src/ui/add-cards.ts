@@ -671,6 +671,14 @@ export function openAddCards(
     liveProgressHook = onAnalysisState;
     onAnalysisState(true);
     onAnalysisState(true, 'Aufnahme wartet auf die lokale Erkennung …');
+    // Begin image inference immediately. OCR is only an independent
+    // verification signal; waiting for OCR must not delay visual retrieval.
+    // A failed pilot never manufactures candidates or aborts photo review.
+    const prefetchedVisual = visualBetaEnabled()
+      ? (visualSearch ??= createVisualSearchSession(visualAbort.signal))
+          .then((session) => session?.match(photo, 12000) ?? [])
+          .catch(() => [])
+      : undefined;
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
@@ -794,6 +802,7 @@ export function openAddCards(
                 controller.signal,
                 visual,
                 useVisual ? 12000 : 4700,
+                prefetchedVisual,
               );
             }
             if (useVisual && automatic) {
