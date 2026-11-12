@@ -1,20 +1,44 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const base = process.env.VITE_BASE_PATH || '/E-Binder/';
+const buildInfo = {
+  schema: 1,
+  version: (
+    JSON.parse(
+      readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+    ) as { version: string }
+  ).version,
+  commit: (
+    process.env.GITHUB_SHA ??
+    process.env.VITE_COMMIT_SHA ??
+    'local'
+  ).slice(0, 12),
+  builtAt: process.env.E_BINDER_BUILD_AT ?? new Date().toISOString(),
+};
 const basePattern = base.replace(/[\\.*+?^$()|[\]{}]/g, '\\$&');
 
 export default defineConfig({
   base,
   define: {
-    __E_BINDER_BUILD__: JSON.stringify(
-      process.env.GITHUB_SHA?.slice(0, 12) ?? 'local',
-    ),
+    __E_BINDER_BUILD__: JSON.stringify(buildInfo.commit),
+    __E_BINDER_BUILD_INFO__: JSON.stringify(buildInfo),
   },
   server: { allowedHosts: ['terminal.local'] },
   preview: { allowedHosts: ['terminal.local'] },
   plugins: [
+    {
+      name: 'e-binder-version-manifest',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify(buildInfo) + '\n',
+        });
+      },
+    },
     VitePWA({
       base,
       registerType: 'prompt',
@@ -59,6 +83,7 @@ export default defineConfig({
         clientsClaim: false,
         globPatterns: ['**/*.{html,js,css,json,woff2,svg,png,webmanifest}'],
         globIgnores: [
+          '**/version.json',
           '**/assets/cards/**',
           '**/catalog-art/**',
           '**/catalog-products/**',
@@ -72,6 +97,12 @@ export default defineConfig({
           new RegExp('^' + basePattern + '(?:index\\.html)?$'),
         ],
         runtimeCaching: [
+          // This endpoint is the truth source for the *deployed* release.
+          // Never precache: installed PWAs must detect a newer Pages build.
+          {
+            urlPattern: new RegExp(basePattern + 'version\\.json$'),
+            handler: 'NetworkOnly',
+          },
           {
             urlPattern: new RegExp(
               basePattern + 'catalog-products/tcgplayer/[0-9]+\\.json$',

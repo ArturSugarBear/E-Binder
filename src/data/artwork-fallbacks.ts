@@ -29,6 +29,24 @@ function load(path: string): Promise<unknown> {
   }
   return requests.get(path)!;
 }
+/**
+ * Only sets with a curated, per-print image manifest may use the secondary
+ * gallery path. Missing provider artwork is NOT proof that an arbitrary card
+ * image exists; each card still goes through secondaryCardArt identity checks.
+ */
+export async function secondaryArtworkSetIds(): Promise<Set<string>> {
+  try {
+    const index = (await load('index.json')) as Index;
+    return new Set(
+      Object.entries(index.sets)
+        .filter(([, entry]) => Boolean(entry.cards))
+        .map(([setId]) => setId),
+    );
+  } catch {
+    return new Set<string>();
+  }
+}
+
 export function trustedArtwork(url: string): boolean {
   try {
     const u = new URL(url);

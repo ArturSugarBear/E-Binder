@@ -1,5 +1,8 @@
 import { localizedCardName } from '../data/japanese-catalog';
-import { secondarySetArt } from '../data/artwork-fallbacks';
+import {
+  secondaryArtworkSetIds,
+  secondarySetArt,
+} from '../data/artwork-fallbacks';
 import {
   catalogEntry,
   catalogResumeCard,
@@ -673,9 +676,13 @@ export function createCatalogBrowser(options: Options) {
       setFacets = facets;
       scopeKey = key;
       const pictured = facets.cards.filter((card) => card.image).length;
+      const hasSecondaryIndex = (await secondaryArtworkSetIds()).has(id);
+      if (closed || signal.aborted || active !== signal) return;
       const imageCoverage =
         pictured === 0 && facets.cards.length
-          ? ' TCGdex liefert für diese Ausgaben derzeit keine Kartenbilder. Die Kartendaten werden als Liste angezeigt.'
+          ? hasSecondaryIndex
+            ? ' TCGdex hat keine Bilder für dieses Set; geprüfte alternative Kartenbilder werden jetzt geladen.'
+            : ' TCGdex liefert für diese Ausgaben derzeit keine Kartenbilder. Die Kartendaten werden als Liste angezeigt.'
           : ` ${pictured} von ${facets.cards.length} Ausgaben mit Katalogbild.`;
       const reset = [
         previousRarity && !rarity.value ? `„${previousRarity}“` : '',
@@ -781,6 +788,7 @@ export function createCatalogBrowser(options: Options) {
   function renderResult(
     result: CatalogResult,
     signal: AbortSignal,
+    alternativeSets: ReadonlySet<string>,
     entry?: CatalogEntry,
   ): void {
     const card = entry?.card ?? catalogResumeCard(result);
@@ -837,7 +845,7 @@ export function createCatalogBrowser(options: Options) {
     owned.dataset.catalogStatus = card.key;
     visibleCards.set(card.key, card);
     caption.append(owned);
-    if (card.image || verifiedLocalArt(card))
+    if (card.image || verifiedLocalArt(card) || alternativeSets.has(card.setId))
       button.replaceChildren(ctx.images.artwork(card), caption);
     else {
       button.classList.add('w-card-without-image');
@@ -1038,11 +1046,24 @@ export function createCatalogBrowser(options: Options) {
     if (closed || signal.aborted || active !== signal) return;
     results.replaceChildren();
     visibleCards.clear();
+    // TCGdex image fields are often empty even though the exact-print
+    // secondary manifest is already published. Do not turn such sets into
+    // "no image" text cards before consulting our verified index.
+    const alternativeSets = await secondaryArtworkSetIds();
+    if (closed || signal.aborted || active !== signal) return;
     results.classList.toggle(
       'w-text-results',
-      found.length > 0 && found.every((card) => !card.image),
+      found.length > 0 &&
+        found.every(
+          (card) =>
+            !card.image &&
+            !verifiedLocalArt(catalogResumeCard(card)) &&
+            !alternativeSets.has(card.id.slice(0, card.id.lastIndexOf('-'))),
+        ),
     );
-    found.forEach((result, i) => renderResult(result, signal, prices?.[i]));
+    found.forEach((result, i) =>
+      renderResult(result, signal, alternativeSets, prices?.[i]),
+    );
     refresh();
     previous.disabled = page === 1;
     pager.replaceChildren(
