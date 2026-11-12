@@ -7,7 +7,10 @@ import {
   visualNumberClues,
 } from './card-catalog';
 import { compareCandidateArtwork } from './scan-photo-match';
-import { reviewVisualCandidates } from '../domain/visual-retrieval';
+import {
+  reviewVisualCandidates,
+  type VisualHit,
+} from '../domain/visual-retrieval';
 import type { VisualSearchSession } from './visual-search';
 import { resolveVisualPrintings } from './scan-visual-shortlist';
 import { rankScanCandidates } from './scan-review';
@@ -185,6 +188,7 @@ export async function resolvePhotoScan(
   signal: AbortSignal,
   visualSession?: VisualSearchSession | null,
   visualTimeoutMs = 4700,
+  prefetchedVisualHits?: Promise<VisualHit[]>,
 ): Promise<AutomaticScanResult> {
   // The optional ONNX index is the only path capable of finding printings
   // when set/name OCR is unreadable. Start it beside catalogue discovery,
@@ -195,9 +199,11 @@ export async function resolvePhotoScan(
     signal,
     AbortSignal.timeout(boundedVisualMs + 100),
   ]);
-  const visualCards = visualSession
-    ? visualSession
-        .match(photo, boundedVisualMs)
+  const visualHits =
+    prefetchedVisualHits ??
+    (visualSession ? visualSession.match(photo, boundedVisualMs) : null);
+  const visualCards = visualHits
+    ? visualHits
         .then((hits) =>
           reviewVisualCandidates(hits, visualNumberClues(text), 5),
         )
