@@ -15,7 +15,7 @@ test('the scanner opens via the central add action without persisting a photo', 
   const dialog = page.getByRole('dialog', { name: 'Binderseiten scannen' });
   await expect(dialog).toBeVisible();
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   await dialog
     .locator('input[type=file][multiple]')
@@ -30,7 +30,7 @@ test('the scanner opens via the central add action without persisting a photo', 
     dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
   ).toBeEnabled();
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   await expect(
     page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
@@ -172,7 +172,7 @@ test('a distorted photo is split into nine reviewable positions without changing
       dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
     ).toBeEnabled();
     await expect(
-      dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+      dialog.locator('.w-dialog-footer .w-button-primary'),
     ).toBeDisabled();
     await dialog
       .getByRole('button', { name: 'Binderseiten scannen schließen' })
@@ -216,7 +216,7 @@ test('a distorted photo is split into nine reviewable positions without changing
     page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
   ).toHaveCount(0);
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
   if (await stop.isVisible()) await stop.click();
@@ -228,4 +228,143 @@ test('a distorted photo is split into nine reviewable positions without changing
   await expect(
     page.getByRole('heading', { name: 'Deine erste Seite wartet.' }),
   ).toBeVisible();
+});
+
+test('exact Japanese printing suggestions render safely and can be reviewed as a page', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  // Deliberately synthetic OCR: this verifies UI/candidate lifecycle, not
+  // real-world Japanese recognition accuracy.
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker;
+    class FixedOcr {
+      onmessage:
+        | ((
+            event: MessageEvent<{ type: string; id: number; text: string }>,
+          ) => void)
+        | null = null;
+      onerror: ((event: Event) => void) | null = null;
+      postMessage(data: { id?: number; warmup?: boolean }) {
+        if (data.warmup || typeof data.id !== 'number') return;
+        const id = data.id;
+        setTimeout(() => {
+          this.onmessage?.(
+            new MessageEvent('message', {
+              data: {
+                type: 'done',
+                id,
+                text: 'M1L 088/063\nメガルカリオex',
+              },
+            }),
+          );
+        }, 15);
+      }
+      terminate() {}
+    }
+    class InterceptWorker extends NativeWorker {
+      constructor(url: string | URL, options?: WorkerOptions) {
+        if (String(url).includes('vision-worker'))
+          return new FixedOcr() as unknown as InterceptWorker;
+        super(url, options);
+      }
+    }
+    Object.defineProperty(window, 'Worker', {
+      configurable: true,
+      value: InterceptWorker,
+    });
+  });
+  await page.route('https://api.tcgdex.net/v2/**', (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const set = {
+      id: 'M1L',
+      name: 'メガブレイブ',
+      cardCount: { official: 63 },
+    };
+    const card = { id: 'M1L-088', localId: '088', name: 'メガルカリオex' };
+    if (path.endsWith('/ja/sets/M1L'))
+      return route.fulfill({ json: { ...set, cards: [card] } });
+    if (path.endsWith('/ja/cards/M1L-088'))
+      return route.fulfill({
+        json: { ...card, set, variants: { holo: true } },
+      });
+    if (path.endsWith('/ja/sets')) return route.fulfill({ json: [set] });
+    if (path.endsWith('/ja/cards')) return route.fulfill({ json: [card] });
+    return route.fulfill({ json: [] });
+  });
+  await page.goto('./#binder');
+  await page.getByRole('button', { name: 'Binderseite scannen' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Binderseiten scannen' });
+  const photo = await page.evaluate(async () => {
+    const resource = await fetch('./assets/cards/svi-211.webp');
+    const bitmap = await createImageBitmap(await resource.blob());
+    const canvas = document.createElement('canvas');
+    canvas.width = 720;
+    canvas.height = 1020;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#121519';
+    context.fillRect(0, 0, 720, 1020);
+    for (let row = 0; row < 3; row++)
+      for (let col = 0; col < 3; col++) {
+        const x = 25 + col * 225;
+        const y = 25 + row * 323;
+        context.drawImage(bitmap, x, y, 200, 280);
+      }
+    bitmap.close();
+    return canvas.toDataURL('image/jpeg', 0.9).split(',')[1]!;
+  });
+  await dialog.locator('input[type=file][multiple]').setInputFiles({
+    name: 'synthetic-binder.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from(photo, 'base64'),
+  });
+  await expect
+    .poll(
+      async () =>
+        (await dialog.locator('.w-page-scan-pocket').count()) === 9 ||
+        (await dialog
+          .locator('.w-page-scan-grid')
+          .getAttribute('data-scan-state')) === 'needs-adjustment',
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+  if (
+    (await dialog
+      .locator('.w-page-scan-grid')
+      .getAttribute('data-scan-state')) === 'needs-adjustment'
+  ) {
+    await dialog
+      .getByRole('button', { name: 'Binderseite jetzt ausrichten' })
+      .click();
+    const crop = page.getByRole('dialog', { name: 'Binderseite ausrichten' });
+    await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
+    await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
+  }
+  await expect(dialog.locator('.w-page-scan-pocket')).toHaveCount(9);
+  await expect(dialog.locator('.w-page-scan-grid')).toHaveAttribute(
+    'data-scan-state',
+    'complete',
+    {
+      timeout: 60_000,
+    },
+  );
+  await expect(dialog.locator('.w-page-scan-pocket').first()).toContainText(
+    'Vorschlag: メガルカリオex',
+  );
+  await expect(dialog.locator('.w-page-scan-pocket').first()).not.toContainText(
+    'Erkennung fehlgeschlagen',
+  );
+  const bulk = dialog.getByRole('button', {
+    name: /eindeutige Ausgaben auswählen/,
+  });
+  await expect(bulk).toBeVisible();
+  await expect(
+    dialog.locator('.w-dialog-footer .w-button-primary'),
+  ).toBeDisabled();
+  await bulk.click();
+  await expect(
+    dialog.locator('.w-dialog-footer .w-button-primary'),
+  ).toBeEnabled();
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });

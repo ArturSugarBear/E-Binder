@@ -10,6 +10,7 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
+import { donateBetaScanPhoto } from '../data/beta-scan-donation';
 import {
   createVisualSearchSession,
   type VisualSearchSession,
@@ -157,7 +158,15 @@ export function openAddCards(
   });
   let selected = options.card;
   let captureId = options.captureId;
-  let reviewingLiveQueue = false;
+  let reviewingLiveQueue = Boolean(options.live);
+  // The normal Add dialog remains available if the live camera is closed
+  // before any result is queued; quick review begins only on Results.
+  // Every photo belongs to the current sheet, not to a stale saved scan history.
+  const currentPending = () =>
+    ctx.state.captures.filter(
+      (shot) => shot.status !== 'confirmed' && transientPhotos.has(shot.id),
+    );
+  const nextCurrentCapture = () => currentPending()[0]?.id;
   const liveOcrAbort = new AbortController();
   let liveOcrSession: ReturnType<typeof createRecognitionSession> | undefined;
   let liveOcrQueue: Promise<void> = Promise.resolve();
@@ -195,6 +204,27 @@ export function openAddCards(
     liveOcrJobs.clear();
     liveOcrEvidence.clear();
     liveReviewResults.clear();
+    // Live photos cease to exist when this sheet closes. Remove abandoned
+    // pending scan metadata so the next session does not show dead previews,
+    // miscount an old queue, or ask the collector to clean it manually.
+    if (reviewingLiveQueue) {
+      const abandoned = new Set(
+        ctx.state.captures
+          .filter((shot) => shot.status !== 'confirmed')
+          .map((shot) => shot.id),
+      );
+      if (abandoned.size)
+        ctx.commit(
+          'Temporäre Scanliste bereinigt',
+          (state) =>
+            changeState(state, (next) => {
+              next.captures = next.captures.filter(
+                (shot) => !abandoned.has(shot.id),
+              );
+            }),
+          { notify: false, undo: false },
+        );
+    }
     transientPhotos.clear();
     alignedCaptures.clear();
     for (const url of previewUrls) URL.revokeObjectURL(url);
@@ -238,22 +268,33 @@ export function openAddCards(
           return 'added';
         },
         () => camera.click(),
-        () => pendingScanCount(ctx.state.captures),
+        () =>
+          pendingScanCount(
+            ctx.state.captures.filter((shot) => transientPhotos.has(shot.id)),
+          ),
         () => {
           sheet.close();
           ctx.openPageScan();
         },
         () => {
           reviewingLiveQueue = true;
-          captureId = ctx.state.captures.find(
-            (item) => item.status === 'pending',
-          )?.id;
+          sheet.dialog.classList.add('w-quick-review');
+          captureId = nextCurrentCapture();
           showQueue();
           showCapture();
           const shot = capture();
           if (shot?.status === 'pending') {
-            if (shot.text) void renderScanReview(shot.text, shot.candidates);
-            else void runOcr();
+            void (async () => {
+              // Never restart a second, expensive OCR while background OCR
+              // for this same photo is already running.
+              const running = liveOcrJobs.get(shot.id);
+              if (running) {
+                tell('Karte wird lokal gelesen · bitte kurz warten …');
+                await running;
+              }
+              if (closed || captureId !== shot.id) return;
+              await runOcr();
+            })();
           }
         },
       );
@@ -307,6 +348,28 @@ export function openAddCards(
     results,
     browser.pager,
     details,
+    el(
+      'section',
+      'w-quick-finished-panel',
+      el('h3', '', 'Karte übernommen'),
+      el(
+        'p',
+        'w-muted',
+        'Du kannst sofort weiterscannen oder zur Sammlung zurückkehren.',
+      ),
+      action(
+        'Nächste Karte scannen',
+        () => takePhoto.click(),
+        'primary',
+        'camera',
+      ),
+      action(
+        'Fertig · Sammlung ansehen',
+        () => sheet.close(),
+        'secondary',
+        'check',
+      ),
+    ),
   );
   sheet.footer.append(
     message(
@@ -325,7 +388,11 @@ export function openAddCards(
     for (const url of previewUrls) URL.revokeObjectURL(url);
     previewUrls.clear();
     const shot = capture();
-    if (!shot) return;
+    if (!shot) {
+      photoArea.hidden = true;
+      return;
+    }
+    photoArea.hidden = false;
     const temporary = transientPhotos.get(shot.id);
     const picture = el('span', 'card-art w-original-photo');
     if (temporary) {
@@ -422,6 +489,42 @@ export function openAddCards(
     queue.replaceChildren();
     const shots = ctx.state.captures;
     const pending = shots.filter((shot) => shot.status !== 'confirmed');
+    if (reviewingLiveQueue) {
+      queueToggle.hidden = true;
+      queue.classList.remove('is-expanded');
+      const current = currentPending();
+      if (!current.length) return;
+      queue.append(
+        el('p', 'w-eyebrow', current.length + ' offen · zur Prüfung'),
+      );
+      const tabs = el('div', 'w-quick-review-tabs');
+      for (const [index, shot] of current.entries()) {
+        const tab = action(
+          'Karte ' + (index + 1),
+          () => {
+            if (captureId === shot.id) return;
+            interrupt();
+            captureId = shot.id;
+            selected = undefined;
+            details.replaceChildren();
+            results.replaceChildren();
+            notices.replaceChildren();
+            showQueue();
+            showCapture();
+            void (async () => {
+              const running = liveOcrJobs.get(shot.id);
+              if (running) await running;
+              if (!closed && captureId === shot.id) await runOcr();
+            })();
+          },
+          shot.id === captureId ? 'primary' : 'secondary',
+        );
+        tab.setAttribute('aria-pressed', String(shot.id === captureId));
+        tabs.append(tab);
+      }
+      queue.append(tabs);
+      return;
+    }
     queueToggle.hidden = pending.length < 2;
     queueToggle.textContent = `Aufnahmen wechseln (${pending.length} offen)`;
     if (pending.length < 2) queue.classList.remove('is-expanded');
@@ -527,12 +630,14 @@ export function openAddCards(
     }
   };
 
+  let liveProgressHook:
+    ((active: boolean, detail?: string) => void) | undefined;
   function prepareLiveOcr(): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrSession) return;
     try {
       liveOcrSession = createRecognitionSession(
         liveOcrAbort.signal,
-        () => undefined,
+        (label) => liveProgressHook?.(true, label),
         { fast: true, timeoutMs: 5600 },
       );
       liveOcrSession.warmup();
@@ -555,8 +660,12 @@ export function openAddCards(
   ): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
     const started = performance.now();
+    liveProgressHook = onAnalysisState;
     onAnalysisState(true);
-    onAnalysisState(true, 'Kartenmerkmale werden gelesen …');
+    onAnalysisState(
+      true,
+      'Erkennungsmodell und Kartendetails werden lokal geprüft …',
+    );
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
@@ -753,7 +862,7 @@ export function openAddCards(
           continue;
         }
         const blocker = scanQueueBlocker(
-          ctx.state.captures,
+          ctx.state.captures.filter((shot) => transientPhotos.has(shot.id)),
           transientPhotos.values(),
           file.size,
         );
@@ -791,6 +900,7 @@ export function openAddCards(
         }
         first ??= shot.id;
         added++;
+        void donateBetaScanPhoto(file, 'card');
       }
       if (!closed) {
         if (!queuedLive) {
@@ -1191,9 +1301,9 @@ export function openAddCards(
     liveOcrEvidence.delete(shot.id);
     liveReviewResults.delete(shot.id);
     interrupt();
-    captureId = ctx.state.captures.find(
-      (item) => item.status === 'pending',
-    )?.id;
+    captureId = reviewingLiveQueue
+      ? nextCurrentCapture()
+      : ctx.state.captures.find((item) => item.status === 'pending')?.id;
     selected = undefined;
     details.replaceChildren();
     results.replaceChildren();
@@ -1203,9 +1313,12 @@ export function openAddCards(
     showCapture();
     tell(
       captureId
-        ? 'Karte hinzugefügt. Das nächste Foto kann geprüft werden.'
-        : 'Karte hinzugefügt. Scanne die nächste Karte.',
+        ? 'Karte übernommen · nächste Karte prüfen.'
+        : 'Karte übernommen · fertig oder nächste Karte scannen.',
     );
+    if (reviewingLiveQueue && !captureId) {
+      sheet.dialog.classList.add('w-quick-finished');
+    }
     if (
       reviewingLiveQueue &&
       captureId &&
@@ -1227,6 +1340,7 @@ export function openAddCards(
     basis?: AutomaticScanResult['basis'],
   ): Promise<void> {
     const request = ++setChoiceRequest;
+    sheet.dialog.classList.remove('w-quick-finished');
     setFlowStage(1);
     captureStart.hidden = true;
     sheet.dialog.classList.remove('w-scan-confirming');
@@ -1450,6 +1564,7 @@ export function openAddCards(
             'Stattdessen Karte manuell suchen',
             () => {
               sheet.dialog.classList.remove('w-guided-scan');
+              sheet.dialog.classList.add('w-quick-search');
               scanSetChoice.replaceChildren();
               results.hidden = false;
               results.replaceChildren();
@@ -1627,6 +1742,7 @@ export function openAddCards(
             'Karte nach Namen suchen',
             () => {
               sheet.dialog.classList.remove('w-guided-scan');
+              sheet.dialog.classList.add('w-quick-search');
               scanSetChoice.replaceChildren();
               searchLine.scrollIntoView({ block: 'start' });
               search.focus();
@@ -2020,9 +2136,9 @@ export function openAddCards(
           alignedCaptures.delete(shot.id);
           ocrController?.abort();
           ocrController = undefined;
-          captureId = ctx.state.captures.find(
-            (item) => item.status === 'pending',
-          )?.id;
+          captureId = reviewingLiveQueue
+            ? nextCurrentCapture()
+            : ctx.state.captures.find((item) => item.status === 'pending')?.id;
           selected = undefined;
           details.replaceChildren();
           results.replaceChildren();
@@ -2030,9 +2146,12 @@ export function openAddCards(
           showCapture();
           tell(
             captureId
-              ? 'Foto übernommen. Das nächste offene Foto ist ausgewählt.'
-              : 'Foto übernommen. Du kannst die nächste Karte fotografieren oder weitere Fotos auswählen.',
+              ? 'Karte übernommen · nächste Karte prüfen.'
+              : 'Karte übernommen · fertig oder nächste Karte scannen.',
           );
+          if (reviewingLiveQueue && !captureId) {
+            sheet.dialog.classList.add('w-quick-finished');
+          }
           if (
             reviewingLiveQueue &&
             captureId &&
@@ -2049,7 +2168,12 @@ export function openAddCards(
   }
 
   function manualForm(): void {
-    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming');
+    sheet.dialog.classList.remove(
+      'w-guided-scan',
+      'w-scan-confirming',
+      'w-quick-review',
+      'w-quick-search',
+    );
     scanSetChoice.replaceChildren();
     setFlowStage(1);
     interrupt();
