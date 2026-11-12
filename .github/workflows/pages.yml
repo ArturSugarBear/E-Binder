@@ -7,7 +7,7 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: e-binder-${{ github.ref }}
   cancel-in-progress: true
@@ -24,17 +24,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - name: Format beta branch before CI (temporary)
-        if: github.event_name == 'pull_request'
-        run: |
-          npx prettier --write scripts/prepare-visual-beta-input.mjs scripts/verify-visual-beta.mjs src/ui/profile-view.ts tests/e2e/visual-beta.spec.ts
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/prepare-visual-beta-input.mjs scripts/verify-visual-beta.mjs src/ui/profile-view.ts tests/e2e/visual-beta.spec.ts
-          if ! git diff --cached --quiet; then
-            git commit -m "style: format visual beta four files"
-            git push origin HEAD:feature/visual-ai-beta-reference-index-20261112
-          fi
       # This pilot is opt-in, not a universal image recognizer.
       # Build model/index from the SAME pinned ONNX weights and exactly nine
       # publisher-checked, already bundled image references. No donor JPEGs.
