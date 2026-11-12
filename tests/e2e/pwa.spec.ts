@@ -54,6 +54,15 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   await expect
     .poll(async () => page.evaluate(() => !!navigator.serviceWorker.controller))
     .toBe(true);
+  // A previously installed app must see newly released promo mappings on
+  // its first online request, while retaining the updated index offline.
+  const freshIndex = await page.evaluate(async () => {
+    const url = new URL('catalog-art/index.json', location.href);
+    const cache = await caches.open('e-binder-artwork-index');
+    await cache.put(url, Response.json({ version: 1, sets: {} }));
+    return (await fetch(url)).json();
+  });
+  expect(freshIndex.sets.mep?.cards).toBe('mep.json');
   await openVault(page, 'binder');
   await page.getByRole('button', { name: 'Ersten Binder anlegen' }).click();
   await page
@@ -72,6 +81,14 @@ test('installed shell and archive can open offline without replacing IndexedDB',
   await expect(
     page.getByRole('heading', { name: 'Offline-Testbinder' }),
   ).toBeVisible();
+  expect(
+    await page.evaluate(async () => {
+      const response = await fetch(
+        new URL('catalog-art/index.json', location.href),
+      );
+      return (await response.json()).sets.mep?.cards;
+    }),
+  ).toBe('mep.json');
   await page.goto('archive.html');
   await expect(page.locator('.chapter .grid .pocket')).toHaveCount(9);
 });

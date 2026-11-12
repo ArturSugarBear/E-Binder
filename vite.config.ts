@@ -73,9 +73,11 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: new RegExp(basePattern + 'catalog-art/.*\\.json$'),
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'e-binder-artwork-index',
+              networkTimeoutSeconds: 3,
+              fetchOptions: { cache: 'no-cache' },
               expiration: { maxEntries: 60, maxAgeSeconds: 7 * 24 * 60 * 60 },
             },
           },
