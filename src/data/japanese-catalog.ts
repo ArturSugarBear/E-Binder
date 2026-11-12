@@ -25,8 +25,7 @@ async function json(url: string): Promise<Record<string, unknown>> {
 export async function japanesePrinting(card: PersonalCard) {
   if (
     card.source !== 'tcgdex' ||
-    (card.language !== 'ja' &&
-      !/^(?:M1L|M1S)$/i.test(card.setId)) ||
+    (card.language !== 'ja' && !/^(?:M1L|M1S)$/i.test(card.setId)) ||
     !card.sourceId.startsWith(`${card.setId}-`) ||
     numberKey(card.sourceId.slice(card.setId.length + 1)) !==
       numberKey(card.number).split('/')[0]

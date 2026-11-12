@@ -171,8 +171,7 @@ it('resolves English-labeled Riolu to the exact Japanese M1L-068 art rare, not t
     Response.json(url.includes('catalog-products/tcgplayer') ? product : riolu),
   );
   vi.stubGlobal('fetch', fetcher);
-  const { secondaryCardArt } =
-    await import('../../src/data/artwork-fallbacks');
+  const { secondaryCardArt } = await import('../../src/data/artwork-fallbacks');
   const card = {
     source: 'tcgdex',
     sourceId: 'M1L-068',
@@ -186,7 +185,11 @@ it('resolves English-labeled Riolu to the exact Japanese M1L-068 art rare, not t
     language: 'ja',
     providerId: '647177',
   });
-  expect(await secondaryCardArt({ ...card, number: '068/064' })).toBeUndefined();
+  expect(
+    await secondaryCardArt({ ...card, number: '068/064' }),
+  ).toBeUndefined();
   expect(await secondaryCardArt({ ...card, setId: 'M1S' })).toBeUndefined();
-  expect(await secondaryCardArt({ ...card, name: 'Mega-Lucario-ex' })).toBeUndefined();
+  expect(
+    await secondaryCardArt({ ...card, name: 'Mega-Lucario-ex' }),
+  ).toBeUndefined();
 });
