@@ -848,9 +848,11 @@ export function openPageScanner(
       sharedRecognition = createRecognitionSession(
         controller.signal,
         (label) => {
-          status.textContent = label;
+          status.textContent = 'Binderkarten werden gelesen · ' + label;
         },
       );
+      // Start loading ONNX immediately, before per-card quality inspection.
+      sharedRecognition.warmup();
     }
     const abort = sharedRecognitionAbort;
     const session = sharedRecognition;
@@ -874,6 +876,8 @@ export function openPageScanner(
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
       for (let index = 0; index < tiles.length; index++) {
         if (closed || abort.signal.aborted) break;
+        const pocket = pockets[index]!;
+        status.textContent = `Fach ${index + 1} von ${tiles.length} · Texterkennung läuft …`;
         try {
           const inspection = await inspectPocketPhoto(
             tiles[index]!,
@@ -894,10 +898,6 @@ export function openPageScanner(
           pockets[index]!.quality.textContent =
             'Fotoqualität konnte nicht geprüft werden. Bitte selbst kontrollieren.';
         }
-      }
-      for (let index = 0; index < tiles.length; index++) {
-        if (closed || abort.signal.aborted) break;
-        const pocket = pockets[index]!;
         try {
           if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
             if (closed || abort.signal.aborted) break;
