@@ -17,3 +17,6 @@ public/catalog-art
 
 # Generated, hash-bound ONNX model/index; do not reformat.
 public/assets/vision/**
+
+# Preserve editorial beta instructions separately from generated application source.
+docs/visual-beta-pilot.md
