@@ -99,7 +99,7 @@ export class CardImages {
     language.hidden = true;
     const labelLanguage = (url: string) => {
       const displayed =
-        card.language === 'ja' &&
+        (card.language === 'ja' || /^(?:M1L|M1S)$/i.test(card.setId)) &&
         url.startsWith('https://tcgplayer-cdn.tcgplayer.com/product/')
           ? 'ja'
           : imageLanguage(url);
