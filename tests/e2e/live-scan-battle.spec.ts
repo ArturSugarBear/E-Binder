@@ -346,8 +346,10 @@ for (const width of [320, 375, 390, 430]) {
       // Fractional-pixel layout rounding can vary with dynamic scan counts.
       // Keep the stage and footer stable within a 4px visual tolerance.
       for (const key of ['x', 'y', 'width', 'height'] as const) {
-        expect(Math.abs(stage![key] - initialStage![key])).toBeLessThanOrEqual(4);
-        expect(Math.abs(footer![key] - initialFooter![key])).toBeLessThanOrEqual(4);
+        const stageDelta = Math.abs(stage![key] - initialStage![key]);
+        const footerDelta = Math.abs(footer![key] - initialFooter![key]);
+        expect(stageDelta).toBeLessThanOrEqual(4);
+        expect(footerDelta).toBeLessThanOrEqual(4);
       }
       const status = await live.locator('.w-live-status').boundingBox();
       expect(status!.y + status!.height).toBeLessThanOrEqual(footer!.y);
