@@ -21,6 +21,14 @@ test('release version is generated from the built app and is visible on every iP
   const label = page.locator('#workspace-version');
   await expect(label).toContainText('v' + release.version);
   await expect(label).toContainText(release.commit.slice(0, 8));
+  // The link's accessible name must contain the version visible to users.
+  await expect(label).toHaveAccessibleName(
+    new RegExp(release.commit.slice(0, 8)),
+  );
+  await expect(label).toHaveAttribute(
+    'aria-description',
+    'App-Version und Updates im Profil',
+  );
   await expect(label).toHaveAttribute('data-build-commit', release.commit);
   const box = await label.boundingBox();
   expect(box).not.toBeNull();
