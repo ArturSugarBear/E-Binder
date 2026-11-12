@@ -16,9 +16,34 @@ const rowSchema = z.object({
   version: z.number().int().positive(),
   state: z.unknown(),
 });
+/** Compare validated snapshots independent of JSONB object-key ordering.
+ * An interrupted same-device sync may commit remotely before its marker is
+ * written. Equal snapshots are safe to reconcile; divergent ones are not.
+ */
+function sameSnapshot(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a) && Array.isArray(b))
+    return (
+      a.length === b.length &&
+      a.every((value, index) => sameSnapshot(value, b[index]))
+    );
+  const left = a as Record<string, unknown>;
+  const right = b as Record<string, unknown>;
+  const keys = Object.keys(left);
+  return (
+    keys.length === Object.keys(right).length &&
+    keys.every(
+      (key) => Object.hasOwn(right, key) && sameSnapshot(left[key], right[key]),
+    )
+  );
+}
 export class CloudStore extends PersonalStore {
   syncError = '';
   conflict = false;
+  pendingSyncCount = 0;
+  onSyncStatusChange?: () => void;
   private version = 0;
   private remoteQueue = Promise.resolve();
   private markerKey: string;
@@ -51,10 +76,27 @@ export class CloudStore extends PersonalStore {
         .maybeSingle();
       if (error) throw error;
       const remote = data ? rowSchema.parse(data) : null;
+      const remoteState = remote ? validateState(remote.state) : null;
       this.version = remote?.version ?? 0;
       if (!force && cached.revision !== previous.revision) {
         this.version = previous.version;
         if ((remote?.version ?? 0) !== previous.version) {
+          // Last cloud RPC may have committed before its local marker did.
+          // Equal complete snapshots prove there is no competing change;
+          // revision equality alone is never enough evidence.
+          if (
+            remoteState?.mode === 'personal' &&
+            sameSnapshot(
+              metadataOnlyState(cached),
+              metadataOnlyState(remoteState),
+            )
+          ) {
+            this.version = remote!.version;
+            this.remember(cached);
+            this.conflict = false;
+            this.syncError = '';
+            return cached;
+          }
           this.conflict = true;
           throw new Error(
             'Auf einem anderen Gerät gibt es einen neueren Cloudstand. Dein lokaler Stand bleibt erhalten. Sichere ihn und wähle im Konto „Cloudstand laden“.',
@@ -63,9 +105,7 @@ export class CloudStore extends PersonalStore {
         await this.push(cached);
         return cached;
       }
-      const state = remote
-        ? validateState(remote.state)
-        : emptyState('personal');
+      const state = remoteState ?? emptyState('personal');
       if (state.mode !== 'personal')
         throw new Error('Ungültiger Cloudbestand.');
       await super.save(state);
@@ -81,14 +121,23 @@ export class CloudStore extends PersonalStore {
       return cached;
     }
   }
+  private notifySyncStatus(): void {
+    try {
+      this.onSyncStatusChange?.();
+    } catch {
+      // Rendering must never interrupt local or remote persistence.
+    }
+  }
   save(state: PersonalState): Promise<void> {
     const snapshot = structuredClone(state);
     const local = super.save(snapshot);
+    if (snapshot.mode !== 'personal') return local;
+    this.pendingSyncCount++;
+    this.notifySyncStatus();
     const operation = this.remoteQueue
       .catch(() => undefined)
       .then(async () => {
         await local;
-        if (snapshot.mode !== 'personal') return;
         try {
           await this.push(snapshot);
         } catch (error) {
@@ -101,7 +150,13 @@ export class CloudStore extends PersonalStore {
         }
       });
     this.remoteQueue = operation;
-    return operation;
+    const settled = () => {
+      this.pendingSyncCount = Math.max(0, this.pendingSyncCount - 1);
+      this.notifySyncStatus();
+    };
+    void operation.then(settled, settled);
+    // The next scan only awaits local IndexedDB durability, not cloud latency.
+    return local;
   }
   private async push(state: PersonalState): Promise<void> {
     if (this.conflict) throw new Error('WORKSPACE_CONFLICT');
