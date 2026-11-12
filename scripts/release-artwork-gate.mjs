@@ -27,7 +27,8 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(committed(`${path}/audit.json`));
   const index = JSON.parse(committed(`${path}/index.json`));
 
-  const transient = /^Set metadata unavailable \((?:en|de):[a-z0-9.+_-]+\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets\/[a-z0-9.+_-]+$/i;
+  const transient =
+    /^Set metadata unavailable \((?:en|de):[a-z0-9.+_-]+\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets\/[a-z0-9.+_-]+$/i;
   if (
     !Array.isArray(attempted.errors) ||
     attempted.errors.length === 0 ||
