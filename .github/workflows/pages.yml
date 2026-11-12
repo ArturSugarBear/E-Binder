@@ -48,7 +48,19 @@ jobs:
             public/assets/vision
           node scripts/verify-visual-beta.mjs
           node scripts/check-vision-release.mjs public/assets/vision
+          python scripts/smoke-visual-inference.py \
+            visual-beta-reference-input.json \
+            /tmp/ebinder-dinov2-small-beta.onnx \
+            public/assets/vision \
+            artifacts/visual-inference-smoke.json
           rm visual-beta-reference-input.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-inference-smoke
+          path: artifacts/visual-inference-smoke.json
+          if-no-files-found: ignore
+          retention-days: 30
       - name: Resolve and audit release artwork
         run: node scripts/release-artwork-gate.mjs
       - uses: actions/upload-artifact@v4
