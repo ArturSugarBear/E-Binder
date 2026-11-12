@@ -11,7 +11,7 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
-import { donateBetaScanPhoto } from '../data/beta-scan-donation';
+import { donateBetaScanPhoto, recordBetaScanConfirmation } from '../data/beta-scan-donation';
 import { visualBetaEnabled } from '../data/visual-beta';
 import {
   createVisualSearchSession,
@@ -922,7 +922,7 @@ export function openAddCards(
         }
         first ??= shot.id;
         added++;
-        void donateBetaScanPhoto(file, 'card');
+        void donateBetaScanPhoto(file, 'card', shot.id);
       }
       if (!closed) {
         if (!queuedLive) {
@@ -1011,7 +1011,12 @@ export function openAddCards(
       // force a second capture after a failed attempt.
       const background = liveReviewResults.get(shot.id);
       if (background) {
-        ctx.commit('Texterkennung abgeschlossen', (state) =>
+        progress.value = 1;
+      status.textContent = candidates.length
+        ? 'Kandidaten gefunden · Ausgabe mit Foto vergleichen'
+        : 'Noch kein Treffer · deine Aufnahme bleibt für die Suche erhalten';
+      journey.update('recognize', 'Abgleich abgeschlossen · nächster Prüfschritt', 1);
+      ctx.commit('Texterkennung abgeschlossen', (state) =>
           changeState(state, (next) => {
             const target = next.captures.find((item) => item.id === shot.id);
             if (target?.status === 'pending') {
@@ -1045,6 +1050,7 @@ export function openAddCards(
     details.replaceChildren();
     results.replaceChildren();
     results.dataset.scanState = 'running';
+    sheet.dialog.classList.add('w-scan-analyzing');
     results.dataset.scanRankedKeys = '[]';
     results.dataset.scanSuggestedKey = '';
     results.dataset.scanVisualModelCandidates = '0';
@@ -1137,8 +1143,11 @@ export function openAddCards(
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
       const local = candidatesFromText(text, known);
+      // OCR is complete; only actual completed stages move the indicator.
+      progress.value = 0.65;
       status.textContent =
-        'Set, Sammlernummer und Kartenbild werden abgeglichen …';
+        'Text erkannt · Set, Sammlernummer und Kartenbild werden abgeglichen …';
+      journey.update('recognize', 'Kartenkatalog wird überprüft …');
       let automatic: AutomaticScanResult | undefined;
       let catalogUnavailable = false;
       if (!printedEnergy.length) {
@@ -1276,6 +1285,7 @@ export function openAddCards(
       );
       tell(text, true);
     } finally {
+      sheet.dialog.classList.remove('w-scan-analyzing');
       if (results.dataset.scanState === 'running')
         results.dataset.scanState = 'cancelled';
     }
@@ -1328,6 +1338,7 @@ export function openAddCards(
       candidate: publicCardKey(shot.candidates[0]),
       selected: publicCardKey(card),
     });
+    void recordBetaScanConfirmation(shot.id, publicCardKey(card) ?? '');
     transientPhotos.delete(shot.id);
     alignedCaptures.delete(shot.id);
     liveOcrEvidence.delete(shot.id);
@@ -1741,36 +1752,27 @@ export function openAddCards(
       );
       showAlternatives();
     } else {
-      const fallback = el(
-        'details',
-        'w-scan-fallback-settings',
-        el('summary', '', 'Karte anhand von Set und Nummer suchen'),
-      );
-      fallback.append(
-        action(
-          'Set-Suche öffnen',
-          () => {
-            void showSetChooser();
-          },
-          'secondary',
-        ),
-      );
+      // Never turn an unsuccessful OCR result into an immediate rescan demand.
+      // Keep the already captured photo visible and guide the next real
+      // identity check. Unknown printings remain unknown until confirmed.
       scanSetChoice.replaceChildren(
         el(
           'div',
-          'w-scan-set-panel',
-          el('p', 'w-eyebrow', 'Erkennung unvollständig'),
-          el('h3', '', 'Noch kein sicherer Kartentreffer'),
+          'w-scan-set-panel w-scan-recovery',
+          el('p', 'w-eyebrow', 'Deine Aufnahme bleibt hier'),
+          el('h3', '', 'Wir suchen deine Karte weiter'),
           el(
             'p',
             'w-muted',
-            'Wir konnten aus diesem Foto noch keine vollständige Kartenausgabe bestimmen. Versuche eine neue, gut beleuchtete Aufnahme der ganzen Karte.',
+            'Die automatische Erkennung hat noch keine eindeutige Ausgabe. ' +
+              'Du musst kein neues Foto aufnehmen: Prüfe Set und Sammlernummer ' +
+              'oder suche nach dem Namen. Dein Foto bleibt zum Vergleichen sichtbar.',
           ),
           action(
-            'Neues Foto aufnehmen',
-            () => camera.click(),
+            'Set und Nummer abgleichen',
+            () => { void showSetChooser(); },
             'primary',
-            'camera',
+            'search',
           ),
           action(
             'Karte nach Namen suchen',
@@ -1783,7 +1785,12 @@ export function openAddCards(
             },
             'secondary',
           ),
-          fallback,
+          action(
+            'Anderes Foto ausprobieren',
+            () => camera.click(),
+            'text',
+            'camera',
+          ),
         ),
       );
     }
@@ -2168,6 +2175,7 @@ export function openAddCards(
             candidate: publicCardKey(shot.candidates[0]),
             selected: publicCardKey(adopted),
           });
+          void recordBetaScanConfirmation(shot.id, publicCardKey(adopted) ?? '');
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
           ocrController?.abort();
