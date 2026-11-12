@@ -9,7 +9,12 @@ import {
   type Holding,
 } from '../domain/personal';
 import { matchesCard } from '../data/card-catalog';
-import { holdingPrice, type HoldingPriceResult } from '../data/holding-prices';
+import {
+  holdingPrice,
+  holdingMarketReference,
+  type HoldingPriceResult,
+} from '../data/holding-prices';
+import { tcgplayerMarket } from './card-market';
 import { portfolioQuoteKey, type PortfolioQuote } from '../domain/portfolio';
 import {
   action,
@@ -67,7 +72,7 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
     sourceLink.rel = 'noopener noreferrer';
   }
   const element = el(
-    'span',
+    detail ? 'div' : 'span',
     detail ? 'w-price-reference w-holding-price' : 'w-price-reference',
     detail ? el('span', 'w-label', 'Cardmarket · Preisreferenz') : null,
     value,
@@ -101,6 +106,11 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
     element,
     load: async () => {
       if (comparable) render(await holdingPrice(holding));
+      if (detail) {
+        const reference = await holdingMarketReference(holding);
+        if (element.isConnected)
+          element.append(tcgplayerMarket(reference ? [reference] : []));
+      }
     },
   };
 }

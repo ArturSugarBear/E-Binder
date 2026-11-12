@@ -34,6 +34,85 @@ function mockCard(
   );
 }
 
+it.each([
+  [
+    'sv01-070',
+    {
+      unit: 'EUR',
+      updated: '2026-11-10T12:00:00Z',
+      normal: { marketPrice: 9 },
+    },
+  ],
+  ['sv01-071', { unit: 'USD', normal: { marketPrice: 9 } }],
+  [
+    'sv01-072',
+    {
+      unit: 'USD',
+      updated: '2099-01-01T12:00:00Z',
+      normal: { marketPrice: 9 },
+    },
+  ],
+  [
+    'sv01-073',
+    {
+      unit: 'USD',
+      updated: '2026-11-10T12:00:00Z',
+      normal: { marketPrice: 0 },
+    },
+  ],
+  ['sv01-074', { unit: 'USD', updated: 'invalid', normal: { marketPrice: 9 } }],
+  [
+    'sv01-075',
+    {
+      unit: 'USD',
+      updated: '2026-11-10T12:00:00Z',
+      holofoil: { marketPrice: 9 },
+    },
+  ],
+  [
+    'sv01-076',
+    {
+      unit: 'USD',
+      updated: '2026-11-10T12:00:00Z',
+      normal: { marketPrice: 'bad' },
+    },
+  ],
+] as const)(
+  'withholds an invalid or mismatched TCGplayer quote for %s without losing EUR pricing',
+  async (id, tcgplayer) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id,
+              localId: id.split('-').at(-1),
+              name: 'Testkarte',
+              set: {
+                id: 'sv01',
+                name: 'Karmesin & Purpur',
+                cardCount: { official: 198 },
+              },
+              variants: { normal: true, holo: false },
+              pricing: {
+                cardmarket: {
+                  unit: 'EUR',
+                  updated: '2026-11-10T12:00:00Z',
+                  trend: 3.5,
+                },
+                tcgplayer,
+              },
+            }),
+          ),
+      ),
+    );
+    const entry = await catalogEntry(id, 'de', undefined, false);
+    expect(entry.price?.amount).toBe(3.5);
+    expect(entry.tcgplayer).toBeUndefined();
+  },
+);
+
 it('reads a nonfoil price but never mislabels the secondary reverse series as holo', async () => {
   mockCard('sv01-007', {
     unit: 'EUR',
@@ -319,4 +398,75 @@ it('prefers newly corrected provider prices when Cardmarket ID is verified', asy
   expect(result.price).toMatchObject({ amount: 19.35, basis: 'trend' });
   expect(result.price?.provenance).toBeUndefined();
   expect(result.cardmarketUrl).toContain('/Groudon-V2-DLR111');
+});
+
+it.each([
+  ['sv01-077', { unit: 'EUR', updated: 1e30, trend: 3.5 }],
+  ['sv01-078', 'malformed-provider'],
+] as const)(
+  'keeps a valid USD reference when Cardmarket metadata is invalid for %s',
+  async (id, cardmarket) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id,
+              localId: id.split('-').at(-1),
+              name: 'Testkarte',
+              set: {
+                id: 'sv01',
+                name: 'Karmesin & Purpur',
+                cardCount: { official: 198 },
+              },
+              variants: { normal: true },
+              pricing: {
+                cardmarket,
+                tcgplayer: {
+                  unit: 'USD',
+                  updated: '2026-11-10T12:00:00Z',
+                  normal: { marketPrice: 7 },
+                },
+              },
+            }),
+          ),
+      ),
+    );
+    const entry = await catalogEntry(id, 'de', undefined, false);
+    expect(entry.price).toBeUndefined();
+    expect(entry.tcgplayer?.normal?.amount).toBe(7);
+  },
+);
+
+it('withholds a USD reference when the printing ID and collector number disagree', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'sv01-079',
+            localId: '080',
+            name: 'Testkarte',
+            set: {
+              id: 'sv01',
+              name: 'Karmesin & Purpur',
+              cardCount: { official: 198 },
+            },
+            variants: { normal: true },
+            pricing: {
+              tcgplayer: {
+                unit: 'USD',
+                updated: '2026-11-10T12:00:00Z',
+                normal: { marketPrice: 7 },
+              },
+            },
+          }),
+        ),
+    ),
+  );
+  expect(
+    (await catalogEntry('sv01-079', 'de', undefined, false)).tcgplayer,
+  ).toBeUndefined();
 });

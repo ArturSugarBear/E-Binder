@@ -24,6 +24,11 @@ test('collection prices match exact cards', async ({ page }) => {
               updated: '2026-11-09T12:00:00Z',
               trend: 32.36,
             },
+            tcgplayer: {
+              unit: 'USD',
+              updated: '2026-11-09T12:00:00Z',
+              holofoil: { marketPrice: 45.25, productId: 9876 },
+            },
           },
         },
       });
@@ -63,5 +68,11 @@ test('collection prices match exact cards', async ({ page }) => {
   await expect(
     detail.locator('.w-holding-price .w-price-note'),
   ).toContainText('Trendpreis');
+  const comparison = detail.getByRole('region', { name: 'TCGplayer · USD-Marktvergleich' });
+  await expect(comparison).toContainText(/45,25\s*\$/);
+  await expect(comparison).toContainText('Holo · Marktpreis');
+  await expect(comparison).toContainText('kein Bestandteil');
+  await expect(comparison.getByRole('link', { name: 'Auf TCGplayer ansehen' })).toHaveAttribute('href', 'https://www.tcgplayer.com/product/9876');
+  await expect(detail.locator('.w-holding-price > .w-price-value')).toHaveText(/32,36\s*€/);
   expect(exactRequests).toBe(1);
 });
