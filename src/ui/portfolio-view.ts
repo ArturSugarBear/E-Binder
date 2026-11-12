@@ -565,7 +565,11 @@ export function createPortfolioView(ctx: WorkspaceContext) {
               );
               button.classList.add('w-portfolio-missing-card');
               button.replaceChildren(
-                el('span', 'w-portfolio-missing-art', artwork(row.holding, 'missing')),
+                el(
+                  'span',
+                  'w-portfolio-missing-art',
+                  artwork(row.holding, 'missing'),
+                ),
                 el(
                   'span',
                   'w-portfolio-missing-copy',
