@@ -173,11 +173,17 @@ async function checkCard(language, setId, card, official) {
   }
   const candidates = [];
   if (card.image && trusted(card.image)) {
+    let isScrydexHost = false;
+    try {
+      isScrydexHost =
+        new URL(card.image).hostname.toLowerCase() === 'images.scrydex.com';
+    } catch {
+      isScrydexHost = false;
+    }
     candidates.push({
       stage: 'primary',
       url:
-        /[.](?:webp|png|jpe?g)(?:[?]|$)/i.test(card.image) ||
-        card.image.includes('images.scrydex.com/')
+        /[.](?:webp|png|jpe?g)(?:[?]|$)/i.test(card.image) || isScrydexHost
           ? card.image
           : card.image + '/high.webp',
     });
