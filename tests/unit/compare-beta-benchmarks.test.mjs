@@ -47,7 +47,7 @@ it('compares identical private labels but refuses claiming improvement from 15 s
     expect(output.deltaTop1).toBe(7);
     expect(run(base, beta, '--gate').status).toBe(1);
     const tampered = source.map((row) => ({ ...row }));
-    tampered[0]!.expectedKey = 'tcgdex:de:sv01-212';
+    tampered[0].expectedKey = 'tcgdex:de:sv01-212';
     await writeFile(beta, JSON.stringify(report(tampered)));
     expect(run(base, beta).status).not.toBe(0);
   } finally {
