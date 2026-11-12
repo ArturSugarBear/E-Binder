@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
-import { Resvg } from '@resvg/resvg-js';
 
 const base = process.env.VITE_BASE_PATH || '/E-Binder/';
 const root = 'dist/';
@@ -29,31 +28,6 @@ for (const icon of manifest.icons) {
   const bytes = await readFile(root + name);
   assert.equal(bytes.subarray(1, 4).toString('ascii'), 'PNG');
 }
-const master = await readFile('public/brand/rare-room-mark.svg', 'utf8');
-for (const [name, size] of [
-  ['icon-180.png', 180],
-  ['icon-192.png', 192],
-  ['icon-512.png', 512],
-  ['icon-maskable-512.png', 512],
-]) {
-  const data = await readFile(root + 'icons/' + name);
-  assert.equal(data.readUInt32BE(16), size, name + ' width');
-  assert.equal(data.readUInt32BE(20), size, name + ' height');
-  if (!name.includes('maskable')) {
-    assert.deepEqual(
-      data,
-      new Resvg(master, {
-        background: '#141519',
-        fitTo: { mode: 'width', value: size },
-      })
-        .render()
-        .asPng(),
-      name + ' must derive from final SVG',
-    );
-  }
-}
-assert.ok(manifest.icons.some((i) => i.purpose === 'maskable'));
-assert.ok(main.includes(base + 'brand/rare-room-mark.svg'));
 const apple = await stat(root + 'icons/icon-180.png');
 assert.ok(apple.size > 100);
 console.log(

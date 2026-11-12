@@ -1,6 +1,5 @@
 import './cloud.css';
 import './workspace.css';
-import './rare-room-materials.css';
 import { startWorkspace } from './ui/workspace';
 import { initPwa } from './pwa';
 import { initMobileKeyboard } from './ui/mobile-keyboard';
