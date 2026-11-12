@@ -30,7 +30,10 @@ export function builtAtLabel(build: BuildInfo = appBuild): string {
  */
 export async function deployedBuild(): Promise<BuildInfo | null> {
   try {
-    const url = new URL(`${import.meta.env.BASE_URL}version.json`, location.origin);
+    const url = new URL(
+      `${import.meta.env.BASE_URL}version.json`,
+      location.origin,
+    );
     url.searchParams.set('check', Date.now().toString(36));
     const response = await fetch(url, {
       cache: 'no-store',

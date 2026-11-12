@@ -1,5 +1,8 @@
 import { localizedCardName } from '../data/japanese-catalog';
-import { secondaryArtworkSetIds, secondarySetArt } from '../data/artwork-fallbacks';
+import {
+  secondaryArtworkSetIds,
+  secondarySetArt,
+} from '../data/artwork-fallbacks';
 import {
   catalogEntry,
   catalogResumeCard,

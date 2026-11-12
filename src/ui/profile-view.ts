@@ -255,7 +255,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
                         '.',
                 );
               })
-              .catch(() => ctx.notify('Updateprüfung derzeit nicht verfügbar.', true));
+              .catch(() =>
+                ctx.notify('Updateprüfung derzeit nicht verfügbar.', true),
+              );
           },
           'secondary',
         ),

@@ -6,8 +6,16 @@ import { VitePWA } from 'vite-plugin-pwa';
 const base = process.env.VITE_BASE_PATH || '/E-Binder/';
 const buildInfo = {
   schema: 1,
-  version: (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }).version,
-  commit: (process.env.GITHUB_SHA ?? process.env.VITE_COMMIT_SHA ?? 'local').slice(0, 12),
+  version: (
+    JSON.parse(
+      readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+    ) as { version: string }
+  ).version,
+  commit: (
+    process.env.GITHUB_SHA ??
+    process.env.VITE_COMMIT_SHA ??
+    'local'
+  ).slice(0, 12),
   builtAt: process.env.E_BINDER_BUILD_AT ?? new Date().toISOString(),
 };
 const basePattern = base.replace(/[\\.*+?^$()|[\]{}]/g, '\\$&');
