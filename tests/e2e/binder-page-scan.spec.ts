@@ -15,7 +15,7 @@ test('the scanner opens via the central add action without persisting a photo', 
   const dialog = page.getByRole('dialog', { name: 'Binderseiten scannen' });
   await expect(dialog).toBeVisible();
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   await dialog
     .locator('input[type=file][multiple]')
@@ -30,7 +30,7 @@ test('the scanner opens via the central add action without persisting a photo', 
     dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
   ).toBeEnabled();
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   await expect(
     page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
@@ -172,7 +172,7 @@ test('a distorted photo is split into nine reviewable positions without changing
       dialog.getByRole('button', { name: 'Binderseite jetzt ausrichten' }),
     ).toBeEnabled();
     await expect(
-      dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+      dialog.locator('.w-dialog-footer .w-button-primary'),
     ).toBeDisabled();
     await dialog
       .getByRole('button', { name: 'Binderseiten scannen schließen' })
@@ -216,7 +216,7 @@ test('a distorted photo is split into nine reviewable positions without changing
     page.getByRole('dialog', { name: 'Binderseite ausrichten' }),
   ).toHaveCount(0);
   await expect(
-    dialog.getByRole('button', { name: 'Geprüfte Binderseite übernehmen' }),
+    dialog.locator('.w-dialog-footer .w-button-primary'),
   ).toBeDisabled();
   const stop = dialog.getByRole('button', { name: 'Erkennung stoppen' });
   if (await stop.isVisible()) await stop.click();
