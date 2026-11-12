@@ -147,7 +147,6 @@ test('all catalogue prices load in a bounded queue even when only the FX service
   ).toHaveCount(0);
 });
 
-
 test('portfolio hero retains a priced card with missing stored artwork', async ({
   page,
 }) => {
