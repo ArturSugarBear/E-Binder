@@ -8,6 +8,7 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFile, stat, writeFile } from 'node:fs/promises';
+import { isTransientArtworkUpstreamFailure } from './artwork-upstream-errors.mjs';
 
 const path = 'public/catalog-art';
 const audit = spawnSync(process.execPath, ['scripts/audit-catalog-art.mjs'], {
@@ -27,12 +28,10 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(committed(`${path}/audit.json`));
   const index = JSON.parse(committed(`${path}/index.json`));
 
-  const transient =
-    /^Set metadata unavailable \((?:en|de):[a-z0-9.+_-]+\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets\/[a-z0-9.+_-]+$/i;
   if (
     !Array.isArray(attempted.errors) ||
     attempted.errors.length === 0 ||
-    !attempted.errors.every((error) => transient.test(error))
+    !attempted.errors.every(isTransientArtworkUpstreamFailure)
   ) {
     throw new Error('Non-transient artwork audit errors: release blocked.');
   }
