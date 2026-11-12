@@ -1,4 +1,6 @@
 import { action, el, icon } from './workspace-dom';
+import { currentBuild, checkPublishedBuild } from '../data/app-version';
+import { isUpdateSafe } from '../pwa';
 import {
   visualBetaEnabled,
   setVisualBetaEnabled,
@@ -85,6 +87,44 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
     ),
   );
   root.append(account, scanner);
+  const build = currentBuild();
+  root.append(
+    el(
+      'section',
+      'w-profile-group',
+      el('h2', '', 'App-Version & Updates'),
+      el(
+        'div',
+        'w-profile-options w-glass-panel',
+        el('p', 'w-muted', `Installiert: v${build.version} · Build ${build.build}`),
+        action('Auf neue Version prüfen', () => {
+          void checkPublishedBuild().then(async (published) => {
+            if (!published) {
+              ctx.notify('Versionsprüfung nicht erreichbar. Bitte die Internetverbindung prüfen.', true);
+              return;
+            }
+            if (published.build === build.build && published.version === build.version) {
+              ctx.notify('Du verwendest den aktuell veröffentlichten Build.');
+              return;
+            }
+            if (!isUpdateSafe()) {
+              ctx.notify(`Neuer Build ${published.build} verfügbar. Bitte Änderungen speichern und Dialoge schließen.`);
+              return;
+            }
+            if ('serviceWorker' in navigator) {
+              try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                await registration?.update();
+              } catch {
+                // The network manifest remains authoritative; reload may still be cached.
+              }
+            }
+            ctx.notify(`Neuer Build ${published.build} veröffentlicht. Verwende den Update-Hinweis oder öffne E-Binder erneut.`);
+          });
+        }, 'secondary'),
+      ),
+    ),
+  );
   const visualActive = visualBetaEnabled();
   root.append(
     el(
