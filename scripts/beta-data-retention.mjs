@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 const url = process.env.SUPABASE_URL;
 const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !secret) {
-  console.error('Private beta retention requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
+  console.error(
+    'Private beta retention requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.',
+  );
   process.exit(1);
 }
 const client = createClient(url, secret, {
@@ -33,10 +35,15 @@ for (const [state, days] of [
     const { error: rowError } = await client
       .from('beta_scan_samples')
       .delete()
-      .in('id', data.map((item) => item.id));
+      .in(
+        'id',
+        data.map((item) => item.id),
+      );
     if (rowError) throw rowError;
     deleted += data.length;
     if (data.length < 50) break;
   }
 }
-console.log('Private beta retention: ' + deleted + ' expired files and records removed.');
+console.log(
+  'Private beta retention: ' + deleted + ' expired files and records removed.',
+);

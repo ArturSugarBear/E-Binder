@@ -151,7 +151,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
             () => {
               void deleteBetaScanPhotos()
                 .then((count) =>
-                  ctx.notify(count + ' Testbilder samt Speicherobjekten gelöscht.'),
+                  ctx.notify(
+                    count + ' Testbilder samt Speicherobjekten gelöscht.',
+                  ),
                 )
                 .catch((error: unknown) => ctx.notify(String(error), true));
             },
