@@ -3,7 +3,7 @@ import type { WorkspaceContext } from './workspace-context';
 import {
   betaScanDonationState,
   changeBetaScanConsent,
-  deletePendingBetaScanPhotos,
+  deleteBetaScanPhotos,
 } from '../data/beta-scan-donation';
 import {
   betaDiagnosticsAuthorized,
@@ -147,11 +147,11 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
             'secondary',
           ),
           action(
-            'Meine unbewerteten Testbilder löschen',
+            'Alle meine Beta-Testbilder löschen',
             () => {
-              void deletePendingBetaScanPhotos()
+              void deleteBetaScanPhotos()
                 .then((count) =>
-                  ctx.notify(count + ' unbewertete Testbilder gelöscht.'),
+                  ctx.notify(count + ' Testbilder samt Speicherobjekten gelöscht.'),
                 )
                 .catch((error: unknown) => ctx.notify(String(error), true));
             },
