@@ -40,7 +40,8 @@ export async function createVisualSearchSession(
   });
   void warmed.catch(() => undefined);
   const warmupTimer = setTimeout(() => {
-    finishWarmup(new Error('Das Bildmodell konnte nicht rechtzeitig geladen werden.'));
+    const error = new Error('Das Bildmodell konnte nicht rechtzeitig geladen werden.');
+    finishWarmup(error);
     close();
   }, 60000);
   const finishWarmup = (error?: Error) => {
@@ -93,7 +94,8 @@ export async function createVisualSearchSession(
     if (event.data.id === 0) {
       if (event.data.type === 'ready') finishWarmup();
       else if (event.data.type === 'error') {
-        finishWarmup(new Error(event.data.message ?? 'Bildmodell nicht verfügbar.'));
+        const reason = event.data.message ?? 'Bildmodell nicht verfügbar.';
+        finishWarmup(new Error(reason));
         close();
       }
       return;
@@ -167,7 +169,8 @@ export async function createVisualSearchSession(
         manifestUrl,
       });
     } catch {
-      finishWarmup(new Error('Das Bildmodell konnte nicht gestartet werden.'));
+      const error = new Error('Das Bildmodell konnte nicht gestartet werden.');
+      finishWarmup(error);
       close();
     }
   }
