@@ -88,6 +88,9 @@ for (const source of ['cardmarket', 'tcgplayer', 'fx-unavailable'] as const) {
     await expect(
       detail.locator('.w-holding-price > .w-price-value'),
     ).toHaveText(amount);
+    const additional = detail.locator('.w-collector-card-extras');
+    await expect(additional).not.toHaveAttribute('open');
+    await additional.locator('summary').click();
     const comparison = detail.getByRole('region', {
       name: 'TCGplayer · EUR-Referenz',
     });
