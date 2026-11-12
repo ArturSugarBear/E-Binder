@@ -64,7 +64,8 @@ it('does not start image inference until verified ONNX warmup signals readiness'
   expect(messages).toHaveLength(1);
   workers[0]?.emit({ id: 0, type: 'ready' });
   await vi.waitFor(() => expect(messages).toHaveLength(2));
-  expect(messages[1]).toMatchObject({ id: 1, warmup: undefined });
+  expect(messages[1]).toMatchObject({ id: 1 });
+  expect(messages[1]).not.toHaveProperty('warmup');
   workers[0]?.emit({ id: 1, type: 'done', hits: [] });
   await expect(pending).resolves.toEqual([]);
   session!.close();
