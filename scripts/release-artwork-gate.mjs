@@ -28,7 +28,6 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(committed(`${path}/audit.json`));
   const index = JSON.parse(committed(`${path}/index.json`));
 
-
   if (
     !Array.isArray(attempted.errors) ||
     attempted.errors.length === 0 ||
