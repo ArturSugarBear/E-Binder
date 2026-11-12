@@ -148,7 +148,7 @@ test('confirming a photo selects the next temporary capture without counting it 
   );
   await expect(add.locator('.w-photo-review h3')).toHaveText('obf-207.webp');
   await expect(add.locator('.w-form-notices')).toContainText(
-    'nächste offene Foto',
+    'nächste Karte prüfen',
   );
   await page.keyboard.press('Escape');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
