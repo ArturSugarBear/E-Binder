@@ -1,0 +1,138 @@
+/* One restrained, reusable Rare Room glass material system. */
+:root {
+  --rare-chrome: #b9a6ff;
+  --rare-glow: rgb(216 242 90 / 0.22);
+  --rare-glass-edge: rgb(255 255 255 / 0.16);
+  --rare-glass-shadow: 0 14px 36px rgb(0 0 0 / 0.18);
+  --rare-radius: 20px;
+  --rare-surface-solid: #262831;
+  --rare-reflection: linear-gradient(165deg, rgb(255 255 255 / 0.11), transparent 37%);
+  --rare-elevated-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.13),
+    inset 0 0 0 1px rgb(255 255 255 / 0.035),
+    0 15px 36px -18px rgb(0 0 0 / 0.65);
+  --rare-motion-fast: 180ms;
+  --rare-motion-regular: 260ms;
+}
+
+.w-home-quick-tile,
+.w-vault-overview-stat,
+.w-portfolio-stat,
+.w-portfolio-by-set,
+.w-profile-hero,
+.w-profile-group,
+.w-discover-mode,
+.w-binder-sidebar {
+  border-color: var(--rare-glass-edge);
+  background-image: var(--rare-reflection);
+  box-shadow: var(--rare-elevated-shadow);
+}
+
+.w-dialog,
+.w-home-quick-tile,
+.w-profile-group,
+.w-vault-overview-stat {
+  background-color: var(--rare-surface-solid);
+}
+
+.w-home-hero,
+.w-portfolio-hero,
+.w-profile-hero {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 24px 54px -30px rgb(0 0 0 / 0.8);
+}
+
+.w-dialog {
+  border-color: var(--rare-glass-edge);
+  box-shadow:
+    0 28px 90px rgb(0 0 0 / 0.54),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+
+/* Small composited panes only: never blur the camera or whole viewport. */
+@supports (backdrop-filter: blur(12px)) {
+  .w-mobile-nav,
+  .w-discover-mode,
+  .w-portfolio-by-set,
+  .w-profile-group {
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    backdrop-filter: blur(12px) saturate(125%);
+  }
+}
+
+.w-header-shortcut,
+.w-home-quick-tile,
+.w-profile-option,
+.w-vault-tab,
+.w-button,
+.w-mobile-nav > a,
+.w-mobile-add {
+  transition:
+    background-color var(--rare-motion-fast) ease,
+    border-color var(--rare-motion-fast) ease,
+    box-shadow var(--rare-motion-regular) ease,
+    transform var(--rare-motion-regular) var(--ease);
+}
+
+.w-button:active:not(:disabled),
+.w-home-quick-tile:active,
+.w-mobile-add:active,
+.w-vault-tab:active {
+  transform: scale(0.98);
+}
+
+.w-home-quick-tile:focus-visible,
+.w-profile-option:focus-visible,
+.w-vault-tab:focus-visible,
+.w-mobile-nav a:focus-visible,
+.w-mobile-add:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .w-home-quick-tile:hover,
+  .w-profile-option:hover,
+  .w-discover-mode:hover {
+    box-shadow:
+      var(--rare-elevated-shadow),
+      0 0 26px -14px var(--rare-glow);
+  }
+  .w-home-quick-tile:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-header-shortcut,
+  .w-home-quick-tile,
+  .w-profile-option,
+  .w-vault-tab,
+  .w-button,
+  .w-mobile-nav > a,
+  .w-mobile-add {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .w-mobile-nav,
+  .w-discover-mode,
+  .w-portfolio-by-set,
+  .w-profile-group {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: var(--rare-surface-solid);
+  }
+}
+
+@media (max-width: 430px) {
+  .w-home-quick-tile,
+  .w-vault-overview-stat,
+  .w-profile-group,
+  .w-portfolio-by-set {
+    min-width: 0;
+  }
+}

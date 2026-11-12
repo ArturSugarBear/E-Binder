@@ -5515,7 +5515,6 @@ textarea.w-input,
   }
 }
 
-
 /* Premium glass is reserved for controls and feature surfaces, never card text. */
 .w-home-quick,
 .w-portfolio-by-set,
@@ -5558,7 +5557,6 @@ textarea.w-input,
     -webkit-backdrop-filter: none;
   }
 }
-
 
 /* Rare Room icon language: consistent geometry, optical alignment and glow. */
 .w-mobile-nav > a > svg,
