@@ -30,12 +30,26 @@ for (const icon of manifest.icons) {
   assert.equal(bytes.subarray(1, 4).toString('ascii'), 'PNG');
 }
 const master = await readFile('public/brand/rare-room-mark.svg', 'utf8');
-for (const [name, size] of [['icon-180.png', 180], ['icon-192.png', 192], ['icon-512.png', 512], ['icon-maskable-512.png', 512]]) {
+for (const [name, size] of [
+  ['icon-180.png', 180],
+  ['icon-192.png', 192],
+  ['icon-512.png', 512],
+  ['icon-maskable-512.png', 512],
+]) {
   const data = await readFile(root + 'icons/' + name);
   assert.equal(data.readUInt32BE(16), size, name + ' width');
   assert.equal(data.readUInt32BE(20), size, name + ' height');
   if (!name.includes('maskable')) {
-    assert.deepEqual(data, new Resvg(master, { background: '#141519', fitTo: { mode: 'width', value: size } }).render().asPng(), name + ' must derive from final SVG');
+    assert.deepEqual(
+      data,
+      new Resvg(master, {
+        background: '#141519',
+        fitTo: { mode: 'width', value: size },
+      })
+        .render()
+        .asPng(),
+      name + ' must derive from final SVG',
+    );
   }
 }
 assert.ok(manifest.icons.some((i) => i.purpose === 'maskable'));
