@@ -68,8 +68,10 @@ test('30th Classic Collection displays exact Scrydex images despite reused histo
   await expect(results).not.toHaveClass(/w-text-results/);
   await expect(results.locator('.card-art')).toHaveCount(6);
   await expect(results).not.toContainText('Ohne geprüftes Katalogbild');
+  // A source may enrich TCGdex artwork before this message renders.
+  // Both routes are valid as long as real cards, not text placeholders, appear.
   await expect(page.locator('.w-set-filter-status')).toContainText(
-    'geprüfte alternative Kartenbilder',
+    /(?:geprüfte alternative Kartenbilder|6 von 6 Ausgaben mit Katalogbild)/,
   );
   for (const [localId, name, providerId] of records) {
     const card = results.locator('button').filter({ hasText: name });
