@@ -65,11 +65,11 @@ jobs:
           name: card-image-coverage-smoke
           path: artifacts/card-artwork-coverage.json
           retention-days: 14
-      # External catalogues intermittently return HTTP 503. A push should
-      # deploy the already validated, dated snapshots; the scheduled/manual
-      # run refreshes and revalidates live third-party data separately.
+      # Manual release and master pushes must not depend on third-party 503s.
+      # Refresh external catalogues only on the scheduled data-maintenance run.
+      # The existing snapshots still pass build, artwork and browser checks.
       - name: Refresh and build dated Cardmarket price guide
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule'
         run: |
           node scripts/refresh-cardmarket.mjs
           node scripts/refresh-japanese-catalog.mjs M1L M1S
@@ -113,9 +113,12 @@ jobs:
               tests/e2e/real-collector-flows.spec.ts \
               tests/e2e/mobile-binder-entry.spec.ts \
               tests/e2e/pwa.spec.ts \
+              tests/e2e/release-provenance.spec.ts \
               tests/e2e/catalog-images.spec.ts \
               tests/e2e/compact-card-sheet.spec.ts \
               tests/e2e/visual-beta.spec.ts \
+              tests/e2e/guest-beta-consent.spec.ts \
+              tests/e2e/scan-zero-match-recovery.spec.ts \
               tests/e2e/classic-collection.spec.ts \
               tests/e2e/binder-card-artwork.spec.ts \
               tests/e2e/set-art-fallback.spec.ts \

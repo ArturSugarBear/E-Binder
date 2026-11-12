@@ -128,6 +128,31 @@
 #workspace-save-status {
   color: var(--w-success);
 }
+/* A short, always-visible screenshot proof of the JS running on this device. */
+.w-release-chip {
+  flex: none;
+  margin-inline-start: auto;
+  border: 1px solid var(--w-border);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font: 600 11px/1.35 var(--mono, ui-monospace, monospace);
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--raised);
+}
+.w-release-chip:focus-visible,
+.w-release-chip:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+@media (max-width: 640px) {
+  .w-release-chip {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+}
+
 #workspace-save-status[data-state='error'] {
   color: var(--error);
   font-weight: 600;
@@ -5434,4 +5459,48 @@ textarea.w-input,
   display: block;
   height: 4px;
   margin: 0;
+}
+
+/* Meaningful scan feedback while real OCR/candidate verification is running.
+ * No fake time-based percent; the existing progress widget owns milestones.
+ * The shimmer stops immediately when the scan exits its running state. */
+.w-scan-analyzing .w-photo-comparison {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.w-scan-analyzing .w-photo-comparison::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(216 242 90 / 0.22) 48%,
+    rgb(216 242 90 / 0.38) 51%,
+    transparent 64%
+  );
+  transform: translateX(-110%);
+  animation: scan-photo-shimmer 2.15s ease-in-out infinite;
+}
+@keyframes scan-photo-shimmer {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-scan-analyzing .w-photo-comparison::after {
+    animation: none;
+    background: none;
+  }
+}
+.w-scan-recovery .w-button {
+  width: 100%;
+  min-height: 46px;
+  justify-content: center;
 }
