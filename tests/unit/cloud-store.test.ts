@@ -30,10 +30,15 @@ it('persists consecutive scan revisions without waiting for a slow cloud', async
     .mockResolvedValue({ data: 2, error: null });
   const client = { rpc } as unknown as SupabaseClient;
   const store = new CloudStore(client, 'user-test');
+  const pendingCounts: number[] = [];
+  store.onSyncStatusChange = () => {
+    pendingCounts.push(store.pendingSyncCount);
+  };
   await store.save({ ...emptyState('personal'), revision: 1 });
   await vi.waitFor(() => expect(rpc).toHaveBeenCalledTimes(1));
   await store.save({ ...emptyState('personal'), revision: 2 });
   expect(local).toHaveBeenCalledTimes(2);
+  expect(store.pendingSyncCount).toBe(2);
   expect(rpc).toHaveBeenCalledTimes(1);
   finishFirst?.({ data: 1, error: null });
   await vi.waitFor(() => expect(rpc).toHaveBeenCalledTimes(2));
@@ -45,6 +50,8 @@ it('persists consecutive scan revisions without waiting for a slow cloud', async
   });
   const versions = rpc.mock.calls.map((call) => call[1].p_expected_version);
   expect(versions).toEqual([0, 1]);
+  await vi.waitFor(() => expect(store.pendingSyncCount).toBe(0));
+  expect(pendingCounts).toEqual([1, 2, 1, 0]);
 });
 
 it('keeps local writes and blocks further cloud calls after version conflict', async () => {
