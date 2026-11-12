@@ -28,6 +28,14 @@ export async function createVisualSearchSession(
   const worker = new Worker(new URL('./visual-worker.ts', import.meta.url), {
     type: 'module',
   });
+  // Warm the real model, in parallel with the collector's normal alignment
+  // and OCR setup. The first inference can still be slow on older iPhones.
+  worker.postMessage({
+    id: 0,
+    warmup: true,
+    photo: new Blob(),
+    manifestUrl,
+  });
   let disposed = false;
   let nextId = 0;
   let current:
