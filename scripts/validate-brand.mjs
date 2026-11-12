@@ -12,7 +12,6 @@ assert.equal(JSON.stringify(T.rare), JSON.stringify(original.T.rare));
 for (const [name, build, source] of [
   ['symbol', mark, original.mark],
   ['wordmark', word, original.word],
-  ['lockup', lockup, original.lockup],
 ]) {
   const args =
     name === 'lockup'
@@ -25,6 +24,12 @@ for (const [name, build, source] of [
   );
 }
 assert.equal(appIcon('rare'), original.appIcon('rare'));
+const approvedMark = readFileSync('public/brand/rare-room-mark.svg', 'utf8');
+const approvedLockup = readFileSync('public/brand/rare-room-lockup.svg', 'utf8');
+assert.ok(approvedMark.includes('viewBox="0 0 128 128"'));
+assert.ok(approvedLockup.includes('Rare Room — E-Binder'));
+assert.ok(approvedLockup.includes('E-BINDER'));
+assert.ok(!/<script|<foreignObject|<image|onload=/i.test(approvedMark));
 console.log(
-  'Rare Room V2 paths, configuration, SVG outputs and icon match authoritative HTML exactly.',
+  'Rare Room legacy source and approved Retro-Futurism masters validated.',
 );

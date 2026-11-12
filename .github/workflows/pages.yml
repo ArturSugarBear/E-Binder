@@ -33,6 +33,8 @@ jobs:
           path: public/catalog-art/audit.json
           retention-days: 14
       - run: npm run check
+      - name: Verify Rare Room brand source
+        run: node scripts/validate-brand.mjs
       - name: Refresh and build dated Cardmarket price guide
         run: |
           node scripts/refresh-cardmarket.mjs

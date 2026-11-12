@@ -64,3 +64,38 @@ test('Rare Room mobile surfaces fit and central scan remains accessible', async 
   }
   expect(pageErrors, 'Uncaught browser errors').toEqual([]);
 });
+
+test('Rare Room example binder, card details and desktop shell render', async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#binder');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  await page.getByRole('button', { name: 'Beispielbinder ansehen' }).click();
+  await expect(page.locator('.w-binder-paper button').first()).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath('rare-room-390-binder-detail.png'),
+    fullPage: true,
+  });
+  await page.locator('.w-binder-paper button').first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath('rare-room-390-card-detail.png'),
+    fullPage: true,
+  });
+  await page.keyboard.press('Escape');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('./#home');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  await page.screenshot({
+    path: info.outputPath('rare-room-1440-desktop.png'),
+    fullPage: true,
+  });
+});
