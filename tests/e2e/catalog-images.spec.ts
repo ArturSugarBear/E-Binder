@@ -201,6 +201,12 @@ test('missing primary metadata uses an exact secondary printing and labels Engli
   );
   await expect(art).toHaveAttribute('data-image-state', 'loaded');
   await expect(art.locator('.w-art-language')).toHaveText('Bild: EN');
+  const imageBox = await art.locator('img').boundingBox();
+  const labelBox = await art.locator('.w-art-language').boundingBox();
+  expect(labelBox!.y).toBeGreaterThanOrEqual(
+    imageBox!.y + imageBox!.height - 1,
+  );
+
   await expect(
     page.getByRole('radio', { name: 'Deutsch', exact: true }),
   ).toBeChecked();

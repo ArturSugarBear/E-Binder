@@ -1,0 +1,89 @@
+{
+  "category": "Pokemon",
+  "id": "M1L-088",
+  "illustrator": "Atsushi Furusawa",
+  "localId": "088",
+  "name": "メガルカリオex",
+  "rarity": "Special illustration rare",
+  "set": {
+    "cardCount": {
+      "official": 63,
+      "total": 92
+    },
+    "id": "M1L",
+    "name": "メガブレイブ"
+  },
+  "variants": {
+    "firstEdition": false,
+    "holo": true,
+    "normal": false,
+    "reverse": false,
+    "wPromo": false
+  },
+  "variants_detailed": [
+    {
+      "type": "holo",
+      "size": "standard",
+      "variantId": "jr7oetx1mqug9"
+    }
+  ],
+  "dexId": [448],
+  "hp": 340,
+  "types": ["Fighting"],
+  "evolveFrom": "リオル",
+  "description": "",
+  "stage": "Stage1",
+  "suffix": "EX",
+  "attacks": [
+    {
+      "cost": ["Fighting"],
+      "name": "はどうづき",
+      "effect": "自分のトラッシュから「基本エネルギー」を3枚まで選び、ベンチポケモンに好きなようにつける。",
+      "damage": 130
+    },
+    {
+      "cost": ["Fighting", "Fighting"],
+      "name": "メガブレイブ",
+      "effect": "次の自分の番、このポケモンは「メガブレイブ」が使えない。",
+      "damage": 270
+    }
+  ],
+  "weaknesses": [
+    {
+      "type": "Psychic",
+      "value": "x2"
+    }
+  ],
+  "resistances": [],
+  "retreat": 2,
+  "regulationMark": "I",
+  "legal": {
+    "standard": true,
+    "expanded": false
+  },
+  "updated": "2026-11-07T23:46:56.809Z",
+  "thirdParty": {
+    "cardmarket": 840383,
+    "tcgplayer": 647197
+  },
+  "pricing": {
+    "cardmarket": {
+      "updated": "2026-11-11T23:49:36.432Z",
+      "unit": "EUR",
+      "idProduct": 840383,
+      "avg": 60.9,
+      "low": 37,
+      "trend": 42.45,
+      "avg1": 40,
+      "avg7": 44.31,
+      "avg30": 52.65,
+      "avg-holo": null,
+      "low-holo": null,
+      "trend-holo": 0,
+      "avg1-holo": null,
+      "avg7-holo": null,
+      "avg30-holo": null
+    },
+    "tcgplayer": null
+  }
+}

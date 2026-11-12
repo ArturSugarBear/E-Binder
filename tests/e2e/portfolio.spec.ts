@@ -60,6 +60,9 @@ test('all catalogue prices load in a bounded queue even when only the FX service
     });
     active--;
   });
+  await page.route('https://assets.tcgdex.net/**', (route) =>
+    route.fulfill({ path: 'public/assets/cards/svi-211.webp' }),
+  );
   const state = emptyState();
   state.holdings = Array.from({ length: 42 }, (_, index) => {
     const localId = String(index + 1).padStart(3, '0');
@@ -74,7 +77,7 @@ test('all catalogue prices load in a bounded queue even when only the FX service
         setId: 'sv01',
         number: `${localId}/198`,
         language: 'de',
-        image: 'assets/cards/svi-211.webp',
+        image: `https://assets.tcgdex.net/de/sv/sv01/${localId}/high.webp`,
         artist: '',
         artistSource: 'unknown' as const,
         evolvesFrom: '',

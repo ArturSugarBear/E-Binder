@@ -1,0 +1,2242 @@
+{
+  "me06-119": {
+    "setId": "me06",
+    "localId": "119",
+    "officialCount": 103,
+    "names": {
+      "de": "Hitze-Rotom-ex",
+      "en": "Heat Rotom ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918958,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Heat-Rotom-ex-V2-DLR119",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-120": {
+    "setId": "me06",
+    "localId": "120",
+    "officialCount": 103,
+    "names": {
+      "de": "Lusardin-ex",
+      "en": "Wishiwashi ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918959,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Wishiwashi-ex-V2-DLR120",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-121": {
+    "setId": "me06",
+    "localId": "121",
+    "officialCount": 103,
+    "names": {
+      "de": "Raikou-ex",
+      "en": "Raikou ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918960,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Raikou-ex-V2-DLR121",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-123": {
+    "setId": "me06",
+    "localId": "123",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Calamanero-ex",
+      "en": "Mega Malamar ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918962,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Malamar-ex-V2-DLR123",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-125": {
+    "setId": "me06",
+    "localId": "125",
+    "officialCount": 103,
+    "names": {
+      "de": "Johnson",
+      "en": "Aarune"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918964,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Aarune-V2-DLR125",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-127": {
+    "setId": "me06",
+    "localId": "127",
+    "officialCount": 103,
+    "names": {
+      "de": "Funktionsweste",
+      "en": "Custom Vest"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918966,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Custom-Vest-V2-DLR127",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-128": {
+    "setId": "me06",
+    "localId": "128",
+    "officialCount": 103,
+    "names": {
+      "de": "MCs Hype",
+      "en": "Emcee's Hype"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918967,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Emcees-Hype-V2-DLR128",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-130": {
+    "setId": "me06",
+    "localId": "130",
+    "officialCount": 103,
+    "names": {
+      "de": "Ben & Svenjas Training",
+      "en": "Tate & Liza's Training"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918969,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Tate-Lizas-Training-V2-DLR130",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-131": {
+    "setId": "me06",
+    "localId": "131",
+    "officialCount": 103,
+    "names": {
+      "de": "Amalias Vertrauen",
+      "en": "Zinnia's Trust"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918970,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zinnias-Trust-V2-DLR131",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-133": {
+    "setId": "me06",
+    "localId": "133",
+    "officialCount": 103,
+    "names": {
+      "de": "Wachsende Grass-Energie",
+      "en": "Growing Grass Energy"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918976,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Growing-G-Energy-DLR133",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-134": {
+    "setId": "me06",
+    "localId": "134",
+    "officialCount": 103,
+    "names": {
+      "de": "Nitro-Fire-Energie",
+      "en": "Nitro Fire Energy"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918977,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Nitro-R-Energy-DLR134",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-135": {
+    "setId": "me06",
+    "localId": "135",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Tectass-ex",
+      "en": "Mega Golisopod ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918979,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golisopod-ex-V3-DLR135",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-136": {
+    "setId": "me06",
+    "localId": "136",
+    "officialCount": 103,
+    "names": {
+      "de": "Raikou-ex",
+      "en": "Raikou ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918980,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Raikou-ex-V3-DLR136",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-137": {
+    "setId": "me06",
+    "localId": "137",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Golgantes-ex",
+      "en": "Mega Golurk ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918981,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golurk-ex-V3-DLR137",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-138": {
+    "setId": "me06",
+    "localId": "138",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Rayquaza-ex",
+      "en": "Mega Rayquaza ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918982,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Rayquaza-ex-V2-DLR138",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-139": {
+    "setId": "me06",
+    "localId": "139",
+    "officialCount": 103,
+    "names": {
+      "de": "Johnson",
+      "en": "Aarune"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918983,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Aarune-V3-DLR139",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-140": {
+    "setId": "me06",
+    "localId": "140",
+    "officialCount": 103,
+    "names": {
+      "de": "Amalias Vertrauen",
+      "en": "Zinnia's Trust"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918984,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zinnias-Trust-V3-DLR140",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-001": {
+    "setId": "me06",
+    "localId": "001",
+    "officialCount": 103,
+    "names": {
+      "de": "Skaraborn",
+      "en": "Heracross"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918810,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Heracross-DLR001",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-009": {
+    "setId": "me06",
+    "localId": "009",
+    "officialCount": 103,
+    "names": {
+      "de": "Viridium",
+      "en": "Virizion"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918818,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Virizion-DLR009",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-011": {
+    "setId": "me06",
+    "localId": "011",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Tectass-ex",
+      "en": "Mega Golisopod ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918820,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golisopod-ex-V1-DLR011",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-012": {
+    "setId": "me06",
+    "localId": "012",
+    "officialCount": 103,
+    "names": {
+      "de": "Felori",
+      "en": "Sprigatito"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918821,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sprigatito-V1-DLR012",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-013": {
+    "setId": "me06",
+    "localId": "013",
+    "officialCount": 103,
+    "names": {
+      "de": "Feliospa",
+      "en": "Floragato"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918823,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Floragato-DLR013",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-016": {
+    "setId": "me06",
+    "localId": "016",
+    "officialCount": 103,
+    "names": {
+      "de": "Olivinio",
+      "en": "Dolliv"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918826,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Dolliv-DLR016",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-022": {
+    "setId": "me06",
+    "localId": "022",
+    "officialCount": 103,
+    "names": {
+      "de": "Qurtel",
+      "en": "Torkoal"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918837,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Torkoal-DLR022",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-024": {
+    "setId": "me06",
+    "localId": "024",
+    "officialCount": 103,
+    "names": {
+      "de": "Furnifraß",
+      "en": "Heatmor"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918839,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Heatmor-DLR024",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-032": {
+    "setId": "me06",
+    "localId": "032",
+    "officialCount": 103,
+    "names": {
+      "de": "Blitza",
+      "en": "Jolteon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918848,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Jolteon-DLR032",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-033": {
+    "setId": "me06",
+    "localId": "033",
+    "officialCount": 103,
+    "names": {
+      "de": "Raikou-ex",
+      "en": "Raikou ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918849,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Raikou-ex-V1-DLR033",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-043": {
+    "setId": "me06",
+    "localId": "043",
+    "officialCount": 103,
+    "names": {
+      "de": "Traumato",
+      "en": "Drowzee"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918863,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Drowzee-DLR043",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-044": {
+    "setId": "me06",
+    "localId": "044",
+    "officialCount": 103,
+    "names": {
+      "de": "Hypno",
+      "en": "Hypno"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918864,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Hypno-DLR044",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-046": {
+    "setId": "me06",
+    "localId": "046",
+    "officialCount": 103,
+    "names": {
+      "de": "Golbit",
+      "en": "Golett"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918867,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Golett-DLR046",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-030": {
+    "setId": "me06",
+    "localId": "030",
+    "officialCount": 103,
+    "names": {
+      "de": "Elektek",
+      "en": "Electabuzz"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918846,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Electabuzz-DLR030",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-088": {
+    "setId": "me06",
+    "localId": "088",
+    "officialCount": 103,
+    "names": {
+      "de": "Fiaro-ex",
+      "en": "Talonflame ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918916,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Talonflame-ex-V1-DLR088",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-020": {
+    "setId": "me06",
+    "localId": "020",
+    "officialCount": 103,
+    "names": {
+      "de": "Magmar",
+      "en": "Magmar"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918834,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Magmar-DLR020",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-084": {
+    "setId": "me06",
+    "localId": "084",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Rayquaza-ex",
+      "en": "Mega Rayquaza ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918912,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Rayquaza-ex-V1-DLR084",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-068": {
+    "setId": "me06",
+    "localId": "068",
+    "officialCount": 103,
+    "names": {
+      "de": "Iscalar",
+      "en": "Inkay"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918893,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Inkay-V1-DLR068",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-069": {
+    "setId": "me06",
+    "localId": "069",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Calamanero-ex",
+      "en": "Mega Malamar ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918895,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Malamar-ex-V1-DLR069",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-090": {
+    "setId": "me06",
+    "localId": "090",
+    "officialCount": 103,
+    "names": {
+      "de": "Abenteuerlaterne",
+      "en": "Adventure Lantern"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918918,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Adventure-Lantern-V1-DLR090",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-124": {
+    "setId": "me06",
+    "localId": "124",
+    "officialCount": 103,
+    "names": {
+      "de": "Fiaro-ex",
+      "en": "Talonflame ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918963,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Talonflame-ex-V2-DLR124",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-015": {
+    "setId": "me06",
+    "localId": "015",
+    "officialCount": 103,
+    "names": {
+      "de": "Olini",
+      "en": "Smoliv"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918825,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Smoliv-DLR015",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-027": {
+    "setId": "me06",
+    "localId": "027",
+    "officialCount": 103,
+    "names": {
+      "de": "Quabbel",
+      "en": "Frillish"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918842,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Frillish-DLR027",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-028": {
+    "setId": "me06",
+    "localId": "028",
+    "officialCount": 103,
+    "names": {
+      "de": "Apoquallyp",
+      "en": "Jellicent"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918843,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Jellicent-DLR028",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-053": {
+    "setId": "me06",
+    "localId": "053",
+    "officialCount": 103,
+    "names": {
+      "de": "Groudon",
+      "en": "Groudon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918876,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V1-DLR053",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-057": {
+    "setId": "me06",
+    "localId": "057",
+    "officialCount": 103,
+    "names": {
+      "de": "Nidoqueen",
+      "en": "Nidoqueen"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918880,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Nidoqueen-DLR057",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-081": {
+    "setId": "me06",
+    "localId": "081",
+    "officialCount": 103,
+    "names": {
+      "de": "Wablu",
+      "en": "Swablu"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918909,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Swablu-DLR081",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-010": {
+    "setId": "me06",
+    "localId": "010",
+    "officialCount": 103,
+    "names": {
+      "de": "Reißlaus",
+      "en": "Wimpod"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918819,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Wimpod-DLR010",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-021": {
+    "setId": "me06",
+    "localId": "021",
+    "officialCount": 103,
+    "names": {
+      "de": "Magbrant",
+      "en": "Magmortar"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918836,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Magmortar-V1-DLR021",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-023": {
+    "setId": "me06",
+    "localId": "023",
+    "officialCount": 103,
+    "names": {
+      "de": "Hitze-Rotom-ex",
+      "en": "Heat Rotom ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918838,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Heat-Rotom-ex-V1-DLR023",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-029": {
+    "setId": "me06",
+    "localId": "029",
+    "officialCount": 103,
+    "names": {
+      "de": "Lusardin-ex",
+      "en": "Wishiwashi ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918845,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Wishiwashi-ex-V1-DLR029",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-031": {
+    "setId": "me06",
+    "localId": "031",
+    "officialCount": 103,
+    "names": {
+      "de": "Elevoltek",
+      "en": "Electivire"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918847,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Electivire-V1-DLR031",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-035": {
+    "setId": "me06",
+    "localId": "035",
+    "officialCount": 103,
+    "names": {
+      "de": "Voltolos",
+      "en": "Thundurus"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918852,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Thundurus-DLR035",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-038": {
+    "setId": "me06",
+    "localId": "038",
+    "officialCount": 103,
+    "names": {
+      "de": "Pamamo",
+      "en": "Pawmo"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918855,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pawmo-DLR038",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-040": {
+    "setId": "me06",
+    "localId": "040",
+    "officialCount": 103,
+    "names": {
+      "de": "Voltrel",
+      "en": "Wattrel"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918857,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Wattrel-DLR040",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-045": {
+    "setId": "me06",
+    "localId": "045",
+    "officialCount": 103,
+    "names": {
+      "de": "Giratina",
+      "en": "Giratina"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918865,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Giratina-DLR045",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-048": {
+    "setId": "me06",
+    "localId": "048",
+    "officialCount": 103,
+    "names": {
+      "de": "Cupidos",
+      "en": "Enamorus"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918869,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Enamorus-V1-DLR048",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-073": {
+    "setId": "me06",
+    "localId": "073",
+    "officialCount": 103,
+    "names": {
+      "de": "Miniras",
+      "en": "Jangmo-o"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918901,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Jangmo-o-DLR073",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-080": {
+    "setId": "me06",
+    "localId": "080",
+    "officialCount": 103,
+    "names": {
+      "de": "Azurill",
+      "en": "Azurill"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918908,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Azurill-V1-DLR080",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-085": {
+    "setId": "me06",
+    "localId": "085",
+    "officialCount": 103,
+    "names": {
+      "de": "Boreos",
+      "en": "Tornadus"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918913,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Tornadus-DLR085",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-091": {
+    "setId": "me06",
+    "localId": "091",
+    "officialCount": 103,
+    "names": {
+      "de": "Funktionsweste",
+      "en": "Custom Vest"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918919,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Custom-Vest-V1-DLR091",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-103": {
+    "setId": "me06",
+    "localId": "103",
+    "officialCount": 103,
+    "names": {
+      "de": "Amalias Vertrauen",
+      "en": "Zinnia's Trust"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918935,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zinnias-Trust-V1-DLR103",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-054": {
+    "setId": "me06",
+    "localId": "054",
+    "officialCount": 103,
+    "names": {
+      "de": "Demeteros",
+      "en": "Landorus"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918877,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Landorus-DLR054",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-055": {
+    "setId": "me06",
+    "localId": "055",
+    "officialCount": 103,
+    "names": {
+      "de": "Nidoran♀",
+      "en": "Nidoran♀"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918878,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Nidoran-F-DLR055",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-056": {
+    "setId": "me06",
+    "localId": "056",
+    "officialCount": 103,
+    "names": {
+      "de": "Nidorina",
+      "en": "Nidorina"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918879,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Nidorina-DLR056",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-058": {
+    "setId": "me06",
+    "localId": "058",
+    "officialCount": 103,
+    "names": {
+      "de": "Webarak",
+      "en": "Spinarak"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918881,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Spinarak-DLR058",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-059": {
+    "setId": "me06",
+    "localId": "059",
+    "officialCount": 103,
+    "names": {
+      "de": "Ariados",
+      "en": "Ariados"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918882,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Ariados-DLR059",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-060": {
+    "setId": "me06",
+    "localId": "060",
+    "officialCount": 103,
+    "names": {
+      "de": "Zobiris",
+      "en": "Sableye"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918883,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sableye-DLR060",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-063": {
+    "setId": "me06",
+    "localId": "063",
+    "officialCount": 103,
+    "names": {
+      "de": "Darkrai",
+      "en": "Darkrai"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918886,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Darkrai-DLR063",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-066": {
+    "setId": "me06",
+    "localId": "066",
+    "officialCount": 103,
+    "names": {
+      "de": "Zorua",
+      "en": "Zorua"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918891,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zorua-V1-DLR066",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-067": {
+    "setId": "me06",
+    "localId": "067",
+    "officialCount": 103,
+    "names": {
+      "de": "Zoroark-ex",
+      "en": "Zoroark ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918892,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zoroark-ex-DLR067",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-070": {
+    "setId": "me06",
+    "localId": "070",
+    "officialCount": 103,
+    "names": {
+      "de": "Morpeko",
+      "en": "Morpeko"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918896,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Morpeko-DLR070",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-072": {
+    "setId": "me06",
+    "localId": "072",
+    "officialCount": 103,
+    "names": {
+      "de": "Shardrago",
+      "en": "Druddigon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918900,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Druddigon-DLR072",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-077": {
+    "setId": "me06",
+    "localId": "077",
+    "officialCount": 103,
+    "names": {
+      "de": "Tauros",
+      "en": "Tauros"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918905,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Tauros-DLR077",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-079": {
+    "setId": "me06",
+    "localId": "079",
+    "officialCount": 103,
+    "names": {
+      "de": "Botogel",
+      "en": "Delibird"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918907,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Delibird-DLR079",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-092": {
+    "setId": "me06",
+    "localId": "092",
+    "officialCount": 103,
+    "names": {
+      "de": "MCs Hype",
+      "en": "Emcee's Hype"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918920,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Emcees-Hype-V1-DLR092",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-094": {
+    "setId": "me06",
+    "localId": "094",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendäre Lavaröhre",
+      "en": "Legendary Pyroduct"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918923,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Pyroduct-DLR094",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-095": {
+    "setId": "me06",
+    "localId": "095",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendäre Lavaröhre",
+      "en": "Legendary Pyroduct"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918924,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Pyroduct-DLR095",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-096": {
+    "setId": "me06",
+    "localId": "096",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendärer Gipfel",
+      "en": "Legendary Summit"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918926,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Summit-DLR096",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-097": {
+    "setId": "me06",
+    "localId": "097",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendärer Gipfel",
+      "en": "Legendary Summit"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918927,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Summit-DLR097",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-100": {
+    "setId": "me06",
+    "localId": "100",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Rayquaza-Kappe",
+      "en": "Mega Rayquaza Cap"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918931,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Rayquaza-Cap-DLR100",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-102": {
+    "setId": "me06",
+    "localId": "102",
+    "officialCount": 103,
+    "names": {
+      "de": "Ben & Svenjas Training",
+      "en": "Tate & Liza's Training"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918934,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Tate-Lizas-Training-V1-DLR102",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-104": {
+    "setId": "me06",
+    "localId": "104",
+    "officialCount": 103,
+    "names": {
+      "de": "Maskeregen",
+      "en": "Masquerain"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918940,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Masquerain-V2-DLR104",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-105": {
+    "setId": "me06",
+    "localId": "105",
+    "officialCount": 103,
+    "names": {
+      "de": "Felori",
+      "en": "Sprigatito"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918941,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sprigatito-V2-DLR105",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-106": {
+    "setId": "me06",
+    "localId": "106",
+    "officialCount": 103,
+    "names": {
+      "de": "Fukano",
+      "en": "Growlithe"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918943,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Growlithe-V2-DLR106",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-108": {
+    "setId": "me06",
+    "localId": "108",
+    "officialCount": 103,
+    "names": {
+      "de": "Elevoltek",
+      "en": "Electivire"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918945,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Electivire-V2-DLR108",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-110": {
+    "setId": "me06",
+    "localId": "110",
+    "officialCount": 103,
+    "names": {
+      "de": "Cupidos",
+      "en": "Enamorus"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918948,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Enamorus-V2-DLR110",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-111": {
+    "setId": "me06",
+    "localId": "111",
+    "officialCount": 103,
+    "names": {
+      "de": "Groudon",
+      "en": "Groudon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918949,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-113": {
+    "setId": "me06",
+    "localId": "113",
+    "officialCount": 103,
+    "names": {
+      "de": "Iscalar",
+      "en": "Inkay"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918952,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Inkay-V2-DLR113",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-116": {
+    "setId": "me06",
+    "localId": "116",
+    "officialCount": 103,
+    "names": {
+      "de": "Altaria",
+      "en": "Altaria"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918955,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Altaria-V2-DLR116",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-117": {
+    "setId": "me06",
+    "localId": "117",
+    "officialCount": 103,
+    "names": {
+      "de": "Kecleon",
+      "en": "Kecleon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918956,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Kecleon-V2-DLR117",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-118": {
+    "setId": "me06",
+    "localId": "118",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Tectass-ex",
+      "en": "Mega Golisopod ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918957,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golisopod-ex-V2-DLR118",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-049": {
+    "setId": "me06",
+    "localId": "049",
+    "officialCount": 103,
+    "names": {
+      "de": "Sandan",
+      "en": "Sandshrew"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918871,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sandshrew-DLR049",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-050": {
+    "setId": "me06",
+    "localId": "050",
+    "officialCount": 103,
+    "names": {
+      "de": "Sandamer",
+      "en": "Sandslash"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918872,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sandslash-DLR050",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-061": {
+    "setId": "me06",
+    "localId": "061",
+    "officialCount": 103,
+    "names": {
+      "de": "Kanivanha",
+      "en": "Carvanha"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918884,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Carvanha-DLR061",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-062": {
+    "setId": "me06",
+    "localId": "062",
+    "officialCount": 103,
+    "names": {
+      "de": "Tohaido",
+      "en": "Sharpedo"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918885,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Sharpedo-DLR062",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-064": {
+    "setId": "me06",
+    "localId": "064",
+    "officialCount": 103,
+    "names": {
+      "de": "Felilou",
+      "en": "Purrloin"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918888,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Purrloin-DLR064",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-065": {
+    "setId": "me06",
+    "localId": "065",
+    "officialCount": 103,
+    "names": {
+      "de": "Kleoparda",
+      "en": "Liepard"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918889,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Liepard-DLR065",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-071": {
+    "setId": "me06",
+    "localId": "071",
+    "officialCount": 103,
+    "names": {
+      "de": "Zarude",
+      "en": "Zarude"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918898,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zarude-DLR071",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-074": {
+    "setId": "me06",
+    "localId": "074",
+    "officialCount": 103,
+    "names": {
+      "de": "Mediras",
+      "en": "Hakamo-o"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918902,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Hakamo-o-DLR074",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-075": {
+    "setId": "me06",
+    "localId": "075",
+    "officialCount": 103,
+    "names": {
+      "de": "Grandiras",
+      "en": "Kommo-o"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918903,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Kommo-o-DLR075",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-076": {
+    "setId": "me06",
+    "localId": "076",
+    "officialCount": 103,
+    "names": {
+      "de": "Mopex",
+      "en": "Cyclizar"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918904,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Cyclizar-DLR076",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-078": {
+    "setId": "me06",
+    "localId": "078",
+    "officialCount": 103,
+    "names": {
+      "de": "Evoli",
+      "en": "Eevee"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918906,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Eevee-V1-DLR078",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-082": {
+    "setId": "me06",
+    "localId": "082",
+    "officialCount": 103,
+    "names": {
+      "de": "Altaria",
+      "en": "Altaria"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918910,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Altaria-V1-DLR082",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-083": {
+    "setId": "me06",
+    "localId": "083",
+    "officialCount": 103,
+    "names": {
+      "de": "Kecleon",
+      "en": "Kecleon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918911,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Kecleon-V1-DLR083",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-086": {
+    "setId": "me06",
+    "localId": "086",
+    "officialCount": 103,
+    "names": {
+      "de": "Dartiri",
+      "en": "Fletchling"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918914,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Fletchling-DLR086",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-087": {
+    "setId": "me06",
+    "localId": "087",
+    "officialCount": 103,
+    "names": {
+      "de": "Dartignis",
+      "en": "Fletchinder"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918915,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Fletchinder-DLR087",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-089": {
+    "setId": "me06",
+    "localId": "089",
+    "officialCount": 103,
+    "names": {
+      "de": "Johnson",
+      "en": "Aarune"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918917,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Aarune-V1-DLR089",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-093": {
+    "setId": "me06",
+    "localId": "093",
+    "officialCount": 103,
+    "names": {
+      "de": "Gris",
+      "en": "Grisham"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918921,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Grisham-DLR093",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-098": {
+    "setId": "me06",
+    "localId": "098",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendärer Graben",
+      "en": "Legendary Trench"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918928,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Trench-DLR098",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-099": {
+    "setId": "me06",
+    "localId": "099",
+    "officialCount": 103,
+    "names": {
+      "de": "Legendärer Graben",
+      "en": "Legendary Trench"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918929,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Legendary-Trench-DLR099",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-101": {
+    "setId": "me06",
+    "localId": "101",
+    "officialCount": 103,
+    "names": {
+      "de": "Leckerer Reisball",
+      "en": "Tasty Rice Ball"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918932,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Tasty-Rice-Ball-DLR101",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-141": {
+    "setId": "me06",
+    "localId": "141",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Rayquaza-ex",
+      "en": "Mega Rayquaza ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918985,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Rayquaza-ex-V3-DLR141",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-107": {
+    "setId": "me06",
+    "localId": "107",
+    "officialCount": 103,
+    "names": {
+      "de": "Magbrant",
+      "en": "Magmortar"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918944,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Magmortar-V2-DLR107",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-109": {
+    "setId": "me06",
+    "localId": "109",
+    "officialCount": 103,
+    "names": {
+      "de": "Britzigel",
+      "en": "Pincurchin"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918947,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pincurchin-V2-DLR109",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-112": {
+    "setId": "me06",
+    "localId": "112",
+    "officialCount": 103,
+    "names": {
+      "de": "Zorua",
+      "en": "Zorua"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918950,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Zorua-V2-DLR112",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-114": {
+    "setId": "me06",
+    "localId": "114",
+    "officialCount": 103,
+    "names": {
+      "de": "Evoli",
+      "en": "Eevee"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918953,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Eevee-V2-DLR114",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-115": {
+    "setId": "me06",
+    "localId": "115",
+    "officialCount": 103,
+    "names": {
+      "de": "Azurill",
+      "en": "Azurill"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918954,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Azurill-V2-DLR115",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-122": {
+    "setId": "me06",
+    "localId": "122",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Golgantes-ex",
+      "en": "Mega Golurk ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918961,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golurk-ex-V2-DLR122",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-126": {
+    "setId": "me06",
+    "localId": "126",
+    "officialCount": 103,
+    "names": {
+      "de": "Abenteuerlaterne",
+      "en": "Adventure Lantern"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918965,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Adventure-Lantern-V2-DLR126",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-129": {
+    "setId": "me06",
+    "localId": "129",
+    "officialCount": 103,
+    "names": {
+      "de": "Pokémon-Fänger",
+      "en": "Pokémon Catcher"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918968,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pokemon-Catcher-DLR129",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-002": {
+    "setId": "me06",
+    "localId": "002",
+    "officialCount": 103,
+    "names": {
+      "de": "Gehweiher",
+      "en": "Surskit"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918811,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Surskit-DLR002",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-003": {
+    "setId": "me06",
+    "localId": "003",
+    "officialCount": 103,
+    "names": {
+      "de": "Maskeregen",
+      "en": "Masquerain"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918812,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Masquerain-V1-DLR003",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-004": {
+    "setId": "me06",
+    "localId": "004",
+    "officialCount": 103,
+    "names": {
+      "de": "Tuska",
+      "en": "Cacnea"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918813,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Cacnea-DLR004",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-005": {
+    "setId": "me06",
+    "localId": "005",
+    "officialCount": 103,
+    "names": {
+      "de": "Noktuska",
+      "en": "Cacturne"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918814,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Cacturne-DLR005",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-006": {
+    "setId": "me06",
+    "localId": "006",
+    "officialCount": 103,
+    "names": {
+      "de": "Wadribie",
+      "en": "Combee"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918815,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Combee-DLR006",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-007": {
+    "setId": "me06",
+    "localId": "007",
+    "officialCount": 103,
+    "names": {
+      "de": "Honweisel",
+      "en": "Vespiquen"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918816,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Vespiquen-DLR007",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-008": {
+    "setId": "me06",
+    "localId": "008",
+    "officialCount": 103,
+    "names": {
+      "de": "Shaymin",
+      "en": "Shaymin"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918817,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Shaymin-DLR008",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-014": {
+    "setId": "me06",
+    "localId": "014",
+    "officialCount": 103,
+    "names": {
+      "de": "Maskagato-ex",
+      "en": "Meowscarada ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918824,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Meowscarada-ex-DLR014",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-017": {
+    "setId": "me06",
+    "localId": "017",
+    "officialCount": 103,
+    "names": {
+      "de": "Olithena",
+      "en": "Arboliva"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918827,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Arboliva-DLR017",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-018": {
+    "setId": "me06",
+    "localId": "018",
+    "officialCount": 103,
+    "names": {
+      "de": "Fukano",
+      "en": "Growlithe"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918832,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Growlithe-V1-DLR018",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-019": {
+    "setId": "me06",
+    "localId": "019",
+    "officialCount": 103,
+    "names": {
+      "de": "Arkani",
+      "en": "Arcanine"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918833,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Arcanine-DLR019",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-025": {
+    "setId": "me06",
+    "localId": "025",
+    "officialCount": 103,
+    "names": {
+      "de": "Mantax",
+      "en": "Mantine"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918840,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mantine-DLR025",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-026": {
+    "setId": "me06",
+    "localId": "026",
+    "officialCount": 103,
+    "names": {
+      "de": "Kyogre",
+      "en": "Kyogre"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918841,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Kyogre-DLR026",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-034": {
+    "setId": "me06",
+    "localId": "034",
+    "officialCount": 103,
+    "names": {
+      "de": "Rotom",
+      "en": "Rotom"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918850,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Rotom-DLR034",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-036": {
+    "setId": "me06",
+    "localId": "036",
+    "officialCount": 103,
+    "names": {
+      "de": "Britzigel",
+      "en": "Pincurchin"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918853,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pincurchin-V1-DLR036",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-037": {
+    "setId": "me06",
+    "localId": "037",
+    "officialCount": 103,
+    "names": {
+      "de": "Pamo",
+      "en": "Pawmi"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918854,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pawmi-DLR037",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-039": {
+    "setId": "me06",
+    "localId": "039",
+    "officialCount": 103,
+    "names": {
+      "de": "Pamomamo",
+      "en": "Pawmot"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918856,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Pawmot-DLR039",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-041": {
+    "setId": "me06",
+    "localId": "041",
+    "officialCount": 103,
+    "names": {
+      "de": "Voltrean",
+      "en": "Kilowattrel"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918858,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Kilowattrel-DLR041",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-042": {
+    "setId": "me06",
+    "localId": "042",
+    "officialCount": 103,
+    "names": {
+      "de": "Miraidon",
+      "en": "Miraidon"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918859,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Miraidon-DLR042",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-047": {
+    "setId": "me06",
+    "localId": "047",
+    "officialCount": 103,
+    "names": {
+      "de": "Mega-Golgantes-ex",
+      "en": "Mega Golurk ex"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918868,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Mega-Golurk-ex-V1-DLR047",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-051": {
+    "setId": "me06",
+    "localId": "051",
+    "officialCount": 103,
+    "names": {
+      "de": "Onix",
+      "en": "Onix"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918873,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Onix-DLR051",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  },
+  "me06-052": {
+    "setId": "me06",
+    "localId": "052",
+    "officialCount": 103,
+    "names": {
+      "de": "Stahlos",
+      "en": "Steelix"
+    },
+    "language": ["de", "en"],
+    "normal": true,
+    "productId": 918875,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Steelix-DLR052",
+    "source": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign",
+    "checkedAt": "2026-11-12T10:29:00Z",
+    "expansionId": 6704
+  }
+}

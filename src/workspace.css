@@ -5381,3 +5381,16 @@ textarea.w-input,
     opacity: 0.26;
   }
 }
+
+/* Reserve the actual dock footprint, including iOS safe area and larger text. */
+@media (max-width: 640px), (max-width: 950px) and (pointer: coarse) {
+  html {
+    scroll-padding-bottom: calc(var(--mobile-nav-clearance, 110px) + 24px);
+  }
+  .workspace {
+    padding-bottom: calc(var(--mobile-nav-clearance, 110px) + 32px);
+  }
+  #workspace-main {
+    scroll-margin-bottom: calc(var(--mobile-nav-clearance, 110px) + 24px);
+  }
+}

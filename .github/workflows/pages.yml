@@ -3,6 +3,8 @@ on:
   push:
     branches: [master]
   pull_request:
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,6 +33,12 @@ jobs:
           path: public/catalog-art/audit.json
           retention-days: 14
       - run: npm run check
+      - name: Refresh and build dated Cardmarket price guide
+        run: |
+          node scripts/refresh-cardmarket.mjs
+          node scripts/refresh-japanese-catalog.mjs M1L M1S
+          npm run audit:providers
+          npm run build
       - run: node scripts/verify-competitor-media.mjs
       # Browser downloads are cached between runs. For pull requests the
       # full Chromium desktop/mobile suite gives fast feedback; master
@@ -62,6 +70,7 @@ jobs:
               tests/e2e/photo-review.spec.ts \
               tests/e2e/collection-prices.spec.ts \
               tests/e2e/portfolio.spec.ts \
+              tests/e2e/p0-resolvers.spec.ts \
               tests/e2e/real-collector-flows.spec.ts \
               tests/e2e/mobile-binder-entry.spec.ts \
               tests/e2e/pwa.spec.ts \

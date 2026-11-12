@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { enableSheetDrag } from './sheet-gestures';
 import type { CatalogEntry } from '../data/card-catalog';
 import { cardMarket } from './card-market';
@@ -207,6 +208,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
   function showCard(card: PersonalCard, entry: CatalogEntry) {
     status.replaceChildren();
     const view = modal(card.name);
+    view.dialog.querySelector('h2')?.replaceChildren(localizedCardName(card));
     view.dialog.classList.add('w-card-detail-dialog');
     closePreview = view.close;
     const owned = el('p', 'w-muted');
@@ -242,7 +244,7 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       'div',
       'w-discover-info',
       el('p', 'w-discover-overline', card.language.toUpperCase()),
-      el('h3', '', card.name),
+      el('h3', '', localizedCardName(card)),
       el('h4', 'w-discover-set-name', card.setName),
       el(
         'p',

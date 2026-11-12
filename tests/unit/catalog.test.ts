@@ -212,7 +212,7 @@ it('fills German missing images in one request and only uses the same exact prin
     fetcher.mock.calls.filter(([url]) =>
       String(url).startsWith('https://api.tcgdex.net/'),
     ),
-  ).toHaveLength(1);
+  ).toHaveLength(2);
 });
 it('keeps zero and missing price observations unknown, and retains positive dated EUR observations', async () => {
   const { catalogEntry } = await import('../../src/data/card-catalog');

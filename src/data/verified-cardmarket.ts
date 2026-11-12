@@ -1,16 +1,6 @@
-/**
- * Independently verified printing-to-Cardmarket crosswalk.
- *
- * Do NOT trust a TCGdex idProduct when the ordinary and illustration-rare
- * versions collide. A dated direct Cardmarket observation is a temporary
- * reference, NOT a live quote and NOT a language/condition-specific NM sale.
- *
- * Observation: Cardmarket product page for DLR 111, checked 2026-11-11.
- * The public page identifies product 918949; TCGdex currently incorrectly
- * identifies both me06-053 and me06-111 as product 918876.
- *
- * Once a licensed/official recurring price feed is installed it should
- * replace the dated snapshot. Keep the verified URL even after expiry.
+/** Independent, exact printing crosswalk with dated official price-guide trends.
+ * These are not language/condition-specific Near Mint offers.
+ * Ambiguous catalogue rows are excluded; expired observations retain only the URL.
  */
 export interface ExactCardmarketPrinting {
   id: string;
@@ -35,43 +25,43 @@ export interface VerifiedCardmarketProduct {
     | undefined;
 }
 
-const GROUDON = {
-  productId: 918949,
-  url: 'https://www.cardmarket.com/en/Pokemon/Products/Singles/Delta-Reign/Groudon-V2-DLR111',
-  amount: 17.81,
-  updated: '2026-11-11T00:00:00.000Z',
-} as const;
+import crosswalk from './cardmarket-crosswalk.json';
+import observations from './cardmarket-observations.json';
 
-const SNAPSHOT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-/**
- * Exact matching is mandatory. A shared name, collector number, similar
- * illustration, Japanese print or different finish must not receive a quote.
- */
+/** Independent expansion crosswalk, never inferred from name or price magnitude. */
 export function verifiedCardmarketProduct(
   card: ExactCardmarketPrinting,
   now = Date.now(),
 ): VerifiedCardmarketProduct | undefined {
+  const row = (
+    crosswalk as Record<string, (typeof crosswalk)[keyof typeof crosswalk]>
+  )[card.id];
   if (
-    card.id !== 'me06-111' ||
-    card.setId !== 'me06' ||
-    card.localId !== '111' ||
-    card.officialCount !== 103 ||
-    card.name.trim().toLowerCase() !== 'groudon' ||
-    (card.language !== 'de' && card.language !== 'en') ||
-    card.normal !== true
+    !row ||
+    row.setId !== card.setId ||
+    row.localId !== card.localId ||
+    row.officialCount !== card.officialCount ||
+    row.normal !== card.normal ||
+    !row.language.includes(card.language) ||
+    row.names[card.language as keyof typeof row.names]?.toLowerCase() !==
+      card.name.trim().toLowerCase()
   )
-    return undefined;
-
-  const age = now - Date.parse(GROUDON.updated);
+    return;
+  const guide = (
+    observations.prices as Record<string, { trend: number | null } | null>
+  )[String(row.productId)];
+  const updated = new Date(observations.updated).toISOString();
+  const age = now - Date.parse(updated);
   return {
-    productId: GROUDON.productId,
-    url: GROUDON.url,
+    productId: row.productId,
+    url: row.url,
     observation:
-      Number.isFinite(age) && age >= 0 && age < SNAPSHOT_MAX_AGE_MS
+      guide?.trend && guide.trend > 0 && age >= 0 && age < MAX_AGE_MS
         ? {
-            amount: GROUDON.amount,
-            updated: GROUDON.updated,
+            amount: guide.trend,
+            updated,
             basis: 'trend',
             provenance: 'verified-snapshot',
           }

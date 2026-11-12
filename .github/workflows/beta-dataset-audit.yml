@@ -1,6 +1,11 @@
 name: Private beta dataset quality
 on:
   workflow_dispatch:
+    inputs:
+      review_public_key_b64:
+        description: Optional RSA-3072 public key (base64 PEM) for encrypted reviewer-only export
+        required: false
+        type: string
 permissions:
   contents: read
 jobs:
@@ -19,3 +24,19 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/beta-dataset-audit.mjs
+
+      - name: Encrypt consented samples for the requesting reviewer
+        if: inputs.review_public_key_b64 != ''
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REVIEW_PUBLIC_KEY_B64: ${{ inputs.review_public_key_b64 }}
+          REVIEW_EXPORT_PATH: ${{ runner.temp }}/beta-review.enc.json
+        run: node scripts/export-beta-review.mjs
+      - uses: actions/upload-artifact@v4
+        if: inputs.review_public_key_b64 != ''
+        with:
+          name: encrypted-beta-review
+          path: ${{ runner.temp }}/beta-review.enc.json
+          retention-days: 1
+          if-no-files-found: error

@@ -47,7 +47,8 @@ export function cardMarket(entry: CatalogEntry): HTMLElement {
       el(
         'p',
         'w-muted',
-        'Für diese Ausgabe ist kein datierter EUR-Preis verfügbar.',
+        entry.priceDiagnostic ??
+          'Für diese Ausgabe ist kein datierter EUR-Preis verfügbar.',
       ),
     );
   section.append(
@@ -76,6 +77,14 @@ export function cardMarket(entry: CatalogEntry): HTMLElement {
         'p',
         'w-help',
         'Für diese Ausgabe ist kein eindeutiger Cardmarket-Link hinterlegt.',
+      ),
+    );
+  if (entry.cardmarketProductId)
+    section.append(
+      el(
+        'small',
+        'w-muted',
+        `Produkt ${entry.cardmarketProductId} · ${entry.card.setId} · ${entry.card.number} · ${entry.card.language.toUpperCase()}`,
       ),
     );
   section.append(tcgplayerMarket(Object.values(entry.tcgplayer ?? {})));

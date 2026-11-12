@@ -91,14 +91,15 @@
 }
 .w-art-language {
   position: absolute;
-  z-index: 1;
-  bottom: 5px;
-  right: 5px;
-  padding: 4px 5px;
-  border-radius: 4px;
-  background: var(--desk);
-  color: var(--ink);
-  font: 10px/1.2 var(--sans);
+  bottom: 0;
+  inset-inline: 0;
+  height: 18px;
+  text-align: center;
+  color: var(--ink-2);
+  font: 10px/18px var(--sans);
+}
+.card-art:has(.w-art-language:not([hidden])) img {
+  height: calc(100% - 18px);
 }
 .card-art[data-image-state='unavailable'] .art-fallback {
   padding: 12px;

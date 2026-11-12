@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import {
   addWish,
   changeState,
@@ -108,7 +109,7 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
           ? 'Preis momentan nicht erreichbar'
           : result.status === 'suspect'
             ? 'Preiszuordnung unplausibel · nicht bewertet'
-            : 'Keine verlässliche EUR-Preisreferenz';
+            : (result.reason ?? 'Keine verlässliche EUR-Preisreferenz');
     }
   };
   return {
@@ -411,7 +412,7 @@ function holdingCard(
     el(
       'span',
       'w-card-caption',
-      el('strong', '', holding.card.name),
+      el('strong', '', localizedCardName(holding.card)),
       el(
         'small',
         '',
@@ -439,6 +440,9 @@ export function openHolding(
   const holding = ctx.state.holdings.find((item) => item.id === id);
   if (!holding) return;
   const sheet = modal(holding.card.name);
+  sheet.dialog
+    .querySelector('h2')
+    ?.replaceChildren(localizedCardName(holding.card));
   const price = priceBadge(holding, true);
   const quantity = input('number', String(holding.quantity));
   quantity.min = '1';
@@ -743,7 +747,7 @@ export function renderWishes(ctx: WorkspaceContext): HTMLElement {
       el(
         'div',
         'w-wish-copy',
-        el('h2', '', wish.card.name),
+        el('h2', '', localizedCardName(wish.card)),
         el(
           'p',
           'w-muted',

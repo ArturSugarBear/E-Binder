@@ -13,7 +13,7 @@ import { convertedMarketReference, usdEurRate } from './exchange-rates';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
-  | { status: 'unavailable' | 'suspect' }
+  | { status: 'unavailable' | 'suspect'; reason?: string }
   | { status: 'error'; reason?: 'exchange-rate' };
 
 interface CachedPrice {
@@ -81,7 +81,11 @@ export async function holdingPrice(
   holding: Holding,
 ): Promise<HoldingPriceResult> {
   const key = portfolioQuoteKey(holding);
-  if (!key) return { status: 'unavailable' };
+  if (!key)
+    return {
+      status: 'unavailable',
+      reason: 'Druckvariante oder Katalogidentität nicht eindeutig',
+    };
   // Re-check imported/corrected metadata even if another holding with the
   // same provider ID already has a cached quote.
   const requestKey = JSON.stringify([
@@ -110,7 +114,11 @@ export async function holdingPrice(
       // with a wrong language, fraction or finish. Never borrow its neighbor's
       // market quote just because the source ID still exists.
       if (!matchesHolding(entry, holding, sourceId)) {
-        return { status: 'unavailable' } as HoldingPriceResult;
+        return {
+          status: 'unavailable',
+          reason:
+            'Gespeicherte Karte stimmt nicht mit der Katalogausgabe überein',
+        } as HoldingPriceResult;
       }
       const price = holding.finish === 'holo' ? entry.holoPrice : entry.price;
       const quote: PortfolioQuote | undefined = price
@@ -126,10 +134,10 @@ export async function holdingPrice(
         : undefined;
       let value: HoldingPriceResult =
         entry.priceIssue === 'suspect'
-          ? { status: 'suspect' }
+          ? { status: 'suspect', reason: entry.priceDiagnostic }
           : isUsableQuote(quote, key)
             ? { status: 'priced', quote }
-            : { status: 'unavailable' };
+            : { status: 'unavailable', reason: entry.priceDiagnostic };
       if (value.status !== 'priced') {
         const reference =
           holding.finish === 'normal' || holding.finish === 'holo'

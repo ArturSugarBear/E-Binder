@@ -1,3 +1,4 @@
+import { localizedCardName } from '../data/japanese-catalog';
 import { scanProgress } from './scan-progress';
 import {
   candidatesFromText,
@@ -1385,7 +1386,7 @@ export function openAddCards(
         'div',
         'w-scan-match-copy',
         el('p', 'w-eyebrow', 'Ausgabe mit deinem Foto vergleichen'),
-        el('h3', '', card.name),
+        el('h3', '', localizedCardName(card)),
         el(
           'p',
           'w-muted',
@@ -1656,7 +1657,7 @@ export function openAddCards(
           el(
             'span',
             'w-card-caption',
-            el('strong', '', card.name),
+            el('strong', '', localizedCardName(card)),
             el('small', '', `${card.setName} · ${card.number}`),
           ),
         );
@@ -1773,7 +1774,7 @@ export function openAddCards(
         el(
           'span',
           'w-card-caption',
-          el('strong', '', card.name),
+          el('strong', '', localizedCardName(card)),
           el('small', '', `${card.setName} · ${card.number}`),
         ),
       );
@@ -1991,7 +1992,7 @@ export function openAddCards(
           'div',
           '',
           el('p', 'w-eyebrow', 'Genaue Ausgabe prüfen'),
-          el('h3', '', card.name),
+          el('h3', '', localizedCardName(card)),
           el('p', '', `${card.setName} · ${card.number}`),
           el('p', 'w-muted', artist),
         ),

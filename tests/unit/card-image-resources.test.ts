@@ -55,3 +55,28 @@ it('shares concurrent exact-print image lookups while keeping languages separate
   ).toContain('/en/');
   expect(fetch).toHaveBeenCalledTimes(2);
 });
+
+it('rejects stored images pointing to another set, number or Japanese/Western printing', async () => {
+  const { exactPrimaryArtwork } = await import('../../src/data/card-images');
+  const card = {
+    sourceId: 'sv01-081',
+    setId: 'sv01',
+    number: '081/198',
+    language: 'de',
+    image: 'https://assets.tcgdex.net/en/sv/sv01/081/high.webp',
+  } as PersonalCard;
+  expect(exactPrimaryArtwork(card)).toBe(true);
+  expect(
+    exactPrimaryArtwork({
+      ...card,
+      image: 'https://assets.tcgdex.net/en/sv/sv01/082/high.webp',
+    }),
+  ).toBe(false);
+  expect(
+    exactPrimaryArtwork({
+      ...card,
+      image: 'https://assets.tcgdex.net/en/sv/sv02/081/high.webp',
+    }),
+  ).toBe(false);
+  expect(exactPrimaryArtwork({ ...card, language: 'ja' })).toBe(false);
+});
