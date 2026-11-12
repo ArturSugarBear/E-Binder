@@ -16,12 +16,9 @@ it('persists consecutive scan revisions without waiting for a slow cloud', async
   });
   // IndexedDB persistence is covered separately by PersonalStore tests.
   vi.stubGlobal('indexedDB', { open: () => ({}) });
-  const local = vi.spyOn(PersonalStore.prototype, 'save').mockResolvedValue(
-    undefined,
-  );
-  let finishFirst:
-    | ((value: { data: number; error: null }) => void)
-    | undefined;
+  const local = vi.spyOn(PersonalStore.prototype, 'save');
+  local.mockResolvedValue(undefined);
+  let finishFirst: ((value: unknown) => void) | undefined;
   const rpc = vi
     .fn()
     .mockImplementationOnce(
@@ -31,10 +28,8 @@ it('persists consecutive scan revisions without waiting for a slow cloud', async
         }),
     )
     .mockResolvedValue({ data: 2, error: null });
-  const store = new CloudStore(
-    { rpc } as unknown as SupabaseClient,
-    'user-test',
-  );
+  const client = { rpc } as unknown as SupabaseClient;
+  const store = new CloudStore(client, 'user-test');
   await store.save({ ...emptyState('personal'), revision: 1 });
   await vi.waitFor(() => expect(rpc).toHaveBeenCalledTimes(1));
   await store.save({ ...emptyState('personal'), revision: 2 });
@@ -48,25 +43,21 @@ it('persists consecutive scan revisions without waiting for a slow cloud', async
       revision: 2,
     });
   });
-  expect(rpc.mock.calls.map((call) => call[1].p_expected_version)).toEqual([
-    0, 1,
-  ]);
+  const versions = rpc.mock.calls.map((call) => call[1].p_expected_version);
+  expect(versions).toEqual([0, 1]);
 });
 
 it('keeps local writes and blocks further cloud calls after version conflict', async () => {
   vi.stubGlobal('localStorage', { setItem: vi.fn() });
   vi.stubGlobal('indexedDB', { open: () => ({}) });
-  const local = vi.spyOn(PersonalStore.prototype, 'save').mockResolvedValue(
-    undefined,
-  );
+  const local = vi.spyOn(PersonalStore.prototype, 'save');
+  local.mockResolvedValue(undefined);
   const rpc = vi.fn().mockResolvedValue({
     data: null,
     error: { message: 'WORKSPACE_CONFLICT' },
   });
-  const store = new CloudStore(
-    { rpc } as unknown as SupabaseClient,
-    'user-test',
-  );
+  const client = { rpc } as unknown as SupabaseClient;
+  const store = new CloudStore(client, 'user-test');
   await store.save({ ...emptyState('personal'), revision: 1 });
   await vi.waitFor(() => expect(store.conflict).toBe(true));
   await store.save({ ...emptyState('personal'), revision: 2 });
