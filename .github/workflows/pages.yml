@@ -47,6 +47,7 @@ jobs:
             /tmp/ebinder-dinov2-small-beta.onnx \
             public/assets/vision
           node scripts/verify-visual-beta.mjs
+          node scripts/check-vision-release.mjs public/assets/vision
           rm visual-beta-reference-input.json
       - name: Resolve and audit release artwork
         run: node scripts/release-artwork-gate.mjs
