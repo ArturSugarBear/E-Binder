@@ -31,6 +31,7 @@ import {
 import type { WorkspaceContext } from './workspace-context';
 import { enableSwipe } from './swipe';
 import { enableSheetDrag } from './sheet-gestures';
+import { collectorCardOverview, collectorCardExtras } from './collector-card-overview';
 
 const euro = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -444,6 +445,15 @@ export function openHolding(
     .querySelector('h2')
     ?.replaceChildren(localizedCardName(holding.card));
   const price = priceBadge(holding, true);
+  // Adapt the proven physical demo-binder sheet for personal cards.
+  // Ownership editing is a secondary task, not the default detail screen.
+  const overview = collectorCardOverview(
+    ctx,
+    holding.card,
+    finishLabels[holding.finish],
+  );
+  overview.classList.add('w-holding-preview');
+  sheet.dialog.classList.add('w-collector-card-dialog');
   const quantity = input('number', String(holding.quantity));
   quantity.min = '1';
   quantity.max = '999';
@@ -498,32 +508,6 @@ export function openHolding(
   form.append(
     el(
       'div',
-      'w-holding-preview',
-      ctx.images.artwork(holding.card),
-      el(
-        'div',
-        '',
-        el('p', 'w-eyebrow', holding.card.language.toUpperCase()),
-        el('h3', '', holding.card.setName),
-        el('p', '', holding.card.number),
-        el(
-          'p',
-          'w-muted',
-          `${finishLabels[holding.finish]}${holding.variantNote ? ` · ${holding.variantNote}` : ''}`,
-        ),
-        el(
-          'p',
-          'w-muted',
-          holding.card.artist
-            ? `Illustration: ${holding.card.artist}`
-            : 'Illustrator unbekannt',
-        ),
-        holding.card.artistUrl ? sourceLink(holding.card.artistUrl) : null,
-      ),
-    ),
-    price.element,
-    el(
-      'div',
       'w-form-grid',
       field('Bestätigte Gesamtmenge', quantity),
       field(
@@ -553,9 +537,22 @@ export function openHolding(
     )
       sheet.close();
   });
-  sheet.body.append(form);
-  void price.load();
-  const cardSurface = form.querySelector<HTMLElement>('.w-holding-preview');
+  const advancedActions = el('div', 'w-collector-card-extra-actions');
+  const extra = collectorCardExtras(
+    'Weitere Details & Sammlung bearbeiten',
+    form,
+    advancedActions,
+  );
+  if (holding.card.artistUrl) extra.append(sourceLink(holding.card.artistUrl));
+  sheet.body.append(overview, price.element, extra);
+  void price.load().then(() => {
+    // TCGplayer references are valuable provenance, but not first-screen UI.
+    const supplement =
+      price.element.querySelector<HTMLElement>('.w-tcgplayer-market');
+    if (supplement) extra.append(supplement);
+  });
+  const cardSurface =
+    overview.querySelector<HTMLElement>('.w-collector-card-stage');
   if (cardSurface) {
     cardSurface.classList.add('w-card-swipe-zone');
     enableSheetDrag(sheet.dialog, sheet.dialog, [cardSurface]);
@@ -598,10 +595,10 @@ export function openHolding(
       next,
     );
     navigator.setAttribute('aria-label', 'Zwischen Karten wechseln');
-    sheet.body.prepend(navigator);
+    sheet.body.insertBefore(navigator, extra);
     if (cardSurface) enableSwipe(cardSurface, browse);
   }
-  sheet.footer.append(
+  advancedActions.append(
     action(
       'Ausgabe korrigieren',
       () => {
