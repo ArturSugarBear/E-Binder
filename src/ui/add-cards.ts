@@ -475,9 +475,7 @@ export function openAddCards(
       queue.classList.remove('is-expanded');
       const current = currentPending();
       if (!current.length) return;
-      queue.append(el('p', 'w-eyebrow', current.length === 1
-        ? 'Eine Karte prüfen'
-        : current.length + ' Karten prüfen'));
+      queue.append(el('p', 'w-eyebrow', current.length + ' offen · zur Prüfung'));
       const tabs = el('div', 'w-quick-review-tabs');
       for (const [index, shot] of current.entries()) {
         const tab = action(
