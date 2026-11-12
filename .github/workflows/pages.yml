@@ -34,6 +34,7 @@ jobs:
           retention-days: 14
       - run: npm run check
       - name: Refresh and build dated Cardmarket price guide
+        if: github.event_name != 'pull_request'
         run: |
           node scripts/refresh-cardmarket.mjs
           node scripts/refresh-japanese-catalog.mjs M1L M1S
