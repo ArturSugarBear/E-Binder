@@ -1,6 +1,11 @@
 import { action, el, icon } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 import {
+  betaScanDonationState,
+  changeBetaScanConsent,
+  deletePendingBetaScanPhotos,
+} from '../data/beta-scan-donation';
+import {
   betaDiagnosticsAuthorized,
   betaDiagnosticsPaused,
   setBetaDiagnosticsPaused,
@@ -98,11 +103,65 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       ),
     );
   }
+  if (ctx.account) {
+    const donation = betaScanDonationState();
+    const enabled = donation === 'on';
+    root.append(
+      el(
+        'section',
+        'w-profile-group',
+        el('h2', '', 'Beta · Bilderkennung verbessern'),
+        el(
+          'p',
+          'w-muted',
+          'Freiwillig: Deine neu aufgenommenen Kartenscans werden nur mit deiner Einwilligung als komprimierte JPEGs ohne EXIF- und Standortdaten in einen privaten Testbereich übertragen. Das verbessert die Erkennung nicht sofort. Aufnahmen werden zuerst geprüft und beschriftet. Deine Sammlung bleibt privat.',
+        ),
+        el(
+          'div',
+          'w-profile-options w-glass-panel',
+          el(
+            'p',
+            'w-muted',
+            donation === 'loading'
+              ? 'Deine Einstellung wird geladen …'
+              : enabled
+                ? 'Teilnahme aktiv · neu erfasste Karten und ausgerichtete Binderseiten können gespendet werden.'
+                : 'Teilnahme ausgeschaltet · Fotos bleiben auf deinem Gerät.',
+          ),
+          action(
+            enabled ? 'Foto-Teilnahme beenden' : 'Foto-Teilnahme ausdrücklich aktivieren',
+            () => {
+              void changeBetaScanConsent(!enabled)
+                .then(() => {
+                  ctx.notify(
+                    enabled
+                      ? 'Weitere Fotoübertragungen sind ausgeschaltet.'
+                      : 'Danke! Künftige Scanbilder können jetzt zur Verbesserung beitragen.',
+                  );
+                  ctx.render();
+                })
+                .catch((error: unknown) => ctx.notify(String(error), true));
+            },
+            'secondary',
+          ),
+          action(
+            'Meine unbewerteten Testbilder löschen',
+            () => {
+              void deletePendingBetaScanPhotos()
+                .then((count) => ctx.notify(count + ' unbewertete Testbilder gelöscht.'))
+                .catch((error: unknown) => ctx.notify(String(error), true));
+            },
+            'text',
+          ),
+        ),
+      ),
+    );
+  }
   root.append(
     el(
       'p',
       'w-profile-privacy',
-      'Deine Fotos werden lokal verarbeitet und nach der Erfassung verworfen. Kartenbilder und Katalogdaten kommen aus den jeweils ausgewiesenen Quellen.',
+      'Standardmäßig bleiben Fotos lokal und werden nach der Erfassung verworfen. Nur bei freiwillig aktivierter Beta-Teilnahme werden neue, komprimierte Scans privat übertragen. Kartenbilder und Katalogdaten stammen aus den ausgewiesenen Quellen.',
     ),
   );
   if (ctx.state.mode === 'demo')
