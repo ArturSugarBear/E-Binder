@@ -33,8 +33,11 @@ jobs:
           path: public/catalog-art/audit.json
           retention-days: 14
       - run: npm run check
+      # External catalogues intermittently return HTTP 503. A push should
+      # deploy the already validated, dated snapshots; the scheduled/manual
+      # run refreshes and revalidates live third-party data separately.
       - name: Refresh and build dated Cardmarket price guide
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           node scripts/refresh-cardmarket.mjs
           node scripts/refresh-japanese-catalog.mjs M1L M1S
