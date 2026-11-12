@@ -1158,6 +1158,14 @@ export function openAddCards(
             controller.signal,
             visual,
           );
+          if (visualBetaEnabled() && automatic)
+            recordBetaEvent(
+              'scan_result',
+              'scan',
+              'visual_beta_shortlist',
+              automatic.visualModelCandidates > 0 ? 'ok' : 'unknown',
+              { metric: Math.min(200, automatic.visualModelCandidates) },
+            );
         } catch {
           catalogUnavailable = true;
         }
