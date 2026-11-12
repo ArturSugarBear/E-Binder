@@ -24,7 +24,7 @@
 .w-portfolio-stat,
 .w-portfolio-by-set,
 .w-profile-hero,
-.w-profile-group,
+.w-profile-options,
 .w-discover-mode,
 .w-binder-sidebar {
   border-color: var(--rare-glass-edge);
@@ -34,7 +34,7 @@
 
 .w-dialog,
 .w-home-quick-tile,
-.w-profile-group,
+.w-profile-options,
 .w-vault-overview-stat {
   background-color: var(--rare-surface-solid);
 }
@@ -59,7 +59,7 @@
   .w-mobile-nav,
   .w-discover-mode,
   .w-portfolio-by-set,
-  .w-profile-group {
+  .w-profile-options {
     -webkit-backdrop-filter: blur(12px) saturate(125%);
     backdrop-filter: blur(12px) saturate(125%);
   }
@@ -125,7 +125,7 @@
   .w-mobile-nav,
   .w-discover-mode,
   .w-portfolio-by-set,
-  .w-profile-group {
+  .w-profile-options {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     background-color: var(--rare-surface-solid);
@@ -135,7 +135,7 @@
 @media (max-width: 430px) {
   .w-home-quick-tile,
   .w-vault-overview-stat,
-  .w-profile-group,
+  .w-profile-options,
   .w-portfolio-by-set {
     min-width: 0;
   }
