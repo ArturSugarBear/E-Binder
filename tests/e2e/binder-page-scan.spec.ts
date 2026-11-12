@@ -248,12 +248,13 @@ test('exact Japanese printing suggestions render safely and can be reviewed as a
       onerror: ((event: Event) => void) | null = null;
       postMessage(data: { id?: number; warmup?: boolean }) {
         if (data.warmup || typeof data.id !== 'number') return;
+        const id = data.id;
         setTimeout(() => {
           this.onmessage?.(
             new MessageEvent('message', {
               data: {
                 type: 'done',
-                id: data.id,
+                id,
                 text: 'M1L 088/063\nメガルカリオex',
               },
             }),
