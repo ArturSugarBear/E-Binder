@@ -30,6 +30,8 @@ jobs:
           src/ui/page-scan.ts
           src/ui/profile-view.ts
           scripts/beta-dataset-audit.mjs
+          scripts/beta-data-retention.mjs
+          .github/workflows/beta-data-retention.yml
           tests/e2e/beta-mobile-ergonomics.spec.ts
           .github/workflows/pages.yml
           .github/workflows/beta-dataset-audit.yml
