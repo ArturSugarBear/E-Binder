@@ -13,6 +13,7 @@ import { editorialCards } from '../data/card-catalog';
 import { PersonalStore } from '../data/personal-store';
 import { CloudStore } from '../data/cloud-store';
 import { cloudClient } from '../data/supabase';
+import { loadBetaScanConsent } from '../data/beta-scan-donation';
 import {
   startBetaDiagnostics,
   recordBetaEvent,
@@ -361,6 +362,9 @@ export async function startWorkspace(): Promise<void> {
       }
     },
   };
+  void loadBetaScanConsent(account?.id, () => {
+    if (location.hash.startsWith('#profil')) ctx.render();
+  });
   function saved(): void {
     status.textContent =
       ctx.state.mode === 'demo'
