@@ -16,5 +16,24 @@
       "bytes": 26249,
       "sha256": "28b2362ad4ab2dc38769aa72feb535e3a9ddb3fd2a7585a05920e6393b1dc7f7"
     }
-  ]
+  ],
+  "japanese": {
+    "model": "PaddleOCR Japanese PP-OCRv3 recognition, ONNX conversion",
+    "source": "https://huggingface.co/breezedeus/cnocr-ppocr-japan_PP-OCRv3/tree/d4bbb0746dec3dfec43c32ac62a4f4d340897601",
+    "upstream": "https://github.com/PaddlePaddle/PaddleOCR",
+    "license": "Apache-2.0",
+    "dictionary": "Matching character metadata embedded in the pinned ONNX model; includes trailing space plus CTC space token",
+    "files": [
+      {
+        "name": "ppocrv3-ja-rec.onnx",
+        "bytes": 10093083,
+        "sha256": "329eec1da950c729780712052b50aee602fadbdc985b7b4984394332a5cdd7e2"
+      },
+      {
+        "name": "ppocr-ja-keys.txt",
+        "bytes": 17332,
+        "sha256": "1dcfcb41eec90576a945b3084f22ade11ced506e24f14879245b071698f308e8"
+      }
+    ]
+  }
 }

@@ -62,6 +62,45 @@ export function cardSummary(reports) {
     top5Rate: rate(count(entries, 'top5'), entries.length),
   });
   const negative = reports.filter((report) => report.expectedKey === null);
+  const measurements = (entries) => ({
+    ...rates(entries.filter((r) => r.expectedKey !== null)),
+    noMatchRate: rate(
+      entries.filter((r) => !r.error && r.resultStatus === 'no-candidates')
+        .length,
+      entries.length,
+    ),
+    errors: entries.filter((r) => r.error).length,
+    automaticIdentitySuggestions: entries.some(
+      (r) => r.automaticIdentityMeasured === false,
+    )
+      ? null
+      : entries.filter((r) => r.automaticKey).length,
+    incorrectConfidentMatches: entries.some(
+      (r) => r.automaticIdentityMeasured === false,
+    )
+      ? null
+      : entries.filter(
+          (r) => r.automaticKey && r.automaticKey !== r.expectedKey,
+        ).length,
+    p50RecognitionMs: percentile(
+      entries
+        .filter((r) => !r.error)
+        .map((r) => r.phasesMs?.recognitionAndReview ?? r.durationMs),
+      0.5,
+    ),
+    p95RecognitionMs: percentile(
+      entries
+        .filter((r) => !r.error)
+        .map((r) => r.phasesMs?.recognitionAndReview ?? r.durationMs),
+      0.95,
+    ),
+  });
+  const byLanguage = Object.fromEntries(
+    ['de', 'en', 'ja'].map((language) => [
+      language,
+      measurements(reports.filter((r) => r.language === language)),
+    ]),
+  );
   const byCondition = Object.fromEntries(
     [...new Set(reports.flatMap((report) => report.conditions))].map(
       (condition) => [
@@ -92,5 +131,7 @@ export function cardSummary(reports) {
       0.95,
     ),
     byCondition,
+    byLanguage,
+    ...measurements(reports),
   };
 }

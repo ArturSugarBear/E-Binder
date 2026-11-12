@@ -30,7 +30,7 @@ export function liveScanMissingEvidence(text: string): {
     // lines; footer retries must not masquerade as title evidence.
     title: !recognizedNameHints(text).some(
       (name) =>
-        !/^(?:SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR|M\d{1,2}[A-Z]?|SV\d{1,2}[A-Z]?|S\d{1,2}[A-Z]?)$/i.test(
+        !/^(?:MEG|SVI|PAL|OBF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR|M\d{1,2}[A-Z]?|SV\d{1,2}[A-Z]?|S\d{1,2}[A-Z]?)$/i.test(
           name.trim(),
         ),
     ),

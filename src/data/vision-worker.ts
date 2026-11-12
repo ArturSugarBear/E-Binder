@@ -18,6 +18,11 @@ const scope = self as unknown as {
           hotZone?: LiveHotZone;
           fast?: boolean;
           warmup?: boolean;
+          language?: string;
+          latinModelUrl?: string;
+          latinDictionaryUrl?: string;
+          japaneseModelUrl?: string;
+          japaneseDictionaryUrl?: string;
           modelUrl: string;
           dictionaryUrl: string;
           id?: number;
@@ -29,36 +34,48 @@ const scope = self as unknown as {
 };
 const report = (status: string, id?: number) =>
   scope.postMessage({ type: 'progress', status, id });
-let prepared:
-  Promise<{ session: InferenceSession; dictionary: string[] }> | undefined;
+const prepared = new Map<
+  string,
+  Promise<{ session: InferenceSession; dictionary: string[] }>
+>();
 async function modelResources(
   modelUrl: string,
   dictionaryUrl: string,
   id?: number,
 ) {
-  if (!prepared) {
-    prepared = (async () => {
-      report('Erkennungsmodell wird geladen …', id);
-      env.wasm.numThreads = 1;
-      env.wasm.proxy = false;
-      env.wasm.wasmPaths = { wasm: wasmUrl, mjs: runtimeUrl };
-      const [model, dictionaryText] = await Promise.all([
-        resource(modelUrl).then((response) => response.arrayBuffer()),
-        resource(dictionaryUrl).then((response) => response.text()),
-      ]);
-      const session = await InferenceSession.create(model, {
-        executionProviders: ['wasm'],
-      });
-      return {
-        session,
-        dictionary: ['', ...dictionaryText.trimEnd().split('\n'), ' '],
-      };
-    })().catch((error: unknown) => {
-      prepared = undefined;
-      throw error;
-    });
+  if (!prepared.has(modelUrl)) {
+    prepared.set(
+      modelUrl,
+      (async () => {
+        report('Erkennungsmodell wird geladen …', id);
+        env.wasm.numThreads = 1;
+        env.wasm.proxy = false;
+        env.wasm.wasmPaths = { wasm: wasmUrl, mjs: runtimeUrl };
+        const [model, dictionaryText] = await Promise.all([
+          resource(modelUrl).then((response) => response.arrayBuffer()),
+          resource(dictionaryUrl).then((response) => response.text()),
+        ]);
+        const session = await InferenceSession.create(model, {
+          executionProviders: ['wasm'],
+        });
+        return {
+          session,
+          dictionary: [
+            '',
+            ...dictionaryText
+              .replace(/\r\n/g, '\n')
+              .replace(/\n$/, '')
+              .split('\n'),
+            ' ',
+          ],
+        };
+      })().catch((error: unknown) => {
+        prepared.delete(modelUrl);
+        throw error;
+      }),
+    );
   }
-  return prepared;
+  return prepared.get(modelUrl)!;
 }
 
 async function resource(url: string): Promise<Response> {
@@ -77,8 +94,15 @@ scope.onmessage = (event) => {
     queue = queue
       .then(async () => {
         await modelResources(data.modelUrl, data.dictionaryUrl);
+        if (
+          data.language === 'ja' &&
+          data.latinModelUrl &&
+          data.latinDictionaryUrl
+        )
+          await modelResources(data.latinModelUrl, data.latinDictionaryUrl);
+        scope.postMessage({ type: 'ready' });
       })
-      .catch(() => undefined);
+      .catch(() => scope.postMessage({ type: 'warmup-error' }));
     return;
   }
   queue = queue
@@ -99,6 +123,11 @@ async function recognize({
   fast,
   modelUrl,
   dictionaryUrl,
+  language,
+  japaneseModelUrl,
+  japaneseDictionaryUrl,
+  latinModelUrl,
+  latinDictionaryUrl,
   id,
 }: {
   photo: Blob;
@@ -107,14 +136,20 @@ async function recognize({
   fast?: boolean;
   modelUrl: string;
   dictionaryUrl: string;
+  language?: string;
+  japaneseModelUrl?: string;
+  japaneseDictionaryUrl?: string;
+  latinModelUrl?: string;
+  latinDictionaryUrl?: string;
   id?: number;
 }): Promise<void> {
   if (typeof OffscreenCanvas === 'undefined')
     throw new Error('Bildverarbeitung im Hintergrund wird nicht unterstützt.');
-  const [{ session, dictionary }, bitmap] = await Promise.all([
+  const [resources, bitmap] = await Promise.all([
     modelResources(modelUrl, dictionaryUrl, id),
     createImageBitmap(photo),
   ]);
+  let { session, dictionary } = resources;
   try {
     const read = async (
       region: readonly [number, number, number, number],
@@ -213,8 +248,29 @@ async function recognize({
     }
 
     report('Set und Sammlernummer werden gelesen …', id);
-    const number = await read([0.155, 0.94, 0.13, 0.032]);
-    const identifier = await read([0.07, 0.94, 0.38, 0.032]);
+    // Modern Japanese fractions sit immediately beside the SAR/AR rarity.
+    // Keep those glyphs out of the numeric crop; never trim guessed digits.
+    const number = await read(
+      language === 'ja'
+        ? [0.155, 0.95, 0.11, 0.024]
+        : [0.155, 0.94, 0.13, 0.032],
+    );
+    let identifier: string;
+    if (language === 'ja' && latinModelUrl && latinDictionaryUrl) {
+      // Set codes remain Latin even on Japanese cards. Use the Latin-capable
+      // model for that line instead of turning M1S into Japanese-looking glyphs.
+      const titleResources = { session, dictionary };
+      ({ session, dictionary } = await modelResources(
+        latinModelUrl,
+        latinDictionaryUrl,
+        id,
+      ));
+      try {
+        identifier = await read([0.07, 0.94, 0.38, 0.032]);
+      } finally {
+        ({ session, dictionary } = titleResources);
+      }
+    } else identifier = await read([0.07, 0.94, 0.38, 0.032]);
     const texts = [number, identifier];
     // The card number alone is shared by many sets. Re-read the wider footer
     // if the narrow crop missed PBL, DLR or another printed set code.
@@ -253,10 +309,31 @@ async function recognize({
       scope.postMessage({ type: 'done', id, text: texts.join('\n') });
       return;
     }
+    // A printed Japanese set code selects a Japanese-capable title model,
+    // even when the collector started with the default German catalogue.
+    if (
+      language !== 'ja' &&
+      japaneseModelUrl &&
+      japaneseDictionaryUrl &&
+      texts.some((text) =>
+        /(?:^|[^A-Z0-9])(?:SV|SM|XY|BW|S|M)\d{1,2}[A-Z]?(?=[^A-Z0-9]|$)/i.test(
+          text,
+        ),
+      )
+    ) {
+      report('Japanischer Kartenname wird lokal geprüft …', id);
+      ({ session, dictionary } = await modelResources(
+        japaneseModelUrl,
+        japaneseDictionaryUrl,
+        id,
+      ));
+    }
     report('Kartenname wird gegengeprüft …', id);
     // Real sleeve photos often shift the title well outside the narrow
     // centre band. The second, wider top read is only needed for weak OCR.
-    const title = await read([0.08, 0.02, 0.83, 0.065]);
+    const title = await read(
+      language === 'ja' ? [0.15, 0.018, 0.6, 0.062] : [0.08, 0.02, 0.83, 0.065],
+    );
     texts.push(title);
     if (!/\p{L}{3}/u.test(title)) {
       texts.push(await read([0.05, 0.005, 0.9, 0.095], 'gray'));

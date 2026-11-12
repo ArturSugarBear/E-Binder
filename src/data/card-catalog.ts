@@ -1,3 +1,4 @@
+import { normalizePrintedIdentityText } from '../domain/ocr-number-search';
 import { secondaryCardArt } from './artwork-fallbacks';
 import { priceLooksMisassigned } from '../domain/price-integrity';
 import { verifiedCardmarketProduct } from './verified-cardmarket';
@@ -39,6 +40,7 @@ const canonicalGermanSetNames: Record<string, string> = {
 };
 
 const setIds: Record<string, string> = {
+  meg: 'me01', // Printed MEG code, independently visible on Mega Evolution cards.
   svi: 'sv01',
   pal: 'sv02',
   obf: 'sv03',
@@ -843,7 +845,7 @@ export async function catalogSetCards(
         signal,
       ),
     );
-  if (detail.id !== id)
+  if (detail.id.toLowerCase() !== id.toLowerCase())
     throw new Error('Die Setantwort passt nicht zur Anfrage.');
   return detail.cards.map((card) => ({
     ...card,
@@ -900,13 +902,14 @@ export interface RecognitionClue {
 }
 /** Printed codes narrow candidates; an OCR string never confirms ownership. */
 export function recognitionClues(text: string): RecognitionClue[] {
-  const code = text.match(
-    /(?:^|[^A-Z])(?:[A-I])?(SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/i,
+  const printedText = normalizePrintedIdentityText(text);
+  const code = printedText.match(
+    /(?:^|[^A-Z])(?:[A-I])?(MEG|SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/i,
   );
   // Japanese set identifiers (e.g. M2a, SV8a, S12a) can be read even
   // when the current Latin OCR cannot transcribe the Japanese card title.
   // The set code is only a clue, never sufficient evidence on its own.
-  const japaneseCode = text.match(
+  const japaneseCode = printedText.match(
     /(?:^|[^A-Za-z0-9])((?:SV|SM|XY|BW|S|M)\d{1,2}[a-z]?)(?![A-Za-z0-9])/i,
   );
   const setId = code
@@ -916,7 +919,7 @@ export function recognitionClues(text: string): RecognitionClue[] {
     (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
     (japaneseCode ? 'ja' : undefined);
   const counts = new Map<string, number>();
-  for (const match of text.matchAll(
+  for (const match of printedText.matchAll(
     /(?<![0-9])((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\s*[/|]\s*((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\b/gi,
   )) {
     const fix = (part: string) =>

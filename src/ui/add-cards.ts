@@ -639,7 +639,7 @@ export function openAddCards(
       liveOcrSession = createRecognitionSession(
         liveOcrAbort.signal,
         (label) => liveProgressHook?.(true, label),
-        { fast: true, timeoutMs: 5600 },
+        { fast: true, timeoutMs: 5600, language: () => language.value },
       );
       liveOcrSession.warmup();
     } catch {
@@ -660,13 +660,9 @@ export function openAddCards(
     onAnalysisState: (active: boolean, detail?: string) => void,
   ): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
-    const started = performance.now();
     liveProgressHook = onAnalysisState;
     onAnalysisState(true);
-    onAnalysisState(
-      true,
-      'Erkennungsmodell und Kartendetails werden lokal geprüft …',
-    );
+    onAnalysisState(true, 'Aufnahme wartet auf die lokale Erkennung …');
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
@@ -678,13 +674,27 @@ export function openAddCards(
       .then(async () => {
         if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
           return;
+        let started = performance.now();
         const remaining = () =>
           remainingLiveScanBudget(started, performance.now());
         let text = '';
         const tried: LiveHotZone[] = [];
-        if (!liveOcrSession && remaining() > 300) prepareLiveOcr();
+        if (!liveOcrSession) prepareLiveOcr();
         if (liveOcrSession && remaining() > 300) {
+          let modelReady = false;
           try {
+            onAnalysisState(true, 'Erkennungsmodell wird vorbereitet …');
+            await liveOcrSession.warmup();
+            if (
+              closed ||
+              liveOcrAbort.signal.aborted ||
+              !transientPhotos.has(id)
+            )
+              return;
+            // Queue waiting and cold model downloads are observed preparation,
+            // not spent inference time. Each queued photo gets its own cap.
+            started = performance.now();
+            modelReady = true;
             let attempts = 1;
             onAnalysisState(true, 'Set, Nummer und Name werden gelesen …');
             text = await liveOcrSession.recognize(
@@ -719,6 +729,12 @@ export function openAddCards(
               liveOcrEvidence.set(id, text);
             }
           } catch {
+            recordBetaEvent(
+              'scan_result',
+              'scan',
+              modelReady ? 'live_ocr_timeout' : 'live_model_unavailable',
+              'error',
+            );
             // Timeouts terminate the worker, but partial OCR evidence is
             // retained; the collector may correct the card manually.
             liveOcrSession?.close();
@@ -1025,6 +1041,7 @@ export function openAddCards(
     results.replaceChildren();
     results.dataset.scanState = 'running';
     results.dataset.scanRankedKeys = '[]';
+    results.dataset.scanSuggestedKey = '';
     results.dataset.scanVisualModelCandidates = '0';
     const status = el('p', 'w-muted', 'Texterkennung startet …');
     status.setAttribute('role', 'status');
@@ -1086,6 +1103,7 @@ export function openAddCards(
                 else progress.removeAttribute('value');
               }
             },
+            { language: () => language.value },
           );
       if (controller.signal.aborted || closed || ocrController !== controller)
         return;
@@ -1370,6 +1388,8 @@ export function openAddCards(
       ).values(),
     ];
     results.dataset.scanResultContract = '1';
+    results.dataset.scanSuggestedKey = suggested?.key ?? '';
+    results.dataset.scanIdentityBasis = basis ?? 'review';
     results.dataset.scanRankedKeys = JSON.stringify(
       ranked.map((card) => card.key),
     );
@@ -1761,6 +1781,8 @@ export function openAddCards(
     results.classList.remove('w-text-results', 'w-scan-result-stack');
     delete results.dataset.scanResultContract;
     delete results.dataset.scanRankedKeys;
+    delete results.dataset.scanSuggestedKey;
+    delete results.dataset.scanIdentityBasis;
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [
