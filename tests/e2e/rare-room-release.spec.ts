@@ -3,27 +3,27 @@ import { expect, test } from './fixtures';
 const routes = ['home', 'entdecken', 'binder', 'portfolio', 'profil'] as const;
 const widths = [320, 375, 390, 430] as const;
 
-test('Rare Room mobile surfaces fit and central scan remains accessible', async ({
-  page,
-}, info) => {
-  test.skip(
-    info.project.name === 'chromium',
-    'Phone viewport checks run on mobile Chromium and WebKit.',
-  );
-  test.setTimeout(180_000);
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'mediaDevices', {
-      configurable: true,
-      value: {
-        getUserMedia: async () => {
-          throw new DOMException('Denied', 'NotAllowedError');
+for (const width of widths) {
+  test('Rare Room mobile surfaces fit and scan opens at ' + width + 'px', async ({
+    page,
+  }, info) => {
+    test.skip(
+      info.project.name === 'chromium',
+      'Phone viewport checks run on mobile Chromium and WebKit.',
+    );
+    test.setTimeout(120_000);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: {
+          getUserMedia: async () => {
+            throw new DOMException('Denied', 'NotAllowedError');
+          },
         },
-      },
+      });
     });
-  });
-  const pageErrors: string[] = [];
-  page.on('pageerror', (error) => pageErrors.push(error.message));
-  for (const width of widths) {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
     await page.setViewportSize({ width, height: 844 });
     for (const route of routes) {
       await page.goto('./#' + route);
@@ -49,7 +49,9 @@ test('Rare Room mobile surfaces fit and central scan remains accessible', async 
       'data-ready',
       'true',
     );
-    await page.locator('#workspace-mobile-add').click();
+    const scan = page.locator('#workspace-mobile-add');
+    await expect(scan, 'Central mobile Scan must be visible').toBeVisible();
+    await scan.click();
     await expect(
       page.getByRole('dialog', {
         name: 'Karte live scannen',
@@ -61,9 +63,9 @@ test('Rare Room mobile surfaces fit and central scan remains accessible', async 
       fullPage: true,
     });
     await page.keyboard.press('Escape');
-  }
-  expect(pageErrors, 'Uncaught browser errors').toEqual([]);
-});
+    expect(pageErrors, 'Uncaught browser errors').toEqual([]);
+  });
+}
 
 test('Rare Room example binder, card details and desktop shell render', async ({
   page,
