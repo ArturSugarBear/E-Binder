@@ -100,6 +100,13 @@ async function benchmark(manifestPath) {
         viewport: { width: 390, height: 844 },
         serviceWorkers: 'block',
       });
+      // The same private benchmark can be run twice without user clicks:
+      // default OCR-only, or explicitly opted-in visual ONNX beta. No photos
+      // or account identifiers are sent to a provider by this toggle.
+      if (process.env.CARD_SCAN_VISUAL_BETA === '1')
+        await context.addInitScript(() =>
+          localStorage.setItem('e-binder-visual-beta-v1', 'on'),
+        );
       const page = await context.newPage();
       const start = performance.now();
       try {
@@ -240,7 +247,10 @@ async function benchmark(manifestPath) {
     provenance: {
       commit: process.env.GIT_COMMIT_SHA ?? null,
       modelVersion: process.env.CARD_SCAN_MODEL_VERSION ?? 'unreported',
-      indexVersion: null,
+      indexVersion:
+        process.env.CARD_SCAN_VISUAL_BETA === '1'
+          ? 'visual-beta-opted-in'
+          : 'visual-beta-disabled',
       browser: 'chromium',
       browserVersion,
       viewport: '390x844',
