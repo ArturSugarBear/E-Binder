@@ -609,12 +609,15 @@ export function openAddCards(
     }
   };
 
+  let liveProgressHook:
+    | ((active: boolean, detail?: string) => void)
+    | undefined;
   function prepareLiveOcr(): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrSession) return;
     try {
       liveOcrSession = createRecognitionSession(
         liveOcrAbort.signal,
-        () => undefined,
+        (label) => liveProgressHook?.(true, label),
         { fast: true, timeoutMs: 5600 },
       );
       liveOcrSession.warmup();
@@ -637,8 +640,9 @@ export function openAddCards(
   ): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
     const started = performance.now();
+    liveProgressHook = onAnalysisState;
     onAnalysisState(true);
-    onAnalysisState(true, 'Kartenmerkmale werden gelesen …');
+    onAnalysisState(true, 'Erkennungsmodell und Kartendetails werden lokal geprüft …');
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
