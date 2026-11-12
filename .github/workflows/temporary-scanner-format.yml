@@ -1,0 +1,35 @@
+name: Temporary scanner formatter
+on:
+  push:
+    branches: [fix/scanner-onehand-review-20261112]
+permissions:
+  contents: write
+jobs:
+  prettier:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: >-
+          npx prettier --write
+          src/ui/add-cards.ts
+          src/ui/page-scan.ts
+          src/workspace.css
+          tests/e2e/binder-page-scan.spec.ts
+          tests/e2e/live-scan-battle.spec.ts
+      - name: Commit scoped formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/ui/add-cards.ts src/ui/page-scan.ts src/workspace.css tests/e2e/binder-page-scan.spec.ts tests/e2e/live-scan-battle.spec.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format scanner repair changes'
+            git push
+          fi
