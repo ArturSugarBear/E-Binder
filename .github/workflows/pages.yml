@@ -103,6 +103,9 @@ jobs:
             npx playwright test \
               tests/e2e/binder-page-scan.spec.ts \
               tests/e2e/set-first-scan.spec.ts \
+              tests/e2e/set-filters.spec.ts \
+              tests/e2e/native-touch.spec.ts \
+              tests/e2e/workspace.spec.ts \
               tests/e2e/photo-review.spec.ts \
               tests/e2e/collection-prices.spec.ts \
               tests/e2e/portfolio.spec.ts \
