@@ -232,7 +232,7 @@ test('portfolio hero retains a priced card with missing stored artwork', async (
   await page.goto('./#portfolio');
   await page.reload();
 
-  await expect(page.locator('.w-portfolio-balance')).toHaveText(/2,00\\s*€/);
+  await expect(page.locator('.w-portfolio-balance')).toHaveText(/2,00\s*€/);
   const heroArt = page.locator('.w-portfolio-hero-art .card-art');
   await expect(heroArt).toHaveCount(1);
   await expect(heroArt.locator('img')).toHaveAttribute(
