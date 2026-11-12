@@ -22,7 +22,10 @@ test('release version is generated from the built app and is visible on every iP
   await expect(label).toContainText('v' + release.version);
   await expect(label).toContainText(release.commit.slice(0, 8));
   // The accessible name also includes the visible text (WCAG Label in Name).
-  await expect(label).toHaveAttribute('aria-label', new RegExp(release.commit.slice(0, 8)));
+  await expect(label).toHaveAttribute(
+    'aria-label',
+    new RegExp(release.commit.slice(0, 8)),
+  );
   await expect(label).toHaveAttribute('data-build-commit', release.commit);
   const box = await label.boundingBox();
   expect(box).not.toBeNull();
