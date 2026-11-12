@@ -1,0 +1,29 @@
+name: Format private beta quality gate
+on:
+  push:
+    branches:
+      - feature/private-beta-quality-gate-20261112
+permissions:
+  contents: write
+jobs:
+  format:
+    if: "!contains(github.event.head_commit.message, '[formatted-private-beta]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: |
+          npx prettier --write scripts/compare-beta-benchmarks.mjs tests/unit/compare-beta-benchmarks.test.mjs docs/beta-dataset-pipeline.md package.json
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/compare-beta-benchmarks.mjs tests/unit/compare-beta-benchmarks.test.mjs docs/beta-dataset-pipeline.md package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format private beta quality gate [formatted-private-beta]"
+            git push origin HEAD:feature/private-beta-quality-gate-20261112
+          fi
