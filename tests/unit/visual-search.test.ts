@@ -33,8 +33,11 @@ it('does not load an embedding model after a scanner was cancelled', async () =>
 
 it('does not start image inference until verified ONNX warmup signals readiness', async () => {
   const messages: unknown[] = [];
-  let worker: FakeVisualWorker | undefined;
+  const workers: FakeVisualWorker[] = [];
   class FakeVisualWorker {
+    constructor() {
+      workers.push(this);
+    }
     onmessage: ((event: MessageEvent) => void) | null = null;
     onerror: ((event: Event) => void) | null = null;
     postMessage(value: unknown) {
@@ -50,15 +53,7 @@ it('does not start image inference until verified ONNX warmup signals readiness'
     'fetch',
     vi.fn().mockResolvedValue(new Response('{}', { status: 200 })),
   );
-  vi.stubGlobal(
-    'Worker',
-    class extends FakeVisualWorker {
-      constructor() {
-        super();
-        worker = this;
-      }
-    },
-  );
+  vi.stubGlobal('Worker', FakeVisualWorker);
   const session = await createVisualSearchSession(new AbortController().signal);
   expect(session).not.toBeNull();
   expect(messages).toHaveLength(1);
@@ -67,10 +62,10 @@ it('does not start image inference until verified ONNX warmup signals readiness'
   const pending = session!.match(new Blob(['real-photo']), 500);
   await new Promise((resolve) => setTimeout(resolve, 20));
   expect(messages).toHaveLength(1);
-  worker?.emit({ id: 0, type: 'ready' });
+  workers[0]?.emit({ id: 0, type: 'ready' });
   await vi.waitFor(() => expect(messages).toHaveLength(2));
   expect(messages[1]).toMatchObject({ id: 1, warmup: undefined });
-  worker?.emit({ id: 1, type: 'done', hits: [] });
+  workers[0]?.emit({ id: 1, type: 'done', hits: [] });
   await expect(pending).resolves.toEqual([]);
   session!.close();
 });
