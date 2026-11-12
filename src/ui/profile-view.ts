@@ -153,7 +153,8 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       ),
     );
   }
-  if (ctx.account) {
+  {
+    // Local-only users can explicitly opt in; no E-Binder account is created.
     const donation = betaScanDonationState();
     const enabled = donation === 'on';
     root.append(
@@ -164,7 +165,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
         el(
           'p',
           'w-muted',
-          'Freiwillig: Deine neu aufgenommenen Kartenscans werden nur mit deiner Einwilligung als komprimierte JPEGs ohne EXIF- und Standortdaten in einen privaten Testbereich übertragen. Das verbessert die Erkennung nicht sofort. Aufnahmen werden zuerst geprüft und beschriftet. Deine Sammlung bleibt privat.',
+          ctx.account
+            ? 'Freiwillig: Erst nach ausdrücklicher Einwilligung speichern wir neu aufgenommene JPEGs ohne EXIF und Standortdaten privat für Prüfung und künftige Modellverbesserung. Ohne unabhängige Bestätigung werden keine Trainingslabels erzeugt.'
+            : 'Auch ohne E-Binder-Konto kannst du freiwillig Fotos spenden. Nur nach deinem Klick erzeugt Supabase eine pseudonyme Testidentität in diesem Browser. Neue Scans werden privat und ohne EXIF/Standortdaten übertragen; deine Sammlung bleibt lokal. Vor dem Löschen der Browserdaten solltest du alle Spenden löschen, da sonst dein Zugriff auf diese anonyme Identität verloren geht.',
         ),
         el(
           'div',
@@ -181,7 +184,9 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
           action(
             enabled
               ? 'Foto-Teilnahme beenden'
-              : 'Foto-Teilnahme ausdrücklich aktivieren',
+              : ctx.account
+                ? 'Foto-Teilnahme ausdrücklich aktivieren'
+                : 'Als Gast freiwillig Fotos spenden',
             () => {
               void changeBetaScanConsent(!enabled)
                 .then(() => {
@@ -195,6 +200,11 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
                 .catch((error: unknown) => ctx.notify(String(error), true));
             },
             'secondary',
+          ),
+          el(
+            'p',
+            'w-muted',
+            'Die Foto-Teilnahme lässt sich jederzeit widerrufen. Die Löschung entfernt auch die vorläufigen Scan-Korrekturen und beendet weitere Übertragungen.',
           ),
           action(
             'Alle meine Beta-Testbilder löschen',
