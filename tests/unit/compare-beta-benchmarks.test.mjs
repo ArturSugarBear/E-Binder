@@ -28,11 +28,13 @@ it('compares identical private labels but refuses claiming improvement from 15 s
     await writeFile(
       beta,
       JSON.stringify(
-        report(source.map((row) => ({
-          ...row,
-          top1: true,
-          visualModelCandidates: 1,
-        }))),
+        report(
+          source.map((row) => ({
+            ...row,
+            top1: true,
+            visualModelCandidates: 1,
+          })),
+        ),
       ),
     );
     const run = (...args) =>
