@@ -99,6 +99,26 @@ describe('real, comparable portfolio history', () => {
     ).toEqual([20]);
   });
 
+  it('does not connect different price sources or import the previous price policy', () => {
+    const { state, summary } = stateWithPricedCard();
+    storage.set('e-binder-portfolio-history-v4:local:personal', '[]');
+    recordPortfolioObservation(state, summary, undefined, '2026-11-09');
+    const converted = {
+      ...summary,
+      holdings: summary.holdings.map((row) => ({
+        ...row,
+        priceSource: 'tcgplayer' as const,
+      })),
+    };
+    recordPortfolioObservation(state, converted, undefined, '2026-11-10');
+    expect(
+      comparableHistory(state, converted, undefined).map((p) => p.day),
+    ).toEqual(['2026-11-10']);
+    expect(storage.get('e-binder-portfolio-history-v4:local:personal')).toBe(
+      '[]',
+    );
+  });
+
   it('isolates identical portfolios between accounts, local mode and demo', () => {
     const { state, summary } = stateWithPricedCard();
     recordPortfolioObservation(state, summary, 'account-a', '2026-11-09');
@@ -134,7 +154,7 @@ describe('real, comparable portfolio history', () => {
     expect(points).toHaveLength(2);
     expect(points.map((point) => point.knownValue)).toEqual([15.5, 15.5]);
     const serialized = storage.get(
-      'e-binder-portfolio-history-v4:local:personal',
+      'e-binder-portfolio-history-v5:local:personal',
     )!;
     expect(serialized).not.toContain('Echte Karte');
     expect(serialized).not.toContain('sv01');

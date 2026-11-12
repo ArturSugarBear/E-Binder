@@ -9,10 +9,12 @@ import {
   type PortfolioQuote,
 } from '../domain/portfolio';
 import { normalize, numberKey, type Holding } from '../domain/personal';
+import { convertedMarketReference, usdEurRate } from './exchange-rates';
 
 export type HoldingPriceResult =
   | { status: 'priced'; quote: PortfolioQuote }
-  | { status: 'unavailable' | 'suspect' | 'error' };
+  | { status: 'unavailable' | 'suspect' }
+  | { status: 'error'; reason?: 'exchange-rate' };
 
 interface CachedPrice {
   until: number;
@@ -38,7 +40,7 @@ function matchesHolding(
   );
 }
 
-/** Optional US-market context; never substitutes for a missing EUR value. */
+/** Exact US-market source observation before the shared EUR conversion. */
 export async function holdingMarketReference(
   holding: Holding,
 ): Promise<TcgplayerReference | undefined> {
@@ -80,9 +82,16 @@ export async function holdingPrice(
 ): Promise<HoldingPriceResult> {
   const key = portfolioQuoteKey(holding);
   if (!key) return { status: 'unavailable' };
-  const cached = results.get(key);
+  // Re-check imported/corrected metadata even if another holding with the
+  // same provider ID already has a cached quote.
+  const requestKey = JSON.stringify([
+    key,
+    normalize(holding.card.name),
+    numberKey(holding.card.number),
+  ]);
+  const cached = results.get(requestKey);
   if (cached && cached.until > Date.now()) return cached.value;
-  const request = pending.get(key);
+  const request = pending.get(requestKey);
   if (request) return request;
   if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { status: 'error' };
@@ -92,11 +101,11 @@ export async function holdingPrice(
   const sourceId = key.split(':').slice(1, -1).join(':');
   const promise: Promise<HoldingPriceResult> = catalogEntry(
     sourceId,
-    'de',
+    holding.card.language,
     undefined,
     false,
   )
-    .then((entry) => {
+    .then(async (entry) => {
       // A stored printing can outlive catalogue corrections or be imported
       // with a wrong language, fraction or finish. Never borrow its neighbor's
       // market quote just because the source ID still exists.
@@ -115,19 +124,35 @@ export async function holdingPrice(
             productUrl: entry.cardmarketUrl,
           }
         : undefined;
-      const value: HoldingPriceResult =
+      let value: HoldingPriceResult =
         entry.priceIssue === 'suspect'
           ? { status: 'suspect' }
           : isUsableQuote(quote, key)
             ? { status: 'priced', quote }
             : { status: 'unavailable' };
-      results.set(key, { until: Date.now() + CACHE_MS, value });
+      if (value.status !== 'priced') {
+        const reference =
+          holding.finish === 'normal' || holding.finish === 'holo'
+            ? entry.tcgplayer?.[holding.finish]
+            : undefined;
+        if (reference) {
+          const rate = await usdEurRate();
+          const converted = rate
+            ? convertedMarketReference(reference, rate)
+            : undefined;
+          value = isUsableQuote(converted, key)
+            ? { status: 'priced', quote: converted }
+            : { status: 'error', reason: 'exchange-rate' };
+        }
+      }
+      if (value.status !== 'error')
+        results.set(requestKey, { until: Date.now() + CACHE_MS, value });
       return value;
     })
     .catch((): HoldingPriceResult => ({ status: 'error' }))
     .finally(() => {
-      pending.delete(key);
+      pending.delete(requestKey);
     });
-  pending.set(key, promise);
+  pending.set(requestKey, promise);
   return promise;
 }

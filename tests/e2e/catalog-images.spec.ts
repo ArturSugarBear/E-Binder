@@ -239,3 +239,83 @@ test('set galleries resolve a secondary logo when the primary has none', async (
     'https://images.pokemontcg.io/me6/logo.png',
   );
 });
+
+test('MEP promos use the verified product image in discovery and details without creating ownership', async ({
+  page,
+}) => {
+  const set = {
+    id: 'mep',
+    name: 'MEP Black Star Promos',
+    cardCount: { official: 0, total: 112 },
+  };
+  const cards = [
+    {
+      id: 'mep-029',
+      localId: '029',
+      name: 'Mega-Glurak X-ex',
+      set,
+      variants: { normal: false, holo: true },
+    },
+    {
+      id: 'mep-080',
+      localId: '080',
+      name: 'Fynx',
+      set,
+      variants: { normal: false, holo: true },
+    },
+  ];
+  let providerApiCalls = 0;
+  await page.route('https://tcgcsv.com/**', (route) => {
+    providerApiCalls++;
+    return route.abort();
+  });
+  await page.route('https://tcgplayer-cdn.tcgplayer.com/**', (route) =>
+    route.fulfill({ path: 'public/assets/cards/svi-211.webp' }),
+  );
+  await page.route('https://api.tcgdex.net/**', (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const matched = cards.find((card) => path.endsWith(`/cards/${card.id}`));
+    const value = path.endsWith('/graphql')
+      ? {
+          data: {
+            set: { ...set, cards: cards.map(({ id }) => ({ id })) },
+            cards,
+          },
+        }
+      : (matched ??
+        (path.endsWith('/sets/mep')
+          ? { ...set, cards }
+          : path.endsWith('/sets')
+            ? [set]
+            : path.endsWith('/series/tcgp')
+              ? { id: 'tcgp', sets: [] }
+              : []));
+    return route.fulfill({ json: value });
+  });
+  await page.goto('./#entdecken?lang=de&setId=mep');
+  const results = page.locator('.w-search-results');
+  await expect(results.locator('button')).toHaveCount(2);
+  const fynx = results.locator('button').filter({ hasText: 'Fynx' });
+  await expect(fynx.locator('img')).toHaveAttribute(
+    'src',
+    'https://tcgplayer-cdn.tcgplayer.com/product/694694_200w.jpg',
+  );
+  await expect(fynx.locator('.w-art-language')).toHaveText('Bild: EN');
+  const charizard = results
+    .locator('button')
+    .filter({ hasText: 'Mega-Glurak' });
+  await expect(charizard.locator('img')).toHaveAttribute(
+    'src',
+    'https://tcgplayer-cdn.tcgplayer.com/product/680639_200w.jpg',
+  );
+  await fynx.click();
+  const detail = page.getByRole('dialog');
+  await expect(detail.locator('.card-art img').first()).toHaveAttribute(
+    'src',
+    'https://tcgplayer-cdn.tcgplayer.com/product/694694_200w.jpg',
+  );
+  await detail.getByRole('button', { name: /schließen$/ }).click();
+  await openVault(page, 'sammlung');
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+  expect(providerApiCalls).toBe(0);
+});

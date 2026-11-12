@@ -44,35 +44,51 @@ const holding = (
   updatedAt: '2026-11-09T12:00:00Z',
 });
 
-it('offers a dated USD reference separately without valuing an unavailable EUR price', async () => {
+it('uses a dated TCGplayer EUR fallback only for the exact printing and finish', async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-11-12T12:00:00Z'));
   vi.stubGlobal(
     'fetch',
-    vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            id: 'me06-082',
-            localId: '082',
-            name: 'Testkarte',
-            set: {
-              id: 'me06',
-              name: 'Delta-Herrschaft',
-              cardCount: { official: 103 },
-            },
-            variants: { normal: false, holo: true },
-            pricing: {
-              tcgplayer: {
-                unit: 'USD',
-                updated: '2026-11-10T12:00:00Z',
-                holofoil: { marketPrice: 12.5, productId: 123456 },
+    vi.fn(async (url: string) =>
+      url.includes('frankfurter.dev')
+        ? Response.json({
+            base: 'USD',
+            quote: 'EUR',
+            date: '2026-11-11',
+            rate: 0.9,
+          })
+        : new Response(
+            JSON.stringify({
+              id: 'me06-082',
+              localId: '082',
+              name: 'Testkarte',
+              set: {
+                id: 'me06',
+                name: 'Delta-Herrschaft',
+                cardCount: { official: 103 },
               },
-            },
-          }),
-        ),
+              variants: { normal: false, holo: true },
+              pricing: {
+                tcgplayer: {
+                  unit: 'USD',
+                  updated: '2026-11-10T12:00:00Z',
+                  holofoil: { marketPrice: 12.5, productId: 123456 },
+                },
+              },
+            }),
+          ),
     ),
   );
   const card = holding('me06-082', 'Testkarte', '082/103', 'holo');
-  expect(await holdingPrice(card)).toEqual({ status: 'unavailable' });
+  expect(await holdingPrice(card)).toMatchObject({
+    status: 'priced',
+    quote: {
+      source: 'tcgplayer',
+      currency: 'EUR',
+      amount: 11.25,
+      conversion: { from: 'USD', amount: 12.5, rate: 0.9 },
+    },
+  });
   expect(await holdingMarketReference(card)).toMatchObject({
     source: 'tcgplayer',
     currency: 'USD',
@@ -86,6 +102,12 @@ it('offers a dated USD reference separately without valuing an unavailable EUR p
       card: { ...card.card, name: 'Andere Karte' },
     }),
   ).toBeUndefined();
+  expect(
+    await holdingPrice({
+      ...card,
+      card: { ...card.card, name: 'Andere Karte' },
+    }),
+  ).toEqual({ status: 'unavailable' });
   expect(
     await holdingMarketReference({ ...card, finish: 'normal' }),
   ).toBeUndefined();

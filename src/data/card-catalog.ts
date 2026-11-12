@@ -124,7 +124,7 @@ export interface MarketPrice {
   basis?: 'trend' | 'avg7' | 'avg30' | 'avg';
   provenance?: 'verified-snapshot';
 }
-/** A separately labelled market comparison, never an EUR portfolio quote. */
+/** Original market observation; valuation requires a dated EUR conversion. */
 export interface TcgplayerReference {
   source: 'tcgplayer';
   currency: 'USD';
@@ -377,7 +377,13 @@ function pairCatalogImages<T extends CatalogResult>(
 export function imageLanguage(image: string): string | undefined {
   try {
     const url = new URL(image);
-    if (['images.pokemontcg.io', 'images.scrydex.com'].includes(url.hostname))
+    if (
+      [
+        'images.pokemontcg.io',
+        'images.scrydex.com',
+        'tcgplayer-cdn.tcgplayer.com',
+      ].includes(url.hostname)
+    )
       return 'en';
     return url.hostname === 'assets.tcgdex.net'
       ? url.pathname.split('/')[1]

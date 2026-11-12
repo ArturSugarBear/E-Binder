@@ -37,6 +37,7 @@ export function trustedArtwork(url: string): boolean {
         'assets.tcgdex.net',
         'images.pokemontcg.io',
         'images.scrydex.com',
+        'tcgplayer-cdn.tcgplayer.com',
       ].includes(u.hostname)
     );
   } catch {

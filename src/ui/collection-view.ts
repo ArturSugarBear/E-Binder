@@ -40,6 +40,7 @@ const priceBasisLabels: Record<NonNullable<PortfolioQuote['basis']>, string> = {
   avg7: '7-Tage-Durchschnitt',
   avg30: '30-Tage-Durchschnitt',
   avg: 'Verkaufsdurchschnitt',
+  market: 'Marktpreis',
 };
 
 interface PriceBadge {
@@ -57,7 +58,7 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
   const note = el(
     'small',
     'w-price-note',
-    comparable ? 'Cardmarket · Preisreferenz' : 'Keine sichere Preisreferenz',
+    comparable ? 'Preisreferenz · EUR' : 'Keine sichere Preisreferenz',
   );
   const sourceLink = detail
     ? el(
@@ -71,10 +72,11 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
     sourceLink.target = '_blank';
     sourceLink.rel = 'noopener noreferrer';
   }
+  const sourceLabel = detail ? el('span', 'w-label', 'Kartenwert · EUR') : null;
   const element = el(
     detail ? 'div' : 'span',
     detail ? 'w-price-reference w-holding-price' : 'w-price-reference',
-    detail ? el('span', 'w-label', 'Cardmarket · Preisreferenz') : null,
+    sourceLabel,
     value,
     note,
     sourceLink,
@@ -82,12 +84,19 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
   const render = (result: HoldingPriceResult) => {
     if (!element.isConnected) return;
     if (result.status === 'priced') {
+      const source =
+        result.quote.source === 'cardmarket' ? 'Cardmarket' : 'TCGplayer';
+      if (sourceLabel)
+        sourceLabel.textContent = `${source} · EUR-Preisreferenz`;
       value.textContent = euro.format(result.quote.amount);
       const basis = result.quote.basis
         ? priceBasisLabels[result.quote.basis]
         : 'Preisreferenz';
       note.textContent = `${basis}${result.quote.provenance === 'verified-snapshot' ? ' · verifizierter Snapshot, kein Livepreis' : ' (nicht NM-gefiltert)'} · Stand ${new Date(result.quote.updated).toLocaleDateString('de-DE')}`;
+      if (result.quote.conversion)
+        note.textContent += ` · Aus USD zum EZB-Kurs vom ${new Date(result.quote.conversion.date).toLocaleDateString('de-DE')}`;
       if (sourceLink) {
+        sourceLink.textContent = `Auf ${source} ansehen`;
         sourceLink.hidden = !result.quote.productUrl;
         if (result.quote.productUrl) sourceLink.href = result.quote.productUrl;
       }
@@ -105,8 +114,14 @@ function priceBadge(holding: Holding, detail = false): PriceBadge {
   return {
     element,
     load: async () => {
-      if (comparable) render(await holdingPrice(holding));
-      if (detail) {
+      const result = comparable
+        ? await holdingPrice(holding)
+        : { status: 'unavailable' as const };
+      if (comparable) render(result);
+      if (
+        detail &&
+        !(result.status === 'priced' && result.quote.source === 'tcgplayer')
+      ) {
         const reference = await holdingMarketReference(holding);
         if (element.isConnected)
           element.append(tcgplayerMarket(reference ? [reference] : []));

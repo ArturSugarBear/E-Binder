@@ -9,11 +9,10 @@ export interface PortfolioObservation {
   pricedCopies: number;
   signature: string;
 }
-// v3 observations may include misassigned Cardmarket products that inflated
-// or deflated portfolio values. Begin a new price-policy series, keeping the
-// legacy observations in local storage without displaying them.
+// A unified EUR series may include converted US references. Keep previous
+// policies stored, without presenting a source-policy switch as market gain.
 const key = (mode: PersonalState['mode'], accountId: string | undefined) =>
-  `e-binder-portfolio-history-v4:${accountId ? `account:${accountId}` : 'local'}:${mode}`;
+  `e-binder-portfolio-history-v5:${accountId ? `account:${accountId}` : 'local'}:${mode}`;
 
 /** Compare only the same quantities and exact printings; adding a card starts
  * a new series instead of faking a market gain. */
@@ -46,7 +45,7 @@ function observationSignature(
     .filter((row) => row.unitValue !== null)
     .map(
       (row) =>
-        `${row.quoteKey}:${row.holding.quantity}:${row.priceBasis ?? 'unknown'}`,
+        `${row.quoteKey}:${row.holding.quantity}:${row.priceSource ?? 'cardmarket'}:${row.priceBasis ?? 'unknown'}`,
     )
     .sort()
     .join('|');
