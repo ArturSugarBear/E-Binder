@@ -95,9 +95,6 @@ test('all catalogue prices load in a bounded queue even when only the FX service
       updatedAt: '2026-11-10T12:00:00Z',
     };
   });
-  // A stored card can have no image URL while artwork resolves via catalog fallback.
-  // It must still be eligible for the portfolio hero.
-  state.holdings[4]!.card.image = '';
   await page.goto('./#home');
   await expect(page.locator('#workspace-main')).toHaveAttribute(
     'data-ready',
@@ -148,6 +145,101 @@ test('all catalogue prices load in a bounded queue even when only the FX service
   await expect(
     page.getByRole('button', { name: 'Weitere 40 Karten prüfen' }),
   ).toHaveCount(0);
+});
+
+
+test('portfolio hero retains a priced card with missing stored artwork', async ({
+  page,
+}) => {
+  await page.route('https://api.tcgdex.net/v2/de/cards/sv01-005', (route) =>
+    route.fulfill({
+      json: {
+        id: 'sv01-005',
+        localId: '005',
+        name: 'Testkarte 005',
+        image: 'https://assets.tcgdex.net/de/sv/sv01/005',
+        set: {
+          id: 'sv01',
+          name: 'Karmesin & Purpur',
+          cardCount: { official: 198 },
+        },
+        variants: { normal: true, holo: false },
+        pricing: {
+          cardmarket: {
+            unit: 'EUR',
+            updated: '2026-11-10T12:00:00Z',
+            trend: 2,
+          },
+        },
+      },
+    }),
+  );
+  await page.route('https://assets.tcgdex.net/**', (route) =>
+    route.fulfill({ path: 'public/assets/cards/svi-211.webp' }),
+  );
+
+  const state = emptyState();
+  state.holdings = [
+    {
+      id: 'own-005',
+      card: {
+        key: 'tcgdex:de:sv01-005',
+        source: 'tcgdex' as const,
+        sourceId: 'sv01-005',
+        name: 'Testkarte 005',
+        setName: 'Karmesin & Purpur',
+        setId: 'sv01',
+        number: '005/198',
+        language: 'de',
+        image: '',
+        artist: '',
+        artistSource: 'unknown' as const,
+        evolvesFrom: '',
+        stage: '',
+        finishes: ['normal' as const],
+      },
+      finish: 'normal' as const,
+      variantNote: '',
+      quantity: 1,
+      tradeQuantity: 0,
+      favorite: false,
+      notes: '',
+      confirmed: true as const,
+      createdAt: '2026-11-10T12:00:00Z',
+      updatedAt: '2026-11-10T12:00:00Z',
+    },
+  ];
+
+  await page.goto('./#home');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  await page.evaluate(async (snapshot) => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('e-binder-personal', 2);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction('states', 'readwrite');
+      transaction.objectStore('states').put(snapshot, 'personal');
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    db.close();
+  }, state);
+  await page.goto('./#portfolio');
+  await page.reload();
+
+  await expect(page.locator('.w-portfolio-balance')).toHaveText(/2,00\\s*€/);
+  const heroArt = page.locator('.w-portfolio-hero-art .card-art');
+  await expect(heroArt).toHaveCount(1);
+  await expect(heroArt.locator('img')).toHaveAttribute(
+    'src',
+    'https://assets.tcgdex.net/de/sv/sv01/005/high.webp',
+  );
+  await expect(heroArt).toHaveAttribute('data-image-state', 'loaded');
 });
 
 test('portfolio opens directly without inventing a zero market price', async ({
