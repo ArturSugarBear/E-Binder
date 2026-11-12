@@ -42,6 +42,7 @@ import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
 import { rankScanCandidates } from '../data/scan-review';
+import { discoverNumberedCards } from '../data/scan-auto-resolve';
 import {
   type PocketDecision,
 } from '../domain/binder-scan-review';
@@ -53,6 +54,7 @@ type Pocket = {
   decision: Decision;
   candidates: PersonalCard[];
   card?: PersonalCard;
+  suggested?: PersonalCard;
   select: HTMLSelectElement;
   finish: HTMLSelectElement;
   variant: HTMLInputElement;
@@ -232,6 +234,30 @@ export function openPageScanner(
     'secondary',
   );
   stop.hidden = true;
+  const acceptSuggestions = action(
+    'Sichere Vorschläge auswählen',
+    () => {
+      if (processing || reAligning) return;
+      let chosen = 0;
+      for (const pocket of pockets) {
+        if (pocket.decision !== 'pending' || !pocket.suggested) continue;
+        const index = pocket.candidates.findIndex(
+          (card) => card.key === pocket.suggested?.key,
+        );
+        if (index < 0) continue;
+        pocket.select.value = 'card:' + index;
+        updatePocket(pocket, true);
+        chosen++;
+      }
+      if (chosen) {
+        status.textContent = chosen + ' Vorschläge ausgewählt. Prüfe die Kartenausgaben im Raster und tippe erst danach auf „Karten übernehmen“.';
+        updateSave();
+      }
+    },
+    'secondary',
+    'check',
+  );
+  acceptSuggestions.hidden = true;
   const save = action(
     'Gefundene Karten übernehmen',
     () => {
@@ -365,6 +391,12 @@ export function openPageScanner(
     save.querySelector('span')!.textContent = matches > 0
       ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
       : 'Noch keine Karten gefunden';
+    const suggestedCount = pockets.filter(
+      (pocket) => pocket.decision === 'pending' && pocket.suggested,
+    ).length;
+    acceptSuggestions.hidden = processing || suggestedCount === 0;
+    acceptSuggestions.querySelector('span')!.textContent =
+      suggestedCount + ' eindeutige ' + (suggestedCount === 1 ? 'Ausgabe' : 'Ausgaben') + ' auswählen';
     skipUnresolved.hidden = open === 0;
     skipUnresolved.disabled = processing || reAligning || open === 0;
     const emptyHints = pockets.filter(
@@ -442,6 +474,7 @@ export function openPageScanner(
     progress,
     grid,
     reviewSummary,
+    acceptSuggestions,
     reviewBulk,
     reviewPanel,
   );
@@ -982,11 +1015,20 @@ export function openPageScanner(
             (!resolvedVisual.length || visualReview.kind !== 'exact-print')
           ) {
             try {
-              online = await fetchRecognizedCards(
-                text,
-                preferredLanguage(text),
-                lookupSignal,
-              );
+              // When Japanese characters are unreadable, a numeric fraction
+              // still identifies candidates in Japanese catalogues. Explore
+              // DE/EN/JA in parallel rather than assuming German from OCR.
+              online = recognitionClues(text).some((clue) => clue.setId)
+                ? await fetchRecognizedCards(
+                    text,
+                    preferredLanguage(text),
+                    lookupSignal,
+                  )
+                : await discoverNumberedCards(
+                    text,
+                    preferredLanguage(text),
+                    lookupSignal,
+                  );
             } catch {
               catalogFailed = true;
               // OCR and local cards remain available without a connection.
@@ -1037,6 +1079,7 @@ export function openPageScanner(
                 ? 'catalog-error'
                 : 'no-candidates';
           const preferred = ranked.suggested;
+          pocket.suggested = preferred;
           const exactIndex = preferred
             ? pocket.candidates.findIndex((card) => card.key === preferred.key)
             : -1;
@@ -1047,7 +1090,7 @@ export function openPageScanner(
             pocket.container!.dataset.suggestedCardKey = preferred!.key;
           }
           pocket.status.textContent = matched
-            ? `${pocket.card!.name} · ${pocket.card!.number}`
+            ? `Vorschlag: ${preferred!.name} · ${preferred!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
               : ranked.conflictingName
