@@ -23,9 +23,11 @@ alter table public.beta_scan_feedback enable row level security;
 revoke all on public.beta_scan_feedback from public, anon, authenticated;
 grant select, insert, delete on public.beta_scan_feedback to authenticated;
 
+drop policy if exists beta_scan_feedback_select on public.beta_scan_feedback;
 create policy beta_scan_feedback_select on public.beta_scan_feedback
   for select to authenticated using ((select auth.uid()) = user_id);
 
+drop policy if exists beta_scan_feedback_insert on public.beta_scan_feedback;
 create policy beta_scan_feedback_insert on public.beta_scan_feedback
   for insert to authenticated with check (
     (select auth.uid()) = user_id and
@@ -36,6 +38,7 @@ create policy beta_scan_feedback_insert on public.beta_scan_feedback
     )
   );
 
+drop policy if exists beta_scan_feedback_delete on public.beta_scan_feedback;
 create policy beta_scan_feedback_delete on public.beta_scan_feedback
   for delete to authenticated using ((select auth.uid()) = user_id);
 
