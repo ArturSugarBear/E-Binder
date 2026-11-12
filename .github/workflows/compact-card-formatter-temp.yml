@@ -1,0 +1,37 @@
+name: Temporary Compact Card formatter
+on:
+  push:
+    branches:
+      - feature/compact-card-sheet-from-demo-20261112
+permissions:
+  contents: write
+jobs:
+  format:
+    if: "!contains(github.event.head_commit.message, '[formatted-compact]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Apply project code style
+        run: |
+          npx prettier --write \
+            src/collector-card-sheet.css \
+            src/ui/collector-card-overview.ts \
+            src/ui/collection-view.ts \
+            src/ui/discover-view.ts \
+            tests/e2e/compact-card-sheet.spec.ts \
+            tests/e2e/discover.spec.ts \
+            tests/e2e/collection-prices.spec.ts
+      - name: Commit formatted changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/collector-card-sheet.css src/ui/collector-card-overview.ts src/ui/collection-view.ts src/ui/discover-view.ts tests/e2e/
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format compact card sheet [formatted-compact]"
+            git push origin HEAD:feature/compact-card-sheet-from-demo-20261112
+          fi
