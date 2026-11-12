@@ -1,4 +1,5 @@
 import type { VisualHit } from '../domain/visual-retrieval';
+import { visualBetaEnabled } from './visual-beta';
 
 export interface VisualSearchSession {
   match: (photo: Blob, timeoutMs?: number) => Promise<VisualHit[]>;
@@ -12,7 +13,7 @@ export interface VisualSearchSession {
 export async function createVisualSearchSession(
   signal: AbortSignal,
 ): Promise<VisualSearchSession | null> {
-  if (signal.aborted) return null;
+  if (signal.aborted || !visualBetaEnabled()) return null;
   const manifestUrl = `${import.meta.env.BASE_URL}assets/vision/manifest.json`;
   try {
     const response = await fetch(manifestUrl, {
