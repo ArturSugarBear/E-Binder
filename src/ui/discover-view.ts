@@ -1,5 +1,6 @@
 import { localizedCardName } from '../data/japanese-catalog';
 import { enableSheetDrag } from './sheet-gestures';
+import { enableSwipe } from './swipe';
 import { collectorCardOverview, collectorCardExtras } from './collector-card-overview';
 import type { CatalogEntry } from '../data/card-catalog';
 import { cardMarket } from './card-market';
@@ -254,7 +255,38 @@ export function createDiscoverView(ctx: WorkspaceContext) {
       '.w-help, .w-tcgplayer-market, small.w-muted',
     ))
       extra.append(node);
-    view.body.append(overview, market, extra);
+    view.body.append(overview, market);
+    // Browse the currently visible catalogue results just like the demo-binder.
+    // Keep the search/filter state and exact edition unchanged.
+    const tiles = Array.from(
+      results.querySelectorAll<HTMLButtonElement>('button[data-focus]'),
+    );
+    const selected = tiles.findIndex(
+      (tile) => tile.dataset.focus === `catalog-${card.key}`,
+    );
+    const browse = (step: number) => {
+      const target = tiles[selected + step];
+      if (!target) return;
+      view.close();
+      requestAnimationFrame(() => target.click());
+    };
+    if (selected >= 0 && tiles.length > 1) {
+      const previous = action('Vorherige Karte', () => browse(-1), 'secondary');
+      const next = action('Nächste Karte', () => browse(1), 'secondary');
+      previous.disabled = selected === 0;
+      next.disabled = selected === tiles.length - 1;
+      const navigation = el(
+        'nav',
+        'w-card-browse',
+        previous,
+        el('span', 'w-mono', `${selected + 1} / ${tiles.length}`),
+        next,
+      );
+      navigation.setAttribute('aria-label', 'Zwischen Karten wechseln');
+      view.body.append(navigation);
+      enableSwipe(stage, browse);
+    }
+    view.body.append(extra);
     enableSheetDrag(view.dialog, view.dialog, [stage]);
     view.footer.append(
       action(
