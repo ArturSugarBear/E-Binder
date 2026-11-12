@@ -1,5 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 import './pwa.css';
+import { appBuild, releaseComparison, versionLabel } from './data/app-version';
 
 type InstallPrompt = Event & {
   prompt(): Promise<void>;
@@ -93,7 +94,50 @@ function dismissedInstall(): boolean {
   }
 }
 
+let activateUpdate: ((reloadPage?: boolean) => Promise<void>) | undefined;
+
+/** A manual check never reloads over edits or loses private scans. */
+export async function checkForReleaseUpdate(): Promise<
+  Awaited<ReturnType<typeof releaseComparison>>
+> {
+  const status = await releaseComparison();
+  if (status.state !== 'different' || !status.deployed) return status;
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      await registration?.update();
+    } catch {
+      // A blocked SW update does not erase the uncached version result.
+    }
+  }
+  const useUpdate = () => {
+    if (!isUpdateSafe()) {
+      showBanner(
+        'update',
+        'Bitte vor dem Update Änderungen speichern und offene Scan- oder Bearbeitungsdialoge schließen.',
+        { text: 'Erneut versuchen', run: useUpdate },
+      );
+      return;
+    }
+    if (activateUpdate) void activateUpdate(true);
+    else location.reload();
+  };
+  showBanner(
+    'update',
+    `Eine andere E-Binder-Version ist veröffentlicht (${versionLabel(status.deployed)}). Aktuell läuft ${versionLabel(appBuild)}.`,
+    { text: 'Update anwenden', run: useUpdate },
+  );
+  return status;
+}
+
 export function initPwa(): void {
+  const label = document.querySelector<HTMLElement>('#workspace-version');
+  if (label) {
+    label.textContent = versionLabel();
+    label.title = `E-Binder Build ${appBuild.builtAt || 'lokal'}`;
+    label.dataset.buildCommit = appBuild.commit;
+  }
   if (isStandalone()) document.documentElement.classList.add('pwa-standalone');
 
   if ('serviceWorker' in navigator) {
@@ -127,6 +171,7 @@ export function initPwa(): void {
         console.warn('Service Worker konnte nicht gestartet werden:', error);
       },
     });
+    activateUpdate = update;
     const checkForUpdate = () => {
       if (!navigator.onLine || document.visibilityState !== 'visible') return;
       void navigator.serviceWorker.ready
