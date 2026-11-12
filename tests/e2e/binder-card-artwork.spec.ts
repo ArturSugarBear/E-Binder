@@ -1,5 +1,9 @@
 import { test, expect } from './fixtures';
-import { emptyState, type PersonalCard, type Holding } from '../../src/domain/personal';
+import {
+  emptyState,
+  type PersonalCard,
+  type Holding,
+} from '../../src/domain/personal';
 
 // Regression from a real binder screenshot: the card was correctly placed
 // in an existing binder, but the Japanese M1L artwork was missing. Checking
