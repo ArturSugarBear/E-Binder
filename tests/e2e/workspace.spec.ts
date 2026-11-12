@@ -245,7 +245,7 @@ test('artist shortage, fixed anchor and independent demo survive proposal adopti
   ).toBeVisible();
 });
 
-test('scan metadata resumes without ownership and exports no image bytes', async ({
+test('transient scan metadata is cleaned after reload and exports no image bytes', async ({
   page,
 }) => {
   await ready(page);
@@ -274,17 +274,14 @@ test('scan metadata resumes without ownership and exports no image bytes', async
     'Auf diesem Gerät gespeichert',
   );
   await page.reload();
-  await page
-    .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
-    .click();
+  // Scanned photo bytes are intentionally transient. Their pending metadata
+  // must disappear as well, rather than inviting the collector into an
+  // impossible "Kein Foto gespeichert" recovery flow.
+  await expect(
+    page.getByRole('button', { name: 'Erfassung fortsetzen', exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator('.w-photo-review img')).toHaveCount(0);
-  await expect(page.locator('.w-photo-review')).toContainText(
-    'Kein Foto gespeichert',
-  );
-  const buffer = await (async () => {
-    await page.keyboard.press('Escape');
-    return downloadBackup(page);
-  })();
+  const buffer = await downloadBackup(page);
   const records = buffer
     .toString('utf8')
     .trim()
@@ -307,7 +304,7 @@ test('scan metadata resumes without ownership and exports no image bytes', async
       });
     }),
   ).toEqual(['states']);
-  expect(records.filter((line) => line.record === 'capture')).toHaveLength(1);
+  expect(records.filter((line) => line.record === 'capture')).toHaveLength(0);
   expect(records.filter((line) => line.record === 'holding')).toHaveLength(0);
   await addFirst(page);
   await page.getByRole('button', { name: 'Sichern', exact: true }).click();
@@ -328,11 +325,10 @@ test('scan metadata resumes without ownership and exports no image bytes', async
     .getByRole('button', { name: 'Geprüfte Sicherung wiederherstellen' })
     .click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
-  await page
-    .getByRole('button', { name: 'Erfassung fortsetzen', exact: true })
-    .click();
+  await expect(
+    page.getByRole('button', { name: 'Erfassung fortsetzen', exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator('.w-photo-review img')).toHaveCount(0);
-  await page.keyboard.press('Escape');
   await page.locator('#workspace-undo').click();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
 });
