@@ -2166,7 +2166,12 @@ export function openAddCards(
   }
 
   function manualForm(): void {
-    sheet.dialog.classList.remove('w-guided-scan', 'w-scan-confirming', 'w-quick-review', 'w-quick-search');
+    sheet.dialog.classList.remove(
+      'w-guided-scan',
+      'w-scan-confirming',
+      'w-quick-review',
+      'w-quick-search',
+    );
     scanSetChoice.replaceChildren();
     setFlowStage(1);
     interrupt();
