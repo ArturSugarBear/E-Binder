@@ -42,10 +42,8 @@ import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
 import { rankScanCandidates } from '../data/scan-review';
-import {
-  binderReviewComplete,
-  type PocketDecision,
-} from '../domain/binder-scan-review';
+import { discoverNumberedCards } from '../data/scan-auto-resolve';
+import { type PocketDecision } from '../domain/binder-scan-review';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import { donateBetaScanPhoto } from '../data/beta-scan-donation';
 import type { WorkspaceContext } from './workspace-context';
@@ -55,6 +53,7 @@ type Pocket = {
   decision: Decision;
   candidates: PersonalCard[];
   card?: PersonalCard;
+  suggested?: PersonalCard;
   select: HTMLSelectElement;
   finish: HTMLSelectElement;
   variant: HTMLInputElement;
@@ -234,8 +233,34 @@ export function openPageScanner(
     'secondary',
   );
   stop.hidden = true;
+  const acceptSuggestions = action(
+    'Sichere Vorschläge auswählen',
+    () => {
+      if (processing || reAligning) return;
+      let chosen = 0;
+      for (const pocket of pockets) {
+        if (pocket.decision !== 'pending' || !pocket.suggested) continue;
+        const index = pocket.candidates.findIndex(
+          (card) => card.key === pocket.suggested?.key,
+        );
+        if (index < 0) continue;
+        pocket.select.value = 'card:' + index;
+        updatePocket(pocket, true);
+        chosen++;
+      }
+      if (chosen) {
+        status.textContent =
+          chosen +
+          ' Vorschläge ausgewählt. Prüfe die Kartenausgaben im Raster und tippe erst danach auf „Karten übernehmen“.';
+        updateSave();
+      }
+    },
+    'secondary',
+    'check',
+  );
+  acceptSuggestions.hidden = true;
   const save = action(
-    'Geprüfte Binderseite übernehmen',
+    'Gefundene Karten übernehmen',
     () => {
       if (!current || processing) return;
       const slots: (ScannedCardChoice | null)[] = pockets.map((pocket) =>
@@ -247,6 +272,12 @@ export function openPageScanner(
             }
           : null,
       );
+      const acceptedCount = slots.filter(Boolean).length;
+      if (!acceptedCount) {
+        status.textContent =
+          'Noch keine Kartenausgabe erkannt. Prüfe ein Fach oder fotografiere die Seite erneut.';
+        return;
+      }
       if (
         !ctx.commit('Binderseite aus Foto übernommen', (state) =>
           importScannedPage(state, {
@@ -320,10 +351,10 @@ export function openPageScanner(
   );
   confirmEmptyHints.hidden = true;
   const reviewBulk = el(
-    'div',
-    'w-action-row w-page-scan-bulk-actions',
-    confirmEmptyHints,
-    skipUnresolved,
+    'details',
+    'w-page-scan-bulk-actions',
+    el('summary', '', 'Weitere Prüfoptionen'),
+    el('div', 'w-action-row', confirmEmptyHints, skipUnresolved),
   );
   const updateSave = () => {
     manualAlign.disabled = !current || processing || reAligning;
@@ -332,7 +363,7 @@ export function openPageScanner(
       !current ||
       processing ||
       reAligning ||
-      !binderReviewComplete(pockets.map((pocket) => pocket.decision)) ||
+      !pockets.some((pocket) => pocket.decision === 'card') ||
       pockets.some(
         (pocket) =>
           pocket.decision === 'card' &&
@@ -342,18 +373,37 @@ export function openPageScanner(
     const matches = pockets.filter(
       (pocket) => pocket.decision === 'card',
     ).length;
-    const empty = pockets.filter(
-      (pocket) => pocket.decision === 'empty',
-    ).length;
     const open = pockets.filter(
       (pocket) => pocket.decision === 'pending',
     ).length;
     const skipped = pockets.filter(
       (pocket) => pocket.decision === 'skip',
     ).length;
-    reviewSummary.textContent = pockets.length
-      ? `${matches} ausgewählt · ${empty} bestätigt leer · ${skipped} ungeklärt · ${open} noch zu prüfen. Nur ausgewählte Karten werden übernommen.`
-      : 'Noch keine Binderseite eingelesen.';
+    const suggestedCount = pockets.filter(
+      (pocket) => pocket.decision === 'pending' && pocket.suggested,
+    ).length;
+    if (!pockets.length) {
+      reviewSummary.textContent = 'Bereit für deine Binderseite.';
+    } else if (matches > 0) {
+      reviewSummary.textContent = `${matches} ${matches === 1 ? 'Karte' : 'Karten'} ausgewählt · ${open + skipped} offen. Nur ausgewählte Karten werden übernommen.`;
+    } else if (processing) {
+      reviewSummary.textContent = 'Deine Karten werden geprüft …';
+    } else if (suggestedCount > 0) {
+      reviewSummary.textContent = `${suggestedCount} ${suggestedCount === 1 ? 'passender Vorschlag' : 'passende Vorschläge'} gefunden · vor dem Übernehmen auswählen.`;
+    } else {
+      reviewSummary.textContent =
+        'Noch keine eindeutige Ausgabe. Tippe auf ein Fach, um die Karte zu prüfen.';
+    }
+    save.querySelector('span')!.textContent =
+      matches > 0
+        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
+        : 'Noch keine Karten ausgewählt';
+    acceptSuggestions.hidden = processing || suggestedCount === 0;
+    acceptSuggestions.querySelector('span')!.textContent =
+      suggestedCount +
+      ' eindeutige ' +
+      (suggestedCount === 1 ? 'Ausgabe' : 'Ausgaben') +
+      ' auswählen';
     skipUnresolved.hidden = open === 0;
     skipUnresolved.disabled = processing || reAligning || open === 0;
     const emptyHints = pockets.filter(
@@ -431,6 +481,7 @@ export function openPageScanner(
     progress,
     grid,
     reviewSummary,
+    acceptSuggestions,
     reviewBulk,
     reviewPanel,
   );
@@ -804,9 +855,11 @@ export function openPageScanner(
       sharedRecognition = createRecognitionSession(
         controller.signal,
         (label) => {
-          status.textContent = label;
+          status.textContent = 'Binderkarten werden gelesen · ' + label;
         },
       );
+      // Start loading ONNX immediately, before per-card quality inspection.
+      sharedRecognition.warmup();
     }
     const abort = sharedRecognitionAbort;
     const session = sharedRecognition;
@@ -830,6 +883,8 @@ export function openPageScanner(
       // Diagnostics only advise retakes; they never auto-mark a pocket as empty.
       for (let index = 0; index < tiles.length; index++) {
         if (closed || abort.signal.aborted) break;
+        const pocket = pockets[index]!;
+        status.textContent = `Fach ${index + 1} von ${tiles.length} · Texterkennung läuft …`;
         try {
           const inspection = await inspectPocketPhoto(
             tiles[index]!,
@@ -850,10 +905,6 @@ export function openPageScanner(
           pockets[index]!.quality.textContent =
             'Fotoqualität konnte nicht geprüft werden. Bitte selbst kontrollieren.';
         }
-      }
-      for (let index = 0; index < tiles.length; index++) {
-        if (closed || abort.signal.aborted) break;
-        const pocket = pockets[index]!;
         try {
           if (await likelyEmptyPocket(tiles[index]!, abort.signal)) {
             if (closed || abort.signal.aborted) break;
@@ -971,11 +1022,20 @@ export function openPageScanner(
             (!resolvedVisual.length || visualReview.kind !== 'exact-print')
           ) {
             try {
-              online = await fetchRecognizedCards(
-                text,
-                preferredLanguage(text),
-                lookupSignal,
-              );
+              // When Japanese characters are unreadable, a numeric fraction
+              // still identifies candidates in Japanese catalogues. Explore
+              // DE/EN/JA in parallel rather than assuming German from OCR.
+              online = recognitionClues(text).some((clue) => clue.setId)
+                ? await fetchRecognizedCards(
+                    text,
+                    preferredLanguage(text),
+                    lookupSignal,
+                  )
+                : await discoverNumberedCards(
+                    text,
+                    preferredLanguage(text),
+                    lookupSignal,
+                  );
             } catch {
               catalogFailed = true;
               // OCR and local cards remain available without a connection.
@@ -1026,6 +1086,7 @@ export function openPageScanner(
                 ? 'catalog-error'
                 : 'no-candidates';
           const preferred = ranked.suggested;
+          pocket.suggested = preferred;
           const exactIndex = preferred
             ? pocket.candidates.findIndex((card) => card.key === preferred.key)
             : -1;
@@ -1036,7 +1097,7 @@ export function openPageScanner(
             pocket.container!.dataset.suggestedCardKey = preferred!.key;
           }
           pocket.status.textContent = matched
-            ? `${pocket.card!.name} · ${pocket.card!.number}`
+            ? `Vorschlag: ${preferred!.name} · ${preferred!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
               : ranked.conflictingName
@@ -1096,7 +1157,7 @@ export function openPageScanner(
           `${index + 1} von 9 Fächern geprüft`,
           index + 1,
         );
-        status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;
+        status.textContent = `Karten werden gelesen · ${index + 1} von ${tiles.length} geprüft`;
       }
     } finally {
       // Keep the ONNX model loaded for subsequent photos in the same batch.
@@ -1122,8 +1183,12 @@ export function openPageScanner(
       updateSave();
       if (!closed)
         status.textContent = abort.signal.aborted
-          ? 'Erkennung angehalten. Prüfe die vorhandenen Vorschläge oder suche fehlende Karten manuell.'
-          : 'Erkennung abgeschlossen. Prüfe die offenen Fächer oder übernimm die ausgewählten Karten.';
+          ? 'Erkennung angehalten. Deine bisherigen Vorschläge bleiben prüfbar.'
+          : pockets.some((pocket) => pocket.decision === 'card')
+            ? 'Erkennung abgeschlossen. Übernimm die ausgewählten Karten – unerkannte Fächer bleiben frei.'
+            : pockets.some((pocket) => pocket.suggested)
+              ? 'Erkennung abgeschlossen. Wähle die eindeutigen Vorschläge aus und bestätige danach die Übernahme.'
+              : 'Noch keine Karten sicher erkannt. Tippe auf ein Fach und prüfe die Ausgaben oder fotografiere erneut.';
     }
   };
   const nextPage = async () => {
