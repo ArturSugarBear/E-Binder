@@ -43,7 +43,6 @@ import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
 import { rankScanCandidates } from '../data/scan-review';
 import {
-  binderReviewComplete,
   type PocketDecision,
 } from '../domain/binder-scan-review';
 import { recordBetaEvent } from '../data/beta-diagnostics';
@@ -234,7 +233,7 @@ export function openPageScanner(
   );
   stop.hidden = true;
   const save = action(
-    'Geprüfte Binderseite übernehmen',
+    'Gefundene Karten übernehmen',
     () => {
       if (!current || processing) return;
       const slots: (ScannedCardChoice | null)[] = pockets.map((pocket) =>
@@ -246,6 +245,12 @@ export function openPageScanner(
             }
           : null,
       );
+      const acceptedCount = slots.filter(Boolean).length;
+      if (!acceptedCount) {
+        status.textContent =
+          'Noch keine Kartenausgabe erkannt. Prüfe ein Fach oder fotografiere die Seite erneut.';
+        return;
+      }
       if (
         !ctx.commit('Binderseite aus Foto übernommen', (state) =>
           importScannedPage(state, {
@@ -319,10 +324,10 @@ export function openPageScanner(
   );
   confirmEmptyHints.hidden = true;
   const reviewBulk = el(
-    'div',
-    'w-action-row w-page-scan-bulk-actions',
-    confirmEmptyHints,
-    skipUnresolved,
+    'details',
+    'w-page-scan-bulk-actions',
+    el('summary', '', 'Weitere Prüfoptionen'),
+    el('div', 'w-action-row', confirmEmptyHints, skipUnresolved),
   );
   const updateSave = () => {
     manualAlign.disabled = !current || processing || reAligning;
@@ -331,7 +336,7 @@ export function openPageScanner(
       !current ||
       processing ||
       reAligning ||
-      !binderReviewComplete(pockets.map((pocket) => pocket.decision)) ||
+      !pockets.some((pocket) => pocket.decision === 'card') ||
       pockets.some(
         (pocket) =>
           pocket.decision === 'card' &&
@@ -351,8 +356,15 @@ export function openPageScanner(
       (pocket) => pocket.decision === 'skip',
     ).length;
     reviewSummary.textContent = pockets.length
-      ? `${matches} ausgewählt · ${empty} bestätigt leer · ${skipped} ungeklärt · ${open} noch zu prüfen. Nur ausgewählte Karten werden übernommen.`
-      : 'Noch keine Binderseite eingelesen.';
+      ? matches > 0
+        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} gefunden · ${open + skipped} offen. Nur die ausgewählten Karten werden übernommen.`
+        : processing
+          ? 'Deine Karten werden geprüft …'
+          : 'Noch keine Karte sicher zugeordnet. Tippe auf ein Fach, um einen Vorschlag zu prüfen.'
+      : 'Bereit für deine Binderseite.';
+    save.querySelector('span')!.textContent = matches > 0
+      ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
+      : 'Noch keine Karten gefunden';
     skipUnresolved.hidden = open === 0;
     skipUnresolved.disabled = processing || reAligning || open === 0;
     const emptyHints = pockets.filter(
@@ -1095,7 +1107,7 @@ export function openPageScanner(
           `${index + 1} von 9 Fächern geprüft`,
           index + 1,
         );
-        status.textContent = `${index + 1} von 9 Fächern verarbeitet. Keine Karte wurde automatisch gespeichert.`;
+        status.textContent = `Karten werden gelesen · ${index + 1} von ${tiles.length} geprüft`;
       }
     } finally {
       // Keep the ONNX model loaded for subsequent photos in the same batch.
@@ -1121,8 +1133,10 @@ export function openPageScanner(
       updateSave();
       if (!closed)
         status.textContent = abort.signal.aborted
-          ? 'Erkennung angehalten. Prüfe die vorhandenen Vorschläge oder suche fehlende Karten manuell.'
-          : 'Erkennung abgeschlossen. Prüfe die offenen Fächer oder übernimm die ausgewählten Karten.';
+          ? 'Erkennung angehalten. Deine bisherigen Vorschläge bleiben prüfbar.'
+          : pockets.some((pocket) => pocket.decision === 'card')
+            ? 'Erkennung abgeschlossen. Tippe auf „Karten übernehmen“ – unerkannte Fächer bleiben frei.'
+            : 'Noch keine Karten sicher erkannt. Tippe auf ein Fach und prüfe die Ausgaben oder fotografiere erneut.';
     }
   };
   const nextPage = async () => {
