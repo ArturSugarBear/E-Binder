@@ -1,5 +1,5 @@
 import { action, el, icon } from './workspace-dom';
-import { appBuild, builtAtLabel, versionLabel } from '../data/app-version';
+import { builtAtLabel, versionLabel } from '../data/app-version';
 import { checkForReleaseUpdate } from '../pwa';
 import {
   visualBetaEnabled,
