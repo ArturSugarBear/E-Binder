@@ -388,10 +388,18 @@ export async function startWorkspace(): Promise<void> {
         : store instanceof CloudStore
           ? store.syncError
             ? 'Lokal gesichert · Cloud ausstehend'
-            : 'Im Konto gespeichert'
+            : store.pendingSyncCount > 0
+              ? 'Lokal gesichert · Cloud synchronisiert …'
+              : 'Im Konto gespeichert'
           : 'Auf diesem Gerät gespeichert';
     status.dataset.state =
-      store instanceof CloudStore && store.syncError ? 'error' : 'saved';
+      store instanceof CloudStore && store.syncError
+        ? 'error'
+        : store instanceof CloudStore && store.pendingSyncCount > 0
+          ? 'saving'
+          : 'saved';
+    if (store instanceof CloudStore && !store.syncError)
+      storageError.hidden = true;
     if (store instanceof CloudStore && store.syncError) {
       storageError.hidden = false;
       storageError.replaceChildren(
@@ -406,6 +414,11 @@ export async function startWorkspace(): Promise<void> {
         action('Sicherung herunterladen', ctx.openBackup, 'secondary'),
       );
     }
+  }
+  if (store instanceof CloudStore) {
+    store.onSyncStatusChange = () => {
+      if (!saveFailed && ctx.state.mode === 'personal') saved();
+    };
   }
   function persist(snapshot: PersonalState): void {
     status.textContent = 'Wird gespeichert …';
