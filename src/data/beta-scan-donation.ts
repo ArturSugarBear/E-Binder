@@ -190,22 +190,22 @@ export async function donateBetaScanPhoto(
       await client.storage.from(BUCKET).remove([objectPath]);
       return;
     }
-    const { error: rowError } = await client
-      .from('beta_scan_samples')
-      .insert({
-        id,
-        user_id: userId,
-        object_path: objectPath,
-        source_kind: kind,
-        consent_version: BETA_SCAN_CONSENT_VERSION,
-        byte_count: jpeg.size,
-        capture_key:
-          captureKey &&
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(captureKey)
-            ? captureKey
-            : null,
-        review_status: 'pending',
-      });
+    const { error: rowError } = await client.from('beta_scan_samples').insert({
+      id,
+      user_id: userId,
+      object_path: objectPath,
+      source_kind: kind,
+      consent_version: BETA_SCAN_CONSENT_VERSION,
+      byte_count: jpeg.size,
+      capture_key:
+        captureKey &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          captureKey,
+        )
+          ? captureKey
+          : null,
+      review_status: 'pending',
+    });
     if (rowError) await client.storage.from(BUCKET).remove([objectPath]);
   } catch {
     // Network donation is best effort, never a prerequisite for local recognition.
@@ -229,7 +229,9 @@ export async function recordBetaScanConfirmation(
     !client ||
     state !== 'on' ||
     !userId ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(captureKey) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      captureKey,
+    ) ||
     !/^tcgdex:(de|en|ja):[A-Za-z0-9_.+-]{3,160}$/.test(selectedPrinting)
   )
     return;

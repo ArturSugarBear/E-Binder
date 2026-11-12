@@ -5461,8 +5461,12 @@ textarea.w-input,
   animation: scan-photo-shimmer 2.15s ease-in-out infinite;
 }
 @keyframes scan-photo-shimmer {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(110%); }
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .w-scan-analyzing .w-photo-comparison::after {

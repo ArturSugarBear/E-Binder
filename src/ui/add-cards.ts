@@ -11,7 +11,10 @@ import {
   matchesCard,
 } from '../data/card-catalog';
 import { createRecognitionSession, recognizePhoto } from '../data/recognize';
-import { donateBetaScanPhoto, recordBetaScanConfirmation } from '../data/beta-scan-donation';
+import {
+  donateBetaScanPhoto,
+  recordBetaScanConfirmation,
+} from '../data/beta-scan-donation';
 import { visualBetaEnabled } from '../data/visual-beta';
 import {
   createVisualSearchSession,
@@ -1012,11 +1015,15 @@ export function openAddCards(
       const background = liveReviewResults.get(shot.id);
       if (background) {
         progress.value = 1;
-      status.textContent = candidates.length
-        ? 'Kandidaten gefunden · Ausgabe mit Foto vergleichen'
-        : 'Noch kein Treffer · deine Aufnahme bleibt für die Suche erhalten';
-      journey.update('recognize', 'Abgleich abgeschlossen · nächster Prüfschritt', 1);
-      ctx.commit('Texterkennung abgeschlossen', (state) =>
+        status.textContent = candidates.length
+          ? 'Kandidaten gefunden · Ausgabe mit Foto vergleichen'
+          : 'Noch kein Treffer · deine Aufnahme bleibt für die Suche erhalten';
+        journey.update(
+          'recognize',
+          'Abgleich abgeschlossen · nächster Prüfschritt',
+          1,
+        );
+        ctx.commit('Texterkennung abgeschlossen', (state) =>
           changeState(state, (next) => {
             const target = next.captures.find((item) => item.id === shot.id);
             if (target?.status === 'pending') {
@@ -1770,7 +1777,9 @@ export function openAddCards(
           ),
           action(
             'Set und Nummer abgleichen',
-            () => { void showSetChooser(); },
+            () => {
+              void showSetChooser();
+            },
             'primary',
             'search',
           ),
@@ -2175,7 +2184,10 @@ export function openAddCards(
             candidate: publicCardKey(shot.candidates[0]),
             selected: publicCardKey(adopted),
           });
-          void recordBetaScanConfirmation(shot.id, publicCardKey(adopted) ?? '');
+          void recordBetaScanConfirmation(
+            shot.id,
+            publicCardKey(adopted) ?? '',
+          );
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
           ocrController?.abort();

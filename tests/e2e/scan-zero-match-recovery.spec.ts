@@ -43,21 +43,25 @@ test('zero-match scanner keeps the photo and guides the collector to exact-print
     .getByRole('button', { name: 'Karten hinzufügen', exact: true })
     .click();
   const dialog = page.getByRole('dialog', { name: 'Karten hinzufügen' });
-  await dialog.locator('input[capture]').setInputFiles(
-    'public/assets/cards/svi-211.webp',
-  );
+  await dialog
+    .locator('input[capture]')
+    .setInputFiles('public/assets/cards/svi-211.webp');
   const crop = page.getByRole('dialog', { name: 'Karte ausrichten' });
   await crop.getByRole('button', { name: 'Ausschnitt prüfen' }).click();
   await crop.getByRole('button', { name: 'Texterkennung starten' }).click();
-  await expect(dialog.getByRole('heading', { name: 'Wir suchen deine Karte weiter' }))
-    .toBeVisible({ timeout: 65_000 });
+  await expect(
+    dialog.getByRole('heading', { name: 'Wir suchen deine Karte weiter' }),
+  ).toBeVisible({ timeout: 65_000 });
   await expect(dialog.locator('.w-photo-review img')).toHaveAttribute(
     'src',
     /^blob:/,
   );
-  await expect(dialog.getByRole('button', { name: 'Set und Nummer abgleichen' }))
-    .toBeVisible();
-  await dialog.getByRole('button', { name: 'Set und Nummer abgleichen' }).click();
+  await expect(
+    dialog.getByRole('button', { name: 'Set und Nummer abgleichen' }),
+  ).toBeVisible();
+  await dialog
+    .getByRole('button', { name: 'Set und Nummer abgleichen' })
+    .click();
   await expect(dialog.locator('input[placeholder*="088/063"]')).toBeVisible();
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });

@@ -22,7 +22,10 @@ vi.mock('../../src/data/supabase', () => {
       signInAnonymously: async () => {
         fake.signCalls++;
         fake.signed = true;
-        return { data: { user: { id: userId, is_anonymous: true } }, error: null };
+        return {
+          data: { user: { id: userId, is_anonymous: true } },
+          error: null,
+        };
       },
     },
     from(table: string) {
