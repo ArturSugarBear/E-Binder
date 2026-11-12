@@ -27,3 +27,15 @@ Primär: **Exact Printing Top-1** aus Set, Sammlernummer, vollständigem Namen, 
 ## Der aktuelle Implementierungsstand
 
 Die Upload- und RLS-Schicht stellt **unbewertete** private Samples bereit. Es gibt **keinen** automatischen Trainingslauf und noch keine verifizierten neuen Gewichte. Dieses Gate ist beabsichtigt: Aus wenigen oder falsch etikettierten Aufnahmen ohne Hold-out wäre „Training erfolgreich“ fachlich irreführend.
+
+## Reproduzierbare Offline-A/B-Freigabe
+
+Nach schriftlich belegter Einwilligung und unabhängiger Prüfung werden die **gleichen** privaten Fotos in zwei Läufen von `scripts/benchmark-card-scans.mjs` untersucht: Beta-Schalter aus (OCR allein), danach eingeschaltet (OCR + visueller ONNX-Index). Die Ausgabe enthält nur Metadaten und Messwerte, keine Originalbilder.
+
+```sh
+npm run audit:beta-model -- /private/baseline.json /private/visual.json --gate
+```
+
+`scripts/compare-beta-benchmarks.mjs` lehnt abweichende Testmengen, falsch gepaarte Labels, Duplikate, unter 100 unabhängig geprüfte Kartenfotos, unter 10 Negativfälle, technische Fehler, mehr falsche automatische Vorschläge oder einen schlechteren Top-1/Top-5-Stand ab. Ein Durchlauf ist trotzdem **keine** Berechtigung, Modellgewichte ohne eigenes rechtliches, reproduzierbares Training und unabhängigen Hold-out zu ändern.
+
+Stand 12. November: In Supabase liegen 15 private Kartenfotos zur Prüfung, alle mit `review_status=pending`, null `human_verified`; die Fotos dürfen daher aktuell weder als echte Benchmark-Ground-Truth noch für Training benutzt werden. Der autorisierte Reviewer muss sie zuerst individuell prüfen. Verschlüsselter Export und Label-Gates sind unter `scripts/export-beta-review.mjs` und `scripts/review-beta-samples.mjs` implementiert.
