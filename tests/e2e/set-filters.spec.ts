@@ -139,7 +139,7 @@ test('set filters exclude impossible rarities and show a genuine example beyond 
     .click();
   const dialog = page.getByRole('dialog');
   await expect(
-    dialog.getByRole('heading', { name: 'Mega-Entwicklung', exact: true }),
+    dialog.getByRole('heading', { name: 'Testkarte 25', exact: true }),
   ).toBeVisible();
   await expect(dialog).toContainText('025/132 · DE');
   await expect(dialog).toContainText('Artist B');
