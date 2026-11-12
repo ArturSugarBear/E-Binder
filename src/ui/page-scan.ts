@@ -378,20 +378,24 @@ export function openPageScanner(
     const skipped = pockets.filter(
       (pocket) => pocket.decision === 'skip',
     ).length;
-    reviewSummary.textContent = pockets.length
-      ? matches > 0
-        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} gefunden · ${open + skipped} offen. Nur die ausgewählten Karten werden übernommen.`
-        : processing
-          ? 'Deine Karten werden geprüft …'
-          : 'Noch keine Karte sicher zugeordnet. Tippe auf ein Fach, um einen Vorschlag zu prüfen.'
-      : 'Bereit für deine Binderseite.';
-    save.querySelector('span')!.textContent =
-      matches > 0
-        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
-        : 'Noch keine Karten gefunden';
     const suggestedCount = pockets.filter(
       (pocket) => pocket.decision === 'pending' && pocket.suggested,
     ).length;
+    if (!pockets.length) {
+      reviewSummary.textContent = 'Bereit für deine Binderseite.';
+    } else if (matches > 0) {
+      reviewSummary.textContent = `${matches} ${matches === 1 ? 'Karte' : 'Karten'} ausgewählt · ${open + skipped} offen. Nur ausgewählte Karten werden übernommen.`;
+    } else if (processing) {
+      reviewSummary.textContent = 'Deine Karten werden geprüft …';
+    } else if (suggestedCount > 0) {
+      reviewSummary.textContent = `${suggestedCount} ${suggestedCount === 1 ? 'passender Vorschlag' : 'passende Vorschläge'} gefunden · vor dem Übernehmen auswählen.`;
+    } else {
+      reviewSummary.textContent = 'Noch keine eindeutige Ausgabe. Tippe auf ein Fach, um die Karte zu prüfen.';
+    }
+    save.querySelector('span')!.textContent =
+      matches > 0
+        ? `${matches} ${matches === 1 ? 'Karte' : 'Karten'} übernehmen`
+        : 'Noch keine Karten ausgewählt';
     acceptSuggestions.hidden = processing || suggestedCount === 0;
     acceptSuggestions.querySelector('span')!.textContent =
       suggestedCount +
@@ -1179,8 +1183,10 @@ export function openPageScanner(
         status.textContent = abort.signal.aborted
           ? 'Erkennung angehalten. Deine bisherigen Vorschläge bleiben prüfbar.'
           : pockets.some((pocket) => pocket.decision === 'card')
-            ? 'Erkennung abgeschlossen. Tippe auf „Karten übernehmen“ – unerkannte Fächer bleiben frei.'
-            : 'Noch keine Karten sicher erkannt. Tippe auf ein Fach und prüfe die Ausgaben oder fotografiere erneut.';
+            ? 'Erkennung abgeschlossen. Übernimm die ausgewählten Karten – unerkannte Fächer bleiben frei.'
+            : pockets.some((pocket) => pocket.suggested)
+              ? 'Erkennung abgeschlossen. Wähle die eindeutigen Vorschläge aus und bestätige danach die Übernahme.'
+              : 'Noch keine Karten sicher erkannt. Tippe auf ein Fach und prüfe die Ausgaben oder fotografiere erneut.';
     }
   };
   const nextPage = async () => {
