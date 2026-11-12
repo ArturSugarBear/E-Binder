@@ -73,3 +73,46 @@ it('rejects arbitrary hosts and ambiguous collector numbers', async () => {
     trustedArtwork('https://images.pokemontcg.io.evil.example/a.png'),
   ).toBe(false);
 });
+
+it('maps all 30 Classic Collection printings by TCGdex ID, not reused historical number', async () => {
+  vi.resetModules();
+  const { default: classic } =
+    await import('../../public/catalog-art/30th-c.json');
+  expect(Object.keys(classic.cards)).toHaveLength(30);
+  expect(
+    new Set(Object.values(classic.cards).map((art) => art.providerId)).size,
+  ).toBe(30);
+  expect(classic.cards['003'].providerId).toBe('me55c-11');
+  expect(classic.cards['004'].providerId).toBe('me55c-11g');
+  expect(classic.cards['022'].providerId).toBe('me55c-106p');
+  expect(classic.cards['023'].providerId).toBe('me55c-106m');
+  expect(classic.cards['024'].providerId).toBe('me55c-106');
+
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) =>
+      Response.json(
+        url.endsWith('index.json')
+          ? { version: 1, sets: { '30th-c': { cards: '30th-c.json' } } }
+          : classic,
+      ),
+    ),
+  );
+  const { secondaryCardArt } = await import('../../src/data/artwork-fallbacks');
+  const classicCard = {
+    ...card,
+    setId: '30th-c',
+    sourceId: '30th-c-004',
+    number: '004/030',
+  };
+  expect(await secondaryCardArt(classicCard)).toMatchObject({
+    providerId: 'me55c-11g',
+    url: 'https://images.scrydex.com/pokemon/me55c-11g/large',
+  });
+  expect(
+    await secondaryCardArt({ ...classicCard, number: '003/030' }),
+  ).toBeUndefined();
+  expect(
+    await secondaryCardArt({ ...classicCard, setId: '30th' }),
+  ).toBeUndefined();
+});
