@@ -196,7 +196,7 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
-for (const width of [320, 390, 430]) {
+for (const width of [320, 375, 390, 430]) {
   test(`five consecutive scans keep a stable reviewable UI at ${width}px without ownership`, async ({
     page,
   }, testInfo) => {
@@ -488,7 +488,7 @@ test('closing the scanner while camera permission is pending releases late track
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
-for (const width of [320, 390, 430]) {
+for (const width of [320, 375, 390, 430]) {
   test(`camera-denied recovery stays accessible at ${width}px with reduced motion`, async ({
     page,
   }, testInfo) => {
