@@ -28,14 +28,28 @@ export async function createVisualSearchSession(
   const worker = new Worker(new URL('./visual-worker.ts', import.meta.url), {
     type: 'module',
   });
-  // Warm the real model, in parallel with the collector's normal alignment
-  // and OCR setup. The first inference can still be slow on older iPhones.
-  worker.postMessage({
-    id: 0,
-    warmup: true,
-    photo: new Blob(),
-    manifestUrl,
+  // The model download, hash checks and ONNX initialization are a distinct
+  // cold-start stage. A per-card timeout begins only after real readiness.
+  // Otherwise all early scans time out while a valid model is downloading.
+  let settledWarmup = false;
+  let resolveWarmup: (() => void) | undefined;
+  let rejectWarmup: ((reason: Error) => void) | undefined;
+  const warmed = new Promise<void>((resolve, reject) => {
+    resolveWarmup = resolve;
+    rejectWarmup = reject;
   });
+  void warmed.catch(() => undefined);
+  const warmupTimer = setTimeout(() => {
+    finishWarmup(new Error('Das Bildmodell konnte nicht rechtzeitig geladen werden.'));
+    close();
+  }, 60000);
+  const finishWarmup = (error?: Error) => {
+    if (settledWarmup) return;
+    settledWarmup = true;
+    clearTimeout(warmupTimer);
+    if (error) rejectWarmup?.(error);
+    else resolveWarmup?.();
+  };
   let disposed = false;
   let nextId = 0;
   let current:
@@ -57,6 +71,7 @@ export async function createVisualSearchSession(
   const close = () => {
     if (disposed) return;
     disposed = true;
+    finishWarmup(new DOMException('Abgebrochen', 'AbortError'));
     worker.terminate();
     signal.removeEventListener('abort', close);
     finish(new DOMException('Abgebrochen', 'AbortError'));
@@ -74,7 +89,16 @@ export async function createVisualSearchSession(
       message?: string;
     }>,
   ) => {
-    if (disposed || !current || event.data.id !== current.id) return;
+    if (disposed) return;
+    if (event.data.id === 0) {
+      if (event.data.type === 'ready') finishWarmup();
+      else if (event.data.type === 'error') {
+        finishWarmup(new Error(event.data.message ?? 'Bildmodell nicht verfügbar.'));
+        close();
+      }
+      return;
+    }
+    if (!current || event.data.id !== current.id) return;
     if (event.data.type === 'done') finish(undefined, event.data.hits ?? []);
     else if (event.data.type === 'error') {
       finish(new Error(event.data.message ?? 'Bildsuche fehlgeschlagen.'));
@@ -85,8 +109,12 @@ export async function createVisualSearchSession(
   // Bound the queue to prevent unbounded photo retention on old iPhones.
   let matchQueue: Promise<void> = Promise.resolve();
   let queuedMatches = 0;
-  const matchOnce = (photo: Blob, timeoutMs: number): Promise<VisualHit[]> =>
-    new Promise((resolve, reject) => {
+  const matchOnce = async (
+    photo: Blob,
+    timeoutMs: number,
+  ): Promise<VisualHit[]> => {
+    await warmed;
+    return new Promise((resolve, reject) => {
       if (disposed || signal.aborted) {
         reject(new DOMException('Abgebrochen', 'AbortError'));
         return;
@@ -110,6 +138,7 @@ export async function createVisualSearchSession(
       current = { id, resolve, reject, timer };
       worker.postMessage({ id, photo, manifestUrl });
     });
+  };
   signal.addEventListener('abort', close, { once: true });
   const match = (photo: Blob, timeoutMs = 45000): Promise<VisualHit[]> => {
     if (disposed || signal.aborted)
@@ -129,5 +158,18 @@ export async function createVisualSearchSession(
     });
   };
   if (signal.aborted) close();
+  else {
+    try {
+      worker.postMessage({
+        id: 0,
+        warmup: true,
+        photo: new Blob(),
+        manifestUrl,
+      });
+    } catch {
+      finishWarmup(new Error('Das Bildmodell konnte nicht gestartet werden.'));
+      close();
+    }
+  }
   return { match, close };
 }
