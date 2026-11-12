@@ -27,3 +27,13 @@ Primär: **Exact Printing Top-1** aus Set, Sammlernummer, vollständigem Namen, 
 ## Der aktuelle Implementierungsstand
 
 Die Upload- und RLS-Schicht stellt **unbewertete** private Samples bereit. Es gibt **keinen** automatischen Trainingslauf und noch keine verifizierten neuen Gewichte. Dieses Gate ist beabsichtigt: Aus wenigen oder falsch etikettierten Aufnahmen ohne Hold-out wäre „Training erfolgreich“ fachlich irreführend.
+
+## Gastbeiträge und Korrekturen (November 2026)
+
+- Auch Nutzer ohne E-Binder-Konto können im **Profil** die Foto-Teilnahme ausdrücklich aktivieren. Erst dann wird eine getrennte, pseudonyme Supabase-Anonymous-Auth-Identität angelegt. Die lokale Sammlung bleibt im `PersonalStore` und wird nicht mit dieser Auth-Identität synchronisiert.
+- Vorausgesetzt wird, dass **Anonymous Sign-ins** in den Supabase-Authentifizierungseinstellungen aktiviert sind. Falls nicht, wird eine verständliche Fehlermeldung gezeigt; Scannen und OCR arbeiten lokal weiter.
+- `beta_scan_samples.capture_key` verbindet den privaten gespendeten Fotoeintrag mit `beta_scan_feedback.capture_key`. Ein manuell oder nach einem Vorschlag bestätigter `tcgdex:Sprache:KartenID`-Schlüssel ist **vorläufiges Nutzerfeedback**, keine verifizierte Wahrheit. Ein fehlgeschlagener Scan bleibt ohne vermutetes Label und geht in die unabhängige Prüfung.
+- Fotouploads, die keine aktive Zustimmung nachweisen können, sind durch Server-RLS und den privaten Bucket verboten. Die Bildkopie wird ohne EXIF neu kodiert, nicht in öffentliche GitHub-Artefakte geschrieben und kann vom jeweiligen Besitzer gelöscht werden.
+- Widerruf stoppt **neue** Fotoübertragungen. „Alle meine Beta-Testbilder löschen“ deaktiviert zusätzlich die Einwilligung und entfernt die privaten Bilder, Sample-Metadaten und vorläufigen Korrekturen. Gastnutzer müssen dies vor dem Löschen des lokalen Browser-Speichers tun; ohne ihre anonyme Identität kann die clientseitige Löschung nicht mehr autorisiert werden.
+- Die Zusatzdaten erlauben später einen **privaten OCR-/Bildmodell-Benchmark**: tatsächliches Kamerafoto versus unabhängiges, anhand von Edition/Set/Nummer/Name/Sprachvarianten geprüftes Label. Die Nutzerwahl selbst darf niemals ungeprüft Trainingsgewichtung werden.
+- Vor Produktiveinsatz prüfen: Benutzerinformation und Datenschutztext, Aufbewahrungs-/Löschkonzept für verlorene Gastidentitäten, Rate-Limits für anonyme Auth und Storage, Missbrauchsschutz und getrennte A/B-Messung auf einem versiegelten Hold-out. Training bleibt bis zu diesen Prüfungen deaktiviert.
