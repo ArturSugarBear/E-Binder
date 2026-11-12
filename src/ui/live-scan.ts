@@ -2,7 +2,7 @@ import { manualCaptureAvailable } from '../domain/live-capture-ui';
 import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
-import { suggestPageCorners } from '../domain/page-outline';
+import { suggestCardCorners } from '../domain/card-outline';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
 import {
@@ -364,6 +364,7 @@ export function openLiveScanner(
   let reliable: Quad | null = null;
   let sampled = 0;
   let cameraReadyAt = 0;
+  let frameFailures = 0;
   const sample = document.createElement('canvas');
   sample.width = 192;
   sample.height = 256;
@@ -389,6 +390,7 @@ export function openLiveScanner(
     if (!running || closed || busy) return;
     waitingForRemoval = false;
     missingFrames = 0;
+    frameFailures = 0;
     observations = 0;
     last = null;
     reliable = null;
@@ -515,19 +517,25 @@ export function openLiveScanner(
       stableFrames: observations,
       elapsedMs: time - cameraReadyAt,
     });
-    if (busy || document.hidden || time - sampled < 280 || video.readyState < 2)
+    if (busy || document.hidden || time - sampled < 280) return;
+    if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+      if (time - cameraReadyAt > 3000)
+        status.textContent =
+          'Warte auf ein Kamerabild · Kamera und Berechtigung prüfen';
       return;
+    }
     sampled = time;
-    if (!video.videoWidth || !video.videoHeight) return;
     let corners: Quad | null = null;
     try {
       drawVisible(video, sample);
       const pixels = sample
         .getContext('2d', { willReadFrequently: true })!
         .getImageData(0, 0, sample.width, sample.height);
-      corners = suggestPageCorners(pixels.data, sample.width, sample.height);
+      corners = suggestCardCorners(pixels.data, sample.width, sample.height);
+      frameFailures = 0;
     } catch {
       // A temporarily missing camera frame must never trigger a shutter.
+      frameFailures++;
     }
     if (waitingForRemoval) {
       const latch = updateCaptureLatch(
@@ -556,7 +564,12 @@ export function openLiveScanner(
       progress.value = 0;
       stage.dataset.scanPhase = 'ready';
       stageLabel.textContent = 'Karte ausrichten';
-      status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
+      status.textContent =
+        frameFailures >= 3
+          ? 'Kamerabild kann nicht ausgewertet werden · Ecken werden gesucht'
+          : time - cameraReadyAt > 4500
+            ? 'Ecken werden gesucht · Mehr Licht, Abstand ändern oder manuell aufnehmen'
+            : 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
     observations = lock.stableFrames;
@@ -602,6 +615,7 @@ export function openLiveScanner(
     reliable = null;
     progress.value = 0;
     sampled = 0;
+    frameFailures = 0;
     stage.classList.remove('has-card-outline');
     polygon.removeAttribute('points');
     journey.update('ready', 'Karte in den Rahmen halten', 0);
