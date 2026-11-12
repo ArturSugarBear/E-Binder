@@ -5456,7 +5456,7 @@ textarea.w-input,
   border-radius: inherit;
   pointer-events: none;
   z-index: -1;
-  background-image: linear-gradient(rgb(255 255 255 / 0.018) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(255 255 255 / 0.018), transparent);
   background-size: 100% 7px;
 }
 .w-home-hero::after,
