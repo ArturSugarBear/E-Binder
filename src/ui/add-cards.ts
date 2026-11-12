@@ -343,6 +343,14 @@ export function openAddCards(
     results,
     browser.pager,
     details,
+    el(
+      'section',
+      'w-quick-finished-panel',
+      el('h3', '', 'Karte übernommen'),
+      el('p', 'w-muted', 'Du kannst sofort weiterscannen oder zur Sammlung zurückkehren.'),
+      action('Nächste Karte scannen', () => takePhoto.click(), 'primary', 'camera'),
+      action('Fertig · Sammlung ansehen', () => sheet.close(), 'secondary', 'check'),
+    ),
   );
   sheet.footer.append(
     message(
@@ -1281,7 +1289,6 @@ export function openAddCards(
       ? 'Karte übernommen · nächste Karte prüfen.'
       : 'Karte übernommen · fertig oder nächste Karte scannen.');
     if (reviewingLiveQueue && !captureId) {
-      captureStart.hidden = false;
       sheet.dialog.classList.add('w-quick-finished');
     }
     if (
@@ -2113,7 +2120,6 @@ export function openAddCards(
             ? 'Karte übernommen · nächste Karte prüfen.'
             : 'Karte übernommen · fertig oder nächste Karte scannen.');
           if (reviewingLiveQueue && !captureId) {
-            captureStart.hidden = false;
             sheet.dialog.classList.add('w-quick-finished');
           }
           if (
