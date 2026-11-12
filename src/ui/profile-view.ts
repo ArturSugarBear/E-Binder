@@ -1,4 +1,6 @@
 import { action, el, icon } from './workspace-dom';
+import { appBuild, builtAtLabel, versionLabel } from '../data/app-version';
+import { checkForReleaseUpdate } from '../pwa';
 import {
   visualBetaEnabled,
   setVisualBetaEnabled,
@@ -213,6 +215,53 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       ),
     );
   }
+  root.append(
+    el(
+      'section',
+      'w-profile-group w-release-information',
+      el('h2', '', 'App-Version & Updates'),
+      el(
+        'div',
+        'w-profile-options w-glass-panel',
+        el(
+          'p',
+          'w-muted',
+          'Lokal ausgeführt: ' + versionLabel() + ' · Build ' + builtAtLabel(),
+        ),
+        el(
+          'p',
+          'w-muted',
+          'Diese Kennung gehört zum tatsächlich geladenen Programm. Eine neu veröffentlichte Version wird getrennt bei GitHub Pages geprüft.',
+        ),
+        action(
+          'Veröffentlichte Version prüfen',
+          () => {
+            void checkForReleaseUpdate()
+              .then((result) => {
+                const published = result.deployed;
+                ctx.notify(
+                  result.state === 'current'
+                    ? 'Du nutzt bereits den veröffentlichten Stand ' +
+                        versionLabel() +
+                        '.'
+                    : result.state === 'different' && published
+                      ? 'Veröffentlicht: ' +
+                        versionLabel(published) +
+                        '. Aktuell geladen: ' +
+                        versionLabel() +
+                        '. Update-Hinweis eingeblendet.'
+                      : 'Release-Version konnte nicht online geprüft werden. Dein geladener Build bleibt ' +
+                        versionLabel() +
+                        '.',
+                );
+              })
+              .catch(() => ctx.notify('Updateprüfung derzeit nicht verfügbar.', true));
+          },
+          'secondary',
+        ),
+      ),
+    ),
+  );
   root.append(
     el(
       'p',
