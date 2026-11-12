@@ -167,12 +167,16 @@ async function checkSet(language, setId) {
     if (detail.id !== setId || !Array.isArray(detail.cards))
       throw Error('Incomplete set record');
     const checked = detail.cards.length;
-    const before = totals.missing;
     const official = detail.cardCount?.official;
     if (!Number.isSafeInteger(official)) throw Error('Missing official count');
     await pool(detail.cards, 12, (card) => checkCard(language, setId, card, official));
     sets.push({
-      language, setId, checked, missing: totals.missing - before,
+      language,
+      setId,
+      checked,
+      missing: missing.filter(
+        (item) => item.language === language && item.setId === setId,
+      ).length,
     });
   } catch (error) {
     issues.push({ language, setId, stage: 'set-lookup', error: String(error) });
