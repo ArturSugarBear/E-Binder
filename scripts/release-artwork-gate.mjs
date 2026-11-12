@@ -27,7 +27,7 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(committed(`${path}/audit.json`));
   const index = JSON.parse(committed(`${path}/index.json`));
 
-  const transient = /^Set metadata unavailable \\((?:en|de):[a-z0-9.+_-]+\\): Error: (?:429|5[0-9]{2}): https:\\/\\/api\\.tcgdex\\.net\\/v2\\/(?:en|de)\\/sets\\/[a-z0-9.+_-]+$/i;
+  const transient = /^Set metadata unavailable \((?:en|de):[a-z0-9.+_-]+\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets\/[a-z0-9.+_-]+$/i;
   if (
     !Array.isArray(attempted.errors) ||
     attempted.errors.length === 0 ||
@@ -67,14 +67,14 @@ async function fallbackToVerifiedSnapshot() {
   }
   for (const [id, entry] of Object.entries(index.sets)) {
     if (entry.cards) {
-      if (!/^[a-z0-9.+_-]+\\.json$/i.test(entry.cards))
+      if (!/^[a-z0-9.+_-]+\.json$/i.test(entry.cards))
         throw new Error(`Invalid cached card index path: ${id}`);
       const cards = JSON.parse(committed(`${path}/${entry.cards}`));
       if (cards.setId !== id || !cards.cards)
         throw new Error(`Invalid cached card index: ${id}`);
     }
     if (entry.placeholder) {
-      if (!/^set-[a-z0-9.+_-]+\\.svg$/i.test(entry.placeholder))
+      if (!/^set-[a-z0-9.+_-]+\.svg$/i.test(entry.placeholder))
         throw new Error(`Invalid cached placeholder path: ${id}`);
       const svg = committed(`${path}/${entry.placeholder}`);
       if (!svg.includes('<svg')) throw new Error(`Invalid SVG: ${id}`);
