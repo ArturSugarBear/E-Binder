@@ -173,13 +173,9 @@ async function checkCard(language, setId, card, official) {
   }
   const candidates = [];
   if (card.image && trusted(card.image)) {
-    let isScrydexHost = false;
-    try {
-      isScrydexHost =
-        new URL(card.image).hostname.toLowerCase() === 'images.scrydex.com';
-    } catch {
-      isScrydexHost = false;
-    }
+    // trusted() above already validated the URL and allow-listed its host.
+    const isScrydexHost =
+      new URL(card.image).hostname.toLowerCase() === 'images.scrydex.com';
     candidates.push({
       stage: 'primary',
       url:
