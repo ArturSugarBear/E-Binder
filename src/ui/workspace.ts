@@ -101,9 +101,7 @@ export async function startWorkspace(): Promise<void> {
   // force collectors to remove broken entries manually.
   if (initial.captures.some((shot) => shot.status !== 'confirmed')) {
     initial = changeState(initial, (next) => {
-      next.captures = next.captures.filter(
-        (shot) => shot.status === 'confirmed',
-      );
+      next.captures = next.captures.filter((shot) => shot.status === 'confirmed');
     });
     try {
       await store.save(initial);
