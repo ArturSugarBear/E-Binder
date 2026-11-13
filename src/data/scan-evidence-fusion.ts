@@ -99,7 +99,7 @@ export function fuseScanEvidence(
         (matchingNumber && titleMatches ? 600 : 0) +
         (matchingNumber ? 180 : 0) +
         (titleMatches ? 75 : 0) +
-        (visualRank === undefined ? 0 : 90 + Math.max(0, 6 - visualRank)) +
+        (visualRank === undefined ? 0 : 90 + Math.max(0, 6 - visualRank) * 3) +
         (fragmentMatches ? 25 : 0) +
         (card.language === preferredLanguage ? 1 : 0) -
         (fullNumbers.size && !matchingNumber ? 260 : 0) -
