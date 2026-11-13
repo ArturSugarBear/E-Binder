@@ -104,7 +104,9 @@ async function fallbackToVerifiedSnapshot() {
     retainedVerifiedSnapshotAt: previous.checkedAt,
     releaseAuditMode: 'cached-verified-upstream-outage',
     warnings: earlyUpstreamOutage
-      ? ['TCGdex DE/EN set metadata temporarily unavailable before audit completion.']
+      ? [
+          'TCGdex DE/EN set metadata temporarily unavailable before audit completion.',
+        ]
       : attempted.errors,
   };
   await writeFile(`${path}/audit.json`, JSON.stringify(result, null, 2));
