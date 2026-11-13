@@ -1,11 +1,5 @@
-import {
-  recognitionClues,
-  visualNumberClues,
-} from './card-catalog';
-import {
-  fullCardNameMatches,
-  rankScanCandidates,
-} from './scan-review';
+import { recognitionClues, visualNumberClues } from './card-catalog';
+import { fullCardNameMatches, rankScanCandidates } from './scan-review';
 import { recognizedNameHints } from '../domain/recognition-names';
 import { numberKey, type PersonalCard } from '../domain/personal';
 import type { VisualHit } from '../domain/visual-retrieval';
@@ -119,26 +113,23 @@ export function fuseScanEvidence(
   const plausibleOcrTitle = Boolean(
     name &&
       unique.some(
-        (card) =>
-          fullCardNameMatches(name, card.name) &&
-          clues.some(
-            (clue) =>
-              !clue.setId ||
-              clue.setId.toLowerCase() === card.setId.toLowerCase(),
-          ),
-      ),
+      (card) =>
+        fullCardNameMatches(name, card.name) &&
+        clues.some(
+          (clue) =>
+            !clue.setId ||
+            clue.setId.toLowerCase() === card.setId.toLowerCase(),
+        ),
+    ),
   );
   const numberDisagreement =
     fullNumbers.size > 0 &&
     (visualRanks.size > 0 || plausibleOcrTitle) &&
     !unique.some((card) => fullNumbers.has(numberKey(card.number)));
-  const conflict =
-    ambiguousOcr || exact.conflictingName || numberDisagreement;
+  const conflict = ambiguousOcr || exact.conflictingName || numberDisagreement;
   const suggested = conflict ? undefined : exact.suggested;
   const basis = suggested ? exact.basis : 'review';
-  const visualAgreement = Boolean(
-    suggested && visualRanks.has(suggested.key),
-  );
+  const visualAgreement = Boolean(suggested && visualRanks.has(suggested.key));
 
   let state: FusionState;
   if (conflict) state = 'ocr-conflict';
