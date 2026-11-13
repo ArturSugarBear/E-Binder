@@ -196,6 +196,42 @@ test('fake live video never auto-captures a blank scene or a square', async ({
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });
 
+test('manual live capture without detected corners keeps the photo and skips mandatory crop', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name.includes('webkit'),
+    'Canvas MediaStream capture simulator is Chromium-specific.',
+  );
+  await installCameraRig(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#sammlung');
+  await page
+    .getByRole('button', { name: 'Karten hinzufügen', exact: true })
+    .click();
+  const add = page.getByRole('dialog', {
+    name: 'Karten hinzufügen',
+    includeHidden: true,
+  });
+  await add.getByRole('button', { name: 'Karte live scannen' }).click();
+  const live = page.getByRole('dialog', { name: 'Karte live scannen' });
+  const shutter = live.getByRole('button', { name: 'Manuell aufnehmen' });
+  await expect(shutter).toBeVisible();
+  await shutter.click();
+  await expect(live.locator('.w-live-review-summary')).toContainText(
+    '1 offene Aufnahme',
+  );
+  await live.getByRole('button', { name: 'Ergebnisse prüfen (1)' }).click();
+  await expect(add.locator('.w-original-photo img')).toBeVisible();
+  await expect(
+    add.getByRole('button', { name: 'Zuschnitt korrigieren (optional)' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Karte ausrichten' }),
+  ).toHaveCount(0);
+  await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
+});
+
 for (const width of [320, 375, 390, 430]) {
   test(`five consecutive scans keep a stable reviewable UI at ${width}px without ownership`, async ({
     page,
