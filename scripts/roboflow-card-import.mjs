@@ -185,7 +185,8 @@ export async function importFork(source, directory, limit) {
     // Fork A was previously reported as ~430 source images. Never guess when
     // multiple candidates meet the range or source image counts changed.
     const candidates = projects.filter(
-      (item) => item.images !== null && item.images >= 300 && item.images <= 600,
+      (item) =>
+        item.images !== null && item.images >= 300 && item.images <= 600,
     );
     if (candidates.length !== 1) {
       throw new Error(
