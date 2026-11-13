@@ -5,7 +5,8 @@ import {
   VISUAL_BETA_REFERENCE_COUNT,
   visualBetaEnabled,
 } from '../data/visual-beta';
-import { cardProjection, type Quad } from '../domain/photo-geometry';
+import type { Quad } from '../domain/photo-geometry';
+import { resamplePerspectivePixels } from '../domain/perspective-resample';
 import {
   detectCardCorners,
   type CardCornerStrategy,
@@ -84,7 +85,6 @@ async function snapshot(
   drawVisible(video, source);
   let output: HTMLCanvasElement = source;
   if (corners) {
-    const project = cardProjection(corners);
     const pixels = source
       .getContext('2d', { willReadFrequently: true })!
       .getImageData(0, 0, source.width, source.height);
@@ -93,28 +93,18 @@ async function snapshot(
     output.height = 880;
     const out = output.getContext('2d')!;
     const result = out.createImageData(output.width, output.height);
-    for (let y = 0; y < output.height; y++) {
-      for (let x = 0; x < output.width; x++) {
-        const point = project(x / (output.width - 1), y / (output.height - 1));
-        const px = Math.max(
-          0,
-          Math.min(source.width - 1, Math.round(point.x * (source.width - 1))),
-        );
-        const py = Math.max(
-          0,
-          Math.min(
-            source.height - 1,
-            Math.round(point.y * (source.height - 1)),
-          ),
-        );
-        const offset = (py * source.width + px) * 4;
-        const destination = (y * output.width + x) * 4;
-        result.data[destination] = pixels.data[offset]!;
-        result.data[destination + 1] = pixels.data[offset + 1]!;
-        result.data[destination + 2] = pixels.data[offset + 2]!;
-        result.data[destination + 3] = 255;
-      }
-    }
+    // Bilinear perspective sampling avoids jagged tiny collector numbers.
+    // The whole rectification remains on-device, with no image upload.
+    result.data.set(
+      resamplePerspectivePixels(
+        pixels.data,
+        source.width,
+        source.height,
+        output.width,
+        output.height,
+        corners,
+      ),
+    );
     out.putImageData(result, 0, 0);
   } else {
     // The on-screen guide supplies a usable crop when edge detection fails.
