@@ -42,7 +42,8 @@ import {
 import { alignPhoto } from './photo-crop';
 import { openLivePageScanner } from './live-page-scan';
 import { animateResolvedPocket } from './collector-polish';
-import { rankScanCandidates } from '../data/scan-review';
+import { fuseScanEvidence } from '../data/scan-evidence-fusion';
+import { resolveVisualPrintings } from '../data/scan-visual-shortlist';
 import { discoverNumberedCards } from '../data/scan-auto-resolve';
 import { type PocketDecision } from '../domain/binder-scan-review';
 import { recordBetaEvent } from '../data/beta-diagnostics';
@@ -975,40 +976,19 @@ export function openPageScanner(
             ...ctx.catalog,
             ...ctx.state.holdings.map((holding) => holding.card),
           ];
-          const localVisual = visualReview.choices.flatMap((hit) => {
-            const sourceId = hit.reference.id.split(':').at(-1)!;
-            return existingCards.filter(
-              (card) =>
-                card.sourceId === sourceId &&
-                card.language === hit.reference.language &&
-                card.setId === hit.reference.setId,
-            );
-          });
-          let resolvedVisual = [...localVisual];
-          if (visualReview.choices.length && navigator.onLine) {
-            // Fetch only the three best image candidates, never a full catalog.
-            const candidateSignal = AbortSignal.any([
-              abort.signal,
-              AbortSignal.timeout(10000),
-            ]);
-            const found = await Promise.allSettled(
-              visualReview.choices.map((hit) => {
-                const sourceId = hit.reference.id.split(':').at(-1)!;
-                return fetchCatalogCard(
-                  sourceId,
-                  hit.reference.language,
-                  candidateSignal,
-                );
-              }),
-            );
-            if (closed || abort.signal.aborted) break;
-            resolvedVisual = [
-              ...found.flatMap((item) =>
-                item.status === 'fulfilled' ? [item.value] : [],
-              ),
-              ...localVisual,
-            ];
-          }
+          // Reuse the strict identity gate shared with single-card scanning.
+          // The visual model must never invent a language, set or printing.
+          const candidateSignal = AbortSignal.any([
+            abort.signal,
+            AbortSignal.timeout(10000),
+          ]);
+          const resolvedVisual = await resolveVisualPrintings(
+            visualReview.choices,
+            existingCards,
+            candidateSignal,
+            { online: navigator.onLine },
+          );
+          if (closed || abort.signal.aborted) break;
           const printedEnergy = anniversaryEnergyFromText(
             text,
             preferredLanguage(text),
@@ -1077,12 +1057,15 @@ export function openPageScanner(
           if (closed || abort.signal.aborted) break;
           // One set+number+full-name policy for single-card and binder scans.
           // A contradictory OCR title cannot become an automatic match.
-          const ranked = rankScanCandidates(
+          const ranked = fuseScanEvidence(
             text,
             printedEnergy.length
               ? printedEnergy
               : [...resolvedVisual, ...online, ...local],
+            visualHits,
+            preferredLanguage(text),
           );
+          pocket.container!.dataset.scanFusionState = ranked.state;
           displayCandidates(pocket, ranked.candidates);
           if (titleHint) pocket.search.value = titleHint;
           pocket.container!.dataset.recognitionState = pocket.candidates.length
@@ -1109,8 +1092,8 @@ export function openPageScanner(
             ? `Vorschlag: ${preferred!.name} · ${preferred!.number}`
             : resolvedVisual.length
               ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
-              : ranked.conflictingName
-                ? 'Kartennamen widersprechen sich · Ausgabe genau prüfen'
+              : ranked.state === 'ocr-conflict'
+                ? 'Erkennung widersprüchlich · Nummer und Namen prüfen'
                 : pocket.candidates.length && titleHint
                   ? `„${titleHint}“ erkannt · Ausgabe wählen`
                   : pocket.candidates.length
