@@ -66,7 +66,15 @@ for (const [index, sample] of manifest.samples.entries()) {
   const file = await stat(path);
   if (!file.isFile() || file.size > 12_000_000)
     throw new Error('Private photo exceeds the allowed size.');
-  paths.push({ path, mime: ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg' });
+  paths.push({
+    path,
+    mime:
+      ext === '.png'
+        ? 'image/png'
+        : ext === '.webp'
+          ? 'image/webp'
+          : 'image/jpeg',
+  });
 }
 const output = process.env.CORNER_BENCHMARK_OUT;
 if (output) {
@@ -84,19 +92,41 @@ try {
     const capture = await page.evaluate(
       async ({ base64, mime }) => {
         const buffer = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-        const bitmap = await createImageBitmap(new Blob([buffer], { type: mime }));
+        const bitmap = await createImageBitmap(
+          new Blob([buffer], { type: mime }),
+        );
         try {
           const ratio = 192 / 256;
           const wide = bitmap.width / bitmap.height > ratio;
           const crop = wide
-            ? { x: (bitmap.width - bitmap.height * ratio) / 2, y: 0, width: bitmap.height * ratio, height: bitmap.height }
-            : { x: 0, y: (bitmap.height - bitmap.width / ratio) / 2, width: bitmap.width, height: bitmap.width / ratio };
+            ? {
+                x: (bitmap.width - bitmap.height * ratio) / 2,
+                y: 0,
+                width: bitmap.height * ratio,
+                height: bitmap.height,
+              }
+            : {
+                x: 0,
+                y: (bitmap.height - bitmap.width / ratio) / 2,
+                width: bitmap.width,
+                height: bitmap.width / ratio,
+              };
           const canvas = document.createElement('canvas');
           canvas.width = 192;
           canvas.height = 256;
           const ctx = canvas.getContext('2d', { willReadFrequently: true });
           if (!ctx) throw new Error('Canvas unavailable');
-          ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, 192, 256);
+          ctx.drawImage(
+            bitmap,
+            crop.x,
+            crop.y,
+            crop.width,
+            crop.height,
+            0,
+            0,
+            192,
+            256,
+          );
           return {
             rgba: Array.from(ctx.getImageData(0, 0, 192, 256).data),
             crop,
@@ -114,17 +144,21 @@ try {
       x: (x * capture.fullWidth - capture.crop.x) / capture.crop.width,
       y: (y * capture.fullHeight - capture.crop.y) / capture.crop.height,
     }));
-    for (const [name, soft] of [['baseline', false], ['improved', true]]) {
+    for (const [name, soft] of [
+      ['baseline', false],
+      ['improved', true],
+    ]) {
       const start = performance.now();
       const prediction = detectCardCorners(rgba, 192, 256, soft);
       const durationMs = performance.now() - start;
-      const error = prediction.corners && expected
-        ? Math.max(
-            ...prediction.corners.map((point, i) =>
-              Math.hypot(point.x - expected[i].x, point.y - expected[i].y),
-            ),
-          )
-        : null;
+      const error =
+        prediction.corners && expected
+          ? Math.max(
+              ...prediction.corners.map((point, i) =>
+                Math.hypot(point.x - expected[i].x, point.y - expected[i].y),
+              ),
+            )
+          : null;
       results[name].push({
         positive: Boolean(expected),
         detected: prediction.corners !== null,
@@ -152,7 +186,9 @@ function summary(rows) {
     falsePositives,
     recall: positive.length ? detected / positive.length : null,
     accurateRate: positive.length ? accurate / positive.length : null,
-    falsePositiveRate: negative.length ? falsePositives / negative.length : null,
+    falsePositiveRate: negative.length
+      ? falsePositives / negative.length
+      : null,
     p95Ms: times[Math.ceil(times.length * 0.95) - 1] ?? null,
   };
 }
@@ -169,10 +205,13 @@ const report = {
   independentlyVerified: true,
   baseline,
   improved,
-  releaseGate: enough &&
+  releaseGate:
+    enough &&
     improved.accurate >= baseline.accurate &&
     improved.falsePositives <= baseline.falsePositives,
-  warning: enough ? null : 'Exploratory only: insufficient independently verified holdout.',
+  warning: enough
+    ? null
+    : 'Exploratory only: insufficient independently verified holdout.',
 };
 if (output)
   await writeFile(resolve(output), JSON.stringify(report, null, 2), {

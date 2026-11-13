@@ -106,7 +106,12 @@ export function detectCardCorners(
         )
           continue;
         const score = strength * (0.4 + 0.6 * coverage) * coherence;
-        candidates.push({ position, slope, score, polarity: Math.sign(signed) });
+        candidates.push({
+          position,
+          slope,
+          score,
+          polarity: Math.sign(signed),
+        });
       }
     }
     // Keep distinct sides rather than 3 neighboring samples of one edge.
@@ -135,56 +140,57 @@ export function detectCardCorners(
       return null;
 
     function crossing(vertical: Edge, horizontal: Edge): Point {
-    const denominator = 1 - vertical.slope * horizontal.slope;
-    const x =
-      (vertical.position +
-        vertical.slope * (horizontal.position - 0.5 - horizontal.slope * 0.5)) /
-      denominator;
-    return { x, y: horizontal.position + horizontal.slope * (x - 0.5) };
-  }
+      const denominator = 1 - vertical.slope * horizontal.slope;
+      const x =
+        (vertical.position +
+          vertical.slope *
+            (horizontal.position - 0.5 - horizontal.slope * 0.5)) /
+        denominator;
+      return { x, y: horizontal.position + horizontal.slope * (x - 0.5) };
+    }
 
-  let best: Quad | null = null;
-  let bestScore = -Infinity;
-  for (const l of left)
-    for (const r of right)
-      for (const t of top)
-        for (const b of bottom) {
-          // Real outer borders have opposing polarities across each axis.
-          // Requiring this only for the softened path avoids promoting
-          // sleeve reflections or repeated inner-artwork stripes.
-          if (
-            soft &&
-            (l.polarity === r.polarity ||
-              t.polarity === b.polarity ||
-              r.position - l.position < 0.48 ||
-              b.position - t.position < 0.53)
-          )
-            continue;
-          const corners: Quad = [
-            crossing(l, t),
-            crossing(r, t),
-            crossing(r, b),
-            crossing(l, b),
-          ];
-          if (
-            !plausibleCardQuad(corners, width, height) ||
-            !whollyVisible(corners)
-          )
-            continue;
-          try {
-            cardProjection(corners);
-          } catch {
-            continue;
+    let best: Quad | null = null;
+    let bestScore = -Infinity;
+    for (const l of left)
+      for (const r of right)
+        for (const t of top)
+          for (const b of bottom) {
+            // Real outer borders have opposing polarities across each axis.
+            // Requiring this only for the softened path avoids promoting
+            // sleeve reflections or repeated inner-artwork stripes.
+            if (
+              soft &&
+              (l.polarity === r.polarity ||
+                t.polarity === b.polarity ||
+                r.position - l.position < 0.48 ||
+                b.position - t.position < 0.53)
+            )
+              continue;
+            const corners: Quad = [
+              crossing(l, t),
+              crossing(r, t),
+              crossing(r, b),
+              crossing(l, b),
+            ];
+            if (
+              !plausibleCardQuad(corners, width, height) ||
+              !whollyVisible(corners)
+            )
+              continue;
+            try {
+              cardProjection(corners);
+            } catch {
+              continue;
+            }
+            const area = (r.position - l.position) * (b.position - t.position);
+            // Prefer a complete visible outer border over a stronger inner
+            // artwork frame; the physical shape is still validated above.
+            const score = l.score + r.score + t.score + b.score + area * 70;
+            if (score > bestScore) {
+              best = corners;
+              bestScore = score;
+            }
           }
-          const area = (r.position - l.position) * (b.position - t.position);
-          // Prefer a complete visible outer border over a stronger inner
-          // artwork frame; the physical shape is still validated above.
-          const score = l.score + r.score + t.score + b.score + area * 70;
-          if (score > bestScore) {
-            best = corners;
-            bestScore = score;
-          }
-        }
     return best;
   }
 
