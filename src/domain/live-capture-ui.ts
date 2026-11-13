@@ -7,9 +7,5 @@ export function manualCaptureAvailable(state: {
   stableFrames: number;
   elapsedMs: number;
 }): boolean {
-  return (
-    state.running &&
-    !state.busy &&
-    !state.waitingForRemoval
-  );
+  return state.running && !state.busy && !state.waitingForRemoval;
 }
