@@ -183,11 +183,11 @@ async function importFork(source, directory, limit) {
   for (const row of records) {
     const details = await rfRequest(root + '/images/' + encodeURIComponent(row.id), key);
     const image = details.image && typeof details.image === 'object' ? details.image : details;
-    const width = Number(image.width ?? row.width);
-    const height = Number(image.height ?? row.height);
-    const boxes = normalizeCardBoxes(
-      image.annotations ?? details.annotations ?? row.annotations, width, height,
-    );
+    const annotation = image.annotation ?? image.annotations ??
+      details.annotation ?? details.annotations ?? row.annotations;
+    const width = Number(image.annotation?.width ?? image.width ?? row.width);
+    const height = Number(image.annotation?.height ?? image.height ?? row.height);
+    const boxes = normalizeCardBoxes(annotation, width, height);
     if (!boxes.length) {
       missingCardBoxes++;
       continue;
