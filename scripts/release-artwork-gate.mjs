@@ -8,13 +8,20 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFile, stat, writeFile } from 'node:fs/promises';
-import { isTransientArtworkUpstreamFailure } from './artwork-upstream-errors.mjs';
+import {
+  isTransientArtworkUpstreamFailure,
+  isTransientArtworkRootListFailure,
+} from './artwork-upstream-errors.mjs';
 
 const path = 'public/catalog-art';
 const audit = spawnSync(process.execPath, ['scripts/audit-catalog-art.mjs'], {
-  stdio: 'inherit',
+  encoding: 'utf8',
+  maxBuffer: 32 * 1024 * 1024,
 });
+if (audit.stdout) process.stdout.write(audit.stdout);
+if (audit.stderr) process.stderr.write(audit.stderr);
 if (!audit.error && audit.status === 0) process.exit(0);
+const rootSetListOutage = isTransientArtworkRootListFailure(audit.stderr);
 
 function committed(relative) {
   return execFileSync('git', ['show', `HEAD:${relative}`], {
@@ -24,14 +31,20 @@ function committed(relative) {
 }
 
 async function fallbackToVerifiedSnapshot() {
-  const attempted = JSON.parse(await readFile(`${path}/audit.json`, 'utf8'));
-  const previous = JSON.parse(committed(`${path}/audit.json`));
+  const attemptedRaw = await readFile(`${path}/audit.json`, 'utf8');
+  const previousRaw = committed(`${path}/audit.json`);
+  const attempted = JSON.parse(attemptedRaw);
+  const previous = JSON.parse(previousRaw);
+  // The root set list is fetched before ANY audit report/index writes. Only
+  // permit fallback when that old report is byte-identical to clean HEAD.
+  const untouchedRootListFailure = rootSetListOutage && attemptedRaw === previousRaw;
   const index = JSON.parse(committed(`${path}/index.json`));
 
   if (
-    !Array.isArray(attempted.errors) ||
-    attempted.errors.length === 0 ||
-    !attempted.errors.every(isTransientArtworkUpstreamFailure)
+    !untouchedRootListFailure &&
+    (!Array.isArray(attempted.errors) ||
+      attempted.errors.length === 0 ||
+      !attempted.errors.every(isTransientArtworkUpstreamFailure))
   ) {
     throw new Error('Non-transient artwork audit errors: release blocked.');
   }
@@ -88,8 +101,12 @@ async function fallbackToVerifiedSnapshot() {
     ...previous,
     checkedAt: new Date().toISOString(),
     retainedVerifiedSnapshotAt: previous.checkedAt,
-    releaseAuditMode: 'cached-verified-upstream-outage',
-    warnings: attempted.errors,
+    releaseAuditMode: untouchedRootListFailure
+      ? 'cached-verified-root-set-list-outage'
+      : 'cached-verified-upstream-outage',
+    warnings: untouchedRootListFailure
+      ? ['TCGdex returned a verified transient error for its root set catalogue. The committed snapshot was reused; upstream additions could not be checked.']
+      : attempted.errors,
   };
   await writeFile(`${path}/audit.json`, JSON.stringify(result, null, 2));
   console.warn(
