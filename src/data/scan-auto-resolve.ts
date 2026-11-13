@@ -242,7 +242,13 @@ export async function resolvePhotoScan(
   const candidates = number?.includes('/')
     ? all.filter((card) => numberKey(card.number) === numberKey(number))
     : all;
-  const exact = fuseScanEvidence(text, candidates, fromVisual, undefined, preferredLanguage);
+  const exact = fuseScanEvidence(
+    text,
+    candidates,
+    fromVisual,
+    undefined,
+    preferredLanguage,
+  );
   if (exact.suggested)
     return {
       candidates: exact.candidates,
