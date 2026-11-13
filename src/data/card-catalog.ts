@@ -919,22 +919,28 @@ export function recognitionClues(text: string): RecognitionClue[] {
   ];
   const code = latinCodes[0];
   const japaneseCode = japaneseCodes[0];
-  const observedSets = new Set([
-    ...latinCodes.map((match) => setIds[match[1]!.toLowerCase().replace(/^0bf$/, 'obf')]),
-    ...japaneseCodes.map((match) =>
-      match[1]!.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase()),
-    ),
-  ].filter((id): id is string => Boolean(id)));
+  const observedSets = new Set(
+    [
+      ...latinCodes.map(
+        (match) => setIds[match[1]!.toLowerCase().replace(/^0bf$/, 'obf')],
+      ),
+      ...japaneseCodes.map((match) =>
+        match[1]!.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase()),
+      ),
+    ].filter((id): id is string => Boolean(id)),
+  );
   const conflictingSets = observedSets.size > 1;
   const setId = conflictingSets
     ? undefined
     : code
       ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
-      : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase());
+      : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) =>
+          prefix.toUpperCase(),
+        );
   const language: 'de' | 'en' | 'ja' | undefined = conflictingSets
     ? undefined
-    : (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
-      (japaneseCode ? 'ja' : undefined);
+    : ((code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
+      (japaneseCode ? 'ja' : undefined));
   const counts = new Map<string, number>();
   for (const match of printedText.matchAll(
     /(?<![0-9])((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\s*[/|]\s*((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\b/gi,
