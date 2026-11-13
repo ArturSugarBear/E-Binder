@@ -92,11 +92,7 @@ test('image signatures prevent text or HTML being imported as photos', () => {
   assert.equal(imageKind(Buffer.from('89504e470d0a1a0a', 'hex')).ext, 'png');
   assert.equal(
     imageKind(
-      Buffer.concat([
-        Buffer.from('RIFF'),
-        Buffer.alloc(4),
-        Buffer.from('WEBP'),
-      ]),
+      Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBP')]),
     ).ext,
     'webp',
   );
