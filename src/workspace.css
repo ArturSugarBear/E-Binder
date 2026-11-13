@@ -5429,11 +5429,16 @@ textarea.w-input,
   padding: 10px 18px;
   font-size: 14px;
 }
-.w-live-scan-minimal .w-live-vision-state {
+.w-live-scan-minimal .w-live-vision-state,
+.w-live-scan-minimal .w-live-last-result {
   margin: 0;
   padding: 0 12px;
   text-align: center;
   font-size: 12px;
+}
+.w-live-scan-minimal .w-live-last-result:not([hidden]) {
+  color: var(--ink);
+  font-weight: 600;
 }
 .w-live-scan-minimal .w-dialog-body > .w-live-status {
   position: static;
