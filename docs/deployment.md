@@ -33,3 +33,13 @@ In eingeschränkten Umgebungen kann zusätzlich `E2E_STATIC_DIR=dist` verwendet 
 Der Build verwendet bevorzugt `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` aus Repository-Secrets oder lokaler `.env.local`. Da der verbundene GitHub-Connector den Secrets-Endpunkt mit HTTP 403 ablehnt, enthält `cloud.config.json` als funktionierenden Fallback die ausdrücklich öffentlichen Clientwerte dieses Projekts. Der Publishable Key ist zum Ausliefern an Browser bestimmt; RLS schützt Daten. Privilegierte Schlüssel bleiben in Supabase. Forks müssen eine eigene Konfiguration einsetzen.
 
 `keep-alive.yml` liest per Zeitplan spätestens alle fünf Tage eine öffentliche Profil-ID, ohne sie zu protokollieren. Er benutzt dieselbe öffentliche Konfiguration. GitHub kann zeitgesteuerte Workflows in lange inaktiven öffentlichen Repositorys deaktivieren; ein Cronjob ist keine Verfügbarkeitsgarantie.
+
+## Zweiter Hosting-Kanal: Vercel
+
+Die produktive GitHub-Pages-Seite bleibt während des Vercel-Rollouts erreichbar. Das Vercel-Projekt `e-binder` verwendet das **bestehende GitHub-Repository** auf `master`, Framework `vite`, Build `npm run build`, Ausgabe `dist`, Node.js 24.
+
+**Vercel-Build-Umgebungsvariablen**: `VITE_BASE_PATH=/`, `VITE_SUPABASE_URL` und der **öffentliche** `VITE_SUPABASE_ANON_KEY` (publishable Key). Keine Service-Role-Keys im Frontend. `vite.config.ts` liest `VERCEL_GIT_COMMIT_SHA` für `/version.json`. Im Unterschied zu Pages liegt die App am Domain-Root `/`; das PWA-Manifest, der Service Worker, Bilder und das ONNX-Modell müssen darum unter `/` geprüft werden. `archive.html` ist ein zweiter eigenständiger Vite-Entry-Point; keine pauschale SPA-Rewrite-Regel setzen.
+
+Vor einer Umschaltung: Deployment-Status **READY**; `GET /version.json` entspricht dem geprüften `master`-SHA; Browser-Prüfungen für Start/Scanner, OCR-/ONNX-Assets, DE/EN/JA, Kartenbilder, Cardmarket-Verweise, Binder-Gesten und Supabase-Anmeldung erfolgreich; echte iPhone-Kamera als separate manuelle Freigabe. **GitHub Pages nicht abschalten**, solange diese Nachweise fehlen. Bei Fehlern bleibt Pages der Fallback.
+
+[Quality Hub](https://e-binder-quality-hub.vercel.app) verfolgt QA unabhängig vom Hosting; [Agenten- und Tester-Schnittstelle](quality-hub.md).
