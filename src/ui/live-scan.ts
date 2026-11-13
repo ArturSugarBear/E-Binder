@@ -14,6 +14,11 @@ import { analysePhotoPixels, liveCameraPhotoHint } from '../data/photo-quality';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
 import {
+  captureCardSignature,
+  nextCardChange,
+  type CardChangeState,
+} from '../domain/card-change';
+import {
   MAX_PENDING_SCAN_CAPTURES,
   type LiveCaptureOutcome,
 } from '../domain/scan-session-guardrails';
@@ -409,6 +414,8 @@ export function openLiveScanner(
   let last: Quad | null = null;
   let reliable: Quad | null = null;
   let cornerStrategy: CardCornerStrategy = 'none';
+  let capturedSignature: Float32Array | null = null;
+  let cardChange: CardChangeState = { frames: 0, previous: null };
   let sampled = 0;
   let cameraReadyAt = 0;
   let frameFailures = 0;
@@ -442,6 +449,8 @@ export function openLiveScanner(
     last = null;
     reliable = null;
     cornerStrategy = 'none';
+    capturedSignature = null;
+    cardChange = { frames: 0, previous: null };
     polygon.removeAttribute('points');
     stage.classList.remove('has-card-outline');
     stage.dataset.scanPhase = 'ready';
@@ -474,6 +483,22 @@ export function openLiveScanner(
     stage.dataset.scanPhase = 'capture';
     const aligned = reliable !== null;
     const chosen = reliable;
+    let signature: Float32Array | null = null;
+    if (chosen) {
+      try {
+        const preview = sample
+          .getContext('2d', { willReadFrequently: true })!
+          .getImageData(0, 0, sample.width, sample.height);
+        signature = captureCardSignature(
+          preview.data,
+          sample.width,
+          sample.height,
+          chosen,
+        );
+      } catch {
+        // An unavailable fingerprint must never block a valid capture.
+      }
+    }
     status.textContent = aligned
       ? 'Karte eingerahmt · Foto wird ausgerichtet …'
       : 'Foto wird aufgenommen · Ecken anschließend prüfen …';
@@ -517,6 +542,8 @@ export function openLiveScanner(
         // once the physical card is removed, HoloGem-style.
         waitingForRemoval = true;
         missingFrames = 0;
+        capturedSignature = signature;
+        cardChange = { frames: 0, previous: null };
         observations = 0;
         last = null;
         reliable = null;
@@ -619,7 +646,43 @@ export function openLiveScanner(
       );
       waitingForRemoval = latch.waitingForRemoval;
       missingFrames = latch.missingFrames;
-      if (!waitingForRemoval) armForNextCard();
+      if (!waitingForRemoval) {
+        armForNextCard();
+        return;
+      }
+      // Cards may be exchanged without exposing a blank camera frame.
+      // Compare only locally normalized artwork samples, never OCR text,
+      // and require three consecutive consistent changed observations.
+      if (corners && capturedSignature) {
+        let nextSignature: Float32Array | null = null;
+        try {
+          const preview = sample
+            .getContext('2d', { willReadFrequently: true })!
+            .getImageData(0, 0, sample.width, sample.height);
+          nextSignature = captureCardSignature(
+            preview.data,
+            sample.width,
+            sample.height,
+            corners,
+          );
+        } catch {
+          // Keep ordinary card-removal/manual-next recovery available.
+        }
+        cardChange = nextCardChange(
+          cardChange,
+          capturedSignature,
+          nextSignature,
+        );
+        if (cardChange.frames >= 3) {
+          recordBetaEvent('scan_result', 'scan', 'card_swapped_auto');
+          armForNextCard();
+          return;
+        }
+        if (cardChange.frames > 0)
+          stageLabel.textContent = 'Kartenwechsel wird geprüft';
+      } else {
+        cardChange = { frames: 0, previous: null };
+      }
       return;
     }
     const lock = nextCardLock(
@@ -688,6 +751,8 @@ export function openLiveScanner(
     observations = 0;
     last = null;
     reliable = null;
+    capturedSignature = null;
+    cardChange = { frames: 0, previous: null };
     progress.value = 0;
     sampled = 0;
     frameFailures = 0;
