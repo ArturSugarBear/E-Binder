@@ -12,6 +12,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, relative, isAbsolute, join, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { discoverProjects } from './roboflow-projects.mjs';
 
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 const PAGE_SIZE = 50;
@@ -178,7 +179,22 @@ export async function importFork(source, directory, limit) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 2000)
     throw new Error('Limit must be 1–2000');
   const output = privateOutput(directory);
-  const root = `${match[1]}/${match[2]}`;
+  let slug = match[2];
+  if (slug === 'auto') {
+    const projects = await discoverProjects(match[1], key);
+    // Fork A was previously reported as ~430 source images. Never guess when
+    // multiple candidates meet the range or source image counts changed.
+    const candidates = projects.filter(
+      (item) => item.images !== null && item.images >= 300 && item.images <= 600,
+    );
+    if (candidates.length !== 1) {
+      throw new Error(
+        'Roboflow auto selection is ambiguous; run scripts/roboflow-projects.mjs and specify the exact project slug.',
+      );
+    }
+    slug = candidates[0].project;
+  }
+  const root = `${match[1]}/${slug}`;
   // Finish authentication and schema discovery before creating output dirs.
   const project = await rfRequest(root, key);
   const license = project?.license ?? project?.project?.license ?? 'unknown';
