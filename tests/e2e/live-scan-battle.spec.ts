@@ -240,11 +240,11 @@ for (const width of [320, 375, 390, 430]) {
     await expect(live.locator('.w-live-analysis')).toBeHidden();
     await mode(page, 'card');
     await expect(live.locator('.w-live-status')).toContainText(
-      /Aufnahme vorgemerkt|Scan fehlgeschlagen/,
+      /Foto erfasst|Scan fehlgeschlagen/,
       { timeout: 35_000 },
     );
     await expect(live.locator('.w-live-status')).toContainText(
-      'Aufnahme vorgemerkt',
+      'Foto erfasst',
     );
     await expect(live.locator('.w-live-review-summary')).toContainText(
       '1 offene Aufnahme',
@@ -301,7 +301,7 @@ for (const width of [320, 375, 390, 430]) {
     expect(nextFrame!.width / nextFrame!.height).toBeCloseTo(63 / 88, 2);
     await mode(page, 'card2');
     await expect(live.locator('.w-live-status')).toContainText(
-      'Aufnahme vorgemerkt',
+      'Foto erfasst',
       {
         timeout: 35_000,
       },
