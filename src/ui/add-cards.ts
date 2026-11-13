@@ -1459,7 +1459,7 @@ export function openAddCards(
     void recordBetaScanConfirmation(shot.id, publicCardKey(card) ?? '');
     transientPhotos.delete(shot.id);
     alignedCaptures.delete(shot.id);
-          framedCaptures.delete(shot.id);
+    framedCaptures.delete(shot.id);
     liveOcrEvidence.delete(shot.id);
     liveReviewResults.delete(shot.id);
     interrupt();
