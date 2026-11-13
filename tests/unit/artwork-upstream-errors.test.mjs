@@ -78,12 +78,23 @@ describe('dependent Classic Collection metadata outage', () => {
   it.each([
     [],
     ['Classic Collection artwork audit failed: invalid mapping'],
-    ['Set metadata unavailable (en:base1): Error: 503: https://api.tcgdex.net/v2/en/sets/base1'],
-    ['Set metadata unavailable (en:30th-c): Error: 404: https://api.tcgdex.net/v2/en/sets/30th-c'],
-    ['Set metadata unavailable (en:30th-c): Error: 503: https://api.tcgdex.net/v2/en/sets/base1'],
-  ])('rejects unrelated failures and nontransient detail responses', (errors) => {
-    expect(isTransientClassicCollectionDependency(mismatch, errors)).toBe(false);
-  });
+    [
+      'Set metadata unavailable (en:base1): Error: 503: https://api.tcgdex.net/v2/en/sets/base1',
+    ],
+    [
+      'Set metadata unavailable (en:30th-c): Error: 404: https://api.tcgdex.net/v2/en/sets/30th-c',
+    ],
+    [
+      'Set metadata unavailable (en:30th-c): Error: 503: https://api.tcgdex.net/v2/en/sets/base1',
+    ],
+  ])(
+    'rejects unrelated failures and nontransient detail responses',
+    (errors) => {
+      expect(isTransientClassicCollectionDependency(mismatch, errors)).toBe(
+        false,
+      );
+    },
+  );
 
   it('does not forgive malformed or altered Classic Collection mappings', () => {
     expect(
