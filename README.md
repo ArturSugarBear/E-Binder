@@ -4,7 +4,7 @@
 
 Kostenlose, installierbare Pokémon-TCG-Web-App mit Live-Kartenscanner, 3×3-Binderseiten-Erfassung, Sammlungsverwaltung, Karten- und Set-Entdeckung sowie nachvollziehbaren Marktwerten.
 
-[**E-Binder öffnen**](https://artursugarbear.github.io/E-Binder/) · [Beta-Guide](docs/beta-rollout.md) · [Produktreview](docs/reviews/2026-11-12-beta-release-readiness.md) · [Quality Hub – Live-QA](https://e-binder-quality-hub.vercel.app) · [Fehler melden](https://github.com/ArturSugarBear/E-Binder/issues)
+[**E-Binder öffnen**](https://artursugarbear.github.io/E-Binder/) · [Vercel-Version (nach Freigabe)](https://e-binder-zeta.vercel.app) · [Beta-Guide](docs/beta-rollout.md) · [Produktreview](docs/reviews/2026-11-12-beta-release-readiness.md) · [Quality Hub – Live-QA](https://e-binder-quality-hub.vercel.app) · [Fehler melden](https://github.com/ArturSugarBear/E-Binder/issues)
 
 ![Rare Room auf dem iPhone – Home](docs/screenshots/review-2026-11-11/home-390.png)
 
@@ -59,7 +59,7 @@ npx playwright install --with-deps chromium webkit
 npm run test:e2e
 ```
 
-Der GitHub-Pages-Release wird durch Build, Unit-Tests und Chromium-/Mobile-/WebKit-Tests abgesichert. Ein Browser-Simulationstest ist kein Ersatz für echte iPhone-Kameratests.
+GitHub Pages bleibt die aktive Produktionsversion. Nach Einrichtung der GitHub-Actions-Konfiguration kann die [abgesicherte Vercel-Pipeline](docs/vercel-auto-deploy.md) einen separat verifizierten Vercel-Release veröffentlichen. Der GitHub-Pages-Release wird durch Build, Unit-Tests und Chromium-/Mobile-/WebKit-Tests abgesichert. Ein Browser-Simulationstest ist kein Ersatz für echte iPhone-Kameratests.
 
 | Thema                                    | Dokumentation                                                                                       |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
