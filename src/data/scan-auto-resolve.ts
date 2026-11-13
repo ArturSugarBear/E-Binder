@@ -290,8 +290,7 @@ export async function resolvePhotoScan(
     ranked.sort(
       (a, b) =>
         (scores.get(b.key) ?? -1) - (scores.get(a.key) ?? -1) ||
-        (originalRank.get(a.key) ?? 999) -
-          (originalRank.get(b.key) ?? 999),
+        (originalRank.get(a.key) ?? 999) - (originalRank.get(b.key) ?? 999),
     );
   }
   return {
