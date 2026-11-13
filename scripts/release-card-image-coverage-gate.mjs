@@ -30,7 +30,9 @@ try {
     artwork.bundledCards.length === 0 ||
     artwork.bundledCards.some((card) => card.available !== true)
   )
-    throw new Error('Coverage failure is not exclusively transient and verified.');
+    throw new Error(
+      'Coverage failure is not exclusively transient and verified.',
+    );
 
   // Distinguish a skipped live-provider probe from a passed coverage audit.
   await writeFile(
