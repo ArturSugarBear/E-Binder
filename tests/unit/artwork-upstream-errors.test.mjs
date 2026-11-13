@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { isTransientArtworkUpstreamFailure } from '../../scripts/artwork-upstream-errors.mjs';
+import {
+  isTransientArtworkUpstreamFailure,
+  isTransientArtworkRootListFailure,
+} from '../../scripts/artwork-upstream-errors.mjs';
 
 describe('release artwork transient upstream classification', () => {
   it.each([
@@ -32,5 +35,27 @@ describe('release artwork transient upstream classification', () => {
   it('rejects values other than strings', () => {
     expect(isTransientArtworkUpstreamFailure(null)).toBe(false);
     expect(isTransientArtworkUpstreamFailure(undefined)).toBe(false);
+  });
+});
+
+describe('early root-set-list outage fallback classification', () => {
+  it.each([
+    'Error: 503: https://api.tcgdex.net/v2/en/sets\n',
+    'Error: 429: https://api.tcgdex.net/v2/de/sets\n',
+    'Error: 502: https://api.tcgdex.net/v2/en/sets\n    at json (audit-catalog-art.mjs:34)',
+  ])('recognizes transient root catalogue errors: %s', (log) => {
+    expect(isTransientArtworkRootListFailure(log)).toBe(true);
+  });
+
+  it.each([
+    'Error: 404: https://api.tcgdex.net/v2/en/sets\n',
+    'Error: 503: https://api.tcgdex.net/v2/en/cards/mep-018\n',
+    'Error: 503: https://malicious.example/v2/en/sets\n',
+    'Error: 503: https://api.tcgdex.net/v2/en/sets/base1\n',
+    'Error: 503: https://api.tcgdex.net/v2/en/sets#suffix\n',
+    'invalid local image error',
+    '',
+  ])('rejects other failure sources: %s', (log) => {
+    expect(isTransientArtworkRootListFailure(log)).toBe(false);
   });
 });
