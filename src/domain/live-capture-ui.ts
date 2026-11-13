@@ -1,4 +1,4 @@
-/** A timeout reveals recovery; it never declares a card recognized. */
+/** Keep a manual shutter available as soon as the camera is ready.\n * Background OCR and unstable card outlines must never lock out capture.\n */
 export function manualCaptureAvailable(state: {
   running: boolean;
   busy: boolean;
@@ -10,9 +10,6 @@ export function manualCaptureAvailable(state: {
   return (
     state.running &&
     !state.busy &&
-    !state.analyzing &&
-    !state.waitingForRemoval &&
-    state.stableFrames < 2 &&
-    state.elapsedMs >= 6000
+    !state.waitingForRemoval
   );
 }
