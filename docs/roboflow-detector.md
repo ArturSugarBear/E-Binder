@@ -20,7 +20,7 @@ the exact-card artwork and any pretrained model checkpoint.
   existing index still contains 9 German reference printings. Detector
   training does not increase that coverage by itself.
 
-## Acquire the *existing* fork, no reupload to public Git
+## Acquire the _existing_ fork, no reupload to public Git
 
 The authenticated API audit previously reached your workspace, but its
 temporary key was removed. Set a **new** local `ROBOFLOW_API_KEY` secret and
