@@ -38,15 +38,16 @@ export function isStrictTransientCardCoverageOutage(report) {
     if (accounted.has(identity)) return false;
     accounted.add(identity);
     const url =
-      'https://api.tcgdex.net/v2/' +
-      expected.lang +
-      '/cards/' +
-      expected.id;
+      'https://api.tcgdex.net/v2/' + expected.lang + '/cards/' + expected.id;
     return (
       typeof issue.error === 'string' &&
-      new RegExp('^Error: HTTP (?:429|5[0-9]{2}) ' + url.replace(/\./g, '\\.') + '$').test(
-        issue.error,
-      )
+      new RegExp(
+        '^Error: HTTP (?:429|5[0-9]{2}) ' + url.replace(/\./g, '\\.') + '
+    );
+  });
+}
+,
+      ).test(issue.error)
     );
   });
 }
