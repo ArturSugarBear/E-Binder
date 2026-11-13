@@ -1090,10 +1090,10 @@ export function openPageScanner(
           }
           pocket.status.textContent = matched
             ? `Vorschlag: ${preferred!.name} · ${preferred!.number}`
-            : resolvedVisual.length
-              ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
-              : ranked.state === 'ocr-conflict'
-                ? 'Erkennung widersprüchlich · Nummer und Namen prüfen'
+            : ranked.state === 'ocr-conflict'
+              ? 'Erkennung widersprüchlich · Nummer und Namen prüfen'
+              : resolvedVisual.length
+                ? `${resolvedVisual.length} visuelle Kandidaten · Ausgabe prüfen`
                 : pocket.candidates.length && titleHint
                   ? `„${titleHint}“ erkannt · Ausgabe wählen`
                   : pocket.candidates.length
@@ -1112,7 +1112,7 @@ export function openPageScanner(
             'scan',
             matched
               ? 'page_pocket_exact'
-              : ranked.conflictingName
+              : ranked.state === 'ocr-conflict'
                 ? 'page_pocket_conflict'
                 : pocket.candidates.length
                   ? 'page_pocket_candidates'
