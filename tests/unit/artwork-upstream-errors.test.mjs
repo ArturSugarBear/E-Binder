@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { isTransientArtworkUpstreamFailure } from '../../scripts/artwork-upstream-errors.mjs';
+import {
+  isTransientArtworkUpstreamFailure,
+  isTransientArtworkBootstrapFailure,
+} from '../../scripts/artwork-upstream-errors.mjs';
 
 describe('release artwork transient upstream classification', () => {
   it.each([
@@ -32,5 +35,26 @@ describe('release artwork transient upstream classification', () => {
   it('rejects values other than strings', () => {
     expect(isTransientArtworkUpstreamFailure(null)).toBe(false);
     expect(isTransientArtworkUpstreamFailure(undefined)).toBe(false);
+  });
+});
+
+describe('release artwork initial provider outage', () => {
+  it('accepts one explicit 503 from the initial English set listing', () => {
+    const stderr =
+      'file:///tmp/scripts/audit-catalog-art.mjs:34\n' +
+      'Error: 503: https://api.tcgdex.net/v2/en/sets\n' +
+      '    at json (scripts/audit-catalog-art.mjs:34)\n';
+    expect(isTransientArtworkBootstrapFailure(stderr)).toBe(true);
+  });
+
+  it.each([
+    'Error: 404: https://api.tcgdex.net/v2/en/sets',
+    'Error: 503: https://api.tcgdex.net/v2/en/cards/mep-028',
+    'Error: 503: https://tcgcsv.com/tcgplayer/3/groups',
+    'Error: 503: https://api.tcgdex.net/v2/en/sets\nError: invalid card index',
+    'TypeError: Cannot parse provider content',
+    '',
+  ])('rejects any other premature audit failure', (stderr) => {
+    expect(isTransientArtworkBootstrapFailure(stderr)).toBe(false);
   });
 });
