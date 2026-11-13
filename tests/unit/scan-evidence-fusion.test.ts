@@ -89,7 +89,10 @@ describe('scanner evidence fusion', () => {
   it('keeps artwork similarity as ranking, not confidence', () => {
     const en = card('M1L-088', 'Mega Lucario ex', 'M1L', '088/063', 'en');
     const de = card('M1L-088', 'Mega Lucario ex', 'M1L', '088/063', 'de');
-    const scores = new Map([[en.key, 0.98], [de.key, 0.97]]);
+    const scores = new Map([
+      [en.key, 0.98],
+      [de.key, 0.97],
+    ]);
     const result = fuseScanEvidence('088/063', [en, de], [], scores, 'de');
     expect(result.suggested).toBeUndefined();
     expect(result.candidates[0]?.key).toBe(en.key);
