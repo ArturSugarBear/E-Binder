@@ -719,6 +719,7 @@ export function openAddCards(
     liveOcrQueue = new Promise<void>((resolve) => {
       releaseOcr = resolve;
     });
+    let completionStatus = '';
     const task = previousOcr
       .then(async () => {
         if (closed || !transientPhotos.has(id) || liveOcrAbort.signal.aborted)
@@ -895,6 +896,12 @@ export function openAddCards(
           basis: automatic?.basis,
           fusionState: automatic?.fusionState,
         });
+        completionStatus =
+          automatic?.fusionState === 'text-image-agree'
+            ? 'OCR und lokale Bildreferenz stimmen überein · Ausgabe noch prüfen'
+            : candidates.length
+              ? `${candidates.length} mögliche Ausgaben · keine sichere visuelle Bestätigung`
+              : 'Kein sicherer Treffer · Foto bleibt für die Korrektur erhalten';
         recordBetaEvent(
           'scan_result',
           'scan',
@@ -920,6 +927,8 @@ export function openAddCards(
           text: liveOcrEvidence.get(id) ?? '',
           candidates: [],
         });
+        completionStatus =
+          'Erkennung fehlgeschlagen · Foto bleibt für die Korrektur erhalten';
         recordBetaEvent(
           'scan_result',
           'scan',
@@ -932,6 +941,7 @@ export function openAddCards(
         // reaching the catalogue stage.
         releaseOcr();
         onAnalysisState(false);
+        if (completionStatus) onAnalysisState(false, completionStatus);
         liveOcrJobs.delete(id);
       });
     liveOcrJobs.set(id, task);
