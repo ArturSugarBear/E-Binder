@@ -15,3 +15,19 @@ export function isTransientArtworkUpstreamFailure(message) {
       transientMepCardMetadata.test(message))
   );
 }
+
+/**
+ * The audit can fail before writing audit.json when the initial DE/EN set
+ * listing is temporarily unavailable. Only the exact TCGdex list endpoint
+ * and one unambiguous transient HTTP error are eligible for snapshot reuse.
+ */
+export function isTransientArtworkBootstrapFailure(stderr) {
+  if (typeof stderr !== 'string') return false;
+  const errors = stderr.match(/^Error: [^\r\n]+$/gm) ?? [];
+  return (
+    errors.length === 1 &&
+    /^Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets$/.test(
+      errors[0],
+    )
+  );
+}
