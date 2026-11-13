@@ -1,6 +1,7 @@
 import { manualCaptureAvailable } from '../domain/live-capture-ui';
 import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
+import { VISUAL_BETA_REFERENCE_COUNT, visualBetaEnabled } from '../data/visual-beta';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestCardCorners } from '../domain/card-outline';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
@@ -103,6 +104,26 @@ async function snapshot(
       }
     }
     out.putImageData(result, 0, 0);
+  } else {
+    // The on-screen guide supplies a usable crop when edge detection fails.
+    // This does not verify the physical corners or the card identity.
+    const guideWidth = source.width * 0.73;
+    const guideHeight = guideWidth * (88 / 63);
+    const framed = document.createElement('canvas');
+    framed.width = 630;
+    framed.height = 880;
+    framed.getContext('2d')!.drawImage(
+      source,
+      (source.width - guideWidth) / 2,
+      (source.height - guideHeight) / 2,
+      guideWidth,
+      guideHeight,
+      0,
+      0,
+      framed.width,
+      framed.height,
+    );
+    output = framed;
   }
   return new Promise((resolve, reject) => {
     output.toBlob(
@@ -197,7 +218,7 @@ export function openLiveScanner(
     }
     ongoingAnalysis = Math.max(0, ongoingAnalysis + (active ? 1 : -1));
     analysis.hidden = ongoingAnalysis === 0;
-    if (ongoingAnalysis > 0) trigger.hidden = true;
+    // Previous-photo recognition must never hide this card's shutter.
     stage.classList.toggle('is-analyzing', ongoingAnalysis > 0);
     if (!ongoingAnalysis)
       analysisCaption.textContent = 'Kartendetails werden lokal geprüft …';
@@ -205,6 +226,13 @@ export function openLiveScanner(
   const journey = scanProgress();
   const status = el('p', 'w-live-status', 'Kamera wird gestartet …');
   status.setAttribute('role', 'status');
+  const visionStatus = el(
+    'p',
+    'w-muted w-live-vision-state',
+    visualBetaEnabled()
+      ? `DINOv2-Pilot aktiv · ${VISUAL_BETA_REFERENCE_COUNT} Referenzkarten · keine automatische Bestätigung`
+      : `DINOv2 nicht aktiv · optionaler Test mit ${VISUAL_BETA_REFERENCE_COUNT} Karten unter Profil`,
+  );
   const progress = el('progress', 'w-progress w-live-progress');
   progress.max = 3;
   progress.value = 0;
@@ -327,6 +355,7 @@ export function openLiveScanner(
     stage,
     status,
     analysis,
+    visionStatus,
     journey.element,
     progress,
     options,
@@ -466,7 +495,7 @@ export function openLiveScanner(
         status.textContent =
           outcome === 'duplicate'
             ? 'Diese Aufnahme ist bereits vorhanden · Karte wechseln'
-            : 'Aufnahme vorgemerkt · Karte wechseln oder Ergebnisse prüfen';
+            : 'Foto erfasst · OCR läuft im Hintergrund · nächste Karte einlegen';
         journey.update('review', 'Foto vorgemerkt · noch nicht hinzugefügt', 1);
         stage.dataset.scanPhase = 'queued';
         stageLabel.textContent =
@@ -566,9 +595,9 @@ export function openLiveScanner(
       stageLabel.textContent = 'Karte ausrichten';
       status.textContent =
         frameFailures >= 3
-          ? 'Kamerabild kann nicht ausgewertet werden · Ecken werden gesucht'
+          ? 'Ecken nicht erkennbar · jetzt manuell aufnehmen'
           : time - cameraReadyAt > 4500
-            ? 'Ecken werden gesucht · Mehr Licht, Abstand ändern oder manuell aufnehmen'
+            ? 'Ecken werden gesucht · du kannst jederzeit manuell aufnehmen'
             : 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }
@@ -658,7 +687,7 @@ export function openLiveScanner(
       running = true;
       cameraReadyAt = performance.now();
       trigger.disabled = false;
-      status.textContent = 'Kamera bereit · Karte in den Rahmen halten';
+      status.textContent = 'Kamera bereit · automatisch oder manuell aufnehmen';
       frameId = requestAnimationFrame(inspectFrame);
     } catch (error) {
       if (closed || generation !== cameraGeneration) return;
