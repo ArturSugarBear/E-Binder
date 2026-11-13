@@ -32,7 +32,7 @@ Das neue Skript `scripts/benchmark-card-corners.mjs` vergleicht beide Verfahren 
 
 Beispiel für eine Datei außerhalb des Repositories:
 
-```json
+```text
 { "samples": [
   { "photo": "./card-sleeve.jpg",
     "corners": [[0.18,0.12],[0.82,0.12],[0.82,0.88],[0.18,0.88]],
