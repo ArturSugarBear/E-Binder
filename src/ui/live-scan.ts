@@ -7,6 +7,7 @@ import {
 } from '../data/visual-beta';
 import type { Quad } from '../domain/photo-geometry';
 import { resamplePerspectivePixels } from '../domain/perspective-resample';
+import { expandLiveCaptureQuad } from '../domain/live-capture-quad';
 import {
   detectCardCorners,
   type CardCornerStrategy,
@@ -102,7 +103,7 @@ async function snapshot(
         source.height,
         output.width,
         output.height,
-        corners,
+        expandLiveCaptureQuad(corners),
       ),
     );
     out.putImageData(result, 0, 0);
@@ -409,6 +410,8 @@ export function openLiveScanner(
   let sampled = 0;
   let cameraReadyAt = 0;
   let frameFailures = 0;
+  let missingSamples = 0;
+  let lastMissingEventAt = 0;
   const sample = document.createElement('canvas');
   sample.width = 192;
   sample.height = 256;
@@ -441,6 +444,8 @@ export function openLiveScanner(
     cornerStrategy = 'none';
     capturedSignature = null;
     cardChange = { frames: 0, previous: null };
+    missingSamples = 0;
+    lastMissingEventAt = 0;
     polygon.removeAttribute('points');
     stage.classList.remove('has-card-outline');
     stage.dataset.scanPhase = 'ready';
@@ -682,6 +687,22 @@ export function openLiveScanner(
       sample.height,
     );
     if (!lock.corners) {
+      missingSamples++;
+      // Distinguish "camera stayed open, no physical edges" from OCR failure.
+      // Rate-limit aggregate-only telemetry; an empty frame is not a card.
+      if (
+        time - cameraReadyAt > 4500 &&
+        (lastMissingEventAt === 0 || time - lastMissingEventAt > 12000)
+      ) {
+        lastMissingEventAt = time;
+        recordBetaEvent(
+          'scan_result',
+          'scan',
+          'corner_tracking_timeout',
+          'unknown',
+          { metric: Math.min(200, missingSamples) },
+        );
+      }
       observations = 0;
       last = null;
       reliable = null;
@@ -700,6 +721,8 @@ export function openLiveScanner(
       return;
     }
     observations = lock.stableFrames;
+    missingSamples = 0;
+    lastMissingEventAt = 0;
     last = lock.corners;
     reliable = observations >= 2 ? lock.corners : null;
     cornerStrategy = detectedStrategy;
@@ -743,6 +766,8 @@ export function openLiveScanner(
     reliable = null;
     capturedSignature = null;
     cardChange = { frames: 0, previous: null };
+    missingSamples = 0;
+    lastMissingEventAt = 0;
     progress.value = 0;
     sampled = 0;
     frameFailures = 0;

@@ -1172,6 +1172,7 @@ export function openAddCards(
       'text',
     );
     notices.replaceChildren(journey.element, status, progress, stop);
+    let errorPhase: 'photo' | 'ocr' | 'catalog' | 'review' = 'photo';
     try {
       const photo = transientPhotos.get(shot.id);
       if (!photo)
@@ -1209,6 +1210,7 @@ export function openAddCards(
           Boolean(clue.setId && clue.number),
         ) &&
         recognizedNameHints(quickText).length > 0;
+      errorPhase = 'ocr';
       const text = usableLive
         ? prefilled
         : await recognizePhoto(
@@ -1228,6 +1230,7 @@ export function openAddCards(
         return;
       // Privacy-safe beta triage: diagnose why a real scan has no result
       // without uploading OCR content, search text, images or arbitrary input.
+      errorPhase = 'catalog';
       const readClues = recognitionClues(text);
       const readNames = recognizedNameHints(text);
       recordBetaEvent(
@@ -1361,6 +1364,7 @@ export function openAddCards(
         }),
       );
       showCapture();
+      errorPhase = 'review';
       await renderScanReview(
         text,
         candidates,
@@ -1393,6 +1397,12 @@ export function openAddCards(
         return;
       }
       recordBetaEvent('scan_result', 'scan', 'recognition_failed', 'error');
+      recordBetaEvent(
+        'scan_result',
+        'scan',
+        `review_failed_${errorPhase}`,
+        'error',
+      );
       const text = errorText(error);
       results.dataset.scanState = 'error';
       ctx.commit('Foto bleibt zur Klärung offen', (state) =>

@@ -91,6 +91,11 @@ async function modelResources(
           } finally {
             Object.values(outputs).forEach((tensor) => tensor.dispose());
           }
+        } catch {
+          // Synthetic probes are advisory. Dynamic ONNX shapes and iOS WASM
+          // engines may reject 192px although a real photo remains readable.
+          // Do not make a test tensor prevent every subsequent OCR attempt.
+          scope.postMessage({ type: 'model-probe-warning' });
         } finally {
           probe.dispose();
         }
@@ -263,10 +268,12 @@ async function recognize({
             retry.push(await read([0.01, 0.875, 0.96, 0.12], 'binary'));
           break;
         case 'title':
-          retry.push(await read([0.03, 0.005, 0.93, 0.12], 'gray'));
+          retry.push(
+            await read(fast ? [0.035, 0.04, 0.93, 0.16] : [0.03, 0.005, 0.93, 0.16], 'gray'),
+          );
           break;
         case 'title-wide':
-          retry.push(await read([0.015, 0.01, 0.97, 0.18]));
+          retry.push(await read([0.015, 0.005, 0.97, 0.22]));
           break;
       }
       scope.postMessage({ type: 'done', id, text: retry.join('\n') });
@@ -358,11 +365,17 @@ async function recognize({
     // Real sleeve photos often shift the title well outside the narrow
     // centre band. The second, wider top read is only needed for weak OCR.
     const title = await read(
-      language === 'ja' ? [0.15, 0.018, 0.6, 0.062] : [0.08, 0.02, 0.83, 0.065],
+      fast
+        ? [0.055, 0.02, 0.89, 0.16]
+        : language === 'ja'
+          ? [0.15, 0.018, 0.6, 0.062]
+          : [0.08, 0.02, 0.83, 0.065],
     );
     texts.push(title);
     if (!/\p{L}{3}/u.test(title)) {
-      texts.push(await read([0.05, 0.005, 0.9, 0.095], 'gray'));
+      texts.push(
+        await read(fast ? [0.035, 0.035, 0.93, 0.16] : [0.05, 0.005, 0.9, 0.095], 'gray'),
+      );
     }
     scope.postMessage({ type: 'done', id, text: texts.join('\n') });
   } finally {
