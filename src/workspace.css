@@ -5420,13 +5420,19 @@ textarea.w-input,
   }
 }
 
-/* Auto-first capture: recovery is outside the camera and only shown on demand. */
+/* Live capture remains available while previous photos are recognized. */
 .w-live-scan-minimal .w-live-manual-capture:not([hidden]) {
-  min-height: 44px;
+  min-height: 52px;
   width: auto;
   justify-self: center;
   grid-column: 1 / -1;
-  padding: 8px 14px;
+  padding: 10px 18px;
+  font-size: 14px;
+}
+.w-live-scan-minimal .w-live-vision-state {
+  margin: 0;
+  padding: 0 12px;
+  text-align: center;
   font-size: 12px;
 }
 .w-live-scan-minimal .w-dialog-body > .w-live-status {
@@ -5449,7 +5455,7 @@ textarea.w-input,
   animation: none;
 }
 .w-live-scan-minimal .w-live-stage.is-analyzing .w-live-frame-guide::before {
-  display: none;
+  display: block;
 }
 
 .w-live-scan-minimal .w-dialog-footer {
