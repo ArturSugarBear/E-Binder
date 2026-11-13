@@ -428,15 +428,17 @@ export function openAddCards(
           ? 'Dieses Foto wurde bereits übernommen.'
           : temporary
             ? shot.text && !shot.candidates.length
-              ? 'Kein verlässlicher Treffer. Richte die Ecken auf die gedruckte Karte aus und prüfe die vergrößerte Sammlernummer. Das Foto bleibt nur bis zum Schließen geöffnet.'
+              ? 'Kein sicherer Treffer. Suche die Karte anhand des Namens oder prüfe Set und Nummer. Du kannst den Zuschnitt optional korrigieren; ein neues Foto ist nicht nötig.'
               : 'Vergleiche die Aufnahme mit der Ausgabe. Das Foto wird beim Schließen verworfen.'
             : 'Nur das Erkennungsergebnis wurde gespeichert. Prüfe die Ausgabe oder fotografiere die Karte erneut.',
       ),
     );
-    if (shot.status !== 'confirmed' && temporary)
+    if (shot.status !== 'confirmed' && temporary) {
       copy.append(
         action(
-          'Foto ausrichten und erkennen',
+          framedCaptures.has(shot.id)
+            ? 'Erkennung erneut versuchen'
+            : 'Foto ausrichten und erkennen',
           () => {
             void runOcr();
           },
@@ -444,6 +446,31 @@ export function openAddCards(
           'spark',
         ),
       );
+      if (framedCaptures.has(shot.id))
+        copy.append(
+          action(
+            'Zuschnitt korrigieren (optional)',
+            () => {
+              void (async () => {
+                const corrected = await alignPhoto(
+                  temporary,
+                  liveOcrAbort.signal,
+                );
+                if (!corrected || closed || !transientPhotos.has(shot.id))
+                  return;
+                transientPhotos.set(shot.id, corrected);
+                framedCaptures.delete(shot.id);
+                alignedCaptures.add(shot.id);
+                liveReviewResults.delete(shot.id);
+                liveOcrEvidence.delete(shot.id);
+                showCapture();
+                await runOcr();
+              })();
+            },
+            'secondary',
+          ),
+        );
+    }
     if (shot.error) copy.append(message(shot.error, 'error'));
     if (shot.text) {
       const disclosure = el(
