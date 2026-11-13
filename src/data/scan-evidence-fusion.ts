@@ -112,7 +112,7 @@ export function fuseScanEvidence(
   const exact = rankScanCandidates(text, ranked);
   const plausibleOcrTitle = Boolean(
     name &&
-      unique.some(
+    unique.some(
       (card) =>
         fullCardNameMatches(name, card.name) &&
         clues.some(
