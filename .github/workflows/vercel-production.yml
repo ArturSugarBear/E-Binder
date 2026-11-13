@@ -1,0 +1,156 @@
+name: Publish validated E-Binder on Vercel
+
+on:
+  workflow_run:
+    workflows: ['Check and publish E-Binder']
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e-binder-vercel-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Only successful push-triggered CI for the actual master branch can release.
+    # The variable is off by default until the owner configures VERCEL_TOKEN.
+    if: >-
+      ${{
+        vars.VERCEL_DEPLOY_ENABLED == 'true' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'master' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_Ohsaj9V6AzRe0uIKSjUDmOB6
+      VERCEL_PROJECT_ID: prj_NP6LOmCsOwR7mJuHU28wRfiZkghJ
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      VITE_BASE_PATH: /
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Check CI commit is still current master
+        run: |
+          git fetch --depth=1 origin master
+          test "$(git rev-parse FETCH_HEAD)" = "$RELEASE_SHA"
+      - name: Require configured Vercel token
+        run: |
+          if [[ -z "$VERCEL_TOKEN" ]]; then
+            echo "::error::Set VERCEL_TOKEN secret before enabling VERCEL_DEPLOY_ENABLED."
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      # The ONNX weights are intentionally not committed. A plain Vercel Git
+      # build silently omits them; reproduce the same pinned pilot as Pages CI.
+      - name: Package verified local DINOv2 model and index
+        run: |
+          python -m pip install --disable-pip-version-check 'numpy==2.2.6' 'pillow==11.3.0' 'onnxruntime==1.23.2'
+          curl --fail --location --retry 3 --retry-delay 3 --max-time 180 \
+            'https://huggingface.co/onnx-community/dinov2-small-ONNX/resolve/08c606e/onnx/model_quantized.onnx' \
+            -o /tmp/ebinder-dinov2-small-beta.onnx
+          echo '7cfc69bd1874d20b9dbecdab057f21aeac7b90c2f560bd0fb66af86c78024f62  /tmp/ebinder-dinov2-small-beta.onnx' | sha256sum --check
+          node scripts/prepare-visual-beta-input.mjs
+          python scripts/embed-card-references.py \
+            visual-beta-reference-input.json \
+            /tmp/ebinder-dinov2-small-beta.onnx \
+            /tmp/ebinder-visual-vectors.json
+          node scripts/pack-visual-index.mjs \
+            /tmp/ebinder-visual-vectors.json \
+            /tmp/ebinder-dinov2-small-beta.onnx \
+            public/assets/vision
+          node scripts/verify-visual-beta.mjs
+          rm visual-beta-reference-input.json
+      - name: Configure Vercel project
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+          npm install --global vercel@65.14.0
+          vercel pull --yes --environment=production
+      - name: Build root-path PWA with exact CI revision
+        run: |
+          export GITHUB_SHA="$RELEASE_SHA"
+          vercel build --prod
+      - name: Verify build artifacts before deployment
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, statSync } from 'node:fs';
+          import { join } from 'node:path';
+          const root = '.vercel/output/static';
+          const version = JSON.parse(readFileSync(join(root, 'version.json'), 'utf8'));
+          if (version.commit !== process.env.RELEASE_SHA.slice(0, 12))
+            throw Error('Built SHA does not match successful CI commit');
+          const pwa = JSON.parse(readFileSync(join(root, 'manifest.webmanifest'), 'utf8'));
+          if (pwa.start_url !== '/' || pwa.scope !== '/')
+            throw Error('Wrong PWA base path for Vercel');
+          const dir = join(root, 'assets/vision');
+          const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
+          if (manifest.count !== 9 || !manifest.modelSha256 ||
+              statSync(join(dir, manifest.modelFile)).size !== 24427763)
+            throw Error('Verified visual ONNX model is missing');
+          for (const name of [manifest.indexFile, manifest.referencesFile]) {
+            if (statSync(join(dir, name)).size < 100)
+              throw Error('Visual index missing: ' + name);
+          }
+          console.log('Vercel build and model artifacts match reviewed master');
+          NODE
+      - name: Stage production build without assigning public domain
+        id: stage
+        run: |
+          url="$(vercel deploy --prebuilt --prod --skip-domain)"
+          [[ "$url" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app$ ]] || exit 1
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Check staged URL and model manifest
+        env:
+          DEPLOY_URL: ${{ steps.stage.outputs.url }}
+        run: |
+          expected="${RELEASE_SHA:0:12}"
+          passed=false
+          for attempt in {1..15}; do
+            actual="$(curl -fsSL --max-time 15 "$DEPLOY_URL/version.json" | python3 -c 'import json,sys;print(json.load(sys.stdin)["commit"])' 2>/dev/null || true)"
+            if [[ "$actual" == "$expected" ]]; then
+              passed=true
+              break
+            fi
+            sleep 5
+          done
+          test "$passed" = true
+          curl -fsSL --max-time 20 "$DEPLOY_URL/" | grep -q 'E-Binder'
+          curl -fsSI --max-time 20 "$DEPLOY_URL/assets/vision/manifest.json" > /dev/null
+      - name: Prevent stale release overwriting newer master
+        run: |
+          git fetch --depth=1 origin master
+          test "$(git rev-parse FETCH_HEAD)" = "$RELEASE_SHA"
+      - name: Promote tested build to public Vercel domain
+        env:
+          DEPLOY_URL: ${{ steps.stage.outputs.url }}
+        run: vercel promote "$DEPLOY_URL"
+      - name: Verify shared iPhone URL matches CI commit
+        run: |
+          expected="${RELEASE_SHA:0:12}"
+          for attempt in {1..15}; do
+            actual="$(curl -fsSL --max-time 15 "https://e-binder-zeta.vercel.app/version.json?t=$RELEASE_SHA" | python3 -c 'import json,sys;print(json.load(sys.stdin)["commit"])' 2>/dev/null || true)"
+            if [[ "$actual" == "$expected" ]]; then
+              echo "Vercel release verified: $actual"
+              echo "Public iPhone app: https://e-binder-zeta.vercel.app (commit $actual)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Public domain has not published the verified commit"
+          exit 1
