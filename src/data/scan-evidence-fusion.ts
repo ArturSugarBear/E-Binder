@@ -116,7 +116,12 @@ export function fuseScanEvidence(
   });
 
   const exact = rankScanCandidates(text, ranked);
-  const conflict = ambiguousOcr || exact.conflictingName;
+  const numberDisagreement =
+    fullNumbers.size > 0 &&
+    visualRanks.size > 0 &&
+    !unique.some((card) => fullNumbers.has(numberKey(card.number)));
+  const conflict =
+    ambiguousOcr || exact.conflictingName || numberDisagreement;
   const suggested = conflict ? undefined : exact.suggested;
   const basis = suggested ? exact.basis : 'review';
   const visualAgreement = Boolean(
