@@ -5,6 +5,8 @@
  */
 const transientSetMetadata =
   /^Set metadata unavailable \((en|de):([a-z0-9.+_-]+)\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/\1\/sets\/\2$/i;
+const transientCatalogList =
+  /^Set catalogue unavailable \((en|de)\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/\1\/sets$/i;
 const transientMepCardMetadata =
   /^Promo artwork audit failed: Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/en\/cards\/mep-[a-z0-9.+_-]+$/i;
 
@@ -12,6 +14,7 @@ export function isTransientArtworkUpstreamFailure(message) {
   return (
     typeof message === 'string' &&
     (transientSetMetadata.test(message) ||
+      transientCatalogList.test(message) ||
       transientMepCardMetadata.test(message))
   );
 }
