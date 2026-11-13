@@ -22,16 +22,21 @@ the exact-card artwork and any pretrained model checkpoint.
 
 ## Acquire the _existing_ fork, no reupload to public Git
 
-The authenticated API audit previously reached your workspace, but its
-temporary key was removed. Set a **new** local `ROBOFLOW_API_KEY` secret and
-read the project URL in your Roboflow dashboard. Never paste a token into
+The authenticated API audit previously reached the workspace, but its
+temporary key was removed. The workspace slug is `artur-schuhmacher`.
+The publisher-facing inferencejs key is **not** a replacement for the private
+project-management API key. Set a newly rotated **private** `ROBOFLOW_API_KEY`
+locally; never put it in this checkout, issue bodies, CI logs or URLs. Never paste a token into
 a GitHub issue, shell command saved in CI logs, or the browser code.
 
 ```bash
 # Replace workspace/project with the actual fork shown in the Roboflow URL:
 export ROBOFLOW_API_KEY='<private value>'
+node scripts/roboflow-projects.mjs artur-schuhmacher
+# If exactly one project has between 300 and 600 source images:
 node scripts/roboflow-card-import.mjs \
-  workspace/project /absolute/private/ebinder-card-boxes --limit=1000
+  artur-schuhmacher/auto /absolute/private/ebinder-card-boxes --limit=1000
+# Otherwise use the explicit project slug printed above.
 unset ROBOFLOW_API_KEY
 node --test tests/roboflow-card-import.test.mjs
 ```
