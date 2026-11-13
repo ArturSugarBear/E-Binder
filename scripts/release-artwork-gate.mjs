@@ -11,6 +11,7 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 import {
   isTransientArtworkUpstreamFailure,
   isTransientArtworkBootstrapFailure,
+  isTransientClassicCollectionDependency,
 } from './artwork-upstream-errors.mjs';
 
 const path = 'public/catalog-art';
@@ -45,7 +46,11 @@ async function fallbackToVerifiedSnapshot() {
   const recordedTransientOutage =
     Array.isArray(attempted.errors) &&
     attempted.errors.length > 0 &&
-    attempted.errors.every(isTransientArtworkUpstreamFailure);
+    attempted.errors.every(
+      (error) =>
+        isTransientArtworkUpstreamFailure(error) ||
+        isTransientClassicCollectionDependency(error, attempted.errors),
+    );
   if (!earlyUpstreamOutage && !recordedTransientOutage) {
     throw new Error('Non-transient artwork audit errors: release blocked.');
   }
