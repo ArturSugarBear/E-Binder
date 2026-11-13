@@ -56,6 +56,11 @@ test('zero-match scanner keeps the photo and guides the collector to exact-print
     'src',
     /^blob:/,
   );
+  // When OCR and the visual pilot have no answer, name search is the
+  // first recovery action; collectors do not need to know set codes.
+  await expect(
+    dialog.locator('.w-scan-recovery button').first(),
+  ).toHaveText('Karte nach Namen suchen');
   await expect(
     dialog.getByRole('button', { name: 'Set und Nummer abgleichen' }),
   ).toBeVisible();
