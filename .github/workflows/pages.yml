@@ -24,6 +24,16 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Surface code errors before downloading model weights or probing the
+      # third-party catalogue. On failure show the exact Prettier patch while
+      # still failing the check; never silently normalize source in CI.
+      - name: Early formatting gate with repair diff
+        run: |
+          if ! npm run format:check; then
+            npx prettier --write .
+            git diff -- src scripts tests .github/workflows
+            exit 1
+          fi
       # This pilot is opt-in, not a universal image recognizer.
       # Build model/index from the SAME pinned ONNX weights and exactly nine
       # publisher-checked, already bundled image references. No donor JPEGs.
