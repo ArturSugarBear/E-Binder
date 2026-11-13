@@ -1807,16 +1807,8 @@ export function openAddCards(
             'p',
             'w-muted',
             'Die automatische Erkennung hat noch keine eindeutige Ausgabe. ' +
-              'Du musst kein neues Foto aufnehmen: Prüfe Set und Sammlernummer ' +
-              'oder suche nach dem Namen. Dein Foto bleibt zum Vergleichen sichtbar.',
-          ),
-          action(
-            'Set und Nummer abgleichen',
-            () => {
-              void showSetChooser();
-            },
-            'primary',
-            'search',
+              'Du musst kein neues Foto aufnehmen: Suche zuerst nach dem Namen ' +
+              'oder gleiche Set und Sammlernummer ab. Dein Foto bleibt sichtbar.',
           ),
           action(
             'Karte nach Namen suchen',
@@ -1826,6 +1818,14 @@ export function openAddCards(
               scanSetChoice.replaceChildren();
               searchLine.scrollIntoView({ block: 'start' });
               search.focus();
+            },
+            'primary',
+            'search',
+          ),
+          action(
+            'Set und Nummer abgleichen',
+            () => {
+              void showSetChooser();
             },
             'secondary',
           ),
