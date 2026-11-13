@@ -206,6 +206,9 @@ export function openLiveScanner(
   );
   analysis.setAttribute('role', 'status');
   analysis.hidden = true;
+  const resultStatus = el('p', 'w-muted w-live-last-result');
+  resultStatus.setAttribute('role', 'status');
+  resultStatus.hidden = true;
 
   let ongoingAnalysis = 0;
   const onAnalysisState = (active: boolean, detail?: string) => {
@@ -213,7 +216,11 @@ export function openLiveScanner(
     // Status text changes come from actual OCR/retry/catalogue work;
     // they do not increase the number of pending recognitions.
     if (detail) {
-      analysisCaption.textContent = detail;
+      if (active) analysisCaption.textContent = detail;
+      else {
+        resultStatus.textContent = detail;
+        resultStatus.hidden = false;
+      }
       return;
     }
     ongoingAnalysis = Math.max(0, ongoingAnalysis + (active ? 1 : -1));
@@ -355,6 +362,7 @@ export function openLiveScanner(
     stage,
     status,
     analysis,
+    resultStatus,
     visionStatus,
     journey.element,
     progress,
@@ -448,6 +456,7 @@ export function openLiveScanner(
       return;
     }
     busy = true;
+    resultStatus.hidden = true;
     trigger.hidden = true;
     trigger.disabled = true;
     journey.update('capture', 'Aufnahme wird ausgerichtet …', 0);
