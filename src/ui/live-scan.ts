@@ -353,7 +353,7 @@ export function openLiveScanner(
   cameraFallback.hidden = true;
   // Camera, status, shutter, review: everything else is optional.
   trigger.hidden = true;
-  trigger.classList.add('w-live-manual-capture');
+  trigger.classList.add('w-live-manual-capture', 'w-live-shutter');
   next.classList.add('w-live-next');
   finish.classList.add('w-live-review');
   sheet.dialog.classList.add('w-live-scan-minimal');
