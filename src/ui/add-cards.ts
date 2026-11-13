@@ -671,6 +671,14 @@ export function openAddCards(
     liveProgressHook = onAnalysisState;
     onAnalysisState(true);
     onAnalysisState(true, 'Aufnahme wartet auf die lokale Erkennung …');
+    // Begin image inference immediately. OCR is only an independent
+    // verification signal; waiting for OCR must not delay visual retrieval.
+    // A failed pilot never manufactures candidates or aborts photo review.
+    const prefetchedVisual = visualBetaEnabled()
+      ? (visualSearch ??= createVisualSearchSession(visualAbort.signal))
+          .then((session) => session?.match(photo, 12000) ?? [])
+          .catch(() => [])
+      : undefined;
     // Only serialize ONNX inference. A slow online catalogue lookup for
     // card N must not prevent the worker from reading card N+1.
     const previousOcr = liveOcrQueue;
@@ -759,28 +767,55 @@ export function openAddCards(
           ...ctx.state.holdings.map((item) => item.card),
         ]);
         let automatic: AutomaticScanResult | undefined;
-        if (text.trim() && remaining() > 450) {
-          onAnalysisState(true, 'Kartenkatalog wird abgeglichen …');
+        // A live camera capture must reach the visual model even when OCR
+        // returns no text. Model work is independent of the short OCR budget
+        // and never pauses the camera or automatically confirms a printing.
+        const useVisual = visualBetaEnabled();
+        if ((text.trim() && remaining() > 450) || useVisual) {
+          onAnalysisState(
+            true,
+            useVisual
+              ? 'Kartengrafik wird mit Referenzbildern verglichen …'
+              : 'Kartenkatalog wird abgeglichen …',
+          );
           const controller = new AbortController();
           const timeout = setTimeout(
             () => controller.abort(),
-            Math.max(1, remaining() - 100),
+            useVisual ? 15500 : Math.max(1, remaining() - 100),
           );
           const cleanup = () => controller.abort();
           liveOcrAbort.signal.addEventListener('abort', cleanup, {
             once: true,
           });
           try {
-            automatic = await resolvePhotoScan(
-              photo,
-              text,
-              candidatesFromLocal,
-              language.value,
-              controller.signal,
-            );
+            const visual = useVisual
+              ? await (visualSearch ??= createVisualSearchSession(
+                  visualAbort.signal,
+                ))
+              : null;
+            if (!controller.signal.aborted) {
+              automatic = await resolvePhotoScan(
+                photo,
+                text,
+                candidatesFromLocal,
+                language.value,
+                controller.signal,
+                visual,
+                useVisual ? 12000 : 4700,
+                prefetchedVisual,
+              );
+            }
+            if (useVisual && automatic) {
+              recordBetaEvent(
+                'scan_result',
+                'scan',
+                'visual_beta_shortlist',
+                automatic.visualModelCandidates > 0 ? 'ok' : 'unknown',
+                { metric: Math.min(200, automatic.visualModelCandidates) },
+              );
+            }
           } catch {
-            // Remote catalogue access is advisory. Never spend beyond the
-            // live scan deadline or fabricate a suggested printing.
+            // Retain the scan for review if the model or catalogue fails.
           } finally {
             clearTimeout(timeout);
             liveOcrAbort.signal.removeEventListener('abort', cleanup);
