@@ -188,7 +188,12 @@ await pool(english, async (set) => {
   // TCGdex does not host artwork for 30th-c (upstream issue #2341).
   // This curated mapping is keyed by its sequential 001–030 printing ID,
   // never by historical collector number: e.g. 11 and 106 occur repeatedly.
-  if (set.id === '30th-c') {
+  // A failed detail request is already recorded as transient metadata loss.
+  // Do not misclassify an unreadable catalogue as a broken 30-card mapping:
+  // the release gate can only reuse a recent verified snapshot.
+  if (set.id === '30th-c' && details[0]?.status === 'rejected') {
+    // Metadata outage; exact-print audit remains unverified for this run.
+  } else if (set.id === '30th-c') {
     try {
       const curated = JSON.parse(await readFile(`${root}/30th-c.json`, 'utf8'));
       const summaries = full.cards ?? [];
