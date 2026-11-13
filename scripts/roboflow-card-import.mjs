@@ -169,7 +169,7 @@ async function download(url) {
   return Buffer.from(array);
 }
 
-async function importFork(source, directory, limit) {
+export async function importFork(source, directory, limit) {
   const match = /^([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)$/.exec(source);
   if (!match) throw new Error('Source must be <workspace>/<project>');
   const key = process.env.ROBOFLOW_API_KEY;
