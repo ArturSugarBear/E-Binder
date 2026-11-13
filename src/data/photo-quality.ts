@@ -99,6 +99,22 @@ export function analysePhotoPixels(
   };
 }
 
+/**
+ * Live hints are heuristics from the current camera frame, not evidence of
+ * card identity and never a reason to block capture. No frame is retained.
+ */
+export function liveCameraPhotoHint(quality: PhotoQuality): string | undefined {
+  if (quality.highlightFraction > 0.31)
+    return 'Reflexionen möglich · Karte leicht neigen';
+  if (quality.meanBrightness < 57 || quality.shadowFraction > 0.58)
+    return 'Bild zu dunkel · für mehr Licht sorgen';
+  if (quality.detail < 5.2)
+    return 'Bild möglicherweise unscharf · Kamera ruhig halten';
+  if (quality.contrast < 48)
+    return 'Wenig Kontrast · Karte vor ruhigen Hintergrund halten';
+  return undefined;
+}
+
 export async function inspectPocketPhoto(
   photo: Blob,
   signal: AbortSignal,

@@ -7,6 +7,7 @@ import {
 } from '../data/visual-beta';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestCardCorners } from '../domain/card-outline';
+import { analysePhotoPixels, liveCameraPhotoHint } from '../data/photo-quality';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
 import {
@@ -569,12 +570,19 @@ export function openLiveScanner(
     }
     sampled = time;
     let corners: Quad | null = null;
+    let cameraHint: string | undefined;
     try {
       drawVisible(video, sample);
       const pixels = sample
         .getContext('2d', { willReadFrequently: true })!
         .getImageData(0, 0, sample.width, sample.height);
       corners = suggestCardCorners(pixels.data, sample.width, sample.height);
+      // Diagnose the current preview only after sustained detection trouble.
+      // Never upload a frame or delay an otherwise valid automatic shutter.
+      if (!corners && time - cameraReadyAt > 4500)
+        cameraHint = liveCameraPhotoHint(
+          analysePhotoPixels(pixels.data, sample.width, sample.height),
+        );
       frameFailures = 0;
     } catch {
       // A temporarily missing camera frame must never trigger a shutter.
@@ -611,7 +619,7 @@ export function openLiveScanner(
         frameFailures >= 3
           ? 'Ecken nicht erkennbar · jetzt manuell aufnehmen'
           : time - cameraReadyAt > 4500
-            ? 'Ecken werden gesucht · du kannst jederzeit manuell aufnehmen'
+            ? `Ecken werden gesucht · ${cameraHint ?? 'du kannst jederzeit manuell aufnehmen'}`
             : 'Karte in den Rahmen halten · Ecken werden gesucht';
       return;
     }

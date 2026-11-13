@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { analysePhotoPixels } from '../../src/data/photo-quality';
+import {
+  analysePhotoPixels,
+  liveCameraPhotoHint,
+} from '../../src/data/photo-quality';
 
 function fixture(
   width: number,
@@ -57,6 +60,35 @@ describe('local binder photo diagnostics', () => {
     );
     expect(flat.warnings.join(' ')).toMatch(/Wenige Bilddetails/);
   });
+  it('offers nonblocking live hints for dark, reflective and low-detail frames', () => {
+    const dark = analysePhotoPixels(
+      fixture(128, 176, () => 12),
+      128,
+      176,
+    );
+    const reflective = analysePhotoPixels(
+      fixture(128, 176, () => 255),
+      128,
+      176,
+    );
+    const flat = analysePhotoPixels(
+      fixture(128, 176, () => 135),
+      128,
+      176,
+    );
+    const clear = analysePhotoPixels(
+      fixture(128, 176, (x, y) =>
+        (Math.floor(x / 4) + Math.floor(y / 4)) % 2 ? 215 : 39,
+      ),
+      128,
+      176,
+    );
+    expect(liveCameraPhotoHint(dark)).toMatch(/Licht/);
+    expect(liveCameraPhotoHint(reflective)).toMatch(/Reflexionen/);
+    expect(liveCameraPhotoHint(flat)).toMatch(/unscharf/);
+    expect(liveCameraPhotoHint(clear)).toBeUndefined();
+  });
+
   it('rejects empty, corrupt and mismatched pixel arrays', () => {
     expect(() =>
       analysePhotoPixels(new Uint8ClampedArray(20), 128, 176),

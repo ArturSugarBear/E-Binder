@@ -5,6 +5,7 @@ import runtimeUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url';
 import { decodeRecognition, recognitionTensor } from '../domain/vision-codec';
 import {
   collectorNumberFallbackRegions,
+  wideCollectorFooterRegion,
   hasPrintedCollectorFraction,
   hasPrintedSetCode,
 } from '../domain/ocr-number-search';
@@ -229,7 +230,7 @@ async function recognize({
         case 'footer':
           retry.push(await read([0.025, 0.91, 0.7, 0.08], 'gray'));
           if (!hasPrintedCollectorFraction(retry) || !hasPrintedSetCode(retry))
-            retry.push(await read([0.015, 0.875, 0.93, 0.12]));
+            retry.push(await read(wideCollectorFooterRegion));
           break;
         case 'footer-contrast':
           retry.push(await read([0.04, 0.92, 0.83, 0.07], 'inverted'));

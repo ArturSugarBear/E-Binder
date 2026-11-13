@@ -14,6 +14,12 @@ export const collectorNumberFallbackRegions: readonly RecognitionRegion[] = [
   [0.62, 0.9, 0.35, 0.055],
 ];
 
+/** A single fallback crop for the lower 15% of an aligned card. Narrow
+ * number and set-code reads remain the first, more precise OCR passes. */
+export const wideCollectorFooterRegion: RecognitionRegion = [
+  0.015, 0.85, 0.97, 0.145,
+];
+
 /** Typography aliases preserve digits; rarity glyphs are delimiters, not digits. */
 export function normalizePrintedIdentityText(text: string): string {
   return text

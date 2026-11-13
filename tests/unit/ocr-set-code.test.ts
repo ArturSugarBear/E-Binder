@@ -1,6 +1,9 @@
 import { recognitionClues } from '../../src/data/card-catalog';
 import { expect, it } from 'vitest';
-import { hasPrintedSetCode } from '../../src/domain/ocr-number-search';
+import {
+  hasPrintedSetCode,
+  wideCollectorFooterRegion,
+} from '../../src/domain/ocr-number-search';
 
 it('recognizes printed PBL and DLR footer codes even next to the language', () => {
   expect(hasPrintedSetCode(['089/084', 'PBLDE 089/084'])).toBe(true);
@@ -16,6 +19,13 @@ it('flags contradictory printed set codes instead of choosing an arbitrary first
     conflictingSets: true,
   });
   expect(clues[0]?.setId).toBeUndefined();
+});
+
+it('uses a bounded lower-15-percent fallback crop for hard-to-read card sleeves', () => {
+  const [, y, , height] = wideCollectorFooterRegion;
+  expect(y).toBe(0.85);
+  expect(height).toBe(0.145);
+  expect(y + height).toBeLessThanOrEqual(1);
 });
 
 it('does not mistake a collector number or arbitrary OCR title for a printed set code', () => {
