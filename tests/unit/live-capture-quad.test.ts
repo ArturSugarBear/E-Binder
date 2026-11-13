@@ -30,12 +30,8 @@ it('adapts overscan near the camera boundary instead of inventing pixels', () =>
   ];
   const safe = expandLiveCaptureQuad(close);
   expect(safe[0]!.y).toBeLessThan(close[0]!.y);
-  expect(safe.every((point) => point.x >= 0 && point.x <= 1)).toBe(
-    true,
-  );
-  expect(safe.every((point) => point.y >= 0 && point.y <= 1)).toBe(
-    true,
-  );
+  expect(safe.every((point) => point.x >= 0 && point.x <= 1)).toBe(true);
+  expect(safe.every((point) => point.y >= 0 && point.y <= 1)).toBe(true);
 });
 
 it('leaves malformed quads unchanged instead of producing a black crop', () => {

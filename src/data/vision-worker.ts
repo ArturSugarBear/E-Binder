@@ -269,7 +269,10 @@ async function recognize({
           break;
         case 'title':
           retry.push(
-            await read(fast ? [0.035, 0.04, 0.93, 0.16] : [0.03, 0.005, 0.93, 0.16], 'gray'),
+            await read(
+              fast ? [0.035, 0.04, 0.93, 0.16] : [0.03, 0.005, 0.93, 0.16],
+              'gray',
+            ),
           );
           break;
         case 'title-wide':
@@ -374,7 +377,10 @@ async function recognize({
     texts.push(title);
     if (!/\p{L}{3}/u.test(title)) {
       texts.push(
-        await read(fast ? [0.035, 0.035, 0.93, 0.16] : [0.05, 0.005, 0.9, 0.095], 'gray'),
+        await read(
+          fast ? [0.035, 0.035, 0.93, 0.16] : [0.05, 0.005, 0.9, 0.095],
+          'gray',
+        ),
       );
     }
     scope.postMessage({ type: 'done', id, text: texts.join('\n') });

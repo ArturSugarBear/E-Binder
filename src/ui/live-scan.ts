@@ -692,6 +692,7 @@ export function openLiveScanner(
       // Rate-limit aggregate-only telemetry; an empty frame is not a card.
       if (
         time - cameraReadyAt > 4500 &&
+        missingSamples >= 10 &&
         (lastMissingEventAt === 0 || time - lastMissingEventAt > 12000)
       ) {
         lastMissingEventAt = time;
