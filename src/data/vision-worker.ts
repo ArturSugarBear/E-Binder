@@ -59,17 +59,42 @@ async function modelResources(
         const session = await InferenceSession.create(model, {
           executionProviders: ['wasm'],
         });
-        return {
-          session,
-          dictionary: [
-            '',
-            ...dictionaryText
-              .replace(/\r\n/g, '\n')
-              .replace(/\n$/, '')
-              .split('\n'),
-            ' ',
-          ],
-        };
+        const dictionary = [
+          '',
+          ...dictionaryText
+            .replace(/\r\n/g, '\n')
+            .replace(/\n$/, '')
+            .split('\n'),
+          ' ',
+        ];
+        // Loading a WASM session is not proof that iOS can execute it.
+        // Run one small synthetic blank tensor and validate output shape,
+        // dictionary compatibility and the actual inference path.
+        const probe = new Tensor(
+          'float32',
+          new Float32Array(3 * 48 * 192).fill(1),
+          [1, 3, 48, 192],
+        );
+        try {
+          const outputs = await session.run({
+            [session.inputNames[0]!]: probe,
+          });
+          try {
+            const output = outputs[session.outputNames[0]!];
+            if (!output || output.type !== 'float32')
+              throw new Error('Lokales OCR-Modell liefert falsche Ausgaben.');
+            decodeRecognition(
+              output.data as Float32Array,
+              output.dims,
+              dictionary,
+            );
+          } finally {
+            Object.values(outputs).forEach((tensor) => tensor.dispose());
+          }
+        } finally {
+          probe.dispose();
+        }
+        return { session, dictionary };
       })().catch((error: unknown) => {
         prepared.delete(modelUrl);
         throw error;
