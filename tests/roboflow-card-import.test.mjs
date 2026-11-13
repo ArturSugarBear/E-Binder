@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   imageKind,
+  importFork,
   normalizeCardBoxes,
   stableSplit,
 } from '../scripts/roboflow-card-import.mjs';
@@ -97,4 +101,79 @@ test('image signatures prevent text or HTML being imported as photos', () => {
     'webp',
   );
   assert.throws(() => imageKind(Buffer.from('<html>')), /unsupported/);
+});
+
+test('real Roboflow image-detail schema builds private COCO splits end to end', async () => {
+  const dest = await mkdtemp(join(tmpdir(), 'ebinder-roboflow-mock-'));
+  const nativeFetch = globalThis.fetch;
+  const oldKey = process.env.ROBOFLOW_API_KEY;
+  process.env.ROBOFLOW_API_KEY = 'mock-key-not-a-real-credential';
+  globalThis.fetch = async (input) => {
+    const url = new URL(String(input));
+    if (url.pathname === '/mock/fork') {
+      return Response.json({ license: 'CC BY 4.0' });
+    }
+    if (url.pathname === '/mock/fork/search') {
+      return Response.json({
+        results: [{ id: 'demo-a' }, { id: 'demo-b' }],
+      });
+    }
+    if (url.pathname.startsWith('/mock/fork/images/')) {
+      const id = url.pathname.split('/').at(-1);
+      return Response.json({
+        image: {
+          urls: { original: 'https://cdn.example.org/' + id + '.jpg' },
+          annotation: {
+            width: 100,
+            height: 120,
+            boxes: [
+              { label: 'cards', x: 50, y: 60, width: 80, height: 100 },
+            ],
+          },
+        },
+      });
+    }
+    if (url.hostname === 'cdn.example.org') {
+      const id = url.pathname.includes('demo-a') ? 97 : 98;
+      return new Response(Buffer.from([0xff, 0xd8, 0xff, id]));
+    }
+    throw new Error('Unexpected external request');
+  };
+  try {
+    await importFork('mock/fork', dest, 2);
+    const datasets = await Promise.all(
+      ['train', 'valid', 'test'].map(async (split) =>
+        JSON.parse(
+          await readFile(join(dest, split, '_annotations.coco.json'), 'utf8'),
+        ),
+      ),
+    );
+    assert.equal(
+      datasets.reduce((sum, data) => sum + data.images.length, 0),
+      2,
+    );
+    assert.equal(
+      datasets.reduce((sum, data) => sum + data.annotations.length, 0),
+      2,
+    );
+    for (const data of datasets) {
+      assert.deepEqual(data.categories, [
+        { id: 1, name: 'card', supercategory: 'trading-card' },
+      ]);
+      for (const annotation of data.annotations) {
+        assert.deepEqual(annotation.bbox, [10, 10, 80, 100]);
+      }
+    }
+    const report = JSON.parse(
+      await readFile(join(dest, 'private-provenance.json'), 'utf8'),
+    );
+    assert.equal(report.savedImages, 2);
+    assert.equal(report.detectedBoxes, 2);
+    assert.equal(report.declaredLicense, 'CC BY 4.0');
+  } finally {
+    globalThis.fetch = nativeFetch;
+    if (oldKey === undefined) delete process.env.ROBOFLOW_API_KEY;
+    else process.env.ROBOFLOW_API_KEY = oldKey;
+    await rm(dest, { recursive: true, force: true });
+  }
 });
