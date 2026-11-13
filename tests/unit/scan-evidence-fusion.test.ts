@@ -73,6 +73,20 @@ describe('P0 scanner evidence fusion', () => {
     expect(result.visualAgreement).toBe(false);
   });
 
+  it('downgrades contradictory footer set codes even if a matching visual candidate exists', () => {
+    const groudon = card('de', 'me06-111', 'Groudon', '111/103');
+    const result = fuseScanEvidence(
+      'DLRDE 111/103\nPBLDE 111/103\nGroudon',
+      [groudon],
+      [hit(groudon)],
+      'de',
+    );
+    expect(result.candidates[0]?.key).toBe(groudon.key);
+    expect(result.suggested).toBeUndefined();
+    expect(result.state).toBe('ocr-conflict');
+    expect(result.retryRegion).toBe('footer-contrast');
+  });
+
   it('refuses a conflicting title even if set, number and image match', () => {
     const result = fuseScanEvidence(
       'M1L 088/063\nLucario',

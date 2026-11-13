@@ -8,6 +8,16 @@ it('recognizes printed PBL and DLR footer codes even next to the language', () =
   expect(hasPrintedSetCode(['211/198', 'SVIde 211/198'])).toBe(true);
 });
 
+it('flags contradictory printed set codes instead of choosing an arbitrary first match', () => {
+  const clues = recognitionClues('PBLDE 089/084\nDLRDE 089/084');
+  expect(clues).toHaveLength(1);
+  expect(clues[0]).toMatchObject({
+    number: '89/84',
+    conflictingSets: true,
+  });
+  expect(clues[0]?.setId).toBeUndefined();
+});
+
 it('does not mistake a collector number or arbitrary OCR title for a printed set code', () => {
   expect(hasPrintedSetCode(['089/084', 'Voltenso KP 120'])).toBe(false);
   expect(hasPrintedSetCode(['unlesbar', ''])).toBe(false);

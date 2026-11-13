@@ -36,6 +36,12 @@ describe('P07 live analysis budget', () => {
     ).toBeUndefined();
   });
 
+  it('retries a footer with conflicting codes instead of claiming an exact identity', () => {
+    const conflict = 'DLRDE 111/103\nPBLDE 111/103\nGroudon';
+    expect(liveScanMissingEvidence(conflict).footer).toBe(true);
+    expect(nextLiveHotZone(conflict, [])).toBe('footer');
+  });
+
   it('does not confuse a set code with the card title', () => {
     expect(liveScanMissingEvidence('DLR 111/103\nDLR').title).toBe(true);
     expect(nextLiveHotZone('DLR 111/103', [])).toBe('title');

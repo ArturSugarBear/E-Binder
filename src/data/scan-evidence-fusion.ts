@@ -60,7 +60,8 @@ export function fuseScanEvidence(
   const clues = recognitionClues(text);
   const partial = visualNumberClues(text);
   const fullNumbers = new Set(clues.map((clue) => numberKey(clue.number)));
-  const ambiguousOcr = fullNumbers.size > 1;
+  const ambiguousOcr =
+    fullNumbers.size > 1 || clues.some((clue) => clue.conflictingSets);
   const name = recognizedNameHints(text)[0];
   const visualRanks = new Map<string, number>();
   for (const card of unique) {

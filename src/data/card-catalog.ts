@@ -899,25 +899,42 @@ export interface RecognitionClue {
   setId?: string;
   language?: 'de' | 'en' | 'ja';
   observations: number;
+  /** Conflicting printed set codes invalidate a unique identity suggestion. */
+  conflictingSets?: boolean;
 }
 /** Printed codes narrow candidates; an OCR string never confirms ownership. */
 export function recognitionClues(text: string): RecognitionClue[] {
   const printedText = normalizePrintedIdentityText(text);
-  const code = printedText.match(
-    /(?:^|[^A-Z])(?:[A-I])?(MEG|SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/i,
-  );
-  // Japanese set identifiers (e.g. M2a, SV8a, S12a) can be read even
-  // when the current Latin OCR cannot transcribe the Japanese card title.
-  // The set code is only a clue, never sufficient evidence on its own.
-  const japaneseCode = printedText.match(
-    /(?:^|[^A-Za-z0-9])((?:SV|SM|XY|BW|S|M)\d{1,2}[a-z]?)(?![A-Za-z0-9])/i,
-  );
-  const setId = code
-    ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
-    : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase());
-  const language: 'de' | 'en' | 'ja' | undefined =
-    (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
-    (japaneseCode ? 'ja' : undefined);
+  const latinCodes = [
+    ...printedText.matchAll(
+      /(?:^|[^A-Z])(?:[A-I])?(MEG|SVI|PAL|OBF|0BF|PAR|TEF|TWM|SCR|SSP|JTG|DRI|PBL|DLR)\s*(DE|EN)?(?=[^A-Z]|$)/gi,
+    ),
+  ];
+  // DE/EN codes and Japanese set codes are independent OCR fields. A
+  // contradictory crop must not silently choose the first matching code.
+  const japaneseCodes = [
+    ...printedText.matchAll(
+      /(?:^|[^A-Za-z0-9])((?:SV|SM|XY|BW|S|M)\d{1,2}[a-z]?)(?![A-Za-z0-9])/gi,
+    ),
+  ];
+  const code = latinCodes[0];
+  const japaneseCode = japaneseCodes[0];
+  const observedSets = new Set([
+    ...latinCodes.map((match) => setIds[match[1]!.toLowerCase().replace(/^0bf$/, 'obf')]),
+    ...japaneseCodes.map((match) =>
+      match[1]!.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase()),
+    ),
+  ].filter((id): id is string => Boolean(id)));
+  const conflictingSets = observedSets.size > 1;
+  const setId = conflictingSets
+    ? undefined
+    : code
+      ? setIds[code[1]!.toLowerCase().replace(/^0bf$/, 'obf')]
+      : japaneseCode?.[1]?.replace(/^[a-z]+/i, (prefix) => prefix.toUpperCase());
+  const language: 'de' | 'en' | 'ja' | undefined = conflictingSets
+    ? undefined
+    : (code?.[2]?.toLowerCase() as 'de' | 'en' | undefined) ??
+      (japaneseCode ? 'ja' : undefined);
   const counts = new Map<string, number>();
   for (const match of printedText.matchAll(
     /(?<![0-9])((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\s*[/|]\s*((?:TG|GG|RC|SV)?[0-9OIl]{1,3})\b/gi,
@@ -938,6 +955,7 @@ export function recognitionClues(text: string): RecognitionClue[] {
       setId,
       language,
       observations,
+      ...(conflictingSets ? { conflictingSets: true } : {}),
     }));
 }
 /**

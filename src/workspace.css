@@ -5517,6 +5517,16 @@ textarea.w-input,
   justify-content: center;
 }
 
+/* A compact mobile sheet can scroll by fractional pixels once multiple cards
+   are queued. Pull the live status into its existing inter-row space so the
+   sticky review footer never obscures its final text line. The viewfinder and
+   review buttons retain their stable size across successive captures. */
+@media (max-width: 720px) and (pointer: coarse) {
+  .w-live-scan-minimal .w-dialog-body > .w-live-status {
+    transform: translateY(-8px);
+  }
+}
+
 /* Keep the live camera unobstructed: this accent shimmer belongs to the
    actual OCR/catalogue status below the viewfinder, never to a guessed card. */
 .w-live-scan-minimal .w-live-analysis:not([hidden]) {

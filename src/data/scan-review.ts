@@ -37,6 +37,14 @@ export function scanEvidence(
   const unique = [
     ...new Map(candidates.map((card) => [card.key, card])).values(),
   ];
+  // Never promote a name+number fallback when separate OCR regions disagree
+  // on the set code. Ask for review rather than trusting whichever came first.
+  if (clues.some((clue) => clue.conflictingSets))
+    return {
+      kind: 'set-required',
+      number: clues[0]?.number ?? '',
+      count: unique.length,
+    };
   const printed = unique.filter((card) =>
     clues.some(
       (clue) =>
