@@ -8,7 +8,7 @@ Imported from the owner-provided Google Drive ZIP `E-Binder_Competitive_Benchmar
 
 **Verification:** `node scripts/verify-competitor-media.mjs` succeeds with **18/18 benchmark media verified**. The import was extracted at repository root. The ZIP also contained older copies of this README and the verifier; the reviewed branch versions were retained and updated rather than reverting their integrity checks.
 
-Read the [complete analysis and evidence inventory](ANALYSIS.md), then the [integration status](INTEGRATION.md). These distinguish observed competitor behavior, transferred principles, changes implemented in #39 and work owned by the still-open #37/#38.
+Read the [complete analysis and evidence inventory](ANALYSIS.md), then the [integration status](INTEGRATION.md). These distinguish observed competitor behavior, transferred principles, changes implemented in #39 and work owned by the still-open #37/#38. For the technology behind the HoloGem scanner, read the [static analysis of the HoloGem Android app](../2026-11-13-hologem-android/README.md).
 
 | App      | Recording in companion ZIP               | Examine                                                                                                    |
 | -------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
