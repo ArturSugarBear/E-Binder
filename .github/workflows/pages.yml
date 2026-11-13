@@ -76,9 +76,8 @@ jobs:
           npm run audit:providers
           npm run build
       - run: node scripts/verify-competitor-media.mjs
-      # Browser downloads are cached between runs. For pull requests the
-      # full Chromium desktop/mobile suite gives fast feedback; master
-      # still gates publishing on the full Chromium + WebKit suite.
+      # Browser downloads are cached between runs. Pull requests and master
+      # both require the complete Chromium, mobile-emulation and WebKit suite.
       - uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -131,3 +130,53 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-production:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Verify published version matches deployed master
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          expected="${EXPECTED_SHA:0:12}"
+          for attempt in {1..20}; do
+            actual="$(curl -fsSL --retry 2 "https://artursugarbear.github.io/E-Binder/version.json?release=${EXPECTED_SHA}" | python3 -c 'import json,sys;print(json.load(sys.stdin)["commit"])' 2>/dev/null || true)"
+            if [[ "$actual" == "$expected" ]]; then
+              echo "Published Pages version verified: $actual"
+              exit 0
+            fi
+            echo "Waiting for Pages propagation (attempt $attempt): published=${actual:-unavailable}, expected=$expected"
+            sleep 6
+          done
+          echo "::error::Published Pages version did not match deployed master"
+          exit 1
+      - name: Prepare production browser
+        run: npx playwright install --with-deps chromium
+      - name: Exercise deployed scanner and real ONNX Worker
+        env:
+          E2E_BASE_URL: https://artursugarbear.github.io/E-Binder/
+        run: |
+          npx playwright test \
+            tests/e2e/vision-inference.spec.ts \
+            tests/e2e/scan-zero-match-recovery.spec.ts \
+            tests/e2e/live-scan.spec.ts \
+            --project=chromium \
+            --grep 'real local vision Worker|zero-match scanner|live scanner offers'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: production-scanner-smoke-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
