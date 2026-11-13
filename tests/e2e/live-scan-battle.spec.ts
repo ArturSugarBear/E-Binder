@@ -258,6 +258,11 @@ for (const width of [320, 375, 390, 430]) {
     // OCR starts before the user clicks Results and can use two hot-zone
     // retries with a common bounded deadline.
     await expect(live.locator('.w-live-analysis')).toBeVisible();
+    expect(
+      await live.locator('.w-live-analysis').evaluate(
+        (node) => getComputedStyle(node, '::after').animationName,
+      ),
+    ).toBe('w-live-progress-glint');
     await expect
       .poll(() =>
         page.evaluate(() =>
