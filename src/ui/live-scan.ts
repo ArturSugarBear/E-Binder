@@ -1,7 +1,10 @@
 import { manualCaptureAvailable } from '../domain/live-capture-ui';
 import { scanProgress } from './scan-progress';
 import { recordBetaEvent } from '../data/beta-diagnostics';
-import { VISUAL_BETA_REFERENCE_COUNT, visualBetaEnabled } from '../data/visual-beta';
+import {
+  VISUAL_BETA_REFERENCE_COUNT,
+  visualBetaEnabled,
+} from '../data/visual-beta';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
 import { suggestCardCorners } from '../domain/card-outline';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
