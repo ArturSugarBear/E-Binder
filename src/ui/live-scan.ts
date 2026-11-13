@@ -230,7 +230,7 @@ export function openLiveScanner(
     'p',
     'w-muted w-live-vision-state',
     visualBetaEnabled()
-      ? `DINOv2-Pilot aktiv · ${VISUAL_BETA_REFERENCE_COUNT} Referenzkarten · keine automatische Bestätigung`
+      ? `DINOv2-Pilot aktiviert · ${VISUAL_BETA_REFERENCE_COUNT} Referenzkarten · Modellverfügbarkeit wird beim Scan geprüft`
       : `DINOv2 nicht aktiv · optionaler Test mit ${VISUAL_BETA_REFERENCE_COUNT} Karten unter Profil`,
   );
   const progress = el('progress', 'w-progress w-live-progress');
