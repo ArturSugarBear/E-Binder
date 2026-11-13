@@ -11,19 +11,9 @@ const fullFrame: Quad = [
 
 it('bilinearly interpolates the centre of a tiny rectified image', () => {
   const pixels = new Uint8ClampedArray([
-    0, 0, 0, 255,
-    100, 100, 100, 255,
-    200, 200, 200, 255,
-    240, 240, 240, 255,
+    0, 0, 0, 255, 100, 100, 100, 255, 200, 200, 200, 255, 240, 240, 240, 255,
   ]);
-  const result = resamplePerspectivePixels(
-    pixels,
-    2,
-    2,
-    3,
-    3,
-    fullFrame,
-  );
+  const result = resamplePerspectivePixels(pixels, 2, 2, 3, 3, fullFrame);
   const centre = (1 * 3 + 1) * 4;
   expect(result[centre]).toBe(135);
   expect(result[centre + 1]).toBe(135);
@@ -40,21 +30,14 @@ it('preserves an identity-aligned card without inventing pixel values', () => {
     image[i + 2] = 255 - (i % 255);
     image[i + 3] = 255;
   }
-  expect(
-    resamplePerspectivePixels(image, 4, 4, 4, 4, fullFrame),
-  ).toEqual(image);
+  expect(resamplePerspectivePixels(image, 4, 4, 4, 4, fullFrame)).toEqual(
+    image,
+  );
 });
 
 it('rejects malformed buffers and impossible perspective corners', () => {
   expect(() =>
-    resamplePerspectivePixels(
-      new Uint8ClampedArray(),
-      4,
-      4,
-      4,
-      4,
-      fullFrame,
-    ),
+    resamplePerspectivePixels(new Uint8ClampedArray(), 4, 4, 4, 4, fullFrame),
   ).toThrow();
   const inverted: Quad = [
     { x: 1, y: 0 },

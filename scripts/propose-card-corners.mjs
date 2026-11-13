@@ -102,10 +102,11 @@ try {
       192,
       256,
     );
-    const corners = detection.corners?.map((point) => [
-      (frame.crop.x + frame.crop.width * point.x) / frame.fullWidth,
-      (frame.crop.y + frame.crop.height * point.y) / frame.fullHeight,
-    ]) ?? null;
+    const corners =
+      detection.corners?.map((point) => [
+        (frame.crop.x + frame.crop.width * point.x) / frame.fullWidth,
+        (frame.crop.y + frame.crop.height * point.y) / frame.fullHeight,
+      ]) ?? null;
     const preview = await page.evaluate(
       async ({ image, corners }) => {
         const bytes = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));

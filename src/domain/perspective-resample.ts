@@ -24,18 +24,9 @@ export function resamplePerspectivePixels(
   const result = new Uint8ClampedArray(outputWidth * outputHeight * 4);
   for (let y = 0; y < outputHeight; y++)
     for (let x = 0; x < outputWidth; x++) {
-      const point = project(
-        x / (outputWidth - 1),
-        y / (outputHeight - 1),
-      );
-      const sourceX = Math.max(
-        0,
-        Math.min(width - 1, point.x * (width - 1)),
-      );
-      const sourceY = Math.max(
-        0,
-        Math.min(height - 1, point.y * (height - 1)),
-      );
+      const point = project(x / (outputWidth - 1), y / (outputHeight - 1));
+      const sourceX = Math.max(0, Math.min(width - 1, point.x * (width - 1)));
+      const sourceY = Math.max(0, Math.min(height - 1, point.y * (height - 1)));
       const x0 = Math.floor(sourceX);
       const y0 = Math.floor(sourceY);
       const x1 = Math.min(width - 1, x0 + 1);
@@ -49,13 +40,11 @@ export function resamplePerspectivePixels(
       const destination = (y * outputWidth + x) * 4;
       for (let channel = 0; channel < 3; channel++) {
         const upper =
-          rgba[topLeft + channel]! * (1 - dx) +
-          rgba[topRight + channel]! * dx;
+          rgba[topLeft + channel]! * (1 - dx) + rgba[topRight + channel]! * dx;
         const lower =
           rgba[bottomLeft + channel]! * (1 - dx) +
           rgba[bottomRight + channel]! * dx;
-        result[destination + channel] =
-          upper * (1 - dy) + lower * dy;
+        result[destination + channel] = upper * (1 - dy) + lower * dy;
       }
       result[destination + 3] = 255;
     }
