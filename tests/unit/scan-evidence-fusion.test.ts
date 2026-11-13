@@ -60,11 +60,7 @@ describe('scanner evidence fusion', () => {
   });
 
   it('ranks visual candidates on an OCR-empty photo but never suggests an exact printing', () => {
-    const result = fuseScanEvidence(
-      '',
-      [gardevoir, lucario],
-      [lucario, gardevoir],
-    );
+    const result = fuseScanEvidence('', [gardevoir, lucario], [lucario, gardevoir]);
     expect(result.candidates.map((entry) => entry.key)).toEqual([
       lucario.key,
       gardevoir.key,
@@ -75,22 +71,14 @@ describe('scanner evidence fusion', () => {
   });
 
   it('does not turn an ambiguous collector number and image rank into an exact claim', () => {
-    const result = fuseScanEvidence(
-      '088/063',
-      [gardevoir, lucario],
-      [lucario, gardevoir],
-    );
+    const result = fuseScanEvidence('088/063', [gardevoir, lucario], [lucario, gardevoir]);
     expect(result.candidates[0]?.key).toBe(lucario.key);
     expect(result.suggested).toBeUndefined();
   });
 
   it('rejects contradictory full names even if the printed set and visual rank agree', () => {
     const en = card('M1L-088', 'Mega Lucario ex', 'M1L', '088/063', 'en');
-    const result = fuseScanEvidence(
-      'M1L 088/063\nLucario',
-      [en],
-      [en],
-    );
+    const result = fuseScanEvidence('M1L 088/063\nLucario', [en], [en]);
     expect(result.suggested).toBeUndefined();
     expect(result.signals.conflict).toBe(true);
   });
