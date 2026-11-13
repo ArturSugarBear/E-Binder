@@ -91,6 +91,8 @@ export function openAddCards(
 ): void {
   const transientPhotos = new Map<string, Blob>();
   const alignedCaptures = new Set<string>();
+  // Guide-cropped live photos do not require mandatory manual alignment.
+  const framedCaptures = new Set<string>();
   const previewUrls = new Set<string>();
   const sheet = modal(
     options.correctHoldingId ? 'Ausgabe korrigieren' : 'Karten hinzufügen',
@@ -238,6 +240,7 @@ export function openAddCards(
     }
     transientPhotos.clear();
     alignedCaptures.clear();
+    framedCaptures.clear();
     for (const url of previewUrls) URL.revokeObjectURL(url);
     previewUrls.clear();
     browser.close();
@@ -472,6 +475,7 @@ export function openAddCards(
     for (const id of removed) {
       transientPhotos.delete(id);
       alignedCaptures.delete(id);
+      framedCaptures.delete(id);
       liveOcrEvidence.delete(id);
       liveReviewResults.delete(id);
     }
@@ -944,6 +948,7 @@ export function openAddCards(
         if (existing) {
           transientPhotos.set(existing.id, file);
           if (autoAligned) alignedCaptures.add(existing.id);
+          if (queuedLive) framedCaptures.add(existing.id);
           first ??= existing.id;
           repeats++;
           continue;
@@ -973,6 +978,7 @@ export function openAddCards(
         };
         transientPhotos.set(shot.id, file);
         if (autoAligned) alignedCaptures.add(shot.id);
+        if (queuedLive) framedCaptures.add(shot.id);
         if (
           !ctx.commit('Foto zur Erfassung hinzugefügt', (state) =>
             changeState(state, (next) => {
@@ -982,6 +988,7 @@ export function openAddCards(
         ) {
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
+          framedCaptures.delete(shot.id);
           failed = true;
           break;
         }
@@ -1137,11 +1144,14 @@ export function openAddCards(
       // A raw camera photo without four trusted card edges still needs the
       // explicit alignment step; never treat its background text as a
       // verified exact printing.
-      const prefilled = alignedCaptures.has(shot.id)
-        ? liveOcrEvidence.get(shot.id)
-        : undefined;
+      const prefilled =
+        alignedCaptures.has(shot.id) || framedCaptures.has(shot.id)
+          ? liveOcrEvidence.get(shot.id)
+          : undefined;
       const aligned =
-        alignedCaptures.has(shot.id) || prefilled !== undefined
+        alignedCaptures.has(shot.id) ||
+        framedCaptures.has(shot.id) ||
+        prefilled !== undefined
           ? photo
           : await alignPhoto(photo, controller.signal);
       if (!aligned || closed || controller.signal.aborted) {
@@ -1412,6 +1422,7 @@ export function openAddCards(
     void recordBetaScanConfirmation(shot.id, publicCardKey(card) ?? '');
     transientPhotos.delete(shot.id);
     alignedCaptures.delete(shot.id);
+          framedCaptures.delete(shot.id);
     liveOcrEvidence.delete(shot.id);
     liveReviewResults.delete(shot.id);
     interrupt();
@@ -1437,7 +1448,7 @@ export function openAddCards(
       reviewingLiveQueue &&
       captureId &&
       transientPhotos.has(captureId) &&
-      alignedCaptures.has(captureId)
+      (alignedCaptures.has(captureId) || framedCaptures.has(captureId))
     )
       void runOcr();
   }
@@ -2272,6 +2283,7 @@ export function openAddCards(
           );
           transientPhotos.delete(shot.id);
           alignedCaptures.delete(shot.id);
+          framedCaptures.delete(shot.id);
           ocrController?.abort();
           ocrController = undefined;
           captureId = reviewingLiveQueue
@@ -2294,7 +2306,7 @@ export function openAddCards(
             reviewingLiveQueue &&
             captureId &&
             transientPhotos.has(captureId) &&
-            alignedCaptures.has(captureId)
+            (alignedCaptures.has(captureId) || framedCaptures.has(captureId))
           )
             void runOcr();
         } else sheet.close();
