@@ -24,6 +24,39 @@ Primär: **Exact Printing Top-1** aus Set, Sammlernummer, vollständigem Namen, 
 - Retention und Widerruf müssen auch das tatsächliche Storage-Objekt erfassen; die Profil-Löschung umfasst ausstehende sowie bereits bewertete Aufnahmen.
 - Produktionsgewichte erst nach erfolgreicher unabhängiger Benchmarkprüfung ändern.
 
+## Offline-A/B-Benchmark der Eckenerkennung (13. November 2026)
+
+Die neue lokale Zweistufen-Erkennung führt zuerst die bestehende strenge Kantensuche aus; nur wenn diese keinen validen Treffer liefert, folgt eine separate Low-Contrast-Prüfung. Das Ergebnis ist **kein trainiertes Modell** und wurde noch nicht an echten iPhone-Fotos gemessen.
+
+Das neue Skript `scripts/benchmark-card-corners.mjs` vergleicht beide Verfahren **auf denselben privaten Fotos**. Es verwendet den gleichen 3:4-Mittelausschnitt und die gleiche Auflösung (192×256) wie der Live-Scanner. Die Annotationen sind normierte Eckkoordinaten im **Originalfoto**, sortiert links oben, rechts oben, rechts unten, links unten. Negative Beispiele haben `corners: null`. Jede Probe erfordert unabhängige visuelle Prüfung, Nutzungsrechte, eine physische Kartengruppe und eine Aufnahmesitzung.
+
+Beispiel für eine Datei außerhalb des Repositories:
+
+```json
+{ "samples": [
+  { "photo": "./card-sleeve.jpg",
+    "corners": [[0.18,0.12],[0.82,0.12],[0.82,0.88],[0.18,0.88]],
+    "rights": "Eigene Aufnahme",
+    "physicalCardGroup": "physical-card-a",
+    "sessionGroup": "session-a",
+    "verification": { "independent": true, "evidence": "Visuelle Eckprüfung" }
+  },
+  { "photo": "./empty-frame.jpg", "corners": null,
+    "rights": "Eigene Aufnahme",
+    "physicalCardGroup": "empty-scene-b",
+    "sessionGroup": "session-b",
+    "verification": { "independent": true, "evidence": "Keine Karte sichtbar" }
+  }
+] }
+```
+
+```sh
+CORNER_BENCHMARK_OUT=/private/report.json \
+  node --import tsx scripts/benchmark-card-corners.mjs /private/corners.json
+```
+
+Die Ausgabe enthält nur aggregierte Fehler-, Treffer- und Laufzeitmetriken; **keine Fotos, Dateinamen, Account-IDs oder OCR-Texte**. Es werden keine privaten Daten ins öffentliche Repo geschrieben. Eine Freigabe verlangt mindestens 100 unabhängige positive Karten, zehn Negativfälle, ausreichende Sitzungs- und Kartengruppenvielfalt, mindestens gleiche Eckentreffer und keine erhöhte Fehlalarmrate. Die vorhandenen 59 freiwillig gespendeten privaten Bilder sind noch nicht unabhängig geprüft; die Roboflow-Boxen sind keine echten perspektivischen Eckmarkierungen. Darum bleibt der ML-Gewichte-Tausch gesperrt.
+
 ## Der aktuelle Implementierungsstand
 
 Die Upload- und RLS-Schicht stellt **unbewertete** private Samples bereit. Es gibt **keinen** automatischen Trainingslauf und noch keine verifizierten neuen Gewichte. Dieses Gate ist beabsichtigt: Aus wenigen oder falsch etikettierten Aufnahmen ohne Hold-out wäre „Training erfolgreich“ fachlich irreführend.

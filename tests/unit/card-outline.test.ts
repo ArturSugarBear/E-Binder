@@ -72,6 +72,10 @@ it('recognizes a real low-contrast card border that was previously below the edg
     const tone = value === 224 ? 190 : value === 18 ? 168 : 177;
     image[i] = image[i + 1] = image[i + 2] = tone;
   }
+  expect(detectCardCorners(image, 192, 256, false)).toEqual({
+    corners: null,
+    strategy: 'none',
+  });
   const detection = detectCardCorners(image, 192, 256);
   expect(detection.strategy).toBe('soft-edges');
   expect(detection.corners).not.toBeNull();

@@ -30,6 +30,7 @@ export function detectCardCorners(
   rgba: Uint8ClampedArray,
   width: number,
   height: number,
+  includeSoftEdges = true,
 ): CardCornerDetection {
   if (
     !Number.isInteger(width) ||
@@ -189,6 +190,8 @@ export function detectCardCorners(
 
   const edges = solve(false);
   if (edges) return { corners: edges, strategy: 'edges' };
+  // A/B benchmark may disable the soft pass; production always uses it.
+  if (!includeSoftEdges) return { corners: null, strategy: 'none' };
   const softEdges = solve(true);
   return softEdges
     ? { corners: softEdges, strategy: 'soft-edges' }
