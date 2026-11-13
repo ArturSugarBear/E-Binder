@@ -7,7 +7,15 @@ type Edge = {
   position: number;
   slope: number;
   score: number;
+  polarity: number;
 };
+
+export type CardCornerStrategy = 'page' | 'edges' | 'soft-edges' | 'none';
+
+export interface CardCornerDetection {
+  corners: Quad | null;
+  strategy: CardCornerStrategy;
+}
 
 /**
  * Find the four sides of a *single physical card* in the downscaled live
@@ -18,11 +26,11 @@ type Edge = {
  * returns null rather than selecting arbitrary interior artwork edges.
  * No pixel buffer is saved or transmitted.
  */
-export function suggestCardCorners(
+export function detectCardCorners(
   rgba: Uint8ClampedArray,
   width: number,
   height: number,
-): Quad | null {
+): CardCornerDetection {
   if (
     !Number.isInteger(width) ||
     !Number.isInteger(height) ||
@@ -30,7 +38,7 @@ export function suggestCardCorners(
     height < 80 ||
     rgba.length !== width * height * 4
   )
-    return null;
+    return { corners: null, strategy: 'none' };
 
   // Preserve the existing good path for high-contrast, nearly full-frame
   // cards, but never use a page quad with non-card proportions.
@@ -41,7 +49,7 @@ export function suggestCardCorners(
         point.x > 0.07 && point.x < 0.93 && point.y > 0.07 && point.y < 0.93,
     );
   if (page && plausibleCardQuad(page, width, height) && whollyVisible(page))
-    return page;
+    return { corners: page, strategy: 'page' };
 
   const gray = new Uint8Array(width * height);
   for (let i = 0; i < gray.length; i++) {
@@ -51,7 +59,7 @@ export function suggestCardCorners(
     );
   }
 
-  function find(axis: Axis, near: boolean): Edge[] {
+  function find(axis: Axis, near: boolean, soft: boolean): Edge[] {
     const candidates: Edge[] = [];
     const start = near ? 0.055 : 0.56;
     const end = near ? 0.44 : 0.945;
@@ -80,16 +88,24 @@ export function suggestCardCorners(
           const delta = after - before;
           signed += delta;
           magnitude += Math.abs(delta);
-          if (Math.abs(delta) >= 28) strong++;
+          if (Math.abs(delta) >= (soft ? 12 : 28)) strong++;
           count++;
         }
         if (count < 33 || magnitude === 0) continue;
         const coverage = strong / count;
         const coherence = Math.abs(signed) / magnitude;
         const strength = magnitude / count;
-        if (coverage < 0.57 || coherence < 0.66 || strength < 32) continue;
+        // Low-contrast card sleeves can have real, coherent outer edges
+        // below 28 luminance levels. Run this stricter-coherence fallback
+        // only when the existing high-contrast path found no valid card.
+        if (
+          coverage < (soft ? 0.76 : 0.57) ||
+          coherence < (soft ? 0.82 : 0.66) ||
+          strength < (soft ? 16 : 32)
+        )
+          continue;
         const score = strength * (0.4 + 0.6 * coverage) * coherence;
-        candidates.push({ position, slope, score });
+        candidates.push({ position, slope, score, polarity: Math.sign(signed) });
       }
     }
     // Keep distinct sides rather than 3 neighboring samples of one edge.
@@ -109,14 +125,15 @@ export function suggestCardCorners(
     return chosen;
   }
 
-  const left = find('vertical', true);
-  const right = find('vertical', false);
-  const top = find('horizontal', true);
-  const bottom = find('horizontal', false);
-  if (!left.length || !right.length || !top.length || !bottom.length)
-    return null;
+  function solve(soft: boolean): Quad | null {
+    const left = find('vertical', true, soft);
+    const right = find('vertical', false, soft);
+    const top = find('horizontal', true, soft);
+    const bottom = find('horizontal', false, soft);
+    if (!left.length || !right.length || !top.length || !bottom.length)
+      return null;
 
-  function crossing(vertical: Edge, horizontal: Edge): Point {
+    function crossing(vertical: Edge, horizontal: Edge): Point {
     const denominator = 1 - vertical.slope * horizontal.slope;
     const x =
       (vertical.position +
@@ -131,6 +148,17 @@ export function suggestCardCorners(
     for (const r of right)
       for (const t of top)
         for (const b of bottom) {
+          // Real outer borders have opposing polarities across each axis.
+          // Requiring this only for the softened path avoids promoting
+          // sleeve reflections or repeated inner-artwork stripes.
+          if (
+            soft &&
+            (l.polarity === r.polarity ||
+              t.polarity === b.polarity ||
+              r.position - l.position < 0.48 ||
+              b.position - t.position < 0.53)
+          )
+            continue;
           const corners: Quad = [
             crossing(l, t),
             crossing(r, t),
@@ -156,5 +184,22 @@ export function suggestCardCorners(
             bestScore = score;
           }
         }
-  return best;
+    return best;
+  }
+
+  const edges = solve(false);
+  if (edges) return { corners: edges, strategy: 'edges' };
+  const softEdges = solve(true);
+  return softEdges
+    ? { corners: softEdges, strategy: 'soft-edges' }
+    : { corners: null, strategy: 'none' };
+}
+
+/** Existing callers need only the quad; diagnostics may use the strategy. */
+export function suggestCardCorners(
+  rgba: Uint8ClampedArray,
+  width: number,
+  height: number,
+): Quad | null {
+  return detectCardCorners(rgba, width, height).corners;
 }

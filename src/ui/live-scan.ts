@@ -6,7 +6,10 @@ import {
   visualBetaEnabled,
 } from '../data/visual-beta';
 import { cardProjection, type Quad } from '../domain/photo-geometry';
-import { suggestCardCorners } from '../domain/card-outline';
+import {
+  detectCardCorners,
+  type CardCornerStrategy,
+} from '../domain/card-outline';
 import { analysePhotoPixels, liveCameraPhotoHint } from '../data/photo-quality';
 import { nextCardLock, plausibleCardQuad } from '../domain/live-card-lock';
 import { updateCaptureLatch } from '../domain/scan-capture-latch';
@@ -405,6 +408,7 @@ export function openLiveScanner(
   let missingFrames = 0;
   let last: Quad | null = null;
   let reliable: Quad | null = null;
+  let cornerStrategy: CardCornerStrategy = 'none';
   let sampled = 0;
   let cameraReadyAt = 0;
   let frameFailures = 0;
@@ -437,6 +441,7 @@ export function openLiveScanner(
     observations = 0;
     last = null;
     reliable = null;
+    cornerStrategy = 'none';
     polygon.removeAttribute('points');
     stage.classList.remove('has-card-outline');
     stage.dataset.scanPhase = 'ready';
@@ -495,6 +500,16 @@ export function openLiveScanner(
       if (outcome === 'error')
         throw new Error(
           'Foto konnte nicht zur Scan-Sitzung hinzugefügt werden.',
+        );
+      if (outcome !== 'duplicate')
+        recordBetaEvent(
+          'scan_result',
+          'scan',
+          aligned
+            ? cornerStrategy === 'soft-edges'
+              ? 'corner_soft_capture'
+              : 'corner_auto_capture'
+            : 'corner_manual_capture',
         );
       if (!closed && running) {
         // The image is queued WITHOUT waiting for OCR, model loads or
@@ -570,13 +585,20 @@ export function openLiveScanner(
     }
     sampled = time;
     let corners: Quad | null = null;
+    let detectedStrategy: CardCornerStrategy = 'none';
     let cameraHint: string | undefined;
     try {
       drawVisible(video, sample);
       const pixels = sample
         .getContext('2d', { willReadFrequently: true })!
         .getImageData(0, 0, sample.width, sample.height);
-      corners = suggestCardCorners(pixels.data, sample.width, sample.height);
+      const detection = detectCardCorners(
+        pixels.data,
+        sample.width,
+        sample.height,
+      );
+      corners = detection.corners;
+      detectedStrategy = detection.strategy;
       // Diagnose the current preview only after sustained detection trouble.
       // Never upload a frame or delay an otherwise valid automatic shutter.
       if (!corners && time - cameraReadyAt > 4500)
@@ -610,6 +632,7 @@ export function openLiveScanner(
       observations = 0;
       last = null;
       reliable = null;
+      cornerStrategy = 'none';
       stage.classList.remove('has-card-outline');
       polygon.removeAttribute('points');
       progress.value = 0;
@@ -626,6 +649,7 @@ export function openLiveScanner(
     observations = lock.stableFrames;
     last = lock.corners;
     reliable = observations >= 2 ? lock.corners : null;
+    cornerStrategy = detectedStrategy;
     polygon.setAttribute(
       'points',
       lock.corners

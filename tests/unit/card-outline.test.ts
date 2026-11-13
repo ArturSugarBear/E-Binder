@@ -1,5 +1,8 @@
 import { expect, it } from 'vitest';
-import { suggestCardCorners } from '../../src/domain/card-outline';
+import {
+  detectCardCorners,
+  suggestCardCorners,
+} from '../../src/domain/card-outline';
 
 function frame(
   kind: 'card' | 'blank' | 'square' | 'landscape' | 'partial',
@@ -58,6 +61,36 @@ it.each(['blank', 'square', 'landscape', 'partial'] as const)(
   'never fires an automatic shutter on a %s scene',
   (kind) => {
     expect(suggestCardCorners(frame(kind), 192, 256)).toBeNull();
+  },
+);
+
+it('recognizes a real low-contrast card border that was previously below the edge threshold', () => {
+  const image = frame('card');
+  // Deliberately flatten sleeve/card contrast; the outer edge is 22 levels.
+  for (let i = 0; i < image.length; i += 4) {
+    const value = image[i]!;
+    const tone = value === 224 ? 190 : value === 18 ? 168 : 177;
+    image[i] = image[i + 1] = image[i + 2] = tone;
+  }
+  const detection = detectCardCorners(image, 192, 256);
+  expect(detection.strategy).toBe('soft-edges');
+  expect(detection.corners).not.toBeNull();
+  expect(detection.corners![0]!.x).toBeGreaterThan(0.1);
+  expect(detection.corners![2]!.x).toBeLessThan(0.9);
+});
+
+it.each(['square', 'landscape', 'partial'] as const)(
+  'does not promote a low-contrast %s to a card',
+  (kind) => {
+    const image = frame(kind);
+    for (let i = 0; i < image.length; i += 4) {
+      const tone = image[i] === 224 ? 190 : image[i] === 18 ? 168 : 177;
+      image[i] = image[i + 1] = image[i + 2] = tone;
+    }
+    expect(detectCardCorners(image, 192, 256)).toEqual({
+      corners: null,
+      strategy: 'none',
+    });
   },
 );
 
