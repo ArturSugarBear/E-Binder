@@ -97,3 +97,33 @@ Current evidence does **not** establish model mAP, real iPhone latency,
 per-image photo provenance, exact-card recognition, German/Japanese
 printings, or a deployable RF-DETR checkpoint. Do not merge or advertise
 the detector as live based only on a dataset count or a passing importer test.
+
+## Connected workspace verification (2026-11-13)
+
+The connected Roboflow plugin can read the private project directly; the
+previously missing exact project identifier is now confirmed:
+
+- Primary detection fork:
+  `artur-schuhmacher/my-first-project-9dwop-cv0jp` — 430 images,
+  1,622 `cards` boxes; train 430, valid 0, test 0.
+- Secondary dataset:
+  `artur-schuhmacher/tcg-kzyeu-702yr` — 142 images,
+  143 `trading-cards` boxes; train 99, valid 29, test 14.
+- Neither project currently has a generated dataset version or trained model.
+- Across 430 image records, 43 filename-collision groups involve 214
+  records; **matching filenames do not prove matching image bytes**.
+  Pixel-hash and near-duplicate checks must precede held-out splitting.
+- 38 primary images have valid null labels and 25 have valid empty box
+  annotations. Review these as possible negatives; do not silently count
+  them as positive card examples. Twenty-six images have one side under
+  200 pixels. The project health report is stale (203 images), so use the
+  current 430-image project inventory and saved annotation envelopes.
+- Sampled saved boxes use center `x`, `y`, `width`, `height`,
+  `label: "cards"` with numeric-string coordinates. The importer must
+  validate this actual schema rather than assuming all values are numbers.
+
+**Training is not complete.** The exact blocker and private split/evaluation
+steps are tracked in [issue #113](https://github.com/ArturSugarBear/E-Binder/issues/113).
+The nine-printing DE-only visual reference index remains separate; its
+multilingual expansion is tracked in
+[issue #114](https://github.com/ArturSugarBear/E-Binder/issues/114).
