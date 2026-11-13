@@ -15,3 +15,13 @@ export function isTransientArtworkUpstreamFailure(message) {
       transientMepCardMetadata.test(message))
   );
 }
+
+/** The catalogue LIST request fails before the audit can write a report. */
+export function isTransientArtworkRootListFailure(log) {
+  return (
+    typeof log === 'string' &&
+    /(?:^|\n)Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets(?:\r?\n|$)/i.test(
+      log,
+    )
+  );
+}
