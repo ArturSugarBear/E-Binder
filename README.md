@@ -4,7 +4,7 @@
 
 Kostenlose, installierbare Pokémon-TCG-Web-App mit Live-Kartenscanner, 3×3-Binderseiten-Erfassung, Sammlungsverwaltung, Karten- und Set-Entdeckung sowie nachvollziehbaren Marktwerten.
 
-[**E-Binder öffnen**](https://artursugarbear.github.io/E-Binder/) · [Beta-Guide](docs/beta-rollout.md) · [Produktreview](docs/reviews/2026-11-12-beta-release-readiness.md) · [Fehler melden](https://github.com/ArturSugarBear/E-Binder/issues)
+[**E-Binder öffnen**](https://artursugarbear.github.io/E-Binder/) · [Beta-Guide](docs/beta-rollout.md) · [Produktreview](docs/reviews/2026-11-12-beta-release-readiness.md) · [Quality Hub – Live-QA](https://e-binder-quality-hub.vercel.app) · [Fehler melden](https://github.com/ArturSugarBear/E-Binder/issues)
 
 ![Rare Room auf dem iPhone – Home](docs/screenshots/review-2026-11-11/home-390.png)
 
@@ -38,6 +38,10 @@ Die Teilnahme ist **standardmäßig aus**. Unter **Profil → Beta · Bilderkenn
 Nur dann werden **neue** Fotos durch JPEG-Neukodierung ohne EXIF-/Standortdaten verkleinert und verschlüsselt in einen **privaten** Storage-Bucket geschickt. Die lokale OCR und dein Bestand funktionieren ohne Übertragung. Teilnahme stoppen und alle eigenen gespendeten Bilder löschen sind im Profil möglich. Bestätigte Kartenausgaben sind zunächst nur ungeprüfte Hinweise. Kein Foto und keine Nutzerbestätigung wird automatisch zu einem gültigen Trainingslabel. Bei null OCR-Treffern bleibt das aktuelle Foto erhalten, damit Set und Nummer oder der Name ohne neue Aufnahme nachgesucht werden können.
 
 [Beta-Ablauf und Datenschutzgrenzen](docs/beta-rollout.md) · [Technisches Dataset-Konzept](docs/beta-dataset-pipeline.md)
+
+## Gemeinsame Qualitätszentrale
+
+[**E-Binder Quality Hub**](https://e-binder-quality-hub.vercel.app) zeigt Testfälle, Beta-Meldungen, Deploy-/PR-Stände und ein separates agentenfähiges QA-Protokoll. Gemeldete Fehler sind **nicht automatisch reproduziert oder als Regression bestätigt**. Private Scans, Zugangsdaten und Sammlungsinhalte gehören nicht in öffentliche QA-Einträge. [Anleitung für Tester und Agents](docs/quality-hub.md).
 
 ## Auf dem iPhone verwenden
 
