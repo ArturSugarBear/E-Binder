@@ -8,15 +8,14 @@ const ready = {
   stableFrames: 0,
   elapsedMs: 6000,
 };
-it('shows only a delayed manual fallback when auto-capture has not locked', () => {
-  expect(manualCaptureAvailable({ ...ready, elapsedMs: 5999 })).toBe(false);
-  expect(manualCaptureAvailable(ready)).toBe(true);
+it('keeps the manual shutter usable immediately even while OCR and outlines are processing', () => {
+  expect(manualCaptureAvailable({ ...ready, elapsedMs: 0 })).toBe(true);
+  expect(manualCaptureAvailable({ ...ready, analyzing: true })).toBe(true);
+  expect(manualCaptureAvailable({ ...ready, stableFrames: 2 })).toBe(true);
   for (const patch of [
     { running: false },
     { busy: true },
-    { analyzing: true },
     { waitingForRemoval: true },
-    { stableFrames: 2 },
   ])
     expect(manualCaptureAvailable({ ...ready, ...patch })).toBe(false);
 });
