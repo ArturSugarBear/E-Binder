@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { isTransientArtworkUpstreamFailure } from '../../scripts/artwork-upstream-errors.mjs';
+import {
+  isTransientArtworkUpstreamFailure,
+  isTransientArtworkBootstrapFailure,
+  isTransientClassicCollectionDependency,
+} from '../../scripts/artwork-upstream-errors.mjs';
 
 describe('release artwork transient upstream classification', () => {
   it.each([
@@ -32,5 +36,72 @@ describe('release artwork transient upstream classification', () => {
   it('rejects values other than strings', () => {
     expect(isTransientArtworkUpstreamFailure(null)).toBe(false);
     expect(isTransientArtworkUpstreamFailure(undefined)).toBe(false);
+  });
+});
+
+describe('release artwork initial provider outage', () => {
+  it('accepts one explicit 503 from the initial English set listing', () => {
+    const stderr =
+      'file:///tmp/scripts/audit-catalog-art.mjs:34\n' +
+      'Error: 503: https://api.tcgdex.net/v2/en/sets\n' +
+      '    at json (scripts/audit-catalog-art.mjs:34)\n';
+    expect(isTransientArtworkBootstrapFailure(stderr)).toBe(true);
+  });
+
+  it.each([
+    'Error: 404: https://api.tcgdex.net/v2/en/sets',
+    'Error: 503: https://api.tcgdex.net/v2/en/cards/mep-028',
+    'Error: 503: https://tcgcsv.com/tcgplayer/3/groups',
+    'Error: 503: https://api.tcgdex.net/v2/en/sets\nError: invalid card index',
+    'TypeError: Cannot parse provider content',
+    '',
+  ])('rejects any other premature audit failure', (stderr) => {
+    expect(isTransientArtworkBootstrapFailure(stderr)).toBe(false);
+  });
+});
+
+describe('dependent Classic Collection metadata outage', () => {
+  const mismatch =
+    'Classic Collection artwork audit failed: Error: Classic Collection catalogue / mapping mismatch';
+  const verifiedTransient =
+    'Set metadata unavailable (en:30th-c): Error: 503: https://api.tcgdex.net/v2/en/sets/30th-c';
+
+  it('recognizes the exact dependent failure only during a proven TCGdex set-detail outage', () => {
+    expect(
+      isTransientClassicCollectionDependency(mismatch, [
+        verifiedTransient,
+        mismatch,
+      ]),
+    ).toBe(true);
+  });
+
+  it.each([
+    [],
+    ['Classic Collection artwork audit failed: invalid mapping'],
+    [
+      'Set metadata unavailable (en:base1): Error: 503: https://api.tcgdex.net/v2/en/sets/base1',
+    ],
+    [
+      'Set metadata unavailable (en:30th-c): Error: 404: https://api.tcgdex.net/v2/en/sets/30th-c',
+    ],
+    [
+      'Set metadata unavailable (en:30th-c): Error: 503: https://api.tcgdex.net/v2/en/sets/base1',
+    ],
+  ])(
+    'rejects unrelated failures and nontransient detail responses',
+    (errors) => {
+      expect(isTransientClassicCollectionDependency(mismatch, errors)).toBe(
+        false,
+      );
+    },
+  );
+
+  it('does not forgive malformed or altered Classic Collection mappings', () => {
+    expect(
+      isTransientClassicCollectionDependency(
+        'Classic Collection artwork audit failed: Error: Different card source',
+        [verifiedTransient],
+      ),
+    ).toBe(false);
   });
 });

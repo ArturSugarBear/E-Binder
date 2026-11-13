@@ -13,9 +13,12 @@ import {
 } from '../domain/visual-retrieval';
 import type { VisualSearchSession } from './visual-search';
 import { resolveVisualPrintings } from './scan-visual-shortlist';
-import { rankScanCandidates } from './scan-review';
-import { recognizedNameHints } from '../domain/recognition-names';
-import { normalize, numberKey, type PersonalCard } from '../domain/personal';
+import {
+  fuseScanEvidence,
+  type FusionRetryRegion,
+  type FusionState,
+} from './scan-evidence-fusion';
+import { numberKey, type PersonalCard } from '../domain/personal';
 
 export interface AutomaticScanResult {
   candidates: PersonalCard[];
@@ -30,6 +33,9 @@ export interface AutomaticScanResult {
   visualChecked: number;
   /** Validated local-model candidate count, not confidence or accuracy. */
   visualModelCandidates: number;
+  fusionState: FusionState;
+  retryRegion?: FusionRetryRegion;
+  visualAgreement: boolean;
 }
 
 interface CardPreview {
@@ -202,14 +208,16 @@ export async function resolvePhotoScan(
   const visualHits =
     prefetchedVisualHits ??
     (visualSession ? visualSession.match(photo, boundedVisualMs) : null);
+  let completedModelHits: VisualHit[] = [];
   // A prefetched request can still be waiting for a 60-second cold model
   // download. Never make the live scanner wait past its own review budget.
   const visualCards = visualHits
     ? Promise.race([
         visualHits
-          .then((hits) =>
-            reviewVisualCandidates(hits, visualNumberClues(text), 5),
-          )
+          .then((hits) => {
+            completedModelHits = hits;
+            return reviewVisualCandidates(hits, visualNumberClues(text), 5);
+          })
           .then((review) =>
             resolveVisualPrintings(review.choices, known, visualBudget, {
               online: typeof navigator === 'undefined' || navigator.onLine,
@@ -237,20 +245,26 @@ export async function resolvePhotoScan(
       ),
     ).values(),
   ];
-  // Partial numbers (e.g. '088' without '/063') cannot discard otherwise
-  // valid image candidates or prove a printing by themselves.
-  const number = recognitionClues(text)[0]?.number;
-  const candidates = number?.includes('/')
-    ? all.filter((card) => numberKey(card.number) === numberKey(number))
-    : all;
-  const exact = rankScanCandidates(text, candidates);
-  if (exact.suggested)
+  // OCR can misread a complete fraction. Never eliminate a model candidate
+  // solely because that OCR fragment disagrees with its printed number.
+  // The fusion stage ranks disagreements for review instead of losing the
+  // physical card. No image-only candidate becomes a confirmed printing.
+  const fused = fuseScanEvidence(
+    text,
+    all,
+    completedModelHits,
+    preferredLanguage,
+  );
+  if (fused.suggested)
     return {
-      candidates: exact.candidates,
-      suggested: exact.suggested,
-      basis: exact.basis,
-      visualChecked: 0,
+      candidates: fused.candidates,
+      suggested: fused.suggested,
+      basis: fused.basis,
+      visualChecked: completedModelHits.length,
       visualModelCandidates: fromVisual.length,
+      fusionState: fused.state,
+      retryRegion: fused.retryRegion,
+      visualAgreement: fused.visualAgreement,
     };
   // Lightweight artwork colour signatures can rank OCR candidates, but
   // neither cosine similarity nor a dominant colour margin proves a
@@ -260,39 +274,36 @@ export async function resolvePhotoScan(
     ? []
     : await compareCandidateArtwork(
         photo,
-        candidates.slice(0, 12),
+        fused.candidates.slice(0, 12),
         appearanceSignal,
       ).catch(() => []);
   const scores = new Map(
     inspected.map((entry) => [entry.card.key, entry.similarity]),
   );
-  const visualRanks = new Map(
-    fromVisual.map((card, index) => [card.key, index]),
+  const originalRank = new Map(
+    fused.candidates.map((card, index) => [card.key, index]),
   );
-  const title = recognizedNameHints(text)[0];
-  const ranked = [...candidates].sort((a, b) => {
-    const nameA = title && normalize(title) === normalize(a.name) ? 1 : 0;
-    const nameB = title && normalize(title) === normalize(b.name) ? 1 : 0;
-    return (
-      Number(nameB) - Number(nameA) ||
-      (visualRanks.get(a.key) ?? 999) - (visualRanks.get(b.key) ?? 999) ||
-      (scores.get(b.key) ?? -1) - (scores.get(a.key) ?? -1) ||
-      Number(b.language === preferredLanguage) -
-        Number(a.language === preferredLanguage) ||
-      a.key.localeCompare(b.key)
+  const ranked = [...fused.candidates];
+  // Artwork colour is only a tie-break for otherwise unverified candidates.
+  // Never let it overrule full printed numbers or visual model references.
+  if (fused.state === 'review' && !completedModelHits.length) {
+    ranked.sort(
+      (a, b) =>
+        (scores.get(b.key) ?? -1) - (scores.get(a.key) ?? -1) ||
+        (originalRank.get(a.key) ?? 999) - (originalRank.get(b.key) ?? 999),
     );
-  });
+  }
   return {
     candidates: ranked.slice(0, 24),
-    // Only a separate printed-identity match can suggest an exact
-    // printing. Images alone cannot distinguish identical DE/EN artwork
-    // or different foil treatments.
     basis: fromVisual.length
       ? 'visual-review'
-      : candidates.length
+      : ranked.length
         ? 'review'
         : 'no-match',
-    visualChecked: fromVisual.length + inspected.length,
+    visualChecked: completedModelHits.length + inspected.length,
     visualModelCandidates: fromVisual.length,
+    fusionState: fused.state,
+    retryRegion: fused.retryRegion,
+    visualAgreement: fused.visualAgreement,
   };
 }

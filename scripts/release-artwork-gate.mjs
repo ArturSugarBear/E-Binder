@@ -8,12 +8,20 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFile, stat, writeFile } from 'node:fs/promises';
-import { isTransientArtworkUpstreamFailure } from './artwork-upstream-errors.mjs';
+import {
+  isTransientArtworkUpstreamFailure,
+  isTransientArtworkBootstrapFailure,
+  isTransientClassicCollectionDependency,
+} from './artwork-upstream-errors.mjs';
 
 const path = 'public/catalog-art';
 const audit = spawnSync(process.execPath, ['scripts/audit-catalog-art.mjs'], {
-  stdio: 'inherit',
+  stdio: ['inherit', 'pipe', 'pipe'],
+  encoding: 'utf8',
+  maxBuffer: 32 * 1024 * 1024,
 });
+if (audit.stdout) process.stdout.write(audit.stdout);
+if (audit.stderr) process.stderr.write(audit.stderr);
 if (!audit.error && audit.status === 0) process.exit(0);
 
 function committed(relative) {
@@ -28,11 +36,22 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(committed(`${path}/audit.json`));
   const index = JSON.parse(committed(`${path}/index.json`));
 
-  if (
-    !Array.isArray(attempted.errors) ||
-    attempted.errors.length === 0 ||
-    !attempted.errors.every(isTransientArtworkUpstreamFailure)
-  ) {
+  // A failed *initial* TCGdex /sets request aborts the audit before it can
+  // rewrite audit.json. In that narrow case, prove the old snapshot itself
+  // is unchanged and the stderr contains one explicit transient HTTP error.
+  const earlyUpstreamOutage =
+    !audit.error &&
+    attempted.checkedAt === previous.checkedAt &&
+    isTransientArtworkBootstrapFailure(audit.stderr);
+  const recordedTransientOutage =
+    Array.isArray(attempted.errors) &&
+    attempted.errors.length > 0 &&
+    attempted.errors.every(
+      (error) =>
+        isTransientArtworkUpstreamFailure(error) ||
+        isTransientClassicCollectionDependency(error, attempted.errors),
+    );
+  if (!earlyUpstreamOutage && !recordedTransientOutage) {
     throw new Error('Non-transient artwork audit errors: release blocked.');
   }
   if (
@@ -89,11 +108,15 @@ async function fallbackToVerifiedSnapshot() {
     checkedAt: new Date().toISOString(),
     retainedVerifiedSnapshotAt: previous.checkedAt,
     releaseAuditMode: 'cached-verified-upstream-outage',
-    warnings: attempted.errors,
+    warnings: earlyUpstreamOutage
+      ? [
+          'TCGdex DE/EN set metadata temporarily unavailable before audit completion.',
+        ]
+      : attempted.errors,
   };
   await writeFile(`${path}/audit.json`, JSON.stringify(result, null, 2));
   console.warn(
-    `TCGdex transient outage: retained the clean audited index from ${previous.checkedAt}. ${attempted.errors.length} upstream metadata failures are recorded as warnings; no new artwork is invented.`,
+    `TCGdex transient outage: retained the clean audited index from ${previous.checkedAt}. New artwork was not invented.`,
   );
 }
 
