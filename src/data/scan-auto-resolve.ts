@@ -13,9 +13,8 @@ import {
 } from '../domain/visual-retrieval';
 import type { VisualSearchSession } from './visual-search';
 import { resolveVisualPrintings } from './scan-visual-shortlist';
-import { rankScanCandidates } from './scan-review';
-import { recognizedNameHints } from '../domain/recognition-names';
-import { normalize, numberKey, type PersonalCard } from '../domain/personal';
+import { fuseScanEvidence } from './scan-evidence-fusion';
+import { numberKey, type PersonalCard } from '../domain/personal';
 
 export interface AutomaticScanResult {
   candidates: PersonalCard[];
@@ -243,7 +242,7 @@ export async function resolvePhotoScan(
   const candidates = number?.includes('/')
     ? all.filter((card) => numberKey(card.number) === numberKey(number))
     : all;
-  const exact = rankScanCandidates(text, candidates);
+  const exact = fuseScanEvidence(text, candidates, fromVisual, undefined, preferredLanguage);
   if (exact.suggested)
     return {
       candidates: exact.candidates,
@@ -263,25 +262,17 @@ export async function resolvePhotoScan(
         candidates.slice(0, 12),
         appearanceSignal,
       ).catch(() => []);
-  const scores = new Map(
+  const appearance = new Map(
     inspected.map((entry) => [entry.card.key, entry.similarity]),
   );
-  const visualRanks = new Map(
-    fromVisual.map((card, index) => [card.key, index]),
+  const fused = fuseScanEvidence(
+    text,
+    candidates,
+    fromVisual,
+    appearance,
+    preferredLanguage,
   );
-  const title = recognizedNameHints(text)[0];
-  const ranked = [...candidates].sort((a, b) => {
-    const nameA = title && normalize(title) === normalize(a.name) ? 1 : 0;
-    const nameB = title && normalize(title) === normalize(b.name) ? 1 : 0;
-    return (
-      Number(nameB) - Number(nameA) ||
-      (visualRanks.get(a.key) ?? 999) - (visualRanks.get(b.key) ?? 999) ||
-      (scores.get(b.key) ?? -1) - (scores.get(a.key) ?? -1) ||
-      Number(b.language === preferredLanguage) -
-        Number(a.language === preferredLanguage) ||
-      a.key.localeCompare(b.key)
-    );
-  });
+  const ranked = fused.candidates;
   return {
     candidates: ranked.slice(0, 24),
     // Only a separate printed-identity match can suggest an exact
