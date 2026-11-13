@@ -37,7 +37,8 @@ async function fallbackToVerifiedSnapshot() {
   const previous = JSON.parse(previousRaw);
   // The root set list is fetched before ANY audit report/index writes. Only
   // permit fallback when that old report is byte-identical to clean HEAD.
-  const untouchedRootListFailure = rootSetListOutage && attemptedRaw === previousRaw;
+  const untouchedRootListFailure =
+    rootSetListOutage && attemptedRaw === previousRaw;
   const index = JSON.parse(committed(`${path}/index.json`));
 
   if (
@@ -105,12 +106,15 @@ async function fallbackToVerifiedSnapshot() {
       ? 'cached-verified-root-set-list-outage'
       : 'cached-verified-upstream-outage',
     warnings: untouchedRootListFailure
-      ? ['TCGdex returned a verified transient error for its root set catalogue. The committed snapshot was reused; upstream additions could not be checked.']
+      ? [
+          'TCGdex returned a verified transient error for its root set catalogue. The committed snapshot was reused; upstream additions could not be checked.',
+        ]
       : attempted.errors,
   };
   await writeFile(`${path}/audit.json`, JSON.stringify(result, null, 2));
+  const warningCount = untouchedRootListFailure ? 1 : attempted.errors.length;
   console.warn(
-    `TCGdex transient outage: retained the clean audited index from ${previous.checkedAt}. ${attempted.errors.length} upstream metadata failures are recorded as warnings; no new artwork is invented.`,
+    `TCGdex transient outage: retained the clean audited index from ${previous.checkedAt}. ${warningCount} upstream metadata failures are recorded as warnings; no new artwork is invented.`,
   );
 }
 

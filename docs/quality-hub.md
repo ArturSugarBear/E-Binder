@@ -1,8 +1,8 @@
 # E-Binder Quality Hub – gemeinsame QA, Agents und Tester
 
-**Live-Zentrale:** https://e-binder-quality-hub.vercel.app
-**Vercel-Projekt:** `e-binder-quality-hub` (separat vom Produkt-Hosting `e-binder`)
-**Datenbank:** bestehendes Supabase-Projekt `E-Binder`, isolierte öffentliche Tabelle `public.qa_hub_observations`, **keine Änderungen** an Sammlungs-/Scan-Tabellen.
+- **Live-Zentrale:** <https://e-binder-quality-hub.vercel.app>
+- **Vercel-Projekt:** `e-binder-quality-hub` (separat vom Produkt-Hosting `e-binder`)
+- **Datenbank:** bestehendes Supabase-Projekt `E-Binder`, isolierte öffentliche Tabelle `public.qa_hub_observations`, **keine Änderungen** an Sammlungs-/Scan-Tabellen.
 
 ## Testfälle vs. Beobachtungen
 
@@ -10,7 +10,7 @@ Die Website enthält eine kuratierte Testfallbibliothek (P0–P3, DE/EN/JA, Scan
 
 ## Für ChatGPT und andere Agents mit verbundenem Supabase-Zugriff
 
-1. Eintrag *nur* nach kontrollierter Analyse von CI, Screenshots oder echten Reproduktionsschritten ergänzen. Keine Erfolgsmeldungen erfinden.
+1. Eintrag _nur_ nach kontrollierter Analyse von CI, Screenshots oder echten Reproduktionsschritten ergänzen. Keine Erfolgsmeldungen erfinden.
 2. Mit dem Supabase-Connector in Projekt `hmgydjfkvehvdwvdftca` in **`public.qa_hub_observations`** schreiben. Der Agent braucht dafür eine entsprechend berechtigte Verbindung; nur ein Publishable Key reicht **nicht** für privilegierte Agent-Schreibzugriffe.
 3. Zunächst `test_id`, `title`, `category`, `priority`, `status`, `language`, `steps`, `expected`, `actual`, `notes`, `evidence_url` (öffentliche HTTPS-Adresse), `commit_sha`, `source='agent'`, `actor`, `verified` und `created_at` verwenden. Keine privaten Fotos oder Zugangsdaten.
 4. `verified=true` **nur** wenn eine nachvollziehbare Prüfung tatsächlich ausgeführt und mit Belegen zu einem konkreten Build verknüpft ist. Ein CI-Build allein beweist keine iPhone-Kameragenauigkeit.
