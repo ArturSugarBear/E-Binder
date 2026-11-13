@@ -25,6 +25,7 @@ import {
   type AutomaticScanResult,
 } from '../data/scan-auto-resolve';
 import { scanEvidence } from '../data/scan-review';
+import { fuseScanEvidence } from '../data/scan-evidence-fusion';
 import {
   recordBetaEvent,
   betaDiagnosticsAuthorized,
@@ -726,7 +727,31 @@ export function openAddCards(
               remaining() > 650 &&
               !liveOcrAbort.signal.aborted
             ) {
-              const region = nextLiveHotZone(text, tried);
+              let region = nextLiveHotZone(text, tried);
+              if (!region && text.trim()) {
+                // If OCR seems complete but conflicts with a known exact
+                // printing, spend the remaining pass on the disputed region.
+                // Never wait for an optional visual model just to retry OCR.
+                const known = [
+                  ...ctx.catalog,
+                  ...ctx.state.holdings.map((item) => item.card),
+                ];
+                const hints = candidatesFromText(text, known);
+                const fusion = fuseScanEvidence(
+                  text,
+                  hints,
+                  [],
+                  language.value,
+                );
+                if (fusion.state === 'ocr-conflict') {
+                  const requested = fusion.retryRegion;
+                  region =
+                    requested === 'title' && tried.includes('title')
+                      ? 'title-wide'
+                      : requested;
+                  if (region && tried.includes(region)) region = undefined;
+                }
+              }
               if (!region) break;
               tried.push(region);
               attempts++;
