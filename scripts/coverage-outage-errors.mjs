@@ -1,8 +1,8 @@
 /**
- * The three required smoke lookups may all be unavailable during a proven
- * TCGdex outage. This is NOT successful artwork verification. A release
- * wrapper can record an explicit unverified state only when every problem is
- * one of these exact transient source requests and local index checks passed.
+ * The three required live-provider smoke checks can be inconclusive while
+ * TCGdex is down. This function never claims an artwork check succeeded:
+ * only the exact critical-card HTTP 429/5xx errors may be reclassified as
+ * unverified after the independent cached-index integrity gate passed.
  */
 const required = [
   { lang: 'ja', setId: 'M1L', id: 'M1L-068' },
@@ -37,17 +37,12 @@ export function isStrictTransientCardCoverageOutage(report) {
     const identity = expected.lang + ':' + expected.id;
     if (accounted.has(identity)) return false;
     accounted.add(identity);
-    const url =
+    const expectedUrl =
       'https://api.tcgdex.net/v2/' + expected.lang + '/cards/' + expected.id;
-    return (
-      typeof issue.error === 'string' &&
-      new RegExp(
-        '^Error: HTTP (?:429|5[0-9]{2}) ' + url.replace(/\./g, '\\.') + '
-    );
-  });
-}
-,
-      ).test(issue.error)
-    );
+    const failure =
+      typeof issue.error === 'string'
+        ? /^Error: HTTP (429|5[0-9]{2}) (.+)$/.exec(issue.error)
+        : null;
+    return Boolean(failure && failure[2] === expectedUrl);
   });
 }
