@@ -115,17 +115,19 @@ async function snapshot(
     const framed = document.createElement('canvas');
     framed.width = 630;
     framed.height = 880;
-    framed.getContext('2d')!.drawImage(
-      source,
-      (source.width - guideWidth) / 2,
-      (source.height - guideHeight) / 2,
-      guideWidth,
-      guideHeight,
-      0,
-      0,
-      framed.width,
-      framed.height,
-    );
+    framed
+      .getContext('2d')!
+      .drawImage(
+        source,
+        (source.width - guideWidth) / 2,
+        (source.height - guideHeight) / 2,
+        guideWidth,
+        guideHeight,
+        0,
+        0,
+        framed.width,
+        framed.height,
+      );
     output = framed;
   }
   return new Promise((resolve, reject) => {
