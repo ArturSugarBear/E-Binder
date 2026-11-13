@@ -274,7 +274,7 @@ export async function resolvePhotoScan(
     ? []
     : await compareCandidateArtwork(
         photo,
-        candidates.slice(0, 12),
+        fused.candidates.slice(0, 12),
         appearanceSignal,
       ).catch(() => []);
   const scores = new Map(
