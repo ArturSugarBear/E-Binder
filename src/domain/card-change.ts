@@ -42,8 +42,7 @@ export function captureCardSignature(
       const point = project(u, v);
       const x = Math.round(point.x * (width - 1));
       const y = Math.round(point.y * (height - 1));
-      if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2)
-        return null;
+      if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2) return null;
       let brightness = 0;
       for (let dy = -1; dy <= 1; dy++)
         for (let dx = -1; dx <= 1; dx++) {

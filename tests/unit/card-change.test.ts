@@ -34,10 +34,7 @@ function patternedCard(
               42 +
             125
           : 195;
-      const value = Math.min(
-        255,
-        Math.max(0, art * scale + brightness),
-      );
+      const value = Math.min(255, Math.max(0, art * scale + brightness));
       const offset = (y * width + x) * 4;
       rgba[offset] = value;
       rgba[offset + 1] = value;
@@ -47,12 +44,7 @@ function patternedCard(
   return rgba;
 }
 
-function fingerprint(
-  seed: number,
-  brightness = 0,
-  scale = 1,
-  shift = 0,
-) {
+function fingerprint(seed: number, brightness = 0, scale = 1, shift = 0) {
   return captureCardSignature(
     patternedCard(seed, brightness, scale, shift),
     width,
@@ -67,8 +59,7 @@ it('keeps the same card latched despite brightness and slight camera movement', 
   expect(original).not.toBeNull();
   expect(cardSignatureDistance(original, relit)).toBeLessThan(0.12);
   let state = { frames: 0, previous: null as Float32Array | null };
-  for (let i = 0; i < 5; i++)
-    state = nextCardChange(state, original, relit);
+  for (let i = 0; i < 5; i++) state = nextCardChange(state, original, relit);
   expect(state.frames).toBe(0);
 });
 
@@ -97,9 +88,7 @@ it('never unlocks from empty, malformed or featureless frames', () => {
   const blank = new Uint8ClampedArray(width * height * 4);
   const empty = captureCardSignature(blank, width, height, corners);
   expect(empty).toBeNull();
-  expect(
-    captureCardSignature(blank, width - 1, height, corners),
-  ).toBeNull();
+  expect(captureCardSignature(blank, width - 1, height, corners)).toBeNull();
   expect(cardSignatureDistance(fingerprint(4), empty)).toBeNull();
   expect(
     nextCardChange(
