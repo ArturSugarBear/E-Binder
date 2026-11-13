@@ -7,7 +7,10 @@ import {
   visualNumberClues,
 } from './card-catalog';
 import { compareCandidateArtwork } from './scan-photo-match';
-import { reviewVisualCandidates } from '../domain/visual-retrieval';
+import {
+  reviewVisualCandidates,
+  type VisualHit,
+} from '../domain/visual-retrieval';
 import type { VisualSearchSession } from './visual-search';
 import { resolveVisualPrintings } from './scan-visual-shortlist';
 import { rankScanCandidates } from './scan-review';
@@ -184,24 +187,43 @@ export async function resolvePhotoScan(
   preferredLanguage: string,
   signal: AbortSignal,
   visualSession?: VisualSearchSession | null,
+  visualTimeoutMs = 4700,
+  prefetchedVisualHits?: Promise<VisualHit[]>,
 ): Promise<AutomaticScanResult> {
   // The optional ONNX index is the only path capable of finding printings
   // when set/name OCR is unreadable. Start it beside catalogue discovery,
   // not after a potentially long network lookup. Missing licensed assets,
   // expired manifests or visual timeouts leave ordinary OCR functional.
-  const visualBudget = AbortSignal.any([signal, AbortSignal.timeout(4800)]);
-  const visualCards = visualSession
-    ? visualSession
-        .match(photo, 4700)
-        .then((hits) =>
-          reviewVisualCandidates(hits, visualNumberClues(text), 5),
-        )
-        .then((review) =>
-          resolveVisualPrintings(review.choices, known, visualBudget, {
-            online: typeof navigator === 'undefined' || navigator.onLine,
-          }),
-        )
-        .catch(() => [] as PersonalCard[])
+  const boundedVisualMs = Math.max(1000, Math.min(12000, visualTimeoutMs));
+  const visualBudget = AbortSignal.any([
+    signal,
+    AbortSignal.timeout(boundedVisualMs + 100),
+  ]);
+  const visualHits =
+    prefetchedVisualHits ??
+    (visualSession ? visualSession.match(photo, boundedVisualMs) : null);
+  // A prefetched request can still be waiting for a 60-second cold model
+  // download. Never make the live scanner wait past its own review budget.
+  const visualCards = visualHits
+    ? Promise.race([
+        visualHits
+          .then((hits) =>
+            reviewVisualCandidates(hits, visualNumberClues(text), 5),
+          )
+          .then((review) =>
+            resolveVisualPrintings(review.choices, known, visualBudget, {
+              online: typeof navigator === 'undefined' || navigator.onLine,
+            }),
+          )
+          .catch(() => [] as PersonalCard[]),
+        new Promise<PersonalCard[]>((resolve) => {
+          if (visualBudget.aborted) resolve([]);
+          else
+            visualBudget.addEventListener('abort', () => resolve([]), {
+              once: true,
+            });
+        }),
+      ])
     : Promise.resolve([] as PersonalCard[]);
   const [catalog, fromVisual] = await Promise.all([
     discoverNumberedCards(text, preferredLanguage, signal),
