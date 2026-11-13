@@ -82,6 +82,36 @@ describe('autonomous Japanese card matching', () => {
     expect(result.suggested?.sourceId).toBe('M1L-088');
   });
 
+  it('retains a visual catalogue match when OCR is empty', async () => {
+    mockCatalog();
+    const signal = new AbortController().signal;
+    const known = await discoverNumberedCards('088/063', 'ja', signal);
+    const visualHit = {
+      reference: {
+        id: 'ja:M1L-088',
+        language: 'ja' as const,
+        setId: 'M1L',
+        number: '088/063',
+      },
+      similarity: 0.92,
+      visualRank: 1,
+    };
+    const result = await resolvePhotoScan(
+      new Blob(['camera']),
+      '',
+      known,
+      'ja',
+      signal,
+      null,
+      1000,
+      Promise.resolve([visualHit]),
+    );
+    expect(result.basis).toBe('visual-review');
+    expect(result.suggested).toBeUndefined();
+    expect(result.candidates[0]?.sourceId).toBe('M1L-088');
+    expect(result.visualModelCandidates).toBe(1);
+  });
+
   it('does not call a shared number an exact printing without extra evidence', async () => {
     mockCatalog();
     const result = await resolvePhotoScan(
