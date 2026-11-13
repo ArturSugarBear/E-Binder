@@ -31,3 +31,24 @@ export function isTransientArtworkBootstrapFailure(stderr) {
     )
   );
 }
+
+/**
+ * The Classic Collection cross-check requires its TCGdex set-detail record.
+ * When that exact metadata request returns 429/5xx, the legacy card mapping
+ * cannot be reverified, even if the committed index is still intact.
+ * The release gate separately verifies every cached mapping and image.
+ */
+export function isTransientClassicCollectionDependency(message, errors) {
+  return (
+    message ===
+      'Classic Collection artwork audit failed: Error: Classic Collection catalogue / mapping mismatch' &&
+    Array.isArray(errors) &&
+    errors.some(
+      (error) =>
+        typeof error === 'string' &&
+        /^Set metadata unavailable \((?:en|de):30th-c\): Error: (?:429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(?:en|de)\/sets\/30th-c$/i.test(
+          error,
+        ),
+    )
+  );
+}
