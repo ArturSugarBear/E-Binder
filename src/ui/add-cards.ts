@@ -184,6 +184,7 @@ export function openAddCards(
       candidates: PersonalCard[];
       suggested?: PersonalCard;
       basis?: AutomaticScanResult['basis'];
+      fusionState?: AutomaticScanResult['fusionState'];
     }
   >();
   const awaitingLiveReview = new Set<string>();
@@ -836,6 +837,7 @@ export function openAddCards(
           candidates,
           suggested: automatic?.suggested,
           basis: automatic?.basis,
+          fusionState: automatic?.fusionState,
         });
         recordBetaEvent(
           'scan_result',
@@ -1065,6 +1067,7 @@ export function openAddCards(
           background.candidates,
           background.suggested,
           background.basis,
+          background.fusionState,
         );
         results.dataset.scanState = 'complete';
         return;
@@ -1291,6 +1294,7 @@ export function openAddCards(
         candidates,
         automatic?.suggested,
         automatic?.basis,
+        automatic?.fusionState,
       );
       results.dataset.scanState = 'complete';
       results.dataset.scanVisualModelCandidates = String(
@@ -1423,6 +1427,7 @@ export function openAddCards(
     candidates: PersonalCard[],
     suggested?: PersonalCard,
     basis?: AutomaticScanResult['basis'],
+    fusionState?: AutomaticScanResult['fusionState'],
   ): Promise<void> {
     const request = ++setChoiceRequest;
     sheet.dialog.classList.remove('w-quick-finished');
@@ -1456,6 +1461,7 @@ export function openAddCards(
     results.dataset.scanResultContract = '1';
     results.dataset.scanSuggestedKey = suggested?.key ?? '';
     results.dataset.scanIdentityBasis = basis ?? 'review';
+    results.dataset.scanFusionState = fusionState ?? 'unavailable';
     results.dataset.scanRankedKeys = JSON.stringify(
       ranked.map((card) => card.key),
     );
@@ -1468,6 +1474,7 @@ export function openAddCards(
       if (closed || request !== setChoiceRequest) return;
       scanSetChoice.replaceChildren();
       results.hidden = false;
+      const directAdd = fusionState !== 'ocr-conflict';
       const copy = el(
         'div',
         'w-scan-match-copy',
@@ -1478,9 +1485,17 @@ export function openAddCards(
           'w-muted',
           `${card.setName} · ${card.number} · ${card.language.toUpperCase()}`,
         ),
-        el('p', 'w-scan-match-reason', explanation),
+        el(
+          'p',
+          'w-scan-match-reason',
+          fusionState === 'text-image-agree'
+            ? explanation +
+                ' Der lokale Bildvergleich unterstützt das Motiv. Sprache und Druckvariante bitte prüfen.'
+            : explanation,
+        ),
         action(
-          card.source === 'tcgdex' &&
+          directAdd &&
+            card.source === 'tcgdex' &&
             card.finishes.filter(
               (finish) =>
                 finish === 'normal' ||
@@ -1489,7 +1504,7 @@ export function openAddCards(
             ).length === 1
             ? 'Karte hinzufügen'
             : 'Diese Ausgabe prüfen',
-          () => confirmQuickScan(card),
+          () => (directAdd ? confirmQuickScan(card) : choose(card)),
           'primary',
           'check',
         ),
@@ -1762,7 +1777,13 @@ export function openAddCards(
       results.append(other);
     };
 
-    if (suggested) {
+    if (fusionState === 'ocr-conflict' && candidates.length) {
+      showPrint(
+        candidates[0]!,
+        'Die Erkennung hat widersprüchliche Hinweise gefunden. Prüfe Nummer und Namen vor der Übernahme; die Karte wird nicht automatisch ausgewählt.',
+      );
+      showAlternatives();
+    } else if (suggested) {
       const description =
         basis === 'printed-set'
           ? 'Gedrucktes Set und Sammlernummer stimmen überein. Prüfe die Kartenausgabe vor dem Hinzufügen.'
@@ -1847,6 +1868,7 @@ export function openAddCards(
     delete results.dataset.scanRankedKeys;
     delete results.dataset.scanSuggestedKey;
     delete results.dataset.scanIdentityBasis;
+    delete results.dataset.scanFusionState;
     browser.pager.replaceChildren();
     results.replaceChildren();
     const unique = [
