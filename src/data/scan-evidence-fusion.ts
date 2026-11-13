@@ -33,9 +33,7 @@ export function fuseScanEvidence(
   appearance: ReadonlyMap<string, number> = new Map(),
   preferredLanguage = 'de',
 ): FusedScanRanking {
-  const unique = [
-    ...new Map(cards.map((card) => [card.key, card])).values(),
-  ];
+  const unique = [...new Map(cards.map((card) => [card.key, card])).values()];
   const ocr = rankScanCandidates(text, unique);
   const title = recognizedNameHints(text)[0];
   const clues = recognitionClues(text);
@@ -75,7 +73,9 @@ export function fuseScanEvidence(
       (named ? 4 : 0) +
       (full ? 3 : 0) +
       (visualRank === undefined ? 0 : Math.max(0, 4 - visualRank)) +
-      (Number.isFinite(imageScore) ? Math.max(0, Math.min(1, imageScore!)) : 0) +
+      (Number.isFinite(imageScore)
+        ? Math.max(0, Math.min(1, imageScore!))
+        : 0) +
       titlePenalty
     );
   };
