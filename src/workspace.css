@@ -5504,3 +5504,43 @@ textarea.w-input,
   min-height: 46px;
   justify-content: center;
 }
+
+/* Keep the live camera unobstructed: this accent shimmer belongs to the
+   actual OCR/catalogue status below the viewfinder, never to a guessed card. */
+.w-live-scan-minimal .w-live-analysis:not([hidden]) {
+  position: relative;
+  isolation: isolate;
+}
+.w-live-scan-minimal .w-live-analysis:not([hidden])::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -3px;
+  height: 6px;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    rgb(255 255 255 / 0.95),
+    var(--accent),
+    transparent
+  );
+  background-size: 200% 100%;
+  filter: drop-shadow(0 0 8px var(--accent));
+  animation: w-live-progress-glint 1.6s linear infinite;
+}
+@keyframes w-live-progress-glint {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-live-scan-minimal .w-live-analysis:not([hidden])::after {
+    animation: none;
+    background-position: center;
+  }
+}
