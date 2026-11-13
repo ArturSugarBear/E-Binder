@@ -57,21 +57,25 @@ describe('strict release-only card coverage provider outage', () => {
   });
 
   it('rejects wrong identity, duplicates, 404 and unrelated domains', () => {
-    for (const changes of [
-      [makeIssue('ja', 'M1S', 'M1L-068')],
-      [makeIssue('ja', 'M1L', 'M1L-068', 404)],
-      [healthyOutage().issues[0], healthyOutage().issues[0]],
+    const valid = healthyOutage().issues;
+    const invalidSets = [
+      [makeIssue('ja', 'M1S', 'M1L-068'), valid[1], valid[2]],
+      [makeIssue('ja', 'M1L', 'M1L-068', 404), valid[1], valid[2]],
+      [valid[0], valid[0], valid[2]],
       [
         {
-          ...healthyOutage().issues[0],
+          ...valid[0],
           error: 'Error: HTTP 503 https://evil.example/cards/M1L-068',
         },
+        valid[1],
+        valid[2],
       ],
-    ]) {
+    ];
+    for (const issues of invalidSets) {
       expect(
         isStrictTransientCardCoverageOutage({
           ...healthyOutage(),
-          issues: [changes[0], ...healthyOutage().issues.slice(1)],
+          issues,
         }),
       ).toBe(false);
     }
