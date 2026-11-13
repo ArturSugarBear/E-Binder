@@ -116,9 +116,21 @@ export function fuseScanEvidence(
   });
 
   const exact = rankScanCandidates(text, ranked);
+  const plausibleOcrTitle = Boolean(
+    name &&
+      unique.some(
+        (card) =>
+          fullCardNameMatches(name, card.name) &&
+          clues.some(
+            (clue) =>
+              !clue.setId ||
+              clue.setId.toLowerCase() === card.setId.toLowerCase(),
+          ),
+      ),
+  );
   const numberDisagreement =
     fullNumbers.size > 0 &&
-    visualRanks.size > 0 &&
+    (visualRanks.size > 0 || plausibleOcrTitle) &&
     !unique.some((card) => fullNumbers.has(numberKey(card.number)));
   const conflict =
     ambiguousOcr || exact.conflictingName || numberDisagreement;
