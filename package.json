@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "validate:data": "node --import tsx scripts/validate-data.ts",
-    "test": "vitest run && node --test tests/roboflow-card-import.test.mjs",
+    "test": "vitest run && node --test tests/roboflow-*.test.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run format:check && npm run lint && npm run test && npm run build",
