@@ -12,9 +12,22 @@ import { isTransientArtworkUpstreamFailure } from './artwork-upstream-errors.mjs
 
 const path = 'public/catalog-art';
 const audit = spawnSync(process.execPath, ['scripts/audit-catalog-art.mjs'], {
-  stdio: 'inherit',
+  encoding: 'utf8',
+  maxBuffer: 8 * 1024 * 1024,
 });
+if (audit.stdout) process.stdout.write(audit.stdout);
+if (audit.stderr) process.stderr.write(audit.stderr);
 if (!audit.error && audit.status === 0) process.exit(0);
+
+// The audit may fail during its *initial* concurrent set-list requests,
+// before it has written an attempted audit.json. In that narrow case, classify
+// only the exact TCGdex 429/5xx list failure from the child exception. All
+// other errors use the normal attempted report and retain fail-closed checks.
+const catalogueFailure = !audit.error
+  ? (audit.stderr ?? '').match(
+      /(?:^|\n)Error: (429|5[0-9]{2}): https:\/\/api\.tcgdex\.net\/v2\/(en|de)\/sets(?:\r?\n|$)/,
+    )
+  : null;
 
 function committed(relative) {
   return execFileSync('git', ['show', `HEAD:${relative}`], {
@@ -24,8 +37,15 @@ function committed(relative) {
 }
 
 async function fallbackToVerifiedSnapshot() {
-  const attempted = JSON.parse(await readFile(`${path}/audit.json`, 'utf8'));
   const previous = JSON.parse(committed(`${path}/audit.json`));
+  const attempted = catalogueFailure
+    ? {
+        ...previous,
+        errors: [
+          `Set catalogue unavailable (${catalogueFailure[2]}): Error: ${catalogueFailure[1]}: https://api.tcgdex.net/v2/${catalogueFailure[2]}/sets`,
+        ],
+      }
+    : JSON.parse(await readFile(`${path}/audit.json`, 'utf8'));
   const index = JSON.parse(committed(`${path}/index.json`));
 
   if (
