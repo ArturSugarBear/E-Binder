@@ -94,6 +94,52 @@ python3 .opencode/skills/ui-taste/scripts/ui_lint.py src
 Compare before and after screenshots at desktop and mobile sizes. Do not claim a
 visual improvement from DOM or CSS alone; the screenshot is the evidence.
 
+## Motion and performance
+
+Use Playwright to drive and Chrome DevTools to measure. The `chrome-devtools`
+server exposes `emulate`, `performance_start_trace`, `performance_stop_trace`,
+`performance_analyze_insight`, and `lighthouse_audit`.
+
+1. Emulate a slow iPhone before measuring:
+
+   ```text
+   emulate({ pageId, viewport: "390x844x3,mobile,touch",
+             prefersReducedMotion: "reduce",
+             cpuThrottlingRate: 4, networkConditions: "Slow 4G" })
+   ```
+
+2. Record a cold trace and save it under `test-results/visual-review/motion/`:
+
+   ```text
+   performance_start_trace({ pageId, reload: true, autoStop: true,
+                             ignoreCache: true, filePath: "..." })
+   ```
+
+3. Read the reported insight set, then call `performance_analyze_insight` for
+   the relevant `LCPBreakdown`, `LCPDiscovery`, or `RenderBlocking` finding.
+   Compare normal motion with `prefers-reduced-motion: reduce`; non-essential
+   animation must stop, not merely speed up.
+
+4. `lighthouse_audit` covers accessibility, SEO, and best practices. It does
+   **not** measure performance; use the trace for LCP, INP, CLS, and long tasks.
+
+5. For a quick animation sanity check, evaluate `document.getAnimations()` and
+   sample `requestAnimationFrame` deltas during the interaction. Do not claim a
+   frame rate without a measurement.
+
+## Scanner checks
+
+The live scanner opens correctly even when no camera exists, and shows
+`Kamera nicht verfügbar` with a photo fallback. In headless Chromium that is
+expected, not a scanner failure.
+
+Known issue as of 14 November 2026: the fallback file input in
+`src/ui/add-cards.ts` (`openLiveScannerFlow`) is clicked but has no `change`
+handler, so choosing a photo closes the sheet and nothing is queued. Verify any
+fix by uploading a real fixture image and confirming the review sheet opens.
+Use `tests/e2e/live-scan.spec.ts` and `tests/e2e/binder-page-scan.spec.ts` for
+the real camera/OCR mocks.
+
 ## Automated checks
 
 Use the real test suite for behaviour that the MCP session should not paper over:

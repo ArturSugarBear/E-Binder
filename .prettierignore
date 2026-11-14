@@ -27,4 +27,5 @@ docs/visual-beta-pilot.md
 # Vendored agent skills mirrored for OpenCode (see scripts/install-opencode-skills.sh).
 .opencode/skills/*
 !.opencode/skills/e-binder-browser-test/
+!.opencode/skills/e-binder-scanner/
 

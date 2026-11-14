@@ -22,3 +22,4 @@ public/icons/*.png
 # skill tracked.
 .opencode/skills/*
 !.opencode/skills/e-binder-browser-test/
+!.opencode/skills/e-binder-scanner/

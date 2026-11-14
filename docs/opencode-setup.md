@@ -8,12 +8,13 @@ als Desktop-Web-App und als iPhone-Web-App prüfen.
 
 ### Browser (Playwright MCP)
 
-`opencode.json` startet drei lokale MCP-Server:
+`opencode.json` startet vier lokale MCP-Server:
 
 | Server              | Zweck                              | Einstellung                              |
 | ------------------- | ---------------------------------- | ---------------------------------------- |
 | `playwright`        | Desktop-Web-App                    | Chromium, 1440 × 900, headless, isolated |
 | `playwright-mobile` | Mobile Web-App                     | iPhone 13, Chromium, headless, isolated  |
+| `chrome-devtools`   | Performance, Traces, Emulation     | Chromium über CDP, SwiftShader, headless |
 | `context7`          | aktuelle Bibliotheks-Dokumentation | `@upstash/context7-mcp`                  |
 
 Beide Playwright-Server blockieren den Production-Service-Worker, damit
@@ -35,10 +36,48 @@ opencode mcp list
 Erwartet:
 
 ```text
+✓ chrome-devtools    connected
 ✓ context7           connected
 ✓ playwright         connected
 ✓ playwright-mobile  connected
 ```
+
+### Performance und Motion (Chrome DevTools MCP)
+
+Playwright fährt die App und klickt; Chrome DevTools misst, warum etwas ruckelt.
+Der Server liefert `performance_start_trace`, `performance_stop_trace`,
+`performance_analyze_insight`, `lighthouse_audit` und `emulate`.
+
+In diesem Container kann `chrome-devtools-mcp` Chromium nicht zuverlässig selbst
+starten. `scripts/chrome-devtools-mcp.sh` startet deshalb Playwrights Chromium
+mit CDP-Port 9333, SwiftShader und headless und verbindet den MCP-Server damit.
+Der Wrapper räumt den Browser beim Beenden wieder auf.
+
+Typischer Motion-Audit:
+
+```text
+emulate:
+  pageId: <id>
+  viewport: "390x844x3,mobile,touch"
+  prefersReducedMotion: "reduce"
+  cpuThrottlingRate: 4
+  networkConditions: "Slow 4G"
+
+performance_start_trace:
+  pageId: <id>
+  reload: true
+  autoStop: true
+  ignoreCache: true
+  filePath: "test-results/visual-review/motion/home-trace.json.gz"
+```
+
+`lighthouse_audit` deckt Accessibility, SEO und Best Practices ab, **nicht**
+Performance. Für LCP, INP, CLS und Long Tasks den Trace verwenden.
+
+Geprüfter Lauf auf `#home` (Produktions-Preview, iPhone-Emulation, reduzierte
+Bewegung): LCP 762 ms, CLS 0.00, keine laufenden Animationen bei
+`prefers-reduced-motion: reduce`. Der Trace liegt unter
+`test-results/visual-review/motion/`.
 
 ### Skills
 
