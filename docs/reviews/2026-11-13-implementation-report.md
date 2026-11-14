@@ -19,8 +19,8 @@
 7. **Native tab bar.** The floating dock with raised FAB is replaced by an edge-to-edge iOS tab bar: full-width, safe-area padded, gray unselected icons/labels (11 px), single lime tint for the active tab, no FAB, no glow.
 8. **Home dashboard.** „Zuletzt hinzugefügt" (recent cards) now comes directly after the hero; onboarding remains first-run only.
 9. **Binder.** The 3×3 page is the first content under a compact title; pager and page tools merged into one toolbar; the duplicate desktop 9-row inspector was removed; the page rail is kept.
-11. **Accent discipline.** Lime = one primary + the selected nav state. The vault segmented control is neutral (raised selected segment, no glow); the focus ring is white (`--focus: #ffffff`); the scan FAB glow is gone.
-12. **Platform.** Side safe areas for the workspace, 44 px footer links, `prefers-contrast: more` support, version chip moved into Profil („App-Version & Updates"), favicon/OG/`apple-touch-startup-image` links added. `lang="ja"` on card-name elements remains open (follow-up).
+10. **Accent discipline.** Lime = one primary + the selected nav state. The vault segmented control is neutral (raised selected segment, no glow); the focus ring is white (`--focus: #ffffff`); the scan FAB glow is gone.
+11. **Platform.** Side safe areas for the workspace, 44 px footer links, `prefers-contrast: more` support, version chip moved into Profil („App-Version & Updates"), favicon/OG/`apple-touch-startup-image` links added. `lang="ja"` on card-name elements remains open (follow-up).
 
 ## Acceptance evidence
 

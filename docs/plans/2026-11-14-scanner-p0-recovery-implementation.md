@@ -11,7 +11,7 @@ Repository issue [#114](https://github.com/ArturSugarBear/E-Binder/issues/114) d
 ## 2. Desired behavior and non-goals
 
 - Detect and rectify the card automatically while keeping the live camera responsive; never require cropping as the default interaction.
-- Search all *available, properly indexed and rights-cleared* exact-print references, not a fixed nine-card demo shortlist. Distinguish catalog coverage from visual index coverage.
+- Search all _available, properly indexed and rights-cleared_ exact-print references, not a fixed nine-card demo shortlist. Distinguish catalog coverage from visual index coverage.
 - Use one canonical card identity across Discover, scanner, binder and portfolio: source ID + language + set ID + collector number (preserve leading zeros and printed fraction) + verified print variant. Never infer edition, foil, condition or price from image similarity.
 - Fuse visual retrieval with OCR of set code, collector number and complete card name; retain multiple plausible candidates when evidence is weak. No silent inventory additions.
 - Maintain OCR/catalog/manual fallback if visual assets are absent, offline or too slow.
@@ -33,7 +33,7 @@ Repository issue [#114](https://github.com/ArturSugarBear/E-Binder/issues/114) d
 1. Inventory the existing Discover/TCGdex catalog data, its IDs, image references, language/set coverage, pricing mapping and caching. Avoid creating a second incompatible catalog or blindly copying third-party data into Supabase.
 2. Define normalized printing identity and provenance, e.g. `(provider, source_card_id, language, set_id, collector_number, variant)`; canonicalize leading zeros and fraction only for matching while retaining original display text. Explicitly handle multiple languages sharing artwork, reprints, first-edition stamps, secret rares, Trainer/Energy cards and distinct finishes.
 3. Choose **Supabase as an optional canonical metadata/cache and index-manifest store**, subject to provider terms, licensing, freshness and storage costs. Keep provider attribution, update timestamps, invalidation, import checkpoints and data-source reconciliation. Never assume every Discover record has an embeddable image.
-4. Audit image access and embedding/redistribution rights *per source*. Internet visibility does not grant rehosting or embedding rights. Index only authorized exact-print reference images; document missing coverage.
+4. Audit image access and embedding/redistribution rights _per source_. Internet visibility does not grant rehosting or embedding rights. Index only authorized exact-print reference images; document missing coverage.
 5. Generate reference embeddings using the **exact deployed DINOv2 ONNX weights, pooling and preprocessing**. Version each shard with model hash, preprocessor hash, manifest schema, exact-print count per language, checksums and provenance. Do not mix incompatible embedding spaces.
 6. Support incremental generation and content-addressed shards rather than one giant PWA download. Prefer local compressed search shards with lazy loading and IndexedDB caching for the iPhone-first path; benchmark network/storage/memory. Consider server-side Supabase pgvector/HNSW as a separate option only after testing latency, operational cost, privacy, offline fallback and rights. Never upload raw scans merely to do cloud similarity without explicit consent.
 7. Gate index publication on a real coverage audit. When the indexed universe is incomplete, label the coverage accurately and fall back to OCR/catalog search instead of always returning a visually similar pilot card.
@@ -46,7 +46,7 @@ Repository issue [#114](https://github.com/ArturSugarBear/E-Binder/issues/114) d
 2. Detect card quadrilateral from live frames with visible corner feedback, temporal stability and blur/glare checks. Run perspective correction automatically when geometry is trustworthy; keep optional non-blocking correction. For binder pages, detect outer page and inner 3×3 pocket geometry separately; crop card ROI rather than plastic pocket boundaries.
 3. Use a bounded multi-frame strategy and progressive resolution: cheap detection/quality check first, then higher-resolution crop if required. Do not repeatedly OCR the full frame or block the camera thread.
 4. Visual retrieval proposes a sufficiently broad Top-K from the licensed index; OCR extracts set/number/name from targeted ROIs. Fuse with explicit evidence rules: exact set+number+language can disambiguate; partial digits only re-rank; name and image alone cannot prove a printing. Keep visual candidates available even when OCR fails.
-5. Deduplicate repeated *captures* by stable session/capture identity, not just image hash; suppress repeated identical bad suggestions without hiding legitimate duplicates of the same physical card. Separate retrieval failure, catalog miss, model unavailable and offline conditions.
+5. Deduplicate repeated _captures_ by stable session/capture identity, not just image hash; suppress repeated identical bad suggestions without hiding legitimate duplicates of the same physical card. Separate retrieval failure, catalog miss, model unavailable and offline conditions.
 6. Present an understandable state machine: `detecting card` -> `matching artwork` -> `reading print` -> `confirming candidate`; show shimmer/progress honestly, with cancel/retry and no fabricated percentages. Never auto-add an uncertain card.
 7. Reuse the same resolver and canonical IDs in single-card and binder-page scans; share ranking policy and logging, while preserving distinct geometry handling.
 
@@ -58,7 +58,7 @@ Repository issue [#114](https://github.com/ArturSugarBear/E-Binder/issues/114) d
 2. Preserve opt-in for image donation, consent version, retention/deletion rights, private storage and separation of raw photo from public telemetry. Existing 92 pending samples remain **unverified** until independently labeled.
 3. Create a private review workflow: inspect original capture, predicted boundary, proposed candidates, user-selected printing, language/variant, and review evidence. User corrections are weak labels until independently verified. Prevent train/test leakage by capture/session grouping.
 4. Capture machine-readable per-stage timings, model/index version, candidate IDs, crop source, fallback reason and correction outcome; redact identifiers and never emit private image URLs, tokens or credentials into public logs.
-5. Provide a private, reproducible benchmark export for authorized reviewers. Compare OCR-only, pilot fusion, expanded fusion and ablations on the *same* labeled samples.
+5. Provide a private, reproducible benchmark export for authorized reviewers. Compare OCR-only, pilot fusion, expanded fusion and ablations on the _same_ labeled samples.
 
 **Exit:** A privacy-safe feedback loop and auditable exact-print labels, not automatic training on unreviewed scans.
 
