@@ -20,3 +20,7 @@ public/assets/vision/**
 
 # Preserve editorial beta instructions separately from generated application source.
 docs/visual-beta-pilot.md
+
+# Local Cline agent configuration (installed via scripts/install-cline-skills.sh).
+.cline/**
+
