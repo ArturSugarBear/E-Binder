@@ -31,9 +31,14 @@ You are acting as a senior Apple-platform UI engineer and interaction designer i
 - P1 11: Accent discipline — lime = one primary + selected nav state; neutral segmented control; white focus ring.
 - P1 12 (partial): side safe areas, 44 px footer links, `prefers-contrast: more`, version chip moved to Profil, favicon/OG/startup image links.
 
-Commit hash of that work: `61f6569` (`ux(ui): implement Apple UI review P0 fixes and selected P1 refinements`), published on `master` after rebasing onto `db815b3` (the P0 scanner recovery docs and over-crop fixes from 14 November).
+Commit hash of that work: `61f6569` (`ux(ui): implement Apple UI review P0 fixes and selected P1 refinements`), published on `master` at `83446f0` after rebasing onto `db815b3` (P0 scanner recovery plan + over-crop fixes from 14 November) and merging the agent tooling commits.
 
 ## Next ordered tasks (with acceptance criteria)
+
+### New owner priorities (14 November)
+
+0. **Scanner reliability first.** The owner reports the live scanner as „not working". Read `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md` (now on master) and implement its P0 recovery steps before any cosmetic work: shutter capture, camera-denied fallbacks, over-crop name protection (partially merged in `c12cb94`), and a smoke e2e that actually exercises a camera frame. Acceptance: the scanner produces reviewable captures on the real device without losing the card name.
+0b. **Motion/animation weak point.** The owner names animations as the app's biggest weakness. Use the `motion-director` + `web-motion-auditor` skills (already installed under `.cline/skills/`): purposeful micro-interactions (tab transitions, sheet springs, scan feedback), strict `prefers-reduced-motion`, no decorative glow, and document the motion system in `docs/design.md`.
 
 ### Phase 2 remainder (P1)
 
