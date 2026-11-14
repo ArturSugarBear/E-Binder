@@ -14,7 +14,7 @@
   --foil: #b9a6ff;
   --accent-hover: #e5f78e;
   --on-accent: #141519;
-  --focus: #ffffff;
+  --focus: #d8f25a;
   --surface-hover: #2e3038;
   --field-border: #72717e;
   --success: #8bd8b3;
@@ -28,12 +28,6 @@
   --mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --pad: clamp(16px, 4vw, 32px);
-  /* Apple type ramp. 1rem follows the root font-size, which Safari resolves
-     through -apple-system-body so the whole ramp scales with Dynamic Type. */
-  --text-body: 1rem; /* 17px at the 17px root */
-  --text-secondary: 0.8824rem; /* 15px */
-  --text-caption: 0.7647rem; /* 13px */
-  --text-legal: 0.6471rem; /* 11px floor for legal fine print */
 }
 * {
   box-sizing: border-box;
@@ -41,17 +35,13 @@
 html {
   background: var(--desk);
   color: var(--ink);
-  font-size: 17px;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scrollbar-color: #72717e var(--desk);
-  /* iOS Dynamic Type: rem sizes follow the user's text-size setting. Browsers
-     without -apple-system-body keep the 17px root above. */
-  font: -apple-system-body;
 }
 body {
   margin: 0;
-  font: 400 var(--text-body) / 1.5 var(--sans);
+  font: 400 15px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
 }
@@ -133,15 +123,9 @@ svg {
     color 0.15s var(--ease),
     background-color 0.15s var(--ease);
 }
-.to-index:active {
+.to-index:hover {
   color: var(--ink);
   background: var(--surface-hover);
-}
-@media (hover: hover) and (pointer: fine) {
-  .to-index:hover {
-    color: var(--ink);
-    background: var(--surface-hover);
-  }
 }
 
 /* chapter */

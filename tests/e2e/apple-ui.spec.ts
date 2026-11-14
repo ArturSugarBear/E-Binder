@@ -182,7 +182,7 @@ test.describe('Apple UI review acceptance', () => {
       .click();
   });
 
-  test('native tab bar: edge-to-edge, gray unselected, no FAB glow', async ({
+  test('restored mobile tab bar: lime scanner action is highlighted', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -203,9 +203,9 @@ test.describe('Apple UI review acceptance', () => {
           borderRadius: style.borderRadius,
         };
       });
-    expect(symbol.background).toBe('rgba(0, 0, 0, 0)');
-    expect(symbol.boxShadow).toBe('none');
-    expect(symbol.borderRadius).toBe('7px');
+    expect(symbol.background).toBe('rgb(216, 242, 90)');
+    expect(symbol.boxShadow).not.toBe('none');
+    expect(symbol.borderRadius).toBe('14px');
     // Unselected tabs are gray; the active tab uses the single lime tint.
     const color = await page
       .locator('.w-mobile-nav > a')
@@ -218,7 +218,7 @@ test.describe('Apple UI review acceptance', () => {
     expect(active).toBe('rgb(216, 242, 90)');
   });
 
-  test('type ramp: 17px body, utility headings, sans eyebrows', async ({
+  test('restored collector typography: compact body, expressive headings and mono eyebrows', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -226,7 +226,7 @@ test.describe('Apple UI review acceptance', () => {
     const body = await page.evaluate(
       () => getComputedStyle(document.body).fontSize,
     );
-    expect(body).toBe('17px');
+    expect(body).toBe('15px');
     const eyebrow = await page
       .locator('.w-eyebrow')
       .first()
@@ -238,13 +238,13 @@ test.describe('Apple UI review acceptance', () => {
           weight: style.fontWeight,
         };
       });
-    expect(parseFloat(eyebrow.size)).toBeGreaterThanOrEqual(11);
-    expect(eyebrow.family).not.toContain('Mono');
+    expect(parseFloat(eyebrow.size)).toBe(10);
+    expect(eyebrow.family).toContain('Mono');
     const h1 = await page.locator('.w-page-heading h1').evaluate((node) => {
       const style = getComputedStyle(node);
       return { weight: style.fontWeight, spacing: style.letterSpacing };
     });
-    expect(h1.weight).toBe('700');
+    expect(h1.weight).toBe('900');
     await page.goto('./#home');
     const hero = await page.locator('.w-home-hero h1').evaluate((node) => {
       const style = getComputedStyle(node);

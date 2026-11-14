@@ -132,8 +132,12 @@ export async function checkForReleaseUpdate(): Promise<
 }
 
 export function initPwa(): void {
-  // The version identifier is rendered by the profile view (App-Version &
-  // Updates); appBuild stays available there through app-version.
+  const label = document.querySelector<HTMLElement>('#workspace-version');
+  if (label) {
+    label.textContent = versionLabel();
+    label.title = `E-Binder Build ${appBuild.builtAt || 'lokal'}`;
+    label.dataset.buildCommit = appBuild.commit;
+  }
   if (isStandalone()) document.documentElement.classList.add('pwa-standalone');
 
   if ('serviceWorker' in navigator) {
