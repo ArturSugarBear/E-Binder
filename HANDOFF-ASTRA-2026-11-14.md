@@ -20,10 +20,12 @@ zurücksetzen. Von dort wurden nur die Dokumente übernommen.
 
 - Arbeitsbranch: `fix/scanner-dinov2-candidates`
 - Basis: `origin/master@8b8a882`
-- Letzter Haupt-Commit vor diesem Handoff: `bb9123c`
+- Branch-Head bei Erstellung: `ec3777d`; maßgeblich ist immer `git log -1`.
 - Arbeitsbaum: sauber (bis auf dieses Handoff)
-- PR #120: **Draft**, Head `5b1399d`, CI-Run `43587668937` **grün**
-  (Chromium + WebKit, 18m56s). **Nicht gemerged, nicht deployed.**
+- PR #120: **Draft**, Head `ec3777d`. Der vollständige CI-Run `43587668937`
+  war für `5b1399d` **grün** (Chromium + WebKit, 18m56s); der Lauf für
+  `ec3777d` (R01–R03 + Handoff) war bei Erstellung noch offen.
+  **Nicht gemerged, nicht deployed.**
 - Live-Pages-SHA: `7e930c5b940d` (älter als der Branch)
 - Retention-Run `43586330161`: failure (separate private-image automation,
   nicht der App-Build). Vercel-Runs `43582019833`, `43580000381`: skipped.
