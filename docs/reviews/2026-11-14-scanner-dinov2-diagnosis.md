@@ -1,8 +1,9 @@
 # Scanner — DINOv2-Pilot und wiederholte Kandidaten (Diagnose, 2026-11-14)
 
-**Status:** Diagnose, Regressionstest und minimale Coverage-Sperre im
-Scanner-Datenfluss. **Keine** Supabase-Migration, **kein** Deployment. Der
-Draft-PR bleibt bis zur ausdrücklichen Freigabe des Inhabers offen.
+**Status:** Diagnose, Regressionstest, minimale Coverage-Sperre und
+Prototyp-Verbesserungen für Stage-UX, OCR und den privaten Dataset-Import.
+**Keine** Supabase-Migration. Merge und Pages-Deployment erfolgen nur auf
+ausdrückliche Anweisung des Inhabers; der Draft-PR bleibt bis dahin offen.
 
 - **Auftrag:** `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md`
   (P0-A, P0-B Punkt 7, P0-C Punkt 4/5) sowie der Handoff in
@@ -236,20 +237,51 @@ unverändert.
 Eine Cosinus-Schwelle (absolut oder relativ) wurde bewusst **nicht** eingeführt:
 Sie wäre ohne unabhängig gelabelte DE/EN/JA-Daten eine erfundene Kalibrierung.
 
+## 6b. Prototyp-Umsetzung (Stage-UX, OCR, Dataset)
+
+Auf ausdrückliche Owner-Anweisung zusätzlich umgesetzt, ohne neues Modell,
+ohne neue Laufzeitabhängigkeit und ohne automatischen Besitz:
+
+1. **Ehrliche Stage-Anzeige.** `src/domain/live-analysis.ts` definiert
+   `capture → ocr → visual → catalog → ready|error`. Der Live-Scanner zeigt
+   eine nummernlose Stage-Leiste, die nur durch echte OCR-/Vision-/Katalog-
+   Ereignisse voranschreitet (`src/ui/live-scan.ts:224–290`,
+   `src/ui/add-cards.ts:706–960`). Keine Zeit-zu-Prozent-Abbildung.
+2. **Reward-Moment.** Ein einmaliger 1,4-s-Rahmenimpuls plus dezente
+   Vibration bei `ready`; `error` bleibt ruhig und rötlich. Alles unter
+   `prefers-reduced-motion` statisch (`src/workspace.css`, `.w-live-analysis-*`,
+   `.w-live-stage.is-scan-reward|is-scan-error`).
+3. **Keine erfundene 0,65-Progress.** Der Foreground-Review zeigt während der
+   Katalogarbeit wieder eine unbestimmte Anzeige (`add-cards.ts`).
+4. **Multi-Level-OCR.** Otsu-Binarisierung (`src/domain/vision-codec.ts`) als
+   zusätzliche Kontraststufe und ein früher, breiter Footer-ROI
+   (`src/data/vision-worker.ts`) gegen verschobene Set-/Nummernzeilen.
+5. **Privater Dataset-Import.** `scripts/prepare-owner-dataset.mjs` validiert
+   Bildheader, dedupliziert per SHA-256, splittet deterministisch 80/20 und
+   schreibt ein Manifest **außerhalb** jedes Git-Worktrees. Keine Fotos werden
+   kopiert, hochgeladen oder committet; Supabase-Export bleibt ein manueller
+   Schritt (`docs/owner-dataset.md`).
+
+Testbelege: `tests/unit/live-analysis.test.ts`, `tests/unit/vision.test.ts`,
+`tests/unit/owner-dataset.test.mjs`, die Scanner-Specs
+(`live-scan`, `live-scan-battle`, `scan-zero-match-recovery`) und die
+Bestätigungs-Specs (`photo-review`, `interaction-templates`, `workspace`).
+
 ## 7. Ausgeführte Tests
 
-| Befehl                                                                                                                                                                     | Ergebnis                                                                                                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run format:check`                                                                                                                                                     | grün                                                                                                                                                |
-| `npm run lint`                                                                                                                                                             | grün, 0 Warnungen                                                                                                                                   |
-| `npm run test` (vor dem Fix)                                                                                                                                               | 68 Dateien, **382 passed + 1 expected fail** (der neue P0-Test)                                                                                     |
-| `npm run typecheck` (nach dem Fix)                                                                                                                                         | grün                                                                                                                                                |
-| `npx vitest run` (7 betroffene Unit-Dateien, nach dem Fix)                                                                                                                 | **44/44 grün**                                                                                                                                      |
-| `npm run build` (in `npm run check`)                                                                                                                                       | grün, PWA-Validierung grün                                                                                                                          |
-| `npx playwright test tests/e2e/live-scan.spec.ts --project=chromium --workers=1`                                                                                           | 4/4 grün                                                                                                                                            |
-| `... --project=mobile-chromium --workers=1`                                                                                                                                | 3/4 im Dateilauf; der schwere 24-Foto-Test lief **isoliert** grün. Im Dateilauf `Target crashed` (bekannte 8-GB-Codespace-Grenze, kein App-Fehler). |
-| `npx playwright test tests/e2e/live-scan-battle.spec.ts tests/e2e/scan-zero-match-recovery.spec.ts tests/e2e/scanner-live-fallback.spec.ts --project=chromium --workers=1` | 13 passed, 1 skipped (`scanner-live-fallback.spec.ts` ist `test.fixme`)                                                                             |
-| Regressionstest vor/nach dem Fix                                                                                                                                           | vorher rot (`visual-review`), nachher grün                                                                                                          |
+| Befehl                                                                                                                                                         | Ergebnis                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run format:check`                                                                                                                                         | grün                                                                                                                                                |
+| `npm run lint`                                                                                                                                                 | grün, 0 Warnungen                                                                                                                                   |
+| `npm run test` (aktueller Stand)                                                                                                                               | 70 Dateien, **410 passed**                                                                                                                          |
+| `npm run typecheck` (nach dem Fix)                                                                                                                             | grün                                                                                                                                                |
+| `npx vitest run` (betroffene Unit-Dateien, nach dem Fix)                                                                                                       | **44/44 grün**; Dataset-Tool **20/20 grün**                                                                                                         |
+| `npm run build` (in `npm run check`)                                                                                                                           | grün, PWA-Validierung grün                                                                                                                          |
+| `npx playwright test tests/e2e/live-scan.spec.ts --project=chromium --workers=1`                                                                               | 4/4 grün                                                                                                                                            |
+| `... --project=mobile-chromium --workers=1`                                                                                                                    | 3/4 im Dateilauf; der schwere 24-Foto-Test lief **isoliert** grün. Im Dateilauf `Target crashed` (bekannte 8-GB-Codespace-Grenze, kein App-Fehler). |
+| `npx playwright test tests/e2e/live-scan-battle.spec.ts tests/e2e/live-scan.spec.ts tests/e2e/scan-zero-match-recovery.spec.ts --project=chromium --workers=1` | 17/17 grün                                                                                                                                          |
+| Bestätigungs-Specs (`photo-review`, `interaction-templates`, `workspace`, Chromium)                                                                            | 20/20 grün                                                                                                                                          |
+| Regressionstest vor/nach dem Fix                                                                                                                               | vorher rot (`visual-review`), nachher grün                                                                                                          |
 
 `npm run check` wurde vor dem Fix mit den neuen Diagnosedateien ausgeführt. Die
 vollständige Suite nach dem Fix läuft in GitHub Actions; der Codespace ist für
