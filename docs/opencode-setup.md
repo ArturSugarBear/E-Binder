@@ -4,6 +4,32 @@ Stand: 14. November 2026. Ziel: OpenCode bekommt dieselben Design- und
 Motion-Skills wie Cline und kann E-Binder mit einem echten, klickbaren Browser
 als Desktop-Web-App und als iPhone-Web-App prüfen.
 
+## Pflicht beim Start jeder neuen OpenCode-Session
+
+**Vor dem ersten Edit** die `AGENTS.md` im Repository-Root lesen: Der Owner
+hat den E-BINDER-Look vom 13.11.2026 mit limegrünem Scan-Button und
+vollständigem Liquid Glass geschützt. Weitere pauschale Redesigns sind nicht
+autorisiert; an Scanner, Preisen und Tests darf weiterhin gezielt gearbeitet
+werden.
+
+Für einen **eigenen Feature-Branch** mit bereits sauberem Arbeitsbaum:
+
+```bash
+git status --short --branch
+git fetch --prune origin
+git log -1 --oneline origin/master
+git rebase origin/master
+git status --short --branch
+```
+
+Wenn OpenCode gerade auf einem **eigenen sauberen `master`** arbeitet, stattdessen
+`git pull --ff-only origin master` ausführen. Bei uncommitteten Änderungen
+zuerst bewusst sichern; bei Konflikten nicht blind überschreiben, `reset --hard`
+oder fremde Worktrees/Branches rebasen. In Codespaces mit mehreren Agents
+getrennte Worktrees nutzen. Den Fetch/Rebase vor dem Merge erneut durchführen,
+damit keine älteren Feature-Branches das aktuelle UI oder Scanner-Fixes
+versehentlich zurückbringen. Die vollständigen Regeln stehen in `AGENTS.md`.
+
 ## Was eingerichtet ist
 
 ### Browser (Playwright MCP)
