@@ -20,7 +20,6 @@ test('liquid shell remains usable and supports reduce-motion/reduce-transparency
   ).toBeVisible();
 });
 
-
 test('full collector glass has clear layers and a real lime active segment', async ({
   page,
 }) => {
@@ -42,7 +41,9 @@ test('full collector glass has clear layers and a real lime active segment', asy
     };
   });
   // The old .87 opaque coating flattened the surface on iPhone.
-  const alpha = Number(material.background.split(',').at(-1)?.replace(')', '').trim());
+  const alpha = Number(
+    material.background.split(',').at(-1)?.replace(')', '').trim(),
+  );
   expect(alpha).toBeGreaterThan(0.25);
   expect(alpha).toBeLessThan(0.7);
   expect(material.blur).toContain('blur(');
