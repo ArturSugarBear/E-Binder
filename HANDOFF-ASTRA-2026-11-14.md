@@ -154,7 +154,7 @@ Truth behandeln.
 - `npm run typecheck`: grün (nach R01–R03).
 - `npm run lint`: grün (0 Warnungen).
 - `npm run test`: grün (70 Dateien; Lauf nach R01–R03).
-- `npm run build`: zuletzt vor R01–R03 grün; **nach R01–R03 erneut ausführen**.
+- `npm run build`: grün (nach R01–R03, inkl. PWA-Validierung).
 - PR #120 CI: vollständige Chromium-/WebKit-Regression grün (`5b1399d`).
 - Lokal: Scanner-E2E 17/17, Bestätigungs-E2E 20/20 (vor R01–R03).
 - **Nicht gelaufen:** Binder-E2E nach DOM-Reihenfolge, PWA-/Glass-E2E nach
