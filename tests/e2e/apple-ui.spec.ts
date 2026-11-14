@@ -41,6 +41,103 @@ test.describe('Apple UI review acceptance', () => {
     ).toHaveCount(1);
   });
 
+  test('mobile vault tabs visibly select only the active Binder, Karten or Portfolio view', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('./#binder');
+    for (const [route, caption] of [
+      ['binder', 'Binder'],
+      ['sammlung', 'Karten'],
+      ['portfolio', 'Portfolio'],
+    ] as const) {
+      const navigation = page.getByRole('navigation', {
+        name: 'Sammlungsansichten',
+      });
+      await expect(navigation).toBeVisible();
+      const active = navigation.getByRole('link', {
+        name: caption,
+        exact: true,
+      });
+      await expect(active).toHaveAttribute('aria-current', 'true');
+      await expect(
+        navigation.locator('.w-vault-tab[aria-current="true"]'),
+      ).toHaveCount(1);
+      const colors = await active.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          background: style.backgroundColor,
+          text: style.color,
+        };
+      });
+      expect(colors.background).toBe('rgb(216, 242, 90)');
+      expect(colors.text).toBe('rgb(20, 21, 25)');
+      await expect(page.locator('.w-mobile-nav [aria-current="page"]')).toHaveCount(1);
+      // The segmented view state is distinct from the primary dock route.
+      const inactive = navigation.locator('.w-vault-tab[aria-current="false"]');
+      await expect(inactive).toHaveCount(2);
+      for (const tab of await inactive.all()) {
+        expect(
+          await tab.evaluate((node) => getComputedStyle(node).backgroundColor),
+        ).not.toBe(colors.background);
+      }
+      const nextRoute =
+        route === 'binder'
+          ? 'sammlung'
+          : route === 'sammlung'
+            ? 'portfolio'
+            : null;
+      if (nextRoute) {
+        const nextName = nextRoute === 'sammlung' ? 'Karten' : 'Portfolio';
+        await navigation.getByRole('link', { name: nextName, exact: true }).click();
+        await expect(page).toHaveURL(new RegExp(`#${nextRoute}import { test, expect } from './fixtures';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('Apple UI review acceptance', () => {
+  test('one mobile IA: Binder tab opens Deine Binder and is the only active nav item', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('./#home');
+    const navigation = page.getByRole('navigation', {
+      name: 'App-Navigation',
+    });
+    await expect(navigation).toBeVisible();
+    const tabs = navigation.locator(':scope > a, :scope > button');
+    await expect(tabs).toHaveCount(5);
+    await expect(tabs.nth(0)).toContainText('Home');
+    await expect(tabs.nth(1)).toContainText('Entdecken');
+    await expect(tabs.nth(2)).toContainText('Scan');
+    await expect(tabs.nth(3)).toContainText('Binder');
+    await expect(tabs.nth(4)).toContainText('Profil');
+    await expect(tabs.nth(3)).not.toContainText('Sammlung');
+
+    await tabs.nth(3).click();
+    await expect(page).toHaveURL(/#binder$/);
+    await expect(
+      page.getByRole('heading', { name: 'Deine Binder', exact: true }),
+    ).toBeVisible();
+    // Exactly one active nav item in the dock.
+    await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+    await expect(navigation.locator('[aria-current="page"]')).toHaveAttribute(
+      'data-workspace-route',
+      'binder',
+    );
+    // The desktop header never duplicates the route.
+    await expect(
+      page.locator('.w-navigation').getByRole('link', { name: 'Sammlung' }),
+    ).toHaveCount(0);
+    // The vault sub-tabs mark their selection separately.
+    await expect(
+      page.locator('.w-vault-tabs [aria-current="true"]'),
+    ).toHaveCount(1);
+  });
+
+));
+      }
+    }
+  });
+
   test('one scanner surface: Home and dock Scan open the viewfinder directly', async ({
     page,
   }) => {

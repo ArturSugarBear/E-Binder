@@ -2983,7 +2983,10 @@ textarea.w-input,
     background 180ms ease,
     color 180ms ease;
 }
-.w-vault-tab[aria-current='page'] {
+/* Vault links use aria-current="true" so the global app dock is the
+   single aria-current="page". The old page selector left every vault
+   segment visually inactive after the Apple UI rollback. */
+.w-vault-tab[aria-current='true'] {
   color: var(--on-accent);
   background: var(--accent);
   box-shadow: 0 3px 15px rgb(216 242 90 / 0.2);
