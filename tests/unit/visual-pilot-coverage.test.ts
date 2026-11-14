@@ -5,7 +5,7 @@ import {
   type VisualIndex,
   type VisualReference,
 } from '../../src/domain/visual-retrieval';
-import { fuseScanEvidence } from '../../src/data/scan-evidence-fusion';
+import { resolvePhotoScan } from '../../src/data/scan-auto-resolve';
 import type { PersonalCard } from '../../src/domain/personal';
 
 /**
@@ -26,8 +26,8 @@ import type { PersonalCard } from '../../src/domain/personal';
  * (sha256 7cfc69bd…, 24,427,763 bytes) and this exact index packing showed
  * that unrelated frames still receive five pilot cards: a grey frame scored
  * cosine 0.10…0.004, camera noise 0.20…0.11, and non-indexed cards 0.74…0.38.
- * The tests below pin that behaviour down so a future coverage gate can flip
- * the expected-failure test to a normal pass.
+ * The retrieval layer still fills Top-5; the scanner gate below must keep a
+ * limited index from turning those neighbours into visible candidates.
  */
 
 /** The nine exact printings bundled by scripts/prepare-visual-beta-input.mjs. */
@@ -106,19 +106,52 @@ describe('DINOv2 pilot coverage (P0)', () => {
     );
   });
 
-  it.fails(
-    'must not turn a no-evidence frame into five pilot candidates',
-    () => {
-      const index = pilotIndex();
-      const hits = searchVisualIndex(noEvidenceQuery(), index, 5);
-      const cards = pilotReferences.map(pilotCard);
-      const fused = fuseScanEvidence('', cards, hits, 'de');
-      // Desired P0 contract: no catalog evidence + no coverage => no candidate
-      // list and no "visual-review" state that the review screen renders as a
-      // concrete card (src/ui/add-cards.ts, basis === 'visual-review' branch).
-      expect(fused.state).not.toBe('visual-review');
-      expect(fused.candidates).toHaveLength(0);
-      expect(fused.suggested).toBeUndefined();
-    },
-  );
+  it('does not turn a no-evidence frame into five pilot candidates', async () => {
+    const hits = searchVisualIndex(noEvidenceQuery(), pilotIndex(), 5);
+    const cards = pilotReferences.map(pilotCard);
+    const session = {
+      match: async () => hits,
+      close: () => undefined,
+      limited: true,
+    };
+    const result = await resolvePhotoScan(
+      new Blob(['blank-frame']),
+      '',
+      cards,
+      'de',
+      new AbortController().signal,
+      session,
+    );
+    // P0 contract: no catalog evidence and a limited index => no candidate
+    // list, so the review screen cannot render a concrete pilot card.
+    expect(result.candidates).toHaveLength(0);
+    expect(result.basis).toBe('no-match');
+    expect(result.suggested).toBeUndefined();
+  });
+
+  it('reads pilot coverage after model warmup, not before', async () => {
+    const hits = searchVisualIndex(noEvidenceQuery(), pilotIndex(), 5);
+    const cards = pilotReferences.map(pilotCard);
+    let ready = false;
+    const coldSession = {
+      match: async () => {
+        ready = true; // the real worker reports its manifest count here
+        return hits;
+      },
+      close: () => undefined,
+      get limited() {
+        return ready;
+      },
+    };
+    const result = await resolvePhotoScan(
+      new Blob(['cold-frame']),
+      '',
+      cards,
+      'de',
+      new AbortController().signal,
+      coldSession,
+    );
+    expect(result.candidates).toHaveLength(0);
+    expect(result.basis).toBe('no-match');
+  });
 });

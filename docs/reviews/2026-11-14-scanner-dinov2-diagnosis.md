@@ -1,8 +1,8 @@
 # Scanner — DINOv2-Pilot und wiederholte Kandidaten (Diagnose, 2026-11-14)
 
-**Status:** Diagnose und Regressionstest. **Keine** Scanner-Korrektur, **keine**
-Supabase-Migration, **kein** Deployment. Der Draft-PR bleibt bis zur
-ausdrücklichen Freigabe des Inhabers offen.
+**Status:** Diagnose, Regressionstest und minimale Coverage-Sperre im
+Scanner-Datenfluss. **Keine** Supabase-Migration, **kein** Deployment. Der
+Draft-PR bleibt bis zur ausdrücklichen Freigabe des Inhabers offen.
 
 - **Auftrag:** `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md`
   (P0-A, P0-B Punkt 7, P0-C Punkt 4/5) sowie der Handoff in
@@ -19,14 +19,17 @@ ausdrücklichen Freigabe des Inhabers offen.
 
 ## 1. Scope
 
-Untersucht wurden ausschließlich:
+Untersucht und minimal korrigiert wurden ausschließlich:
 
 1. der Scanner-Datenfluss von Kamera/Upload bis zur Kandidatenanzeige,
 2. der opt-in DINOv2-Pilotindex mit exakt neun Referenzdrucken,
 3. die Ursachen wiederholter bzw. irrelevanter Kandidatenvorschläge.
 
-Nicht geändert wurden UI, Layout, Marke, Motion, Datenmodell,
-Bestätigungsgates, Supabase-Schema, Modell- oder Indexumfang.
+Die Korrektur ist ein Coverage-Gate: ein begrenzter Pilot darf nur visuelle
+Treffer zeigen, die dieselbe Aufnahme über eine gedruckte Nummer stützt. Es
+gibt keine neue UI, keine erfundene Cosinus-Schwelle, kein neues Modell und
+keine Indexerweiterung. Nicht geändert wurden Layout, Marke, Motion,
+Datenmodell, Bestätigungsgates, Supabase-Schema oder Deployment.
 
 ## 2. Datenflusskarte
 
@@ -141,17 +144,16 @@ PYTHONPATH=/tmp/opencode/pylibs python3.12 scripts/probe-visual-pilot.py \
 `de:sv02-210` an erster Stelle. Unterschiedliche, nicht indizierte Karten
 erzeugen also eine überlappende, immer gleiche Kurzliste.
 
-**Rot-Beleg:** Wird der `it.fails`-Test temporär als normaler Test ausgeführt,
-schlägt er an der ersten Zusicherung fehl:
+**Rot-Beleg vor dem Fix:** Als normaler Test ausgeführt, schlug die
+Zusicherung fehl:
 
 ```
 AssertionError: expected 'visual-review' not to be 'visual-review'
 tests/unit/__tmp-red.test.ts:119:31
 ```
 
-Der Test bleibt im Branch als `it.fails` markiert, damit `npm run check` grün
-bleibt. Sobald eine Coverage-Sperre implementiert ist, wird er unerwartet grün
-und erzwingt die Umstellung auf einen normalen Test.
+Nach der Coverage-Sperre ist derselbe Fall ein normaler grüner Regressionstest
+(`tests/unit/visual-pilot-coverage.test.ts`).
 
 ## 5. Root Causes (belegt)
 
@@ -194,31 +196,45 @@ und erzwingt die Umstellung auf einen normalen Test.
 | Gleiches Artwork/Sprache/Reprint                 | **Teilweise.** Die Auflösung trennt Sprache und Nummer korrekt; das erklärt Überlappungen, nicht die wiederholte Kurzliste.                                                     |
 | OCR liefert nichts, Vision zeigt trotzdem Karten | **Belegt.** Genau R4–R7.                                                                                                                                                        |
 
-## 6. Vorgeschlagene minimale Korrektur (nicht implementiert)
+## 6. Implementierte minimale Korrektur
 
-Keine spekulative „Heilung“, keine erfundene Schwelle. Zwei Varianten, beide
-benötigen eine Produktentscheidung:
+Ein **Coverage-Gate ohne erfundene Ähnlichkeitsschwelle**:
 
-1. **Coverage-Gate im Datenfluss (bevorzugt):** `manifest.count` bzw. ein
-   `limited-pilot`-Flag durch `VisualSearchSession` bis `resolvePhotoScan`
-   reichen. Bei einem begrenzten Piloten dürfen rein visuelle Treffer nur dann
-   in `candidates` gelangen, wenn zusätzlich eine gedruckte Identität
-   (Set + vollständige Fraktion + Sprache) bestätigt ist. Andernfalls bleiben
-   sie in einem separaten Feld (z. B. `pilotCandidates`) und werden nie als
-   `candidates[0]` Hauptprüfkarte.
-2. **Separate, klar gekennzeichnete Pilotliste in der UI:** Die neun
-   Referenzen bleiben als „Pilot-Referenzen, keine allgemeine Erkennung“
-   sichtbar, sind aber nicht der primäre Vorschlag. Das ist eine bewusste
-   Abweichung von P08 („image candidate alternatives“) und braucht Freigabe.
+1. `reviewVisualCandidates` liefert zusätzlich `supported`: Treffer, deren
+   gedruckte Nummer durch OCR aus **derselben** Aufnahme exakt oder als
+   Fragment bestätigt ist (`src/domain/visual-retrieval.ts:37–46`, `:112–152`).
+2. Der verifizierte Index meldet beim Warmup seine Referenzzahl
+   (`src/data/visual-worker.ts`). Die Session leitet daraus `limited` ab:
+   jeder Index mit höchstens `VISUAL_BETA_REFERENCE_COUNT` (neun) gilt als
+   begrenzter Pilot (`src/data/visual-search.ts`, `src/data/visual-beta.ts:26`).
+3. `resolvePhotoScan` löst bei `limited` nur `review.supported` auf. Ohne
+   gedruckte Nummer entstehen **keine** visuellen Kandidaten
+   (`src/data/scan-auto-resolve.ts:214–235`). Ein breiter, auditierter Index
+   behält das bisherige Top-5-Review-Verhalten.
+4. Die Binderseite wendet dieselbe Regel pro Fach an
+   (`src/ui/page-scan.ts:992–1004`).
+5. Die Coverage wird erst **nach** dem Modell-Warmup gelesen, nicht beim
+   Funktionsaufruf; ein kalter Worker meldet vor dem Manifest keine Grenze
+   (`src/data/scan-auto-resolve.ts:214–235`). Ein eigener Regressionstest hält
+   diese Reihenfolge fest.
 
-Beide Varianten erhalten OCR/Katalog als Fallback und ändern weder Modell noch
-Index. Eine Cosinus-Schwelle (absolut oder relativ) ist **erst nach**
-kalibrierten, unabhängig gelabelten DE/EN/JA-Daten zulässig; sie darf nicht aus
-den neun Pilotkarten abgeleitet werden.
+| Situation                                   | vorher                                                 | nachher                                                                 |
+| ------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Leeres/unscharfes Foto, Pilot aktiv         | 5 Pilotkarten als Kandidaten, erste als Hauptprüfkarte | `no-match`, keine visuellen Kandidaten; Namens-/Set-Suche bleibt        |
+| Nicht indizierte Karte, keine Nummer lesbar | 5 fremde Pilotkarten                                   | `no-match`, keine falsche Hauptkarte                                    |
+| Nicht indizierte Karte, Nummer lesbar       | 5 Pilotkarten plus Katalogtreffer                      | Katalogtreffer; Pilotkarten nur, wenn ihre Nummer wirklich passt        |
+| Indizierte Karte, Nummer teilweise lesbar   | Pilotkarte als Kandidat                                | Pilotkarte bleibt Kandidat (nummerngestützt), nie automatisch bestätigt |
+| Breiter, geprüfter Index                    | Top-5-Review                                           | unverändert                                                             |
 
-**Reihenfolge:** zuerst Produktentscheidung, dann Test (aus `it.fails` wird ein
-normaler Test), dann minimale Änderung in `scan-auto-resolve.ts` und ggf.
-`add-cards.ts`.
+Der Pilot bleibt damit ein ehrlicher Modellpfad-Test: Er hilft beim
+Wiedererkennen einer der neun Referenzen, erfindet aber keine allgemeine
+Erkennung. Visuelle Treffer dürfen weiterhin OCR-Kandidaten mit demselben
+Printing hochranken (`scan-evidence-fusion.ts:103`), und `suggested` bleibt bei
+reiner Bildähnlichkeit leer. Modell, Index, UI und Bestätigungsgates sind
+unverändert.
+
+Eine Cosinus-Schwelle (absolut oder relativ) wurde bewusst **nicht** eingeführt:
+Sie wäre ohne unabhängig gelabelte DE/EN/JA-Daten eine erfundene Kalibrierung.
 
 ## 7. Ausgeführte Tests
 
@@ -226,14 +242,18 @@ normaler Test), dann minimale Änderung in `scan-auto-resolve.ts` und ggf.
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run format:check`                                                                                                                                                     | grün                                                                                                                                                |
 | `npm run lint`                                                                                                                                                             | grün, 0 Warnungen                                                                                                                                   |
-| `npm run test`                                                                                                                                                             | 68 Dateien, **382 passed + 1 expected fail** (der neue P0-Test)                                                                                     |
+| `npm run test` (vor dem Fix)                                                                                                                                               | 68 Dateien, **382 passed + 1 expected fail** (der neue P0-Test)                                                                                     |
+| `npm run typecheck` (nach dem Fix)                                                                                                                                         | grün                                                                                                                                                |
+| `npx vitest run` (7 betroffene Unit-Dateien, nach dem Fix)                                                                                                                 | **44/44 grün**                                                                                                                                      |
 | `npm run build` (in `npm run check`)                                                                                                                                       | grün, PWA-Validierung grün                                                                                                                          |
 | `npx playwright test tests/e2e/live-scan.spec.ts --project=chromium --workers=1`                                                                                           | 4/4 grün                                                                                                                                            |
 | `... --project=mobile-chromium --workers=1`                                                                                                                                | 3/4 im Dateilauf; der schwere 24-Foto-Test lief **isoliert** grün. Im Dateilauf `Target crashed` (bekannte 8-GB-Codespace-Grenze, kein App-Fehler). |
 | `npx playwright test tests/e2e/live-scan-battle.spec.ts tests/e2e/scan-zero-match-recovery.spec.ts tests/e2e/scanner-live-fallback.spec.ts --project=chromium --workers=1` | 13 passed, 1 skipped (`scanner-live-fallback.spec.ts` ist `test.fixme`)                                                                             |
-| Red-Beleg des neuen Tests                                                                                                                                                  | fehlgeschlagen wie dokumentiert, danach als `it.fails` wieder grün                                                                                  |
+| Regressionstest vor/nach dem Fix                                                                                                                                           | vorher rot (`visual-review`), nachher grün                                                                                                          |
 
-`npm run check` wurde mit den neuen Dateien ausgeführt. Der bekannte
+`npm run check` wurde vor dem Fix mit den neuen Diagnosedateien ausgeführt. Die
+vollständige Suite nach dem Fix läuft in GitHub Actions; der Codespace ist für
+die komplette Chromium-/WebKit-Regression zu klein. Der bekannte
 `Target crashed`-Fehler trat nur unter Speicherdruck auf; nach Freigabe der
 MCP-Chromium-Instanzen lief derselbe Test isoliert durch.
 
@@ -268,21 +288,27 @@ MCP-Chromium-Instanzen lief derselbe Test isoliert durch.
   Top-1/3/5, Falschtreffern, Latenz oder RAM auf realen Geräten.
 - **Keine Supabase-Diagnose.** Keine Migration, kein Zugriff auf
   `beta_diagnostic_events`, keine Auswertung der 92 offenen Spenden.
-- **WebKit** wurde nicht ausgeführt.
-- **Keine Korrektur implementiert.** Der wiederholte Vorschlag ist reproduziert
-  und die Ursache belegt, aber die Produktentscheidung (Pilotliste vs.
-  Coverage-Gate) steht aus.
+- **WebKit** wurde nur für `apple-ui.spec.ts` lokal ausgeführt (7/7 grün); die
+  vollständige WebKit-Regression bleibt CI.
+- **Die Korrektur ist noch nicht mit dem echten Pilotmodell im Browser oder auf
+  einem Gerät verifiziert.** Die Unit-Tests decken die Gate-Logik ab; die
+  Browser-Regression und der echte Modellpfad laufen in CI.
+- **Die Coverage-Grenze ist bewusst konservativ.** Jeder Index mit höchstens
+  neun Referenzen gilt als Pilot. Ein späterer breiter Index muss die Grenze
+  nicht ändern, weil er deutlich mehr Referenzen hat; ein bewusst kleiner
+  Produktionsindex wäre dagegen fälschlich eingeschränkt und braucht dann ein
+  explizites Coverage-Flag.
 - Keine Änderungen an `public/E-Binder_Brand-Lab_v2.html`, keine
   Modell-/Index-Erweiterung, keine neuen Laufzeitabhängigkeiten.
 
 ## 9. Risiken und offene Fragen
 
-1. **Präsentationsentscheidung:** Soll der Pilot bei nicht abgedeckten Karten
-   gar keine Kandidaten zeigen, oder eine ausdrücklich getrennte
-   „Pilot-Referenzen“-Liste? Beides ändert das in P08 dokumentierte Verhalten.
+1. **Verhaltensänderung:** Der Pilot zeigt bei fehlender gedruckter Nummer
+   keine Bildkandidaten mehr. Das weicht bewusst von P08
+   („image candidate alternatives“) ab und ist die in P0 §4.7 verlangte
+   Coverage-Honesty. Der Inhaber sollte das im Draft-PR bestätigen.
 2. **Schwellenwert:** Ohne unabhängig gelabelte Daten ist keine kalibrierte
-   Cosinus-Grenze vertretbar. Ein willkürlicher Wert würde das gemeldete
-   Problem nur verschieben.
+   Cosinus-Grenze vertretbar. Deshalb nummerngestütztes Gate statt Schwelle.
 3. **Abdeckungserwartung:** Solange nur neun DE-Drucke indiziert sind, ist der
    Pilot für DE/EN/JA-Sammlungen strukturell unzureichend. Das ist eine
    Coverage-Aufgabe (P0-B/P0-C), keine Modellverbesserung.

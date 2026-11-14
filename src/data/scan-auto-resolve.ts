@@ -218,11 +218,20 @@ export async function resolvePhotoScan(
             completedModelHits = hits;
             return reviewVisualCandidates(hits, visualNumberClues(text), 5);
           })
-          .then((review) =>
-            resolveVisualPrintings(review.choices, known, visualBudget, {
+          .then((review) => {
+            // Read coverage only after the model signalled readiness; a cold
+            // session reports `limited: false` until its manifest is loaded.
+            // A nine-card pilot must never turn arbitrary nearest neighbours
+            // into scanner candidates. Only references whose printed number
+            // this same photo corroborates may be surfaced. A broad, audited
+            // index keeps the wider Top-5 review behaviour.
+            const limitedPilot = visualSession?.limited === true;
+            const choices = limitedPilot ? review.supported : review.choices;
+            if (!choices.length) return [] as PersonalCard[];
+            return resolveVisualPrintings(choices, known, visualBudget, {
               online: typeof navigator === 'undefined' || navigator.onLine,
-            }),
-          )
+            });
+          })
           .catch(() => [] as PersonalCard[]),
         new Promise<PersonalCard[]>((resolve) => {
           if (visualBudget.aborted) resolve([]);

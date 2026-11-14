@@ -76,6 +76,10 @@ describe('visual-first card retrieval', () => {
     const ambiguous = reviewVisualCandidates(hits, [{ number: '001/198' }]);
     expect(ambiguous.kind).toBe('review');
     expect(ambiguous.suggested).toBeUndefined();
+    expect(ambiguous.supported.map((hit) => hit.reference.id)).toEqual([
+      'de:sv01-001',
+      'en:sv01-001',
+    ]);
     const exact = reviewVisualCandidates(hits, [
       { number: '001/165', setId: 'SV2a', language: 'ja' },
     ]);
@@ -95,6 +99,8 @@ describe('visual-first card retrieval', () => {
       reviewVisualCandidates(hits, [{ number: '077/167', setId: 'different' }])
         .kind,
     ).toBe('review');
+    const noClue = reviewVisualCandidates(hits, []);
+    expect(noClue.supported).toEqual([]);
   });
   it('only counts independent consecutive frame candidates toward stability', () => {
     expect(stableFrameCandidate(['card-a'])).toBeNull();

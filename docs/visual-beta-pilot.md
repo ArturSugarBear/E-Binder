@@ -11,6 +11,8 @@ Das ist ein **Pilottest des Modellpfads** und kein universeller Pokémon-Kartens
 
 Das Bild wird lokal als Vektor eingebettet und nur gegen die neun fest zugeordneten Referenzen verglichen. Ähnlichkeit und Top-5 sind **keine Kalibrierung und keine Druckausgaben-Bestätigung**. Die App zeigt ausschließlich mögliche Karten zur manuellen Prüfung. Sie setzt niemals Bestand oder 1st Edition automatisch.
 
+Weil der Index bewusst nur neun Karten umfasst, ist er als **begrenzter Pilot** gekennzeichnet: Ohne eine in derselben Aufnahme gelesene, passende Sammlernummer werden die neun nächsten Referenzen **nicht** als Kandidaten angezeigt. Der Scanner fällt dann auf OCR-/Katalogsuche und die manuelle Namens-/Set-Suche zurück, statt eine fremde Pilotkarte vorzuschlagen. Erst ein breiter, geprüfter Index darf visuelle Alternativen ohne Nummernbestätigung zeigen.
+
 ## Build / Herkunft
 
 GitHub Actions lädt das unveränderte ONNX Community DINOv2-Small INT8-Modell von einer festgelegten Revision und verifiziert dessen SHA-256. Python ONNX Runtime erzeugt die Referenzvektoren aus dem selben Modell und denselben neun lokal vorhandenen Kartendateien. Der gepackte Index und die Modell- und Referenzdatei erhalten SHA-256 in `assets/vision/manifest.json`. Das Produktions-Build scheitert, wenn Modell, Dimensionszahl, Referenzmenge oder Hashes nicht stimmen.

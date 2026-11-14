@@ -1,9 +1,15 @@
 import type { VisualHit } from '../domain/visual-retrieval';
-import { visualBetaEnabled } from './visual-beta';
+import { VISUAL_BETA_REFERENCE_COUNT, visualBetaEnabled } from './visual-beta';
 
 export interface VisualSearchSession {
   match: (photo: Blob, timeoutMs?: number) => Promise<VisualHit[]>;
   close: () => void;
+  /**
+   * True for the shipped nine-card pilot and any index that small. A limited
+   * index cannot be a general recognizer, so callers must not surface its
+   * arbitrary nearest neighbours as scanner candidates.
+   */
+  readonly limited: boolean;
 }
 
 /**
@@ -32,6 +38,7 @@ export async function createVisualSearchSession(
   // cold-start stage. A per-card timeout begins only after real readiness.
   // Otherwise all early scans time out while a valid model is downloading.
   let settledWarmup = false;
+  let referenceCount = 0;
   let resolveWarmup: (() => void) | undefined;
   let rejectWarmup: ((reason: Error) => void) | undefined;
   const warmed = new Promise<void>((resolve, reject) => {
@@ -90,12 +97,20 @@ export async function createVisualSearchSession(
       type: string;
       hits?: VisualHit[];
       message?: string;
+      count?: number;
     }>,
   ) => {
     if (disposed) return;
     if (event.data.id === 0) {
-      if (event.data.type === 'ready') finishWarmup();
-      else if (event.data.type === 'error') {
+      if (event.data.type === 'ready') {
+        referenceCount =
+          typeof event.data.count === 'number' &&
+          Number.isInteger(event.data.count) &&
+          event.data.count > 0
+            ? event.data.count
+            : 0;
+        finishWarmup();
+      } else if (event.data.type === 'error') {
         const reason = event.data.message ?? 'Bildmodell nicht verfügbar.';
         finishWarmup(new Error(reason));
         close();
@@ -176,5 +191,13 @@ export async function createVisualSearchSession(
       close();
     }
   }
-  return { match, close };
+  return {
+    match,
+    close,
+    get limited() {
+      return (
+        referenceCount > 0 && referenceCount <= VISUAL_BETA_REFERENCE_COUNT
+      );
+    },
+  };
 }

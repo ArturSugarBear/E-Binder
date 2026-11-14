@@ -126,6 +126,7 @@ describe('P08 visual print resolution', () => {
     const session = {
       match: vi.fn(async () => [hit('ja', 'M1L-088', '088/063', 1)]),
       close: vi.fn(),
+      limited: false,
     };
     const result = await resolvePhotoScan(
       new Blob(['still']),
@@ -142,7 +143,7 @@ describe('P08 visual print resolution', () => {
 
   it('uses prefetched visual inference without a second ONNX call', async () => {
     const local = card('ja', 'M1L-088', '088/063');
-    const session = { match: vi.fn(), close: vi.fn() };
+    const session = { match: vi.fn(), close: vi.fn(), limited: false };
     const prefetched = Promise.resolve([hit('ja', 'M1L-088', '088/063', 1)]);
     const result = await resolvePhotoScan(
       new Blob(['captured']),
@@ -165,6 +166,7 @@ describe('P08 visual print resolution', () => {
     const session = {
       match: vi.fn(async () => [hit('de', 'sv01-211', '211/198', 1)]),
       close: vi.fn(),
+      limited: false,
     };
     const result = await resolvePhotoScan(
       new Blob(['live-image']),
@@ -206,6 +208,7 @@ describe('P08 visual print resolution', () => {
         hit('de', 'me06-111', '111/103', 2),
       ]),
       close: vi.fn(),
+      limited: false,
     };
     const result = await resolvePhotoScan(
       new Blob(['photo'], { type: 'image/jpeg' }),
@@ -222,5 +225,42 @@ describe('P08 visual print resolution', () => {
     ]);
     expect(result.basis).toBe('visual-review');
     expect(result.suggested).toBeUndefined();
+  });
+
+  it('never surfaces arbitrary pilot neighbours for a limited index', async () => {
+    const pilot = card('de', 'sv01-211', '211/198');
+    const limitedSession = {
+      match: vi.fn(async () => [hit('de', 'sv01-211', '211/198', 1)]),
+      close: vi.fn(),
+      limited: true,
+    };
+    // No readable printed number: the nine-card pilot must stay silent.
+    const unreadable = await resolvePhotoScan(
+      new Blob(['blank-frame']),
+      '',
+      [pilot],
+      'de',
+      new AbortController().signal,
+      limitedSession,
+    );
+    expect(unreadable.candidates).toEqual([]);
+    expect(unreadable.basis).toBe('no-match');
+    expect(unreadable.suggested).toBeUndefined();
+
+    // A printed number that this photo actually corroborates may surface the
+    // reference. The model still never confirms the printing by itself.
+    const corroborated = await resolvePhotoScan(
+      new Blob(['card-footer']),
+      '211',
+      [pilot],
+      'de',
+      new AbortController().signal,
+      limitedSession,
+    );
+    expect(corroborated.candidates.map((entry) => entry.key)).toEqual([
+      pilot.key,
+    ]);
+    expect(corroborated.suggested).toBeUndefined();
+    expect(corroborated.basis).toBe('visual-review');
   });
 });
