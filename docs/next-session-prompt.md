@@ -1,85 +1,216 @@
-# Living Next-Session Prompt
+# Next Session — Scanner Reliability Only
 
-This file is the canonical handoff for the next session. It is overwritten at the end of every session.
+Stand: 14. November 2026. This file replaces the previous broad Apple-UI
+handoff. The next session works on the card scanner, not on visual polish,
+motion, or new product surfaces.
 
 ## Current prompt
 
-The current complete prompt is:
+````text
+You are a senior frontend and on-device computer-vision engineer working in
+`/workspaces/E-Binder`. Your job is to make the single-card scanner reliable
+end to end, starting with a known regression in the home/dock photo fallback.
+Do not only plan. Reproduce the failure, fix it, add regression coverage, and
+verify on the production build.
 
-```text
-You are acting as a senior Apple-platform UI engineer and interaction designer in `/workspaces/E-Binder`. Continue the Apple UI implementation from the previous session. Do not only plan — make the changes, verify them, and publish them according to the repository rules.
+Load the `e-binder-scanner` skill before touching code. Use
+`e-binder-browser-test` for browser work. Do not load `impeccable` or the
+motion skills for this session; scanner correctness comes first.
+
+## Non-negotiable outcome
+
+A collector can open the scanner from Home or the Scan dock, either grant
+camera access or choose a photo, get a reviewable capture, see an honest
+recognition result or a recoverable failure, and leave without an unconfirmed
+card entering the collection.
 
 ## Read first
 
 1. `AGENTS.md` (binding working rules).
-2. `docs/reviews/2026-11-13-apple-ui-critical-review.md` (the review being implemented).
-3. `docs/reviews/2026-11-13-implementation-report.md` (what the previous session changed and verified).
-4. `PRODUCT.md`, `docs/design.md`, `HANDOFF.md` (current release state).
-5. Current implementation: `index.html`, `src/styles.css`, `src/workspace.css`, `src/ui/workspace.ts`, `src/ui/home-view.ts`, `src/ui/collection-view.ts`, `src/ui/binder-view.ts`, `src/ui/page-scan.ts`, `src/ui/add-cards.ts`, `src/ui/live-scan.ts`, `src/ui/sheet-gestures.ts`, `src/ui/swipe.ts`, `src/ui/workspace-dom.ts`, `src/pwa.ts`, and the e2e specs in `tests/e2e/` (especially `apple-ui.spec.ts`, `navigation.ts`, `pwa.spec.ts`).
+2. `PRODUCT.md` and `docs/scanner.md`.
+3. `docs/scanner-quality.md` and `docs/visual-recognition.md`.
+4. `docs/p08-visual-retrieval.md` and `docs/beta-diagnostics.md`.
+5. `.opencode/skills/e-binder-scanner/SKILL.md`.
+6. `tests/e2e/scanner-live-fallback.spec.ts` (the red test).
+7. `tests/e2e/live-scan.spec.ts`, `tests/e2e/live-scan-battle.spec.ts`,
+   `tests/e2e/scan-zero-match-recovery.spec.ts`,
+   `tests/e2e/binder-page-scan.spec.ts`.
+8. `src/ui/live-scan.ts`, `src/ui/live-page-scan.ts`, `src/ui/page-scan.ts`,
+   `src/ui/add-cards.ts`, `src/data/recognize.ts`,
+   `src/data/scan-auto-resolve.ts`, `src/data/scan-evidence-fusion.ts`,
+   `src/data/scan-visual-shortlist.ts`, `src/domain/live-ocr-policy.ts`,
+   `src/domain/scan-session-guardrails.ts`.
 
-## Already done (previous session)
+## Evidence already established
 
-- P0 1: One mobile IA — dock `Home | Entdecken | Scan | Binder | Profil`; Binder tab opens `Deine Binder`; vault tabs use `aria-current="true"`; desktop header has no duplicate route; `PRODUCT.md`/`docs/design.md` agree. e2e updated.
-- P0 2: One scanner surface — `ctx.openLiveScan()` opens the live viewfinder directly (`openLiveScannerFlow` in `add-cards.ts`); captures are buffered and enter saved state only when review opens; closing returns to the origin screen. The in-add-dialog scanner button keeps the suspended-parent behavior deliberately (protects queued captures, P09 test).
-- P0 3: One primary on the empty collection; heading actions stack at ≤360 px.
-- P0 4: `:active` on every control; hover behind `(hover:hover) and (pointer:fine)`; dirty-field guard on sheet drag/backdrop/Escape via the new `confirmSheet` (`workspace-dom.ts`); `window.confirm` fully replaced.
-- P0 5: Type ramp 17/15/13/≥11 px via rem tokens; `html { font: -apple-system-body }` (Dynamic Type); 900/−0.055em display voice only for home hero + first-run headline; eyebrows 12 px sans; inputs stay 16 px.
-- P1 6: Capture-first page scan (shutter first, binder/name filing accordion after capture).
-- P1 7: Native edge-to-edge tab bar, no FAB/glow, gray unselected, one lime tint.
-- P1 8: Home shows recent cards right after the hero; onboarding first-run only.
-- P1 9: Binder shows the 3×3 page first under a compact title, one toolbar, desktop 9-row inspector removed, page rail kept.
-- P1 11: Accent discipline — lime = one primary + selected nav state; neutral segmented control; white focus ring.
-- P1 12 (partial): side safe areas, 44 px footer links, `prefers-contrast: more`, version chip moved to Profil, favicon/OG/startup image links.
+- `tests/e2e/scanner-live-fallback.spec.ts` is marked `test.fixme`. It encodes
+  the intended contract for the Home/dock photo fallback.
+- `openLiveScannerFlow` in `src/ui/add-cards.ts` (~line 2549) creates a hidden
+  `fallbackCamera` file input and clicks it, but never attaches a `change`
+  handler. Closing the live sheet calls `onClose`, which removes the input
+  before the native picker returns. A selected photo is silently lost.
+- The add-dialog `camera` input at `src/ui/add-cards.ts` (~line 1094) does have
+  a change handler. Do not “fix” the wrong input.
+- Headless Chromium has no camera. `Kamera nicht verfügbar` is an expected
+  branch, not proof of a product failure. The fallback path is the bug.
+- The visual pilot has only nine local reference printings and is opt-in. No
+  ONNX visual model or complete index is shipped for general recognition.
+- The owner’s 34 private binder photos are not in the repository. Never publish
+  them or claim a recognition rate from them.
 
-Commit hash of that work: `61f6569` (`ux(ui): implement Apple UI review P0 fixes and selected P1 refinements`), published on `master` at `83446f0` after rebasing onto `db815b3` (P0 scanner recovery plan + over-crop fixes from 14 November) and merging the agent tooling commits.
+## Scanner contract
 
-## Next ordered tasks (with acceptance criteria)
+1. One scanner surface for Home, the Scan dock, and the add dialog. Choosing a
+   photo from a denied/unavailable camera must keep a usable path to review.
+2. Queue the capture before OCR. The camera loop must not wait for OCR, model
+   warmup, or catalog requests.
+3. Auto-capture only with a stable, plausible card quad. Blank scenes, squares,
+   and landscape frames must not trigger a shutter.
+4. Preserve the printed identity: source ID + language + set ID + collector
+   number (leading zeros and printed fraction) + confirmed variant. Name or
+   image similarity alone is not a printing.
+5. Uncertain candidates remain candidates. Never auto-add inventory. Never turn
+   a cosine score into a probability.
+6. Every failure is recoverable and distinct: unreadable text, no catalog match,
+   offline, model unavailable, timeout, queue full.
+7. No photo bytes in IndexedDB, Supabase, or exports. No ownership without
+   explicit confirmation.
 
-### New owner priorities (14 November)
+## Ordered tasks
 
-0. **Scanner reliability first.** The owner reports the live scanner as „not working". Read `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md` (now on master) and implement its P0 recovery steps before any cosmetic work: shutter capture, camera-denied fallbacks, over-crop name protection (partially merged in `c12cb94`), and a smoke e2e that actually exercises a camera frame. Acceptance: the scanner produces reviewable captures on the real device without losing the card name.
-0b. **Motion/animation weak point.** The owner names animations as the app's biggest weakness. Use the `motion-director` + `web-motion-auditor` skills (already installed under `.cline/skills/`): purposeful micro-interactions (tab transitions, sheet springs, scan feedback), strict `prefers-reduced-motion`, no decorative glow, and document the motion system in `docs/design.md`.
+### 0. Green baseline and exact reproduction
 
-### Phase 2 remainder (P1)
+Run `npm run check`. Then remove `.fixme` from
+`tests/e2e/scanner-live-fallback.spec.ts` and run it:
 
-1. **Direct manipulation gestures (#10).** Card detail and binder-page swipes must follow the finger while dragging (translate with resistance), then commit or snap back on release — or remove the swipe affordances entirely. Keep pager buttons and counters as keyboard/AT alternatives. Acceptance: no jump-cut on release; swipes are cancelled on form changes inside the card sheet (existing guard preserved); `prefers-reduced-motion` keeps instant switching; existing e2e (card swipes, binder pager) stays green.
-2. **`lang="ja"` on Japanese card names (#12).** Wherever `localizedCardName` is rendered (collection card captions, home recent cards, card dialog title, wish list), set `lang="ja"` when the name contains Japanese characters. Acceptance: e2e checks the attribute on a Japanese card name; German chrome remains `lang="de"` on `<html>`.
+```bash
+npx playwright test tests/e2e/scanner-live-fallback.spec.ts --project=chromium
+````
 
-### Phase 3 (only after the above pass)
+Record the exact failure. If the failure is ambiguous, use the Playwright MCP
+mobile session and a `getUserMedia` mock to reproduce it manually. Do not start
+by rewriting the scanner.
 
-3. Remove `backdrop-filter` from content panels (`.w-glass-panel`, `.w-dialog`, `.w-navigation`) and keep it only for the tab bar; measure scrolling/paint on mobile chromium and note the result in the report. Keep `prefers-reduced-transparency` handling.
-4. The liquid-glass WebGL optic for the dock is obsolete now that the dock is a native tab bar — remove `initCollectorMaterial`'s dock attachment or the whole optic if unused elsewhere; document the decision (do not remove the package blindly if archive.html uses it).
-5. Add screenshot baselines at 320/390/430 px + large text + reduced motion, and inspect them.
-6. One route-change handler: on `navigate`, focus the view's `h1` (`tabindex="-1"`) and announce the route via the existing status region; remove or shorten the 360 ms route fade (`revealCollectorRoute`).
-7. Move PWA install/offline banners out of first paint (delay until idle, keep `isUpdateSafe` intact); consolidate duplicated CSS tokens (use ui-taste lint on `src/*.css`); optionally split `add-cards.ts`/`page-scan.ts` into a state machine plus views.
+### 1. Fix the Home/dock photo fallback lifecycle
+
+Choose the UX that matches the existing live scanner: keep the live sheet open,
+queue the selected photo(s) as pending captures, update the review summary, and
+open the add dialog only through “Ergebnisse prüfen (n)”.
+
+Requirements:
+
+- Attach a real `change` handler to `fallbackCamera`.
+- Do not remove the input while the native picker is open.
+- Reset `input.value` after reading files so the same photo can be chosen again.
+- Queue each file as `{ file, aligned: false }`; the existing crop confirmation
+  remains the place to correct alignment.
+- Respect `MAX_PENDING_SCAN_CAPTURES`.
+- Handle cancel (no files) without closing or losing the scanner.
+- Make the test pass without weakening its assertions.
+
+Acceptance: the red test is green; no ownership is created before confirmation;
+the live sheet remains usable after cancel.
+
+### 2. Cover the Home/dock live-camera lifecycle
+
+Reuse the deterministic canvas `MediaStream` rig in
+`tests/e2e/live-scan-battle.spec.ts`. Add or extend a test that opens the
+scanner from `#home` (not only from the add dialog) and verifies:
+
+- a stable card frame reaches the review queue;
+- a blank/square/landscape frame does not auto-capture;
+- manual capture queues one photo;
+- closing the sheet stops every acquired track;
+- the queue count and “Ergebnisse prüfen” stay accurate.
+
+Keep OCR stubbed for these tests. They prove lifecycle, not accuracy.
+
+### 3. Verify the OCR/catalog path with a real fixture
+
+Use `public/assets/cards/*.webp` and the existing OCR worker. Verify:
+
+- a readable card opens the review with a candidate or an explicit recovery;
+- no forced nine-card visual shortlist appears when the visual pilot is off;
+- if the visual pilot is on, its limited coverage is labeled and OCR/catalog
+  fallback remains available;
+- unreadable text and no-match states are distinct;
+- the printed number, fraction, language, and set are preserved;
+- no ownership is added until confirmation.
+
+Inspect `scan-auto-resolve.ts`, `scan-evidence-fusion.ts`,
+`scan-visual-shortlist.ts`, and `live-ocr-policy.ts` before changing ranking.
+Do not add a new model, index, or cloud service in this session.
+
+### 4. Real-device check
+
+On a physical iPhone over HTTPS or the installed PWA, verify:
+
+1. permission denied → visible photo fallback → photo selected → review opens;
+2. permission granted → live preview → manual capture → review opens;
+3. auto-capture on a stable card, no capture on a blank scene;
+4. close the camera → tracks stop, no ownership changes;
+5. confirm one card → name/number/language remain correct;
+6. reject/close the review → collection unchanged.
+
+If no physical device is available, say so explicitly and do not claim a
+real-device pass.
+
+### 5. Regression and delivery
+
+Run:
+
+```bash
+npm run check
+npx playwright test tests/e2e/scanner-live-fallback.spec.ts --project=chromium
+npx playwright test tests/e2e/live-scan.spec.ts --project=chromium --project=mobile-chromium
+npx playwright test tests/e2e/live-scan-battle.spec.ts --project=chromium
+npx playwright test tests/e2e/scan-zero-match-recovery.spec.ts --project=chromium
+npx playwright test tests/e2e/binder-page-scan.spec.ts --project=chromium
+npx playwright test tests/e2e/binder-page-rail.spec.ts --project=chromium
 ```
 
-## Verification commands and publish rules
+Then update `docs/scanner.md` with what was actually verified and what remains
+unverified. Write `docs/reviews/YYYY-MM-DD-scanner-report.md`. Overwrite this
+file with the next focused prompt.
 
-- `npm run check` (Prettier + ESLint + 377 unit tests + build + PWA validation).
-- Targeted Playwright for every touched flow: `npx playwright test <specs> --project=chromium --project=mobile-chromium --project=webkit`. In this environment `PLAYWRIGHT_CHROMIUM_EXECUTABLE` is not available; use the installed Playwright browsers (`npx playwright install chromium webkit` already done; `install-deps` was run). Set `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1` if the host preflight is wrong but the browsers actually run.
-- Axe on every changed screen (see `apple-ui.spec.ts` for the pattern).
-- Inspect 320/390/430 screenshots: first content, no 3-line CTA, no dock overlap, no horizontal overflow.
-- Update `HANDOFF.md` and the implementation report; write the next prompt; stage only task files (never `dist/`, `test-results/`, `playwright-report/`, personal data); no `git add -A`.
-- Publish: fetch remote `master`, rebase if it moved, re-run affected checks, push without force. Check the GitHub Actions run and the live GitHub Pages page; name any external failure.
+## Acceptance criteria
 
-## Do not change
+- The Home/dock fallback regression test passes.
+- Existing scanner specs pass on Chromium and mobile Chromium; WebKit where the
+  test is supported.
+- `npm run check` passes.
+- No photo persistence and no unconfirmed ownership.
+- No forced visual shortlist and no invented confidence.
+- The report distinguishes automated lifecycle tests from real recognition
+  accuracy, and states whether a physical iPhone was tested.
 
-Privacy/data model, confirmation gates, source/date labels, reduced motion/transparency, native dialog focus return, 16 px inputs, the vector logo, the Rare Room V2 palette, the no-framework decision, `public/E-Binder_Brand-Lab_v2.html` (unchanged), the 63:88 card art and exact 3×3 pocket positions, and the now-shipped P0 decisions (one IA, one scanner surface, one empty-collection primary).
+## Do not change in this session
 
-## Session completion protocol — mandatory
+- The Rare Room V2 palette, typography, layout, or motion system.
+- `public/E-Binder_Brand-Lab_v2.html`.
+- The privacy/data model, confirmation gates, 16 px inputs, reduced motion, or
+  44 px touch targets.
+- The exact 3×3 pocket geometry or the no-framework decision.
+- The visual-index licensing/coverage plan. This session fixes the scanner path;
+  a new model or full index is a separate project.
 
-A session is not finished when the code compiles. It is finished when the repository, the live page, and the next session are all ready.
+## Session completion protocol
 
-1. **Verify.** Run `npm run check`. Run the targeted Playwright projects. Inspect 320/390/430 screenshots. Do not claim a check you did not run.
-2. **Report.** Write `docs/reviews/YYYY-MM-DD-implementation-report.md` with: what changed, acceptance evidence, commands and results, screenshots inspected, remaining P0/P1/P2 items, and every external step that failed.
-3. **Write the next prompt.** Overwrite `docs/next-session-prompt.md` with a complete, copy-paste prompt for a fresh session (repository + read-first list, what is already done with commit hash, next ordered tasks with acceptance criteria, verification commands, publish rules, do-not-change list, this same protocol).
-4. **Stage all task files.** Include source, tests, CSS, docs, the implementation report, and the next prompt. Never stage `dist/`, `test-results/`, `playwright-report/`, personal collections, photos, backups, or credentials. Do not use `git add -A`; inspect pre-existing modifications and include only files that belong to this task. Check `git status --short` and `git diff --cached --stat` before committing.
-5. **Commit.** Clear conventional message, e.g. `ux(ui): ...`. Leave the working tree clean for the next session.
-6. **Push.** Fetch the current remote `master` first; if it moved, rebase, re-run affected checks, then push. Never force-push. Report any push failure exactly.
-7. **Verify delivery.** Check the GitHub Actions run and the actual GitHub Pages page. Name any external failure clearly.
-8. **Print the next prompt** in the final response inside a fenced code block, together with the commit hash and live URL.
+1. Run the commands above and report actual results.
+2. Update `docs/scanner.md` and write the scanner report.
+3. Stage only scanner source, tests, and docs. Never `git add -A`.
+4. Commit with a clear message, fetch `origin/master`, rebase if it moved,
+   re-run affected checks, and push without force.
+5. Verify the GitHub Actions run and the deployed page. Name any external
+   failure.
+6. Print the next prompt in the final response.
 
-## At the end of the session
+```
 
-Replace this file with the next complete, self-contained prompt (see the protocol inside). Do not leave a summary here. Then commit and push this file together with every other task file.
+## Why this replaces the previous prompt
+
+The previous handoff mixed scanner recovery with a broad Apple-UI/motion
+roadmap. This prompt starts from one reproducible failure, defines the scanner
+contract, and sequences the work so the next session can finish a meaningful,
+verifiable scanner improvement instead of producing another plan.
+```
