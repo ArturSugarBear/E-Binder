@@ -190,9 +190,11 @@ test.describe('Apple UI review acceptance', () => {
     const bar = page.locator('.w-mobile-nav');
     const box = await bar.boundingBox();
     expect(box).not.toBeNull();
-    expect(Math.round(box!.width)).toBe(390);
-    expect(Math.round(box!.x)).toBe(0);
-    expect(Math.round(box!.y + box!.height)).toBe(844);
+    // The restored floating glass dock has 11px side gutters and a 10px
+    // lower inset; the full-width bar belonged to the rejected redesign.
+    expect(Math.round(box!.width)).toBe(368);
+    expect(Math.round(box!.x)).toBe(11);
+    expect(Math.round(box!.y + box!.height)).toBe(834);
     const symbol = await page
       .locator('.w-mobile-add-symbol')
       .evaluate((node) => {
@@ -205,7 +207,7 @@ test.describe('Apple UI review acceptance', () => {
       });
     expect(symbol.background).toBe('rgb(216, 242, 90)');
     expect(symbol.boxShadow).not.toBe('none');
-    expect(symbol.borderRadius).toBe('14px');
+    expect(symbol.borderRadius).toBe('50%');
     // Unselected tabs are gray; the active tab uses the single lime tint.
     const color = await page
       .locator('.w-mobile-nav > a')
@@ -238,7 +240,7 @@ test.describe('Apple UI review acceptance', () => {
           weight: style.fontWeight,
         };
       });
-    expect(parseFloat(eyebrow.size)).toBe(10);
+    expect(parseFloat(eyebrow.size)).toBe(9);
     expect(eyebrow.family).toContain('Mono');
     const h1 = await page.locator('.w-page-heading h1').evaluate((node) => {
       const style = getComputedStyle(node);

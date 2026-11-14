@@ -19,9 +19,32 @@ export function isStrictTransientCardCoverageOutage(report) {
     !Array.isArray(report.missing) ||
     report.missing.length !== 0 ||
     !report.totals ||
-    Object.values(report.totals).some((value) => value !== 0) ||
     !Array.isArray(report.issues) ||
-    report.issues.length !== required.length
+    report.issues.length < 1 ||
+    report.issues.length > required.length
+  )
+    return false;
+
+  // The smoke executes exactly these three cards. Allow an upstream failure
+  // on a strict subset only when every remaining card was actually verified.
+  // Missing images or unrelated errors must continue to block the release.
+  const stages = [
+    'primary',
+    'paired-english',
+    'secondary-index',
+    'verified-japanese',
+  ];
+  if (
+    report.totals.missing !== 0 ||
+    Object.keys(report.totals).some(
+      (key) => key !== 'missing' && !stages.includes(key),
+    ) ||
+    stages.some(
+      (key) =>
+        !Number.isSafeInteger(report.totals[key]) || report.totals[key] < 0,
+    ) ||
+    stages.reduce((sum, key) => sum + report.totals[key], 0) !==
+      required.length - report.issues.length
   )
     return false;
 

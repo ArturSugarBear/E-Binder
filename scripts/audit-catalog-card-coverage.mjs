@@ -112,11 +112,19 @@ async function indexed(setId, cardId, number) {
   const art = candidates[0][1];
   return art && trusted(art.url) && art.providerId ? art.url : undefined;
 }
-async function japaneseImage(setId, cardId, number, official) {
+async function japaneseImage(setId, cardId, number, official, suppliedCard) {
   if (!/^(?:M1L|M1S)$/i.test(setId)) return;
-  const card = await json(
-    'https://api.tcgdex.net/v2/ja/cards/' + encodeURIComponent(cardId),
-  );
+  // The smoke already fetched the verified full card. Reuse it instead of
+  // introducing a second transient API failure for the same exact printing.
+  // Set listings contain only card briefs, so those still fetch the detail.
+  const card =
+    suppliedCard?.id === cardId &&
+    suppliedCard.set?.id === setId &&
+    Number.isSafeInteger(suppliedCard.set?.cardCount?.official)
+      ? suppliedCard
+      : await json(
+          'https://api.tcgdex.net/v2/ja/cards/' + encodeURIComponent(cardId),
+        );
   const ids = [
     ...new Set(
       [
@@ -208,7 +216,7 @@ async function checkCard(language, setId, card, official) {
     candidates.push({ stage: 'secondary-index', url: indexedUrl });
   if (language === 'ja') {
     try {
-      const image = await japaneseImage(setId, id, number, official);
+      const image = await japaneseImage(setId, id, number, official, card);
       if (image) candidates.push({ stage: 'verified-japanese', url: image });
     } catch {
       /* Failed verification is not a verified image. */

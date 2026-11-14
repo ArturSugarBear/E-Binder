@@ -38,6 +38,23 @@ describe('strict release-only card coverage provider outage', () => {
     expect(isStrictTransientCardCoverageOutage(healthyOutage())).toBe(true);
   });
 
+  it('accepts two exact upstream failures when the third card image was verified', () => {
+    const report = healthyOutage();
+    report.issues = report.issues.slice(1);
+    report.totals['verified-japanese'] = 1;
+    expect(isStrictTransientCardCoverageOutage(report)).toBe(true);
+    report.totals['verified-japanese'] = 0;
+    expect(isStrictTransientCardCoverageOutage(report)).toBe(false);
+  });
+
+  it('rejects a missing Japanese card image despite other upstream failures', () => {
+    const report = healthyOutage();
+    report.issues = report.issues.slice(1);
+    report.missing = [{ language: 'ja', setId: 'M1L', id: 'M1L-068' }];
+    report.totals.missing = 1;
+    expect(isStrictTransientCardCoverageOutage(report)).toBe(false);
+  });
+
   it('rejects actual missing art or unsafe local manifest errors', () => {
     expect(
       isStrictTransientCardCoverageOutage({

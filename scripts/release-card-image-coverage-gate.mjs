@@ -41,14 +41,14 @@ try {
       {
         ...report,
         verificationStatus: 'unverified-upstream-unavailable',
-        providerOutage: 'TCGdex returned 429/5xx on all three critical cards',
+        providerOutage: `TCGdex returned 429/5xx on ${report.issues.length} of 3 critical cards`,
       },
       null,
       2,
     ) + '\n',
   );
   console.warn(
-    '::warning::TCGdex unavailable for the three required cards. ' +
+    '::warning::TCGdex unavailable for one or more required cards. ' +
       'Live-provider coverage is UNVERIFIED; committed artwork integrity was checked.',
   );
 } catch (error) {
