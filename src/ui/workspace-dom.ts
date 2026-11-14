@@ -317,12 +317,11 @@ export function snapshotDialogFields(dialog: HTMLDialogElement): void {
 
 /**
  * A dialog counts as dirty when any form control differs from the snapshot
- * taken at the first check (after the caller has built the content). The
- * first check only creates the reference and never reports dirty.
+ * of its values before the first user edit (see modal()).
  */
 export function dialogHasDirtyFields(dialog: HTMLDialogElement): boolean {
   const holder = dialog as unknown as Record<symbol, FieldSnapshot | undefined>;
-  let snapshot = holder[dirtySnapshotKey];
+  const snapshot = holder[dirtySnapshotKey];
   if (!snapshot) {
     snapshotDialogFields(dialog);
     return false;
