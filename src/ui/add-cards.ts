@@ -402,6 +402,21 @@ export function openAddCards(
     ctx.state.captures.find((item) => item.id === captureId);
   const tell = (text: string, error = false) =>
     notices.replaceChildren(message(text, error ? 'error' : 'note'));
+  let rewardTimer: ReturnType<typeof setTimeout> | undefined;
+  // A confirmed card is the only honest "success" moment. One short foil
+  // settle plus a tiny haptic; never a celebration before human confirmation.
+  const rewardConfirmedCard = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    clearTimeout(rewardTimer);
+    notices.classList.remove('is-confirmed-reward');
+    void notices.offsetWidth;
+    notices.classList.add('is-confirmed-reward');
+    navigator.vibrate?.(18);
+    rewardTimer = setTimeout(
+      () => notices.classList.remove('is-confirmed-reward'),
+      1000,
+    );
+  };
   const showCapture = () => {
     photoArea.replaceChildren();
     for (const url of previewUrls) URL.revokeObjectURL(url);
@@ -1514,6 +1529,7 @@ export function openAddCards(
         ? 'Karte übernommen · nächste Karte prüfen.'
         : 'Karte übernommen · fertig oder nächste Karte scannen.',
     );
+    rewardConfirmedCard();
     if (reviewingLiveQueue && !captureId) {
       sheet.dialog.classList.add('w-quick-finished');
     }
@@ -2372,6 +2388,7 @@ export function openAddCards(
               ? 'Karte übernommen · nächste Karte prüfen.'
               : 'Karte übernommen · fertig oder nächste Karte scannen.',
           );
+          rewardConfirmedCard();
           if (reviewingLiveQueue && !captureId) {
             sheet.dialog.classList.add('w-quick-finished');
           }

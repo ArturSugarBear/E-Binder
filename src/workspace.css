@@ -5765,3 +5765,31 @@ textarea.w-input,
 .w-home-step:active {
   background: var(--glass-background);
 }
+
+/* One-shot confirmation reward: a confirmed card, never a pre-confirmation
+   celebration. Reduced motion keeps the accent border but drops the motion. */
+.w-form-notices.is-confirmed-reward > .w-message {
+  border-color: var(--accent);
+  animation: w-confirmed-card 900ms var(--ease) 1;
+}
+@keyframes w-confirmed-card {
+  0% {
+    transform: translateY(4px) scale(0.985);
+    opacity: 0.45;
+  }
+  38% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px var(--accent),
+      0 0 24px rgb(216 242 90 / 0.34);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-form-notices.is-confirmed-reward > .w-message {
+    animation: none;
+  }
+}
