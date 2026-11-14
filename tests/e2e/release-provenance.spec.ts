@@ -18,8 +18,10 @@ test('release version is generated from the built app and is visible on every iP
   expect(Date.parse(release.builtAt)).not.toBeNaN();
 
   await page.goto('./#entdecken');
-  // The version identifier lives in the profile (App-Version & Updates),
-  // not as a permanent chip on every screen.
+  // Keep the old compact version chip available on every route.
+  await expect(page.locator('#workspace-version')).toContainText(
+    'v' + release.version,
+  );
   await page.getByRole('link', { name: 'Profil und Einstellungen' }).click();
   await expect(
     page.getByRole('heading', { name: 'App-Version & Updates' }),
