@@ -20,6 +20,45 @@ test('liquid shell remains usable and supports reduce-motion/reduce-transparency
   ).toBeVisible();
 });
 
+
+test('full collector glass has clear layers and a real lime active segment', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./#binder');
+  await expect(page.locator('#workspace-main')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  const vault = page.locator('.w-vault-tabs.w-glass-panel');
+  await expect(vault).toBeVisible();
+  const material = await vault.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      background: style.backgroundColor,
+      blur: style.backdropFilter || style.webkitBackdropFilter,
+      border: style.borderTopColor,
+      shadow: style.boxShadow,
+    };
+  });
+  // The old .87 opaque coating flattened the surface on iPhone.
+  const alpha = Number(/rgba?\\([^)]*,\\s*([0-9.]+)\\)$/.exec(material.background)?.[1]);
+  expect(alpha).toBeGreaterThan(0.25);
+  expect(alpha).toBeLessThan(0.7);
+  expect(material.blur).toContain('blur(');
+  expect(material.shadow).toContain('inset');
+  await expect(vault.locator('[aria-current="true"]')).toHaveCount(1);
+  const activeColor = await vault
+    .locator('[aria-current="true"]')
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(activeColor).toBe('rgb(216, 242, 90)');
+
+  const optic = page.locator('.w-mobile-nav .w-liquid-optic');
+  await expect(optic).toHaveCount(1);
+  await expect(optic).toHaveAttribute('strength', '0.2');
+  await expect(optic).toHaveAttribute('saturation', '160');
+});
+
 test('camera scanner switches modes without writing inventory', async ({
   page,
 }) => {

@@ -7,9 +7,9 @@ const prefersOpaque = () =>
   matchMedia('(prefers-reduced-transparency: reduce)').matches;
 
 /**
- * One refracting material on the floating navigation, not 80 glass panels.
- * The web component uses SVG lensing on Chromium and an explicit WebGL
- * backdrop source on iOS Safari. Blur remains a safe fallback.
+ * One refracting material on the floating navigation; the rest of the UI
+ * uses lightweight layered backdrop-glass CSS. SVG lensing runs on Chromium
+ * and explicit WebGL backdrop sampling on iOS Safari. Blur is the fallback.
  */
 export function initCollectorMaterial(): void {
   const nav = document.querySelector<HTMLElement>('.w-mobile-nav');
@@ -33,10 +33,10 @@ export function initCollectorMaterial(): void {
   optic.setAttribute('backdrop-selector', '#workspace-main');
   optic.setAttribute('lens-profile', 'material');
   optic.setAttribute('radius', '28');
-  optic.setAttribute('strength', '0.12');
-  optic.setAttribute('blur', '8');
-  optic.setAttribute('frost', '0.14');
-  optic.setAttribute('saturation', '135');
+  optic.setAttribute('strength', '0.2');
+  optic.setAttribute('blur', '11');
+  optic.setAttribute('frost', '0.1');
+  optic.setAttribute('saturation', '160');
   nav.prepend(optic);
   // The library can deliberately fall back to blur when WebGL/SVG is
   // unavailable. Never remove the solid dock backdrop in that case.
@@ -55,7 +55,7 @@ export function initCollectorMaterial(): void {
   customElements.whenDefined('liquid-glass').then(refresh).catch(refresh);
 }
 
-/** Navigation should feel spatial, not repaint dozens of unrelated tiles. */
+/** Route entrances are subtle; expensive continuous effects are reserved for the dock. */
 export function revealCollectorRoute(root: HTMLElement): void {
   if (prefersCalm()) return;
   const pieces = root.querySelectorAll<HTMLElement>(
