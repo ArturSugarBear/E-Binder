@@ -36,11 +36,15 @@ values. Click with the returned `ref` instead of guessing CSS selectors.
 Run the dev server in the background and keep the URL:
 
 ```bash
-npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+VITE_BASE_PATH=/ npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Open `http://127.0.0.1:5173/E-Binder/`. The `/E-Binder/` base path is required
-because `vite.config.ts` sets `base` to `/E-Binder/`.
+Open `http://127.0.0.1:5173/`.
+
+Use `VITE_BASE_PATH=/` for browser review. With the production base
+(`/E-Binder/`), Vite 8 doubles `%BASE_URL%` assets in dev
+(`/E-Binder/E-Binder/brand/...`), so the header logo and icons appear broken
+even though the production build is correct.
 
 For a production-like check, build first and use the preview server:
 
@@ -49,8 +53,9 @@ npm run build
 npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
 ```
 
-Open `http://127.0.0.1:4173/E-Binder/`. Stop the server when finished; do not
-leave background servers running.
+Open `http://127.0.0.1:4173/E-Binder/`. This is the path the real GitHub Pages
+build uses, and its logo and icons load correctly. Stop the server when
+finished; do not leave background servers running.
 
 ## Review flow
 
