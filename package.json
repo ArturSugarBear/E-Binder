@@ -26,7 +26,7 @@
     "audit:providers": "node --import tsx scripts/audit-p0-providers.ts",
     "audit:card-images": "node scripts/audit-catalog-card-coverage.mjs",
     "audit:beta-model": "node scripts/compare-beta-benchmarks.mjs",
-    "skills:install": "bash scripts/install-cline-skills.sh"
+    "skills:install": "bash scripts/install-cline-skills.sh && bash scripts/install-opencode-skills.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",

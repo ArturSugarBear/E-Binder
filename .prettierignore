@@ -24,3 +24,7 @@ docs/visual-beta-pilot.md
 # Local Cline agent configuration (installed via scripts/install-cline-skills.sh).
 .cline/**
 
+# Vendored agent skills mirrored for OpenCode (see scripts/install-opencode-skills.sh).
+.opencode/skills/*
+!.opencode/skills/e-binder-browser-test/
+

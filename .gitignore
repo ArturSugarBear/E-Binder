@@ -16,3 +16,9 @@ public/icons/*.png
 
 # Local Cline agent configuration (installed via scripts/install-cline-skills.sh)
 .cline/
+
+# OpenCode skills mirrored from .cline/skills (installed via
+# scripts/install-opencode-skills.sh). Keep the project-specific browser-test
+# skill tracked.
+.opencode/skills/*
+!.opencode/skills/e-binder-browser-test/

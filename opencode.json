@@ -1,0 +1,60 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@playwright/mcp@latest",
+          "--headless",
+          "--isolated",
+          "--block-service-workers",
+          "--browser",
+          "chromium",
+          "--viewport-size",
+          "1440x900",
+          "--output-dir",
+          "test-results/visual-review/desktop",
+          "--snapshot-boxes",
+          "--caps",
+          "vision,devtools"
+        ],
+        "timeout": {
+          "startup": 120000
+        }
+      },
+      "playwright-mobile": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@playwright/mcp@latest",
+          "--headless",
+          "--isolated",
+          "--block-service-workers",
+          "--browser",
+          "chromium",
+          "--device",
+          "iPhone 13",
+          "--output-dir",
+          "test-results/visual-review/mobile",
+          "--snapshot-boxes",
+          "--caps",
+          "vision,devtools"
+        ],
+        "timeout": {
+          "startup": 120000
+        }
+      },
+      "context7": {
+        "type": "local",
+        "command": ["npx", "-y", "@upstash/context7-mcp"],
+        "timeout": {
+          "startup": 120000
+        }
+      }
+    }
+  }
+}

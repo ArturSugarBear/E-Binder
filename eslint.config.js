@@ -10,6 +10,7 @@ export default tseslint.config(
       'playwright-report/**',
       'test-results/**',
       '.cline/**',
+      '.opencode/**',
     ],
   },
   js.configs.recommended,
