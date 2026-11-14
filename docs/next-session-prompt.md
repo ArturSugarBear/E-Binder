@@ -1,219 +1,304 @@
-# Next Session — Scanner Reliability Only
+# OpenCode Prompt — Scanner: DINOv2-Pilot und wiederholte Kandidaten
 
-Stand: 14. November 2026. This file replaces the previous broad Apple-UI
-handoff. The next session works on the card scanner, not on visual polish,
-motion, or new product surfaces.
+**Auftrag (verbindlich):**
+Lies `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md`. Prüfe zuerst `git status`, `git diff` und bestehende uncommittete Arbeit und bewahre sie. Analysiere ausschließlich Scanner-Datenfluss, DINOv2-Pilotindex mit neun Karten sowie Ursachen wiederholter Kandidatenvorschläge. Dokumentiere reproduzierbare Fehler, arbeite auf einem Feature-Branch, führe Tests aus und erstelle einen Draft-PR. Keine Änderungen direkt auf Master, keine Supabase-Migration, kein Deployment ohne Freigabe.
 
-## Current prompt
+> Hinweis: Diese Datei ist absichtlich noch nicht committet, damit sie kein
+> Deployment auslöst. Lies sie vollständig, bevor du sie stashst. Übernimm sie
+> als ersten Commit auf den Feature-Branch, damit der Handoff erhalten bleibt.
 
-````text
-You are a senior frontend and on-device computer-vision engineer working in
-`/workspaces/E-Binder`. Your job is to make the single-card scanner reliable
-end to end, starting with a known regression in the home/dock photo fallback.
-Do not only plan. Reproduce the failure, fix it, add regression coverage, and
-verify on the production build.
+## Rolle und Ziel
 
-Load the `e-binder-scanner` skill before touching code. Use
-`e-binder-browser-test` for browser work. Do not load `impeccable` or the
-motion skills for this session; scanner correctness comes first.
+Du arbeitest als Senior Frontend- und On-Device-CV-Ingenieur in
+`/workspaces/E-Binder`. Ziel ist keine neue Scanner-UI und kein neues Modell,
+sondern die belastbare Diagnose und minimale Korrektur des bestehenden
+Scanner-Datenflusses:
 
-## Non-negotiable outcome
+1. Wo entstehen aus Kamera/Upload, OCR, Katalog und DINOv2-Pilot konkrete
+   Kandidatenvorschläge?
+2. Warum schlägt der Scanner wiederholt dieselben oder irrelevante Kandidaten
+   vor, obwohl die Karte nicht exakt belegt ist?
+3. Welche Rolle spielt der DINOv2-Pilotindex mit nur neun Referenzkarten, und
+   wann wird er trotz fehlender Abdeckung als scheinbar sichere Quelle genutzt?
 
-A collector can open the scanner from Home or the Scan dock, either grant
-camera access or choose a photo, get a reviewable capture, see an honest
-recognition result or a recoverable failure, and leave without an unconfirmed
-card entering the collection.
+Arbeitediagnosegetrieben. Keine spekulative „Verbesserung“, kein neuer Index,
+keine neuen Abhängigkeiten, keine UI-/Motion-Arbeit.
 
-## Read first
+## Harte Leitplanken
 
-1. `AGENTS.md` (binding working rules).
-2. `PRODUCT.md` and `docs/scanner.md`.
-3. `docs/scanner-quality.md` and `docs/visual-recognition.md`.
-4. `docs/p08-visual-retrieval.md` and `docs/beta-diagnostics.md`.
-5. `.opencode/skills/e-binder-scanner/SKILL.md`.
-6. `tests/e2e/scanner-live-fallback.spec.ts` (the red test).
-7. `tests/e2e/live-scan.spec.ts`, `tests/e2e/live-scan-battle.spec.ts`,
-   `tests/e2e/scan-zero-match-recovery.spec.ts`,
-   `tests/e2e/binder-page-scan.spec.ts`.
-8. `src/ui/live-scan.ts`, `src/ui/live-page-scan.ts`, `src/ui/page-scan.ts`,
-   `src/ui/add-cards.ts`, `src/data/recognize.ts`,
-   `src/data/scan-auto-resolve.ts`, `src/data/scan-evidence-fusion.ts`,
-   `src/data/scan-visual-shortlist.ts`, `src/domain/live-ocr-policy.ts`,
-   `src/domain/scan-session-guardrails.ts`.
+- **Keine Änderungen direkt auf `master`.** Erstelle zuerst einen
+  Feature-Branch von `origin/master`.
+- **Keine Supabase-Migration**, keine Schema-, RLS- oder Datenänderungen.
+- **Kein Deployment, kein Merge, kein Promote** ohne ausdrückliche Freigabe.
+- **Bestehende uncommittete Arbeit bewahren.** Nichts löschen, nichts
+  überschreiben, nichts mit `git add -A` einsammeln.
+- **Keine erfundenen Genauigkeiten, Confidence-Werte oder Nutzerstudien.**
+- **Keine Fotos** aus dem privaten Bestand in das Repository, in Supabase oder
+  in öffentliche Logs schreiben.
+- **Kein automatischer Besitz.** Ein visueller Treffer ist ein Kandidat, kein
+  bestätigter Bestand.
+- **Scope eng halten:** nur Scanner-Datenfluss, DINOv2-Pilot mit neun Karten und
+  wiederholte Kandidatenvorschläge.
 
-## Evidence already established
+## Schritt 0 — Arbeitsstand prüfen und sichern
 
-- `tests/e2e/scanner-live-fallback.spec.ts` is marked `test.fixme`. It encodes
-  the intended contract for the Home/dock photo fallback. Verified on
-  14 November 2026: with `.fixme` removed, the test fails at
-  `expect(live).toBeVisible()` because the sheet has already closed; the chosen
-  photo is lost.
-- `openLiveScannerFlow` in `src/ui/add-cards.ts` (~line 2549) creates a hidden
-  `fallbackCamera` file input and clicks it, but never attaches a `change`
-  handler. Closing the live sheet calls `onClose`, which removes the input
-  before the native picker returns. A selected photo is silently lost.
-- The add-dialog `camera` input at `src/ui/add-cards.ts` (~line 1094) does have
-  a change handler. Do not “fix” the wrong input.
-- Headless Chromium has no camera. `Kamera nicht verfügbar` is an expected
-  branch, not proof of a product failure. The fallback path is the bug.
-- The visual pilot has only nine local reference printings and is opt-in. No
-  ONNX visual model or complete index is shipped for general recognition.
-- The owner’s 34 private binder photos are not in the repository. Never publish
-  them or claim a recognition rate from them.
-
-## Scanner contract
-
-1. One scanner surface for Home, the Scan dock, and the add dialog. Choosing a
-   photo from a denied/unavailable camera must keep a usable path to review.
-2. Queue the capture before OCR. The camera loop must not wait for OCR, model
-   warmup, or catalog requests.
-3. Auto-capture only with a stable, plausible card quad. Blank scenes, squares,
-   and landscape frames must not trigger a shutter.
-4. Preserve the printed identity: source ID + language + set ID + collector
-   number (leading zeros and printed fraction) + confirmed variant. Name or
-   image similarity alone is not a printing.
-5. Uncertain candidates remain candidates. Never auto-add inventory. Never turn
-   a cosine score into a probability.
-6. Every failure is recoverable and distinct: unreadable text, no catalog match,
-   offline, model unavailable, timeout, queue full.
-7. No photo bytes in IndexedDB, Supabase, or exports. No ownership without
-   explicit confirmation.
-
-## Ordered tasks
-
-### 0. Green baseline and exact reproduction
-
-Run `npm run check`. Then remove `.fixme` from
-`tests/e2e/scanner-live-fallback.spec.ts` and run it:
+Führe zuerst aus und dokumentiere die Ausgabe:
 
 ```bash
-npx playwright test tests/e2e/scanner-live-fallback.spec.ts --project=chromium
-````
+git status --short
+git diff
+git diff --stat
+git diff --cached
+git stash list
+git ls-files --others --exclude-standard
+git log --oneline -5
+```
 
-Record the exact failure. If the failure is ambiguous, use the Playwright MCP
-mobile session and a `getUserMedia` mock to reproduce it manually. Do not start
-by rewriting the scanner.
+Wenn es uncommittete Änderungen gibt:
 
-### 1. Fix the Home/dock photo fallback lifecycle
+- Sie gehören wahrscheinlich dem Repository-Inhaber. Nicht verwerfen.
+- Sichere sie sichtbar, z. B. mit einem WIP-Commit auf einem eigenen Branch
+  oder mit `git stash push -u -m "WIP vor Scanner-Diagnose"`.
+- Dokumentiere im Report, was gesichert wurde und wie es wiederhergestellt
+  werden kann.
+- Frage nach, bevor du fremde Änderungen in deinen Branch übernimmst.
 
-Choose the UX that matches the existing live scanner: keep the live sheet open,
-queue the selected photo(s) as pending captures, update the review summary, and
-open the add dialog only through “Ergebnisse prüfen (n)”.
+Dann:
 
-Requirements:
+```bash
+git fetch origin
+git switch -c fix/scanner-dinov2-candidates origin/master
+```
 
-- Attach a real `change` handler to `fallbackCamera`.
-- Do not remove the input while the native picker is open.
-- Reset `input.value` after reading files so the same photo can be chosen again.
-- Queue each file as `{ file, aligned: false }`; the existing crop confirmation
-  remains the place to correct alignment.
-- Respect `MAX_PENDING_SCAN_CAPTURES`.
-- Handle cancel (no files) without closing or losing the scanner.
-- Make the test pass without weakening its assertions.
+Falls der Branch bereits existiert, wähle einen eindeutigen Namen und notiere
+ihn. Arbeite nicht auf `master`.
 
-Acceptance: the red test is green; no ownership is created before confirmation;
-the live sheet remains usable after cancel.
+## Schritt 1 — Plan und Scanner-Dokumentation lesen
 
-### 2. Cover the Home/dock live-camera lifecycle
+Lies zuerst:
 
-Reuse the deterministic canvas `MediaStream` rig in
-`tests/e2e/live-scan-battle.spec.ts`. Add or extend a test that opens the
-scanner from `#home` (not only from the add dialog) and verifies:
+1. `docs/plans/2026-11-14-scanner-p0-recovery-implementation.md`
+2. `docs/scanner.md`
+3. `docs/scanner-quality.md`
+4. `docs/visual-recognition.md`
+5. `docs/p08-visual-retrieval.md`
+6. `docs/beta-diagnostics.md`
+7. `AGENTS.md` und `PRODUCT.md`
 
-- a stable card frame reaches the review queue;
-- a blank/square/landscape frame does not auto-capture;
-- manual capture queues one photo;
-- closing the sheet stops every acquired track;
-- the queue count and “Ergebnisse prüfen” stay accurate.
+Nutze zusätzlich den Skill `e-binder-scanner`. Lade keine Design-/Motion-Skills
+für diese Aufgabe.
 
-Keep OCR stubbed for these tests. They prove lifecycle, not accuracy.
+## Schritt 2 — Scanner-Datenfluss vollständig kartieren
 
-### 3. Verify the OCR/catalog path with a real fixture
+Erstelle im Report eine nachvollziehbare Kette vom Eingang bis zur Bestätigung.
+Mindestens diese Dateien und ihre Verantwortlichkeiten prüfen:
 
-Use `public/assets/cards/*.webp` and the existing OCR worker. Verify:
+- `src/ui/live-scan.ts` — Live-Kamera, Ecken, Capture-Latch, Queue, Review.
+- `src/ui/live-page-scan.ts` — Binderseiten-Kamera.
+- `src/ui/page-scan.ts` — Seitenzuschnitt, 3×3-Prüfung, Import.
+- `src/ui/add-cards.ts` — Add-Dialog, Datei-/Kamera-Inputs,
+  `openLiveScannerFlow`, OCR/Katalog/Review.
+- `src/data/recognize.ts` — PaddleOCR-Worker, Sprachmodell, Timeout.
+- `src/data/vision-worker.ts` — lokaler OCR-Worker.
+- `src/data/visual-search.ts` — optionaler visueller Suchpfad/Manifest.
+- `src/data/visual-worker.ts` — visueller Worker.
+- `src/data/scan-visual-shortlist.ts` — Validierung visueller Treffer.
+- `src/data/scan-auto-resolve.ts` — OCR-/Nummern-/Katalogauflösung.
+- `src/data/scan-evidence-fusion.ts` — Fusion aus OCR, Katalog und Vision.
+- `src/domain/visual-retrieval.ts` — Top-K und Kandidatenlogik.
+- `src/domain/live-ocr-policy.ts` — Hot Zones, Budget, Retry-Reihenfolge.
+- `src/domain/scan-session-guardrails.ts` — Queue-Limit und Zustände.
+- `src/data/visual-beta.ts` — expliziter Opt-in und neun Referenzen.
 
-- a readable card opens the review with a candidate or an explicit recovery;
-- no forced nine-card visual shortlist appears when the visual pilot is off;
-- if the visual pilot is on, its limited coverage is labeled and OCR/catalog
-  fallback remains available;
-- unreadable text and no-match states are distinct;
-- the printed number, fraction, language, and set are preserved;
-- no ownership is added until confirmation.
+Für jede Stufe dokumentieren:
 
-Inspect `scan-auto-resolve.ts`, `scan-evidence-fusion.ts`,
-`scan-visual-shortlist.ts`, and `live-ocr-policy.ts` before changing ranking.
-Do not add a new model, index, or cloud service in this session.
+- Eingabe und Ausgabe,
+- Timeout und Abbruchpfad,
+- Cache-/Service-Worker-Verhalten,
+- Feature-Flag und Standardzustand,
+- Fehlerzustand (kein Text, kein Treffer, offline, Modell fehlt),
+- ob daraus ein sichtbarer Kandidat oder nur ein Hinweis wird.
 
-### 4. Real-device check
+Markiere jede Stelle, an der ein visueller Nähe-Treffer ohne exakte
+Set-/Nummern-/Sprachbestätigung als Kandidat sichtbar werden kann.
 
-On a physical iPhone over HTTPS or the installed PWA, verify:
+## Schritt 3 — DINOv2-Pilotindex mit neun Karten analysieren
 
-1. permission denied → visible photo fallback → photo selected → review opens;
-2. permission granted → live preview → manual capture → review opens;
-3. auto-capture on a stable card, no capture on a blank scene;
-4. close the camera → tracks stop, no ownership changes;
-5. confirm one card → name/number/language remain correct;
-6. reject/close the review → collection unchanged.
+Beantworte mit Datei- und Zeilenbelegen:
 
-If no physical device is available, say so explicitly and do not claim a
-real-device pass.
+1. Wo liegen Modell, Manifest, Index und Version/Hash-Prüfung?
+2. Wie viele Referenzen sind tatsächlich enthalten, und welche Sprachen/Sets
+   decken sie ab?
+3. Wann wird der Pilot aktiviert? Nur über `visualBetaEnabled()`, über einen
+   Default, über einen Cache oder über einen stillen Fallback?
+4. Was passiert bei fehlendem, veraltetem oder nicht zusammenpassendem
+   Modell/Index? Bleibt OCR funktionsfähig?
+5. Wie werden Top-K-Nachbarn zu echten Printings aufgelöst? Welche Prüfungen
+   erzwingt `scan-visual-shortlist.ts`?
+6. Kann ein Nearest Neighbor aus den neun Karten als „Vorschlag“ erscheinen,
+   obwohl die fotografierte Karte nicht im Index ist?
+7. Wird die begrenzte Abdeckung für Nutzer sichtbar erklärt, oder wirkt der
+   Pilot wie allgemeine Erkennung?
 
-### 5. Regression and delivery
+Wichtig: Der Pilot ist ein begrenzter, opt-in Test mit neun verifizierten
+Referenzen. Seine Existenz ist kein Beweis für allgemeine Erkennungsqualität.
 
-Run:
+## Schritt 4 — Wiederholte Kandidatenvorschläge reproduzieren
+
+Prüfe die folgenden Hypothesen, aber setze keine davon ungeprüft voraus:
+
+- Forced Nearest Neighbor aus dem neun Karten umfassenden Pilotindex bei
+  fehlender Abdeckung.
+- Veralteter Service-Worker-, Manifest- oder Index-Cache.
+- Default-/Fallback-Karte oder ein einmalig gesetzter Kandidatenzustand.
+- Zustands-Leak zwischen Aufnahmen, Sitzungen oder Review-Schritten.
+- Gleiches Artwork, gleiche Sprache, Reprints oder fehlende Druckvariante.
+- Ranking ignoriert exakte Nummer, Fraktion, Sprache oder Set.
+- OCR liefert keinen Text, visuelle Kandidaten werden trotzdem gezeigt.
+- Doppelte Aufnahmen werden nicht als Duplikat erkannt.
+- Modell-/Index-Version passt nicht zusammen, wird aber nicht verworfen.
+- Der Pilot ist aktiviert, ohne dass die begrenzte Abdeckung gekennzeichnet ist.
+
+Reproduziere mit den vorhandenen Mitteln:
+
+- `public/assets/cards/*.webp` als lokale Kartenfixtures.
+- Die deterministische Canvas-`MediaStream`-Kamera aus
+  `tests/e2e/live-scan-battle.spec.ts`.
+- Playwright MCP (`playwright-mobile`) für mobile Bedienung.
+- Chrome DevTools MCP für Console, Network, Emulation und Performance-Spuren.
+- `getUserMedia`-Mock für Kamera-verweigert/fehlt.
+- Datei-Upload für den Foto-Fallback.
+
+Für jeden reproduzierbaren Fehler eine Zeile in einer Tabelle:
+
+| Feld          | Inhalt                       |
+| ------------- | ---------------------------- |
+| Build/SHA     | exakter Commit               |
+| Browser/Gerät | z. B. iPhone 13 Emulation    |
+| Feature-Flag  | DINOv2-Pilot an/aus          |
+| Fixture       | Karten-ID/Datei              |
+| Schritte      | minimaler Ablauf             |
+| Erwartet      | korrektes Verhalten          |
+| Tatsächlich   | beobachtetes Verhalten       |
+| OCR-Text      | falls verfügbar              |
+| Kandidaten    | IDs/Rangfolge                |
+| Evidenz       | Screenshot/Trace/Console     |
+| Ursache       | Datei:Zeile, nur wenn belegt |
+
+Keine privaten Fotos, keine personenbezogenen Daten und keine Zugangsdaten in
+den Report aufnehmen.
+
+## Schritt 5 — Root Cause und minimale Korrektur
+
+Wenn ein Fehler reproduzierbar und die Ursache belegt ist:
+
+1. Schreibe zuerst einen fehlschlagenden Unit- oder E2E-Test, der genau diesen
+   Fehler festhält.
+2. Behebe nur die Ursache im Scanner-Datenfluss.
+3. Kein neues Modell, kein neuer Index, keine neue Abhängigkeit, keine
+   UI-Umgestaltung.
+4. Bestehende Unsicherheit bleibt sichtbar: Kandidat bleibt Kandidat, keine
+   automatische Besitzübernahme, keine erfundene Confidence.
+
+Wenn keine sichere Korrektur möglich ist, liefere einen Diagnose-Draft-PR mit
+reproduzierbaren Fehlern, Ursachen und einem konkreten, aber nicht
+implementierten Vorschlag. Keine riskante „Heilung“ auf Verdacht.
+
+## Schritt 6 — Tests
+
+Mindestens ausführen:
 
 ```bash
 npm run check
-npx playwright test tests/e2e/scanner-live-fallback.spec.ts --project=chromium
 npx playwright test tests/e2e/live-scan.spec.ts --project=chromium --project=mobile-chromium
 npx playwright test tests/e2e/live-scan-battle.spec.ts --project=chromium
 npx playwright test tests/e2e/scan-zero-match-recovery.spec.ts --project=chromium
-npx playwright test tests/e2e/binder-page-scan.spec.ts --project=chromium
-npx playwright test tests/e2e/binder-page-rail.spec.ts --project=chromium
+npx playwright test tests/e2e/scanner-live-fallback.spec.ts --project=chromium
 ```
 
-Then update `docs/scanner.md` with what was actually verified and what remains
-unverified. Write `docs/reviews/YYYY-MM-DD-scanner-report.md`. Overwrite this
-file with the next focused prompt.
+Hinweise:
 
-## Acceptance criteria
+- `tests/e2e/scanner-live-fallback.spec.ts` ist derzeit `test.fixme` und gehört
+  zu einem separaten Fallback-Bug. Nur anfassen, wenn er für die Reproduktion
+  wirklich relevant ist; Scope nicht vermischen.
+- `live-scan-battle.spec.ts` beweist Kamera-/Queue-Lifecycle, nicht
+  Erkennungsgenauigkeit.
+- Der Codespace hat ca. 8 GB RAM. Wenn Chromium mit `Target crashed` abbricht,
+  zuerst überzählige Headless-Chrome-Instanzen/MCP-Seiten schließen und den
+  Test sauber wiederholen.
+- Neue Tests müssen vor dem Fix rot und danach grün sein. Das im Report
+  belegen.
 
-- The Home/dock fallback regression test passes.
-- Existing scanner specs pass on Chromium and mobile Chromium; WebKit where the
-  test is supported.
-- `npm run check` passes.
-- No photo persistence and no unconfirmed ownership.
-- No forced visual shortlist and no invented confidence.
-- The report distinguishes automated lifecycle tests from real recognition
-  accuracy, and states whether a physical iPhone was tested.
+## Schritt 7 — Report und Draft-PR
 
-## Do not change in this session
+Erstelle `docs/reviews/YYYY-MM-DD-scanner-dinov2-diagnosis.md` mit:
 
-- The Rare Room V2 palette, typography, layout, or motion system.
+- Auftrag und Scope,
+- geprüftem Build/SHA und Testumgebung,
+- Datenflusskarte,
+- DINOv2-Pilot-Befund (neun Referenzen, Abdeckung, Aktivierung),
+- Reproduktionstabelle,
+- Root Causes mit Datei:Zeile,
+- minimaler Korrektur und Testbelegen,
+- ausdrücklich ungeprüften Punkten,
+- Risiken und offenen Fragen.
+
+Dann:
+
+```bash
+git status --short
+git diff --stat
+```
+
+Nur Scanner-Dateien, Tests und den Report stagen. Kein `git add -A`.
+
+Commit auf dem Feature-Branch, dann Draft-PR:
+
+```bash
+gh pr create --draft --base master --head fix/scanner-dinov2-candidates \
+  --title "fix(scanner): diagnose DINOv2 pilot candidate repetition" \
+  --body-file docs/reviews/YYYY-MM-DD-scanner-dinov2-diagnosis.md
+```
+
+Kein Merge, kein Deployment, keine Supabase-Migration. Der PR bleibt Draft, bis
+der Inhaber ausdrücklich freigibt.
+
+## Akzeptanzkriterien
+
+- Mindestens ein reproduzierbarer Fehler ist mit exakten Schritten, Build/SHA
+  und Evidenz dokumentiert.
+- Die Ursache ist mit Datei:Zeile belegt, nicht nur vermutet.
+- Der DINOv2-Pilot mit neun Karten ist in seiner Abdeckung, Aktivierung und
+  Fallback-Wirkung erklärt.
+- Es gibt einen fehlschlagenden Regressionstest und, falls sicher, eine
+  minimale Korrektur mit grünem Test.
+- `npm run check` und die relevanten Scanner-Specs sind ausgeführt; Ergebnisse
+  stehen im Report.
+- Keine Änderung auf `master`, keine Supabase-Migration, kein Deployment.
+- Ein Draft-PR existiert; er ist nicht gemerged und nicht deployed.
+- Keine erfundenen Genauigkeiten, keine privaten Fotos, kein automatischer
+  Besitz.
+
+## Nicht ändern
+
+- UI, Layout, Marke, Motion, Farbsystem.
 - `public/E-Binder_Brand-Lab_v2.html`.
-- The privacy/data model, confirmation gates, 16 px inputs, reduced motion, or
-  44 px touch targets.
-- The exact 3×3 pocket geometry or the no-framework decision.
-- The visual-index licensing/coverage plan. This session fixes the scanner path;
-  a new model or full index is a separate project.
+- Datenschutz-/Datenmodell, Bestätigungsgates, 16-px-Inputs,
+  Reduced-Motion, 44-px-Touchziele.
+- Exakte 3×3-Taschengeometrie, No-Framework-Entscheidung.
+- Modellumfang, Indexumfang, neue Abhängigkeiten.
+- Supabase-Schema, RLS, Migrationen, Deployment.
 
-## Session completion protocol
+## Abschluss
 
-1. Run the commands above and report actual results.
-2. Update `docs/scanner.md` and write the scanner report.
-3. Stage only scanner source, tests, and docs. Never `git add -A`.
-4. Commit with a clear message, fetch `origin/master`, rebase if it moved,
-   re-run affected checks, and push without force.
-5. Verify the GitHub Actions run and the deployed page. Name any external
-   failure.
-6. Print the next prompt in the final response.
+Berichte am Ende:
 
-```
+- Branch und Commit,
+- Draft-PR-URL,
+- welche Fehler reproduziert wurden,
+- welche Ursache belegt ist,
+- welche Tests rot/grün sind,
+- was ausdrücklich nicht geprüft oder nicht behoben wurde.
 
-## Why this replaces the previous prompt
-
-The previous handoff mixed scanner recovery with a broad Apple-UI/motion
-roadmap. This prompt starts from one reproducible failure, defines the scanner
-contract, and sequences the work so the next session can finish a meaningful,
-verifiable scanner improvement instead of producing another plan.
-```
+Keine Behauptung, der Scanner sei „fertig“ oder „rock solid“, solange keine
+unabhängige, reproduzierbare Evidenz dafür vorliegt.
