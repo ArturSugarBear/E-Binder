@@ -132,7 +132,9 @@ test('Home and Profile actions reach the named task and cancellation preserves a
       exact: true,
     })
     .click();
-  await main.getByRole('button', { name: 'Meine Binder', exact: true }).click();
+  await main
+    .getByRole('button', { name: 'Sammlung öffnen', exact: true })
+    .click();
   await expect(page).toHaveURL(/#binder$/);
   await expect(
     page.getByRole('button', { name: 'Ersten Binder anlegen' }),

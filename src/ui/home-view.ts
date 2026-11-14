@@ -16,49 +16,115 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     (capture) => capture.status === 'pending',
   ).length;
 
-  const hero = el(
-    'div',
-    'w-home-hero-copy',
-    el('p', 'w-eyebrow', 'Rare Room · Dein Sammelraum'),
-    el(
-      'h1',
-      '',
-      copies ? 'Deine Sammlung. Deine Geschichte.' : 'Dein Fund. Dein Moment.',
-    ),
-    el(
-      'p',
-      'w-home-intro',
-      copies
-        ? `${copies} Karten in deiner Sammlung. Jede verdient ihren Platz.`
-        : 'Scanne deine erste Karte, bestätige ihre Ausgabe und gestalte deinen Binder.',
-    ),
-    el(
-      'div',
-      'w-home-hero-actions',
-      action(
-        'Karte live scannen',
-        () => ctx.openLiveScan(),
-        'primary',
-        'camera',
-      ),
-      action(
-        'Meine Binder',
-        () => ctx.navigate('binder'),
-        'secondary',
-        'binder',
-      ),
-    ),
+  const lastBinder =
+    ctx.state.binders.find((binder) => binder.id === ctx.state.lastBinderId) ??
+    ctx.state.binders[0];
+  const lastPage =
+    lastBinder?.pages.find((page) => page.id === ctx.state.lastPageId) ??
+    lastBinder?.pages[0];
+  const continueHolding = lastPage?.slots
+    .map((slot) =>
+      slot && 'holdingId' in slot && slot.holdingId
+        ? owned.find((holding) => holding.id === slot.holdingId)
+        : undefined,
+    )
+    .find(Boolean);
+  const scan = action(
+    'Karte scannen',
+    () => ctx.openLiveScan(),
+    'primary',
+    'camera',
   );
-  const preview = el('div', 'w-home-art');
-  for (const [index, holding] of [...owned]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 3)
-    .entries()) {
-    const art = el('div', 'w-home-art-card', ctx.images.artwork(holding.card));
-    art.dataset.position = String(index);
-    preview.append(art);
-  }
-  if (!preview.childElementCount) {
+  const openCollection = action(
+    'Sammlung öffnen',
+    () => ctx.navigate('binder'),
+    'secondary',
+    'binder',
+  );
+
+  if (copies) {
+    // Returning collectors see their own collection first, not marketing.
+    root.append(
+      el(
+        'header',
+        'w-home-returning',
+        el('p', 'w-eyebrow', 'E-Binder · Deine Sammlung'),
+        el('h1', '', 'Weiter sammeln'),
+        el(
+          'p',
+          'w-home-intro',
+          `${copies} Karten · ${ctx.state.binders.length} Binder${
+            pending ? ` · ${pending} offene Scans` : ''
+          }`,
+        ),
+        el('div', 'w-home-hero-actions', scan, openCollection),
+      ),
+    );
+    if (lastBinder && lastPage) {
+      const pageIndex = lastBinder.pages.indexOf(lastPage);
+      const continueButton = action(
+        `Weiter: ${lastBinder.name} · Seite ${pageIndex + 1}`,
+        () => ctx.navigate('binder'),
+        'card',
+      );
+      continueButton.classList.add('w-home-continue');
+      continueButton.replaceChildren(
+        el(
+          'span',
+          'w-home-continue-art',
+          continueHolding
+            ? ctx.images.artwork(continueHolding.card)
+            : el('span', 'art-fallback', '3×3'),
+        ),
+        el(
+          'span',
+          'w-home-continue-copy',
+          el('strong', '', lastBinder.name),
+          el(
+            'small',
+            '',
+            `Seite ${pageIndex + 1} · ${
+              lastPage.slots.filter((slot) => slot?.kind === 'owned').length
+            } belegt`,
+          ),
+        ),
+        el('span', 'w-home-quick-arrow', icon('arrow')),
+      );
+      root.append(continueButton);
+    }
+  } else {
+    const hero = el(
+      'div',
+      'w-home-hero-copy',
+      el('p', 'w-eyebrow', 'E-Binder · Dein Sammelraum'),
+      el('h1', '', 'Dein Fund. Dein Moment.'),
+      el(
+        'p',
+        'w-home-intro',
+        'Scanne deine erste Karte, bestätige ihre Ausgabe und gestalte deinen Binder.',
+      ),
+      el(
+        'div',
+        'w-home-hero-actions',
+        action(
+          'Karte live scannen',
+          () => ctx.openLiveScan(),
+          'primary',
+          'camera',
+        ),
+        action(
+          'Demo ansehen',
+          () => {
+            void ctx.switchMode('demo').then(() => {
+              if (ctx.state.mode === 'demo') ctx.navigate('binder');
+            });
+          },
+          'secondary',
+          'binder',
+        ),
+      ),
+    );
+    const preview = el('div', 'w-home-art');
     for (const [index, card] of ctx.catalog.slice(0, 3).entries()) {
       const art = el('div', 'w-home-art-card', ctx.images.artwork(card));
       art.dataset.position = String(index);
@@ -72,8 +138,8 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       );
       preview.append(note);
     }
+    root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
   }
-  root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
 
   // The collection leads before marketing: recent cards come straight after
   // the hero. Onboarding stays a first-run section only.
@@ -148,19 +214,11 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
               : ctx.navigate('entdecken'),
         ),
         quickAction(
-          copies ? 'Binder öffnen' : 'Demo-Binder testen',
+          copies ? 'Binder öffnen' : 'Sammlung öffnen',
           copies
             ? `${pages} Seiten weitergestalten`
-            : 'Erst ausprobieren, ohne eigene Karten zu speichern',
-          () => {
-            if (copies) {
-              ctx.navigate('binder');
-              return;
-            }
-            void ctx.switchMode('demo').then(() => {
-              if (ctx.state.mode === 'demo') ctx.navigate('binder');
-            });
-          },
+            : 'Lege deinen ersten Binder an',
+          () => ctx.navigate('binder'),
         ),
       ),
     ),

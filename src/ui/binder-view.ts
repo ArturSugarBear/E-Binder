@@ -376,13 +376,36 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     );
     pendingPageSwipe = 0;
   }
-  enableSwipe(paper, (step) => {
-    if (document.querySelector('.w-dialog[open]')) return;
-    const adjacent = binder.pages[pageIndex + step];
-    if (!adjacent) return;
-    pendingPageSwipe = step > 0 ? 1 : -1;
-    if (!choosePage(adjacent.id)) pendingPageSwipe = 0;
-  });
+  const reduceMotion = () =>
+    matchMedia('(prefers-reduced-motion: reduce)').matches;
+  enableSwipe(
+    paper,
+    (step) => {
+      if (document.querySelector('.w-dialog[open]')) return;
+      const adjacent = binder.pages[pageIndex + step];
+      if (!adjacent) return;
+      pendingPageSwipe = step > 0 ? 1 : -1;
+      if (!choosePage(adjacent.id)) pendingPageSwipe = 0;
+    },
+    {
+      onDrag: (offset) => {
+        if (reduceMotion()) return;
+        if (offset === null) {
+          paper.classList.remove('is-swiping');
+          paper.classList.add('is-swipe-settling');
+          paper.style.transform = '';
+          window.setTimeout(
+            () => paper.classList.remove('is-swipe-settling'),
+            220,
+          );
+          return;
+        }
+        paper.classList.add('is-swiping');
+        paper.classList.remove('is-swipe-settling');
+        paper.style.transform = `translateX(${offset}px)`;
+      },
+    },
+  );
   const assembly = action(
     page.assembled ? 'Aufbau-Markierung aufheben' : 'Als aufgebaut markieren',
     () => {
@@ -537,9 +560,9 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'div',
     'w-binder-workspace',
     title,
-    toolbar,
     paper,
     pageRail,
+    toolbar,
     info,
   );
   root.append(el('div', 'w-binder-layout', sidebar, workspace));

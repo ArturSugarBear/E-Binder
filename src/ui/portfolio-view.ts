@@ -148,7 +148,7 @@ export function createPortfolioView(ctx: WorkspaceContext) {
       el(
         'div',
         'w-portfolio-hero-copy',
-        el('p', 'w-eyebrow', 'Rare Room / Dein Sammelwert'),
+        el('p', 'w-eyebrow', 'E-Binder / Dein Sammelwert'),
         el('h1', '', 'Dein Portfolio'),
         el(
           'p',

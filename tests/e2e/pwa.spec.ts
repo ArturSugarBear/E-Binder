@@ -115,7 +115,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   ).toHaveAttribute('id', 'workspace-mobile-add');
   await expect(
     navigation.locator(':scope > a, :scope > button').nth(3),
-  ).toContainText('Binder');
+  ).toContainText('Sammlung');
   await expect(
     navigation.locator(':scope > a, :scope > button').nth(4),
   ).toContainText('Profil');
@@ -135,9 +135,9 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
     .click();
   await expect(page.locator('dialog.w-dialog[open]')).toHaveCount(0);
 
-  await navigation.getByRole('link', { name: 'Binder' }).click();
+  await navigation.getByRole('link', { name: 'Sammlung' }).click();
   await expect(
-    navigation.getByRole('link', { name: 'Binder' }),
+    navigation.getByRole('link', { name: 'Sammlung' }),
   ).toHaveAttribute('aria-current', 'page');
   await expect(
     page.getByRole('heading', { name: 'Deine Binder', exact: true }),
@@ -160,7 +160,9 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Wunschliste' }).click();
   await expect(page).toHaveURL(/#wunschliste$/);
-  await expect(navigation.getByRole('link', { name: 'Binder' })).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Sammlung' }),
+  ).toBeVisible();
   expect(
     await navigation.evaluate((element) => getComputedStyle(element).position),
   ).toBe('fixed');

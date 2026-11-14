@@ -77,6 +77,18 @@
         "timeout": {
           "startup": 120000
         }
+      },
+      "supabase-e-binder": {
+        "type": "remote",
+        "url": "https://mcp.supabase.com/mcp?project_ref=hmgydjfkvehvdwvdftca&read_only=true&features=database,docs,storage",
+        "enabled": true,
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:SUPABASE_ACCESS_TOKEN}"
+        },
+        "timeout": {
+          "startup": 120000
+        }
       }
     }
   }

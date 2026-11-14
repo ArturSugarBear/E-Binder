@@ -16,7 +16,7 @@ People who collect because cards carry memories, nostalgia, favorite artists, ch
 
 ## Brand promise
 
-"Dein Fund. Dein Moment." — Rare Room V2, selected production identity.
+"Dein Fund. Dein Moment." — E-Binder, the active production identity. Rare Room V2 is historical context, superseded by owner feedback on 14 November 2026.
 Memorable, independent, warm, collectible. A small art-directed object, not a crypto-trading dashboard or generic AI admin panel.
 
 ## Existing frustrations — authoritative feedback
@@ -38,4 +38,4 @@ Black-on-cyan developer dashboards; glowing neon buttons; fake holographic rainb
 
 ## Selected identity
 
-Rare Room V2 (B) is explicitly selected for production. Use `public/E-Binder_Brand-Lab_v2.html` as the authoritative vector and palette source, superseding the older proposals and Midnight/Cyan. Preserve the source HTML unchanged.
+E-Binder is the active production identity. Keep the existing Lime/surface tokens and the current E-Binder wordmark; do not invent a new logo. `public/E-Binder_Brand-Lab_v2.html` remains an unchanged historical vector/palette source and is not the active brand name. The Astra review (2026-11-14) takes precedence for the visible name.

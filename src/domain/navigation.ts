@@ -32,3 +32,8 @@ export function swipeDirection(dx: number, dy: number): -1 | 0 | 1 {
       ? 1
       : -1;
 }
+
+/** Bounded visual follow for a page/card drag, so it cannot leave the screen. */
+export function swipeOffset(dx: number, limit = 120): number {
+  return Math.max(-limit, Math.min(limit, dx * 0.35));
+}
