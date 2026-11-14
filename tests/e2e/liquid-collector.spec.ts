@@ -74,20 +74,14 @@ test('camera scanner switches modes without writing inventory', async ({
     name: 'Karte live scannen',
   });
   await expect(returned).toBeVisible();
-  // The underlying add-card sheet is preserved but must not create a
-  // second visible modal or compete with the live camera controls.
-  const parent = page.locator('dialog.w-dialog', {
-    has: page.getByRole('heading', {
-      name: 'Karten hinzufügen',
-      includeHidden: true,
-    }),
-  });
-  await expect(parent).toHaveAttribute('inert', '');
+  // One scanner surface: the single scanner reopens directly; no stacked
+  // add-card dialog competes with the live camera controls.
+  await expect(page.locator('dialog.w-dialog[open]')).toHaveCount(1);
   await returned
     .getByRole('button', { name: 'Karte live scannen schließen' })
     .click();
   await expect(
     page.getByRole('dialog', { name: 'Karten hinzufügen' }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await expect(page.locator('.w-owned-grid button')).toHaveCount(0);
 });

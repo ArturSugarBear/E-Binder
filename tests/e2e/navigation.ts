@@ -23,7 +23,7 @@ export async function openVault(
     await click(tab);
   } else {
     const desktop = page.locator('.w-navigation').getByRole('link', {
-      name: destination === 'sammlung' ? 'Sammlung' : 'Meine Binder',
+      name: 'Meine Binder',
       exact: true,
     });
     if (await desktop.isVisible()) await click(desktop);
@@ -31,7 +31,7 @@ export async function openVault(
       await click(
         page
           .locator('.w-mobile-nav')
-          .getByRole('link', { name: 'Sammlung', exact: true }),
+          .getByRole('link', { name: 'Binder', exact: true }),
       );
     if (destination !== 'binder' && !page.url().endsWith(`#${destination}`))
       await click(

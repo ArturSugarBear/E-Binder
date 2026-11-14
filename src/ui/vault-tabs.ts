@@ -17,7 +17,9 @@ export function vaultTabs(
   for (const [route, caption] of tabs) {
     const link = el('a', 'w-vault-tab', caption);
     link.href = `#${route}`;
-    link.setAttribute('aria-current', active === route ? 'page' : 'false');
+    // The dock/header carries the single aria-current="page" of the screen;
+    // the segmented vault control marks its selected segment separately.
+    link.setAttribute('aria-current', active === route ? 'true' : 'false');
     link.addEventListener('click', (event) => {
       event.preventDefault();
       ctx.navigate(route);

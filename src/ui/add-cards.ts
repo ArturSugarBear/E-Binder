@@ -48,6 +48,7 @@ import {
 import { alignPhoto } from './photo-crop';
 import { openLiveScanner } from './live-scan';
 import {
+  MAX_PENDING_SCAN_CAPTURES,
   pendingScanCount,
   scanQueueBlocker,
   type LiveCaptureOutcome,
@@ -71,6 +72,7 @@ import {
   action,
   choices,
   check,
+  confirmSheet,
   el,
   errorText,
   field,
@@ -166,7 +168,9 @@ export function openAddCards(
   });
   let selected = options.card;
   let captureId = options.captureId;
-  let reviewingLiveQueue = Boolean(options.live);
+  let reviewingLiveQueue = Boolean(
+    options.live || options.liveCaptures?.length,
+  );
   // The normal Add dialog remains available if the live camera is closed
   // before any result is queued; quick review begins only on Results.
   // Every photo belongs to the current sheet, not to a stale saved scan history.
@@ -588,12 +592,13 @@ export function openAddCards(
       const clear = action(
         `Alle offenen Aufnahmen entfernen (${open.length})`,
         () => {
-          if (
-            window.confirm(
-              `${open.length} offene Erkennungseinträge entfernen? Bereits bestätigte Karten bleiben im Bestand.`,
-            )
-          )
-            discardCaptures(open.map((shot) => shot.id));
+          void confirmSheet(
+            'Offene Aufnahmen entfernen?',
+            `${open.length} offene Erkennungseinträge werden verworfen. Bereits bestätigte Karten bleiben im Bestand.`,
+            'Entfernen',
+          ).then((confirmed) => {
+            if (confirmed) discardCaptures(open.map((shot) => shot.id));
+          });
         },
         'secondary',
         'trash',
@@ -2492,14 +2497,86 @@ export function openAddCards(
     interrupt();
     browser.languageChanged();
   });
+  /**
+   * Captures buffered by the standalone scanner: the collector reviews and
+   * files them only after capture. No state changes before this point.
+   */
+  const reviewLiveCaptures = async (
+    buffered: { file: File; aligned: boolean }[],
+  ) => {
+    reviewingLiveQueue = true;
+    sheet.dialog.classList.add('w-quick-review');
+    for (const { file, aligned } of buffered) {
+      if (closed) return;
+      const existing = new Set(ctx.state.captures.map((shot) => shot.id));
+      const outcome = await addFiles([file], false, aligned, true);
+      if (outcome !== 'added') continue;
+      const shot = ctx.state.captures.find(
+        (item) => !existing.has(item.id) && item.status !== 'confirmed',
+      );
+      if (shot)
+        startLiveOcr(shot.id, file, (_active, detail) => {
+          if (detail && !closed) tell(detail);
+        });
+    }
+    captureId = nextCurrentCapture();
+    showQueue();
+    showCapture();
+    const shot = capture();
+    if (shot?.status === 'pending') await runOcr();
+  };
+
   showQueue();
   showCapture();
   if (selected) renderConfirmation();
   else if (capture()?.text)
     void renderScanReview(capture()!.text, capture()!.candidates);
   else results.replaceChildren();
-  if (options.live) takePhoto.click();
+  if (options.liveCaptures?.length)
+    void reviewLiveCaptures(options.liveCaptures);
   else if (options.photos) gallery.click();
   else if (options.browse || options.setId || options.artist) search.focus();
   else if (!options.card) scanBinder.focus({ preventScroll: true });
+}
+
+/**
+ * One scanner surface: Home and the dock open the live viewfinder directly.
+ * Photos stay in an on-device buffer until the collector opens the review,
+ * so closing the camera never changes any saved state.
+ */
+export function openLiveScannerFlow(ctx: WorkspaceContext): void {
+  const buffered: { file: File; aligned: boolean }[] = [];
+  const fallbackCamera = input('file');
+  fallbackCamera.accept = 'image/*';
+  fallbackCamera.setAttribute('capture', 'environment');
+  fallbackCamera.hidden = true;
+  document.body.append(fallbackCamera);
+  let finished = false;
+  const cleanup = () => fallbackCamera.remove();
+  const finishReview = () => {
+    if (finished) return;
+    finished = true;
+    cleanup();
+    if (!buffered.length) return;
+    ctx.openAdd({ liveCaptures: buffered });
+  };
+  openLiveScanner(
+    async (file, aligned) => {
+      if (buffered.length >= MAX_PENDING_SCAN_CAPTURES) return 'limit';
+      buffered.push({ file, aligned });
+      return 'added';
+    },
+    () => fallbackCamera.click(),
+    () => buffered.length,
+    () => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      ctx.openPageScan();
+    },
+    finishReview,
+    () => {
+      if (!finished) cleanup();
+    },
+  );
 }

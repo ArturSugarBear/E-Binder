@@ -23,7 +23,7 @@ import {
 import { openAccount } from './account-dialog';
 import { renderSharedBinder } from './shared-binder';
 import { loadCollection } from '../data/load-collection';
-import { openAddCards } from './add-cards';
+import { openAddCards, openLiveScannerFlow } from './add-cards';
 import { renderCollection, renderWishes, openHolding } from './collection-view';
 import { createDiscoverView } from './discover-view';
 import { renderBinders } from './binder-view';
@@ -33,7 +33,7 @@ import { renderHome } from './home-view';
 import { renderProfile } from './profile-view';
 import { vaultTabs } from './vault-tabs';
 import { openBackup } from './backup-dialog';
-import { action, el, errorText, message } from './workspace-dom';
+import { action, confirmSheet, el, errorText, message } from './workspace-dom';
 import type { WorkspaceContext } from './workspace-context';
 
 export async function startWorkspace(): Promise<void> {
@@ -221,10 +221,7 @@ export async function startWorkspace(): Promise<void> {
         const destination = link.dataset.workspaceRoute;
         const inVault = ['binder', 'sammlung', 'portfolio'].includes(route);
         const active =
-          destination === route ||
-          (destination === 'binder' &&
-            inVault &&
-            link.closest('.w-mobile-nav'));
+          destination === route || (destination === 'binder' && inVault);
         link.setAttribute('aria-current', active ? 'page' : 'false');
       }
       if (
@@ -298,6 +295,7 @@ export async function startWorkspace(): Promise<void> {
       window.scrollTo({ top: 0, behavior: 'instant' });
     },
     openAdd: (options) => openAddCards(ctx, options),
+    openLiveScan: () => openLiveScannerFlow(ctx),
     openPageScan: (binderId) => {
       void import('./page-scan')
         .then(({ openPageScanner }) => openPageScanner(ctx, binderId))
@@ -562,7 +560,7 @@ export async function startWorkspace(): Promise<void> {
     .addEventListener('click', () => ctx.openAdd());
   document
     .querySelector('#workspace-mobile-add')!
-    .addEventListener('click', () => ctx.openAdd({ live: true }));
+    .addEventListener('click', () => ctx.openLiveScan());
   document
     .querySelector('#workspace-backup')!
     .addEventListener('click', ctx.openBackup);
@@ -583,21 +581,22 @@ export async function startWorkspace(): Promise<void> {
           );
           return;
         }
-        if (
-          !window.confirm(
-            'Die Demokarten und Beispielseiten auf den Ausgangsstand zurücksetzen? Deine persönlichen Karten bleiben erhalten.',
+        void confirmSheet(
+          'Demo zurücksetzen?',
+          'Die Demokarten und Beispielseiten werden auf den Ausgangsstand zurückgesetzt. Deine persönlichen Karten bleiben erhalten.',
+          'Zurücksetzen',
+        ).then((confirmed) => {
+          if (
+            !confirmed ||
+            !ctx.commit('Demo neu gestartet', (state) => ({
+              ...demoState(ctx.chapters),
+              revision: state.revision + 1,
+            }))
           )
-        )
-          return;
-        if (
-          ctx.commit('Demo neu gestartet', (state) => ({
-            ...demoState(ctx.chapters),
-            revision: state.revision + 1,
-          }))
-        ) {
+            return;
           ctx.filters = { query: '', kind: 'all', order: 'recent' };
           ctx.navigate('binder');
-        }
+        });
       },
       'text',
     ),

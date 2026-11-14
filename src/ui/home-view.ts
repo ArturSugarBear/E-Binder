@@ -37,7 +37,7 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
       'w-home-hero-actions',
       action(
         'Karte live scannen',
-        () => ctx.openAdd({ live: true }),
+        () => ctx.openLiveScan(),
         'primary',
         'camera',
       ),
@@ -74,6 +74,44 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     }
   }
   root.append(el('header', 'w-home-hero w-glass-panel', hero, preview));
+
+  // The collection leads before marketing: recent cards come straight after
+  // the hero. Onboarding stays a first-run section only.
+  if (copies) {
+    const latest = el(
+      'section',
+      'w-home-section',
+      el(
+        'div',
+        'w-home-section-heading',
+        el('h2', '', 'Zuletzt hinzugefügt'),
+        action('Alle Karten', () => ctx.navigate('sammlung'), 'text', 'arrow'),
+      ),
+    );
+    const recent = el('div', 'w-home-recent');
+    for (const holding of [...owned]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 6)) {
+      const button = action(
+        `${holding.card.name} ansehen`,
+        () => ctx.openHolding(holding.id),
+        'card',
+      );
+      button.classList.add('w-home-recent-card');
+      button.replaceChildren(
+        el('div', 'w-home-recent-art', ctx.images.artwork(holding.card)),
+        el(
+          'div',
+          '',
+          el('strong', '', localizedCardName(holding.card)),
+          el('small', '', `${holding.card.setName} · ${holding.card.number}`),
+        ),
+      );
+      recent.append(button);
+    }
+    latest.append(recent);
+    root.append(latest);
+  }
 
   const firstPending = ctx.state.captures.find(
     (capture) => capture.status === 'pending',
@@ -170,40 +208,6 @@ export function renderHome(ctx: WorkspaceContext): HTMLElement {
     metric('Offene Scans', String(pending), 'Noch zu prüfen'),
   );
   root.append(stats);
-
-  const latest = el(
-    'section',
-    'w-home-section',
-    el(
-      'div',
-      'w-home-section-heading',
-      el('h2', '', 'Zuletzt hinzugefügt'),
-      action('Alle Karten', () => ctx.navigate('sammlung'), 'text', 'arrow'),
-    ),
-  );
-  const recent = el('div', 'w-home-recent');
-  for (const holding of [...owned]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 6)) {
-    const button = action(
-      `${holding.card.name} ansehen`,
-      () => ctx.openHolding(holding.id),
-      'card',
-    );
-    button.classList.add('w-home-recent-card');
-    button.replaceChildren(
-      el('div', 'w-home-recent-art', ctx.images.artwork(holding.card)),
-      el(
-        'div',
-        '',
-        el('strong', '', localizedCardName(holding.card)),
-        el('small', '', `${holding.card.setName} · ${holding.card.number}`),
-      ),
-    );
-    recent.append(button);
-  }
-  latest.append(recent);
-  root.append(latest);
 
   const groups = new Map<string, { name: string; count: number }>();
   for (const holding of owned) {

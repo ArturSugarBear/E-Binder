@@ -153,6 +153,7 @@ export function openLiveScanner(
   pendingCaptures: () => number,
   onSwitchToPage?: () => void,
   onReview?: () => void,
+  onClose?: () => void,
 ): void {
   const sheet = modal('Karte live scannen', true);
   sheet.dialog.classList.add('w-live-scan-dialog');
@@ -166,9 +167,13 @@ export function openLiveScanner(
     parent.inert = true;
   }
   sheet.onClose(() => {
-    if (!parent) return;
+    if (!parent) {
+      onClose?.();
+      return;
+    }
     parent.classList.remove('w-scan-parent-suspended');
     parent.inert = false;
+    onClose?.();
   });
   const video = el('video', 'w-live-video');
   video.autoplay = true;

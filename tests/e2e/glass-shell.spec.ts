@@ -111,10 +111,11 @@ test('Home and Profile actions reach the named task and cancellation preserves a
     expect(box!.width).toBeGreaterThanOrEqual(44);
     expect(box!.height).toBeGreaterThanOrEqual(44);
     await close.click();
-    await page
-      .getByRole('dialog', { name: 'Karten hinzufügen', exact: true })
-      .getByRole('button', { name: 'Karten hinzufügen schließen', exact: true })
-      .click();
+    // One scanner surface: closing returns to Home and restores focus to
+    // the opener; there is no stacked add-card dialog underneath.
+    await expect(
+      page.getByRole('dialog', { name: 'Karten hinzufügen', exact: true }),
+    ).toHaveCount(0);
     await expect(
       main.getByRole('button', { name: caption, exact: true }),
     ).toBeFocused();

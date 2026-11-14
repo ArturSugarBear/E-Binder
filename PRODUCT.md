@@ -26,7 +26,7 @@ The user dislikes the current black/navy/cyan palette, anonymous nine-blue-squar
 ## Keep intact
 
 - Product name E-Binder, privacy-first local data, optional Supabase, free access.
-- Five primary mobile destinations (Sammlung, Entdecken, + Karte, Binder, Profil) until user-tested changes justify otherwise.
+- Five primary mobile destinations: **Home | Entdecken | Scan | Binder | Profil**. The `Binder` tab opens `Deine Binder`; the vault sub-tabs (Binder · Karten · Portfolio) keep collection, card list and portfolio separated. Scan opens the live viewfinder directly.
 - Exact 3×3 physical pocket positions, card art shown unaltered, no invented possession.
 - Clear accessibility, text contrast, 44px touch targets, motion reduction, offline capability.
 - German-first writing, cross-platform Latin / Japanese card metadata.

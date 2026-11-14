@@ -232,12 +232,6 @@ export function renderCollection(ctx: WorkspaceContext): HTMLElement {
             'div',
             'w-action-row',
             action(
-              'Erste Karte hinzufügen',
-              () => ctx.openAdd(),
-              'primary',
-              'plus',
-            ),
-            action(
               'Mit Demo ausprobieren',
               () => {
                 void ctx.switchMode('demo');

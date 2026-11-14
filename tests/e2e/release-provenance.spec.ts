@@ -18,30 +18,22 @@ test('release version is generated from the built app and is visible on every iP
   expect(Date.parse(release.builtAt)).not.toBeNaN();
 
   await page.goto('./#entdecken');
-  const label = page.locator('#workspace-version');
+  // The version identifier lives in the profile (App-Version & Updates),
+  // not as a permanent chip on every screen.
+  await page.getByRole('link', { name: 'Profil und Einstellungen' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'App-Version & Updates' }),
+  ).toBeVisible();
+  const label = page.locator('.w-release-information');
   await expect(label).toContainText('v' + release.version);
   await expect(label).toContainText(release.commit.slice(0, 8));
-  // The link's accessible name must contain the version visible to users.
-  await expect(label).toHaveAccessibleName(
-    new RegExp(release.commit.slice(0, 8)),
-  );
-  await expect(label).toHaveAttribute(
-    'aria-description',
-    'App-Version und Updates im Profil',
-  );
-  await expect(label).toHaveAttribute('data-build-commit', release.commit);
+  await expect(
+    label.getByText('Lokal ausgeführt:', { exact: false }),
+  ).toContainText(release.commit.slice(0, 8));
   const box = await label.boundingBox();
   expect(box).not.toBeNull();
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(375);
-
-  await label.click();
-  await expect(
-    page.getByRole('heading', { name: 'App-Version & Updates' }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('Lokal ausgeführt:', { exact: false }),
-  ).toContainText(release.commit.slice(0, 8));
   await page
     .getByRole('button', { name: 'Veröffentlichte Version prüfen' })
     .click();

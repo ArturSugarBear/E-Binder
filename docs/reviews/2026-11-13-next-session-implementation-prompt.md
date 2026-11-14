@@ -17,7 +17,7 @@ You are acting as a senior Apple-platform UI engineer and interaction designer i
 
 ## Objective
 
-Deliver a visibly more native iPhone experience without changing the product's data ethics, Rare Room V2 identity, or native TypeScript/DOM architecture.
+Deliver a visibly more native iPhone experience without changing the product's data ethics or native TypeScript/DOM architecture. But Create a more beautiful and fitting brand-kit with impeccable and taste skill.
 
 ## Non-negotiables
 

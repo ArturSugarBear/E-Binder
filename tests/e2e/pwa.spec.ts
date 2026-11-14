@@ -115,32 +115,33 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   ).toHaveAttribute('id', 'workspace-mobile-add');
   await expect(
     navigation.locator(':scope > a, :scope > button').nth(3),
-  ).toContainText('Sammlung');
+  ).toContainText('Binder');
   await expect(
     navigation.locator(':scope > a, :scope > button').nth(4),
   ).toContainText('Profil');
   await navigation.getByRole('button', { name: 'Karte scannen' }).click();
-  // Opening Scan creates one dominant camera sheet, while the add-card
-  // sheet stays in memory but is inert/hidden to avoid stacked dialogs.
+  // One scanner surface: Scan opens the viewfinder directly without a
+  // second, stacked add-card dialog.
   await expect(
     page.getByRole('dialog', { name: 'Karte live scannen' }),
   ).toBeVisible();
-  const parent = page.locator('dialog.w-dialog.w-scan-parent-suspended');
-  await expect(parent).toHaveAttribute('inert', '');
-  await expect(parent).toBeHidden();
+  await expect(page.locator('dialog.w-dialog[open]')).toHaveCount(1);
+  await expect(
+    page.locator('dialog.w-dialog.w-scan-parent-suspended'),
+  ).toHaveCount(0);
   await page
     .getByRole('dialog', { name: 'Karte live scannen' })
     .getByRole('button', { name: 'Karte live scannen schließen' })
     .click();
-  await page
-    .getByRole('dialog', { name: 'Karten hinzufügen' })
-    .getByRole('button', { name: 'Karten hinzufügen schließen' })
-    .click();
+  await expect(page.locator('dialog.w-dialog[open]')).toHaveCount(0);
 
-  await navigation.getByRole('link', { name: 'Sammlung' }).click();
+  await navigation.getByRole('link', { name: 'Binder' }).click();
   await expect(
-    navigation.getByRole('link', { name: 'Sammlung' }),
+    navigation.getByRole('link', { name: 'Binder' }),
   ).toHaveAttribute('aria-current', 'page');
+  await expect(
+    page.getByRole('heading', { name: 'Deine Binder', exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Portfolio', exact: true }),
   ).toBeVisible();
@@ -159,9 +160,7 @@ test('mobile tabs prioritize collection, add-card action and profile', async ({
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Wunschliste' }).click();
   await expect(page).toHaveURL(/#wunschliste$/);
-  await expect(
-    navigation.getByRole('link', { name: 'Sammlung' }),
-  ).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Binder' })).toBeVisible();
   expect(
     await navigation.evaluate((element) => getComputedStyle(element).position),
   ).toBe('fixed');

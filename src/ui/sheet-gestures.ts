@@ -20,6 +20,7 @@ export function enableSheetDrag(
   dialog: HTMLDialogElement,
   surface: HTMLElement,
   handles: readonly HTMLElement[],
+  options: { requestDismiss?: (dismiss: () => void) => void } = {},
 ): void {
   type Start = { id: number; x: number; y: number; time: number };
   let start: Start | undefined;
@@ -79,15 +80,20 @@ export function enableSheetDrag(
     const wasDragging = dragging;
     reset();
     if (!wasDragging || !shouldDismissSheet(distance, elapsed)) return;
-    if (reducedMotion.matches) {
-      dialog.close();
-      return;
-    }
-    surface.classList.add('is-sheet-dismissing');
-    surface.style.setProperty('--sheet-drag-y', `${window.innerHeight}px`);
-    timeout = setTimeout(() => {
-      if (dialog.open) dialog.close();
-    }, 180);
+    const dismiss = () => {
+      if (reducedMotion.matches) {
+        dialog.close();
+        return;
+      }
+      surface.classList.add('is-sheet-dismissing');
+      surface.style.setProperty('--sheet-drag-y', `${window.innerHeight}px`);
+      timeout = setTimeout(() => {
+        if (dialog.open) dialog.close();
+      }, 180);
+    };
+    // The dialog can confirm before discarding unsaved input, then dismiss.
+    if (options.requestDismiss) options.requestDismiss(dismiss);
+    else dismiss();
   };
 
   const cancel = () => reset();

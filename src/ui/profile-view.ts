@@ -72,7 +72,7 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
       option(
         'Live-Kartenscanner',
         'Karte erfassen und Ausgabe bestätigen',
-        () => ctx.openAdd({ live: true }),
+        () => ctx.openLiveScan(),
       ),
       option(
         'Binderseiten scannen',

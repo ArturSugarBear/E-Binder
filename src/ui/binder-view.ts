@@ -355,17 +355,6 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'primary',
     'spark',
   );
-  const toolbar = el(
-    'div',
-    'w-binder-toolbar',
-    proposals,
-    action(
-      'Vorlage übernehmen',
-      () => openTemplates(ctx, page.id),
-      'secondary',
-      'cards',
-    ),
-  );
   const grid = renderPocketGrid(ctx, page, false);
   const paper = el(
     'div',
@@ -462,6 +451,29 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'text',
   );
   next.disabled = pageIndex === binder.pages.length - 1;
+  // One toolbar for page navigation and page tools; the 3×3 page itself
+  // stays the first content after the compact title.
+  const toolbar = el(
+    'div',
+    'w-binder-toolbar',
+    el(
+      'nav',
+      'w-page-pager',
+      previous,
+      el('span', 'w-mono', `${pageIndex + 1} / ${binder.pages.length}`),
+      next,
+    ),
+    proposals,
+    action(
+      'Vorlage übernehmen',
+      () => openTemplates(ctx, page.id),
+      'secondary',
+      'cards',
+    ),
+  );
+  toolbar
+    .querySelector('nav')!
+    .setAttribute('aria-label', 'Binderseiten blättern');
   const pageRail = el('nav', 'w-binder-page-rail');
   pageRail.setAttribute('aria-label', 'Binderseiten durchblättern');
   for (const [itemIndex, item] of binder.pages.entries()) {
@@ -525,60 +537,12 @@ export function renderBinders(ctx: WorkspaceContext): HTMLElement {
     'div',
     'w-binder-workspace',
     title,
-    el(
-      'nav',
-      'w-page-pager',
-      previous,
-      el('span', 'w-mono', `${pageIndex + 1} / ${binder.pages.length}`),
-      next,
-    ),
+    toolbar,
     paper,
     pageRail,
-    toolbar,
     info,
   );
-  const inventory = el(
-    'aside',
-    'w-page-inspector',
-    el('p', 'w-eyebrow', 'Auf dieser Seite'),
-  );
-  const inspectorDetails = el(
-    'details',
-    'w-page-inspector-details',
-    el('summary', '', 'Alle neun Plätze verwalten'),
-  );
-  inspectorDetails.open = !matchMedia(
-    '(max-width: 640px), (max-width: 950px) and (pointer: coarse)',
-  ).matches;
-  for (const [slotIndex, slot] of page.slots.entries()) {
-    const card = cardForSlot(ctx.state, slot);
-    const button = action(
-      `${slotIndex + 1}. ${card?.name ?? 'Freier Platz'}`,
-      () => openSlot(ctx, page.id, slotIndex),
-      'slot-row',
-    );
-    button.append(
-      el(
-        'small',
-        '',
-        slot?.locked
-          ? 'Festgehalten'
-          : slot?.kind === 'planned'
-            ? 'Geplant'
-            : slot?.kind === 'owned'
-              ? `Exemplar ${slot.copy}`
-              : 'Karte auswählen',
-      ),
-    );
-    inspectorDetails.append(button);
-  }
-  inspectorDetails.append(
-    message(
-      'Tippe einen Platz zum Belegen, Fixieren oder Tauschen. Ziehen funktioniert zusätzlich mit der Maus.',
-    ),
-  );
-  inventory.append(inspectorDetails);
-  root.append(el('div', 'w-binder-layout', sidebar, workspace, inventory));
+  root.append(el('div', 'w-binder-layout', sidebar, workspace));
   return root;
 }
 

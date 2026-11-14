@@ -153,6 +153,7 @@ export function check(
 export function modal(
   title: string,
   wide = false,
+  options: { guard?: boolean } = {},
 ): {
   dialog: HTMLDialogElement;
   body: HTMLElement;
@@ -160,6 +161,9 @@ export function modal(
   close: () => void;
   onClose: (callback: () => void) => void;
 } {
+  // User-initiated dismissal (drag, backdrop, Escape) never silently
+  // discards typed input. Programmatic sheet.close() stays unguarded.
+  const guard = options.guard !== false;
   const opener = document.activeElement;
   const dialog = el('dialog', `w-dialog${wide ? ' w-dialog-wide' : ''}`);
   const heading = el('h2', '', title);
@@ -182,6 +186,24 @@ export function modal(
   );
   header.querySelector('.w-sheet-grabber')!.setAttribute('aria-hidden', 'true');
   dialog.append(header, alerts, body, footer);
+  let dismissConfirmOpen = false;
+  const requestDismiss = (dismiss: () => void) => {
+    if (dismissConfirmOpen) return;
+    if (guard && dialogHasDirtyFields(dialog)) {
+      dismissConfirmOpen = true;
+      void confirmSheet(
+        'Ungespeicherte Eingaben verwerfen?',
+        'In diesem Dialog wurden Felder bearbeitet. Beim Schließen gehen diese Änderungen verloren.',
+        'Verwerfen',
+        { danger: true },
+      ).then((confirmed) => {
+        dismissConfirmOpen = false;
+        if (confirmed) dismiss();
+      });
+      return;
+    }
+    dismiss();
+  };
   const callbacks: (() => void)[] = [];
   dialog.addEventListener('close', () => {
     callbacks.forEach((callback) => callback());
@@ -209,11 +231,56 @@ export function modal(
       event.clientY < box.top ||
       event.clientY > box.bottom
     )
-      close();
+      requestDismiss(close);
   });
+  dialog.addEventListener('cancel', (event) => {
+    if (guard && dialogHasDirtyFields(dialog)) {
+      event.preventDefault();
+      requestDismiss(close);
+    }
+  });
+  // Some fields (e.g. type=search) consume Escape for their own default
+  // action, so the native cancel event never fires. Guard on keydown too.
+  dialog.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key !== 'Escape') return;
+      if (!guard || !dialogHasDirtyFields(dialog)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      requestDismiss(close);
+    },
+    true,
+  );
   document.body.append(dialog);
+  // The content is appended after modal() returns. Keep refreshing the
+  // initial-value snapshot on focus movement until the first real edit
+  // (input/change), so pre-filled or untouched forms never count as dirty
+  // while every subsequent user change does.
+  let userEdited = false;
+  dialog.addEventListener(
+    'input',
+    () => {
+      userEdited = true;
+    },
+    { capture: true },
+  );
+  dialog.addEventListener(
+    'change',
+    () => {
+      userEdited = true;
+    },
+    { capture: true },
+  );
+  dialog.addEventListener(
+    'focusin',
+    () => {
+      if (!userEdited) snapshotDialogFields(dialog);
+    },
+    { capture: true },
+  );
   dialog.showModal();
-  enableSheetDrag(dialog, dialog, [header]);
+  enableSheetDrag(dialog, dialog, [header], { requestDismiss });
   return {
     dialog,
     body,
@@ -221,6 +288,93 @@ export function modal(
     close,
     onClose: (callback) => callbacks.push(callback),
   };
+}
+
+const dirtySnapshotKey = Symbol('w-dirty-snapshot');
+type FieldSnapshot = {
+  values: WeakMap<Element, string>;
+  checked: WeakMap<Element, boolean>;
+};
+
+/**
+ * Snapshot all form-control values of a dialog as the reference for dirty
+ * detection. Programmatically pre-filled forms (edition selects, quantity
+ * fields) never count as edited until the collector changes them.
+ */
+export function snapshotDialogFields(dialog: HTMLDialogElement): void {
+  const values = new WeakMap<Element, string>();
+  const checked = new WeakMap<Element, boolean>();
+  for (const field of dialog.querySelectorAll<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >('input, textarea, select')) {
+    values.set(field, field.value);
+    if (field instanceof HTMLInputElement) checked.set(field, field.checked);
+  }
+  (dialog as unknown as Record<symbol, FieldSnapshot | undefined>)[
+    dirtySnapshotKey
+  ] = { values, checked };
+}
+
+/**
+ * A dialog counts as dirty when any form control differs from the snapshot
+ * taken at the first check (after the caller has built the content). The
+ * first check only creates the reference and never reports dirty.
+ */
+export function dialogHasDirtyFields(dialog: HTMLDialogElement): boolean {
+  const holder = dialog as unknown as Record<symbol, FieldSnapshot | undefined>;
+  let snapshot = holder[dirtySnapshotKey];
+  if (!snapshot) {
+    snapshotDialogFields(dialog);
+    return false;
+  }
+  for (const field of dialog.querySelectorAll<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >('input, textarea, select')) {
+    if (field instanceof HTMLInputElement) {
+      if (field.type === 'radio' || field.type === 'checkbox') {
+        if (field.checked !== snapshot.checked.get(field)) return true;
+        continue;
+      }
+    }
+    if (field.value !== snapshot.values.get(field)) return true;
+  }
+  return false;
+}
+
+/**
+ * The app's own confirmation sheet; replaces window.confirm. Resolves with
+ * the collector's explicit choice and never blocks the main thread.
+ */
+export function confirmSheet(
+  title: string,
+  copy: string,
+  confirmLabel = 'Bestätigen',
+  options: { danger?: boolean } = {},
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const sheet = modal(title, false, { guard: false });
+    sheet.dialog.classList.add('w-confirm-sheet');
+    sheet.body.append(el('p', 'w-confirm-copy', copy));
+    let settled = false;
+    const settle = (value: boolean) => {
+      if (settled) return;
+      settled = true;
+      sheet.close();
+      resolve(value);
+    };
+    const primary = action(
+      confirmLabel,
+      () => settle(true),
+      options.danger ? 'danger' : 'primary',
+      options.danger ? 'trash' : 'check',
+    );
+    sheet.footer.append(
+      action('Abbrechen', () => settle(false), 'secondary'),
+      primary,
+    );
+    sheet.onClose(() => settle(false));
+    primary.focus({ preventScroll: true });
+  });
 }
 export const message = (text: string, kind = 'note'): HTMLElement =>
   el('p', `w-message w-message-${kind}`, text);

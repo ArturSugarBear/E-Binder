@@ -12,6 +12,8 @@ export interface AddOptions {
   captureId?: string;
   photos?: boolean;
   live?: boolean;
+  /** Captures buffered by the standalone live-scanner flow, reviewed after capture. */
+  liveCaptures?: { file: File; aligned: boolean }[];
   correctHoldingId?: string;
 }
 export interface WorkspaceContext {
@@ -31,6 +33,8 @@ export interface WorkspaceContext {
   render: () => void;
   navigate: (route: string) => void;
   openAdd: (options?: AddOptions) => void;
+  /** Open the live card scanner directly; review/filing opens only after capture. */
+  openLiveScan: () => void;
   openPageScan: (binderId?: string) => void;
   openHolding: (id: string) => void;
   openBackup: () => void;

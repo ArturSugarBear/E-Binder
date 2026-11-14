@@ -433,16 +433,8 @@ export function openPageScanner(
   });
   sheet.body.append(
     message(
-      'Richte die vollständige 3×3-Seite in der Live-Kamera aus oder nutze ein Foto. E-Binder zerlegt sie anschließend in neun Positionen. Keine Karte zählt vor deiner Prüfung als Besitz.',
+      'Fotografiere die komplette 3×3-Seite. Zielbinder und Name legst du erst beim Übernehmen fest.',
     ),
-    el(
-      'ol',
-      'w-page-scan-steps',
-      el('li', '', '1 · Ganze Seite aufnehmen'),
-      el('li', '', '2 · Neun Fächer prüfen'),
-      el('li', '', '3 · Binder übernehmen'),
-    ),
-    el('div', 'w-form-grid', field('Zielbinder', binder), binderNameField),
     el(
       'div',
       'w-action-row w-page-scan-entry',
@@ -454,7 +446,7 @@ export function openPageScanner(
             () => camera.click(),
             () => {
               sheet.close();
-              ctx.openAdd({ live: true });
+              ctx.openLiveScan();
             },
           ),
         'primary',
@@ -473,6 +465,19 @@ export function openPageScanner(
         'upload',
       ),
     ),
+    el(
+      'ol',
+      'w-page-scan-steps',
+      el('li', '', '1 · Ganze Seite aufnehmen'),
+      el('li', '', '2 · Neun Fächer prüfen'),
+      el('li', '', '3 · Binder übernehmen'),
+    ),
+    el(
+      'details',
+      'w-page-scan-filing',
+      el('summary', '', 'Zielbinder für die Übernahme'),
+      el('div', 'w-form-grid', field('Zielbinder', binder), binderNameField),
+    ),
     camera,
     gallery,
     scanOptions,
@@ -487,6 +492,10 @@ export function openPageScanner(
     reviewBulk,
     reviewPanel,
   );
+  // Shutter first: the camera action is the first focusable control.
+  sheet.body
+    .querySelector<HTMLButtonElement>('.w-page-scan-entry .w-button')
+    ?.focus({ preventScroll: true });
   sheet.footer.append(stop, save);
   reportQueue();
 

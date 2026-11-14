@@ -258,7 +258,7 @@ test('portfolio opens directly without inventing a zero market price', async ({
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Portfolio' })).toHaveAttribute(
     'aria-current',
-    'page',
+    'true',
   );
   expect(
     await page.evaluate(

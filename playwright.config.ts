@@ -1,12 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const externalURL = process.env.E2E_BASE_URL;
-const chromiumLaunch = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
-  ? {
-      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
-      args: ['--no-sandbox'],
-    }
-  : {};
+// In containers /dev/shm is often tiny, which crashes Chromium renderers
+// ("Target crashed"). --disable-dev-shm-usage is safe in every environment;
+// --no-sandbox applies only to explicitly provided browser binaries.
+const chromiumLaunch = {
+  ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+    : {}),
+  args: [
+    '--disable-dev-shm-usage',
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? ['--no-sandbox'] : []),
+  ],
+};
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 60_000,

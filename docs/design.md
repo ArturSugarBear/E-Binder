@@ -25,6 +25,14 @@ Kleine Formauswahlen mit zwei bis vier stabilen Alternativen verwenden `choices`
 
 Die Sammlung priorisiert ihre Karten statt doppelter Kennzahlkacheln. Offene Erfassungen bleiben handlungsfähig sichtbar. Kartendetails in „Entdecken“ zeigen vorhandene Katalogpreise mit Quelle, Währung und Datum und verlinken ausschließlich auf eine validierte Cardmarket-Produkt-ID. Fehlende Preis-/Bezugsdaten werden benannt. Das ist keine Bestandsbewertung. [Prüfgrundlage und Grenzen](research/ui-usability.md).
 
+### Navigation und Scanner (13. November 2026)
+
+- Die mobile Leiste ist eine native Tab-Bar: `Home | Entdecken | Scan | Binder | Profil`. Es gibt genau ein aktives `aria-current="page"` pro Bildschirm; der Binder-Tab öffnet `Deine Binder`, die Vault-Segmente (Binder · Karten · Portfolio) tragen `aria-current="true"`. Die Desktop-Navigation wiederholt keine mobile Route.
+- Home und der Scan-Tab öffnen den Live-Sucher direkt („One scanner surface“). „Karten hinzufügen“ bleibt der manuelle Katalog-/Dateiweg und öffnet keinen zweiten Dialog automatisch. Aufnahmen werden erst beim Öffnen der Prüfung in den Bestandszustand übernommen.
+- Die leere Sammlung hat genau eine Lime-Primäraktion und eine sekundäre Demo-Aktion. Überschriften-Aktionen stapeln unter 360 px.
+- Jede Schaltfläche/Karte/Tab antwortet mit `:active`; Hover-Regeln liegen hinter `(hover: hover)`. Sheet-Ziehen, Backdrop und Escape fragen bei ungespeicherten Feldern nach; `window.confirm` ist durch das eigene Bestätigungs-Sheet ersetzt.
+- Schriften: Body 17 px, Sekundärtext 15 px, Beschriftungen 13 px, rechtliche Kleinschrift mindestens 11 px. Die 900er-Display-Stimme gilt nur für den Home-Hero und die Erstbesuchs-Headline; h2/h3 und Dialogtitel sind 600–700 ohne extremes Tracking. `html` nutzt `-apple-system-body`; rem-Größen folgen damit Dynamic Type.
+
 ## Native iPhone-Gesten: Cards & Sheets (10. November 2026)
 
 Die mobile App verwendet konsistente, unaufdringliche Gesten statt isolierter Klickpfade:
