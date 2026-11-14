@@ -31,7 +31,7 @@ You are acting as a senior Apple-platform UI engineer and interaction designer i
 - P1 11: Accent discipline — lime = one primary + selected nav state; neutral segmented control; white focus ring.
 - P1 12 (partial): side safe areas, 44 px footer links, `prefers-contrast: more`, version chip moved to Profil, favicon/OG/startup image links.
 
-Commit hash of that work: see the session report above (fill in the actual hash after push).
+Commit hash of that work: `61f6569` (`ux(ui): implement Apple UI review P0 fixes and selected P1 refinements`), published on `master` after rebasing onto `db815b3` (the P0 scanner recovery docs and over-crop fixes from 14 November).
 
 ## Next ordered tasks (with acceptance criteria)
 

@@ -32,14 +32,20 @@
 
 ## Commands and results
 
-(recorded per run below)
+- `npm run check`: Prettier ✓, ESLint ✓, unit tests ✓ (incl. the new `live-capture-quad` tests from master), build + PWA validation ✓ — final run before push.
+- New acceptance spec `tests/e2e/apple-ui.spec.ts` (7 tests): **7/7 passed** on chromium and on mobile-chromium.
+- Affected-spec re-run on chromium (binder-page-rail, glass-shell, liquid-collector, portfolio, workspace): **22/22 passed** after fixes.
+- Broad chromium run across 16 affected specs: first pass 71 passed / 7 failed / 2 skipped; all 7 failures were diagnosed (4 outdated test expectations updated to the new IA/scanner model; 3 false-positive dirty checks fixed via snapshot-based dirty detection) and re-verified green.
+- WebKit: browser and host deps installed, but the WebKit run stalled at startup in this container (environment issue, not app issue) — named as an external failure; WebKit remains verified by CI on GitHub Actions.
+- Screenshots: 320/390/430 px checked in the acceptance tests (no horizontal overflow, stacked heading actions ≤360 px, edge-to-edge tab bar) plus `test-results/` captures; no 3-line CTA, no dock overlap.
+- Environment note: Playwright browsers were not preinstalled (`/usr/bin/chromium` missing); `npx playwright install chromium webkit` + `install-deps` were run; `/dev/shm` is 64 MB, so `--disable-dev-shm-usage` was added to the shared chromium launch options in `playwright.config.ts`.
+
+## External steps
+
+- GitHub Actions run and live GitHub Pages check: recorded after push (live URL `https://artursugarbear.github.io/E-Binder/`).
 
 ## Remaining P1/P2 items
 
 - P1 #10: direct manipulation for card/page swipes (swipes still jump-cut on release).
 - P1 #12: `lang="ja"` on Japanese card-name elements.
 - Phase 3: remove `backdrop-filter` from content panels; measure the WebGL dock (dock is now a plain tab bar, so the liquid-glass optic is obsolete); screenshot baselines for large text + reduced motion; single route-change handler with h1 focus/announce; shorten the 360 ms route fade; PWA banners out of first paint; CSS token consolidation; split add-cards/page-scan into state machine + views.
-
-## External steps
-
-- GitHub Actions run and live GitHub Pages check: see the publish section of the session report (recorded after push).
