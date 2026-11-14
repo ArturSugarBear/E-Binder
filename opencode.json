@@ -54,6 +54,36 @@
         "timeout": {
           "startup": 120000
         }
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--headless",
+          "--isolated",
+          "--executablePath",
+          "/home/codespace/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome",
+          "--viewport",
+          "1440x900",
+          "--workspace",
+          "/workspaces/E-Binder",
+          "--chrome-arg=--no-sandbox",
+          "--chrome-arg=--disable-dev-shm-usage",
+          "--no-usage-statistics",
+          "--no-performance-crux",
+          "--no-category-memory",
+          "--screenshotFormat",
+          "webp",
+          "--screenshotQuality",
+          "80",
+          "--screenshotMaxWidth",
+          "1200"
+        ],
+        "timeout": {
+          "startup": 120000
+        }
       }
     }
   }
