@@ -26,10 +26,16 @@ test('stale captures can be removed individually or together without changing ow
   await expect(add.locator('.w-capture-queue')).not.toContainText(
     'svi-211.webp',
   );
-  page.once('dialog', (dialog) => dialog.accept());
   await add
     .getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ })
     .click();
+  const remove = page.getByRole('dialog', {
+    name: 'Offene Aufnahmen entfernen?',
+    exact: true,
+  });
+  await expect(remove).toBeVisible();
+  await remove.getByRole('button', { name: 'Entfernen', exact: true }).click();
+  await expect(remove).toHaveCount(0);
   await expect(add.locator('.w-capture-queue')).not.toContainText('1 offen');
   await expect(add.locator('.w-photo-review')).toBeEmpty();
   await add
@@ -212,6 +218,13 @@ test('crop review magnifies the actual card footer before OCR and allows correct
     .click();
   await expect(crop.locator('.w-crop-review')).toBeVisible();
   await page.keyboard.press('Escape');
+  const discard = page.getByRole('dialog', {
+    name: 'Ungespeicherte Eingaben verwerfen?',
+    exact: true,
+  });
+  await expect(discard).toBeVisible();
+  await discard.getByRole('button', { name: 'Verwerfen', exact: true }).click();
+  await expect(crop).toHaveCount(0);
   await expect(add).toBeVisible();
   expect(workers.filter((url) => url.includes('vision-worker'))).toEqual([]);
   await add

@@ -71,15 +71,24 @@ test('the demo shows the original physical page and can restart without replacin
     .getByRole('button', { name: 'Platz leeren', exact: true })
     .click();
   await expect(page.locator('.w-binder-paper img')).toHaveCount(8);
-  page.once('dialog', (dialog) => dialog.dismiss());
   await page
     .getByRole('button', { name: 'Demo neu starten', exact: true })
     .click();
+  const reset = page.getByRole('dialog', {
+    name: 'Demo zurücksetzen?',
+    exact: true,
+  });
+  await expect(reset).toBeVisible();
+  await reset.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  await expect(reset).toHaveCount(0);
   await expect(page.locator('.w-binder-paper img')).toHaveCount(8);
-  page.once('dialog', (dialog) => dialog.accept());
   await page
     .getByRole('button', { name: 'Demo neu starten', exact: true })
     .click();
+  await reset
+    .getByRole('button', { name: 'Zurücksetzen', exact: true })
+    .click();
+  await expect(reset).toHaveCount(0);
   await expect(page.locator('.w-binder-paper img')).toHaveCount(9);
   await page.reload();
   await expect(page.locator('.w-binder-paper img')).toHaveCount(9);

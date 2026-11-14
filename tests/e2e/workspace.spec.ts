@@ -154,6 +154,8 @@ test('templates create planned slots without possession, owned copies cannot be 
     page.getByRole('button', { name: 'Platz leeren' }),
   ).toBeDisabled();
   await page.keyboard.press('Escape');
+  // Inspecting a pre-filled, untouched slot must not ask to discard edits.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   if (!(await page.locator('.w-page-controls').getAttribute('open'))) {
     if (
       !(await page
@@ -183,6 +185,13 @@ test('templates create planned slots without possession, owned copies cannot be 
     'Ein belegtes Exemplar ist nicht verfügbar.',
   );
   await page.keyboard.press('Escape');
+  const discard = page.getByRole('dialog', {
+    name: 'Ungespeicherte Eingaben verwerfen?',
+    exact: true,
+  });
+  await expect(discard).toBeVisible();
+  await discard.getByRole('button', { name: 'Verwerfen', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.w-card-availability')).toHaveText('0 frei');
 });
 

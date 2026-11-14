@@ -280,6 +280,12 @@ export function modal(
     { capture: true },
   );
   dialog.showModal();
+  // showModal() focuses the close control before callers append the form.
+  // Capture those synchronously populated fields before the first user event,
+  // including dialogs whose autofocus never moves into an input.
+  queueMicrotask(() => {
+    if (dialog.open && !userEdited) snapshotDialogFields(dialog);
+  });
   enableSheetDrag(dialog, dialog, [header], { requestDismiss });
   return {
     dialog,
