@@ -62,7 +62,10 @@ it('does not start image inference until verified ONNX warmup signals readiness'
   const pending = session!.match(new Blob(['real-photo']), 500);
   await new Promise((resolve) => setTimeout(resolve, 20));
   expect(messages).toHaveLength(1);
-  workers[0]?.emit({ id: 0, type: 'ready' });
+  expect(session!.limited).toBe(false);
+  workers[0]?.emit({ id: 0, type: 'ready', count: 9 });
+  // The shipped nine-card pilot is a limited index by definition.
+  expect(session!.limited).toBe(true);
   await vi.waitFor(() => expect(messages).toHaveLength(2));
   expect(messages[1]).toMatchObject({ id: 1 });
   expect(messages[1]).not.toHaveProperty('warmup');

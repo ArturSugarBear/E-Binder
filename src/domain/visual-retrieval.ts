@@ -39,6 +39,11 @@ export interface VisualReview {
   /** Only 'exact-print' may be proposed as a selected printing, never as owned. */
   suggested?: VisualHit;
   choices: VisualHit[];
+  /**
+   * Hits whose printed number is corroborated by OCR from this same photo.
+   * A limited pilot index may only surface these, never arbitrary neighbours.
+   */
+  supported: VisualHit[];
 }
 
 /**
@@ -139,10 +144,13 @@ export function reviewVisualCandidates(
     );
   });
   const exact = ranked.filter(exactFor);
+  const choices = ranked.slice(0, Math.max(1, Math.min(5, limit)));
+  const supported = choices.filter((hit) => exactFor(hit) || partialFor(hit));
   return {
     kind: exact.length === 1 ? 'exact-print' : 'review',
     suggested: exact.length === 1 ? exact[0] : undefined,
-    choices: ranked.slice(0, Math.max(1, Math.min(5, limit))),
+    choices,
+    supported,
   };
 }
 

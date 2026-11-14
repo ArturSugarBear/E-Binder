@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import { confirmSheet, dismissUnsavedChangesIfAsked } from './navigation';
 import AxeBuilder from '@axe-core/playwright';
 
 test('stale captures can be removed individually or together without changing owned cards', async ({
@@ -26,10 +27,10 @@ test('stale captures can be removed individually or together without changing ow
   await expect(add.locator('.w-capture-queue')).not.toContainText(
     'svi-211.webp',
   );
-  page.once('dialog', (dialog) => dialog.accept());
   await add
     .getByRole('button', { name: /Alle offenen Aufnahmen entfernen/ })
     .click();
+  await confirmSheet(page, 'Entfernen');
   await expect(add.locator('.w-capture-queue')).not.toContainText('1 offen');
   await expect(add.locator('.w-photo-review')).toBeEmpty();
   await add
@@ -212,6 +213,7 @@ test('crop review magnifies the actual card footer before OCR and allows correct
     .click();
   await expect(crop.locator('.w-crop-review')).toBeVisible();
   await page.keyboard.press('Escape');
+  await dismissUnsavedChangesIfAsked(page);
   await expect(add).toBeVisible();
   expect(workers.filter((url) => url.includes('vision-worker'))).toEqual([]);
   await add

@@ -24,7 +24,7 @@ export function renderProfile(ctx: WorkspaceContext): HTMLElement {
   const head = el(
     'header',
     'w-profile-hero w-glass-panel',
-    el('p', 'w-eyebrow', 'Rare Room / Einstellungen'),
+    el('p', 'w-eyebrow', 'E-Binder / Einstellungen'),
     el('h1', '', 'Dein Profil'),
     el(
       'p',

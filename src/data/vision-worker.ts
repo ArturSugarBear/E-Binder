@@ -2,7 +2,11 @@ import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm';
 import type { LiveHotZone } from '../domain/live-ocr-policy';
 import wasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.wasm?url';
 import runtimeUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url';
-import { decodeRecognition, recognitionTensor } from '../domain/vision-codec';
+import {
+  decodeRecognition,
+  otsuThreshold,
+  recognitionTensor,
+} from '../domain/vision-codec';
 import {
   collectorNumberFallbackRegions,
   wideCollectorFooterRegion,
@@ -184,7 +188,7 @@ async function recognize({
   try {
     const read = async (
       region: readonly [number, number, number, number],
-      variant: 'colour' | 'gray' | 'inverted' | 'binary' = 'colour',
+      variant: 'colour' | 'gray' | 'inverted' | 'binary' | 'otsu' = 'colour',
     ): Promise<string> => {
       const [x, y, w, h] = region;
       const height = 48;
@@ -212,9 +216,10 @@ async function recognize({
         height,
       );
       const pixels = context.getImageData(0, 0, width, height).data;
-      if (variant !== 'colour')
-        for (let i = 0; i < pixels.length; i += 4) {
-          let value = Math.max(
+      if (variant !== 'colour') {
+        const gray = new Uint8ClampedArray(width * height);
+        for (let i = 0, pixel = 0; i < pixels.length; i += 4, pixel++)
+          gray[pixel] = Math.max(
             0,
             Math.min(
               255,
@@ -222,10 +227,20 @@ async function recognize({
                 128,
             ),
           );
+        // A fixed split loses small, low-contrast print; Otsu follows the
+        // actual crop histogram. Both remain deterministic preprocessing.
+        const threshold = variant === 'otsu' ? otsuThreshold(gray) : 128;
+        for (let pixel = 0; pixel < gray.length; pixel++) {
+          let value = gray[pixel]!;
           if (variant === 'inverted') value = 255 - value;
-          if (variant === 'binary') value = value > 128 ? 255 : 0;
-          pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
+          if (variant === 'binary' || variant === 'otsu')
+            value = value > threshold ? 255 : 0;
+          pixels[pixel * 4] =
+            pixels[pixel * 4 + 1] =
+            pixels[pixel * 4 + 2] =
+              value;
         }
+      }
       const input = new Tensor(
         'float32',
         recognitionTensor(pixels, width, height),
@@ -266,6 +281,7 @@ async function recognize({
           retry.push(await read([0.04, 0.92, 0.83, 0.07], 'inverted'));
           if (!hasPrintedCollectorFraction(retry) || !hasPrintedSetCode(retry))
             retry.push(await read([0.01, 0.875, 0.96, 0.12], 'binary'));
+          retry.push(await read([0.01, 0.875, 0.96, 0.12], 'otsu'));
           break;
         case 'title':
           retry.push(
@@ -312,7 +328,11 @@ async function recognize({
     // if the narrow crop missed PBL, DLR or another printed set code.
     if (!hasPrintedSetCode(texts)) {
       report('Gedrucktes Setkürzel wird gegengeprüft …', id);
-      texts.push(await read([0.035, 0.905, 0.62, 0.075], 'gray'));
+      // Sleeves and perspective often move the set code outside the narrow
+      // band. Read the whole lower edge first; only then try tighter crops.
+      texts.push(await read(wideCollectorFooterRegion, 'gray'));
+      if (!hasPrintedSetCode(texts))
+        texts.push(await read([0.035, 0.905, 0.62, 0.075], 'gray'));
       // Japanese M1L/M1S/M2a codes are often left of the collector fraction.
       // Re-read this footer with normal contrast before falling back to the
       // ambiguous printed number alone.
@@ -333,7 +353,7 @@ async function recognize({
     }
     if (!fast && !hasPrintedCollectorFraction(texts)) {
       report('Unterer Rand wird mit höherem Kontrast gegengeprüft …', id);
-      for (const variant of ['gray', 'inverted', 'binary'] as const) {
+      for (const variant of ['gray', 'inverted', 'binary', 'otsu'] as const) {
         texts.push(await read([0.07, 0.94, 0.38, 0.032], variant));
         if (hasPrintedCollectorFraction(texts)) break;
       }

@@ -124,6 +124,7 @@ let cached:
       index: VisualIndex;
       size: number;
       preprocessing: Manifest['preprocessing'];
+      count: number;
     }>
   | undefined;
 
@@ -172,6 +173,7 @@ function load(manifestUrl: string) {
         index,
         size: manifest.size,
         preprocessing: manifest.preprocessing,
+        count: manifest.count,
       };
     })().catch((error: unknown) => {
       cached = undefined;
@@ -241,10 +243,10 @@ scope.onmessage = (event) => {
       // Load and verify the same-origin ONNX weights/index while the collector
       // is preparing a photo. No private pixels are passed during warmup.
       if (request.warmup) {
-        await load(request.manifestUrl);
+        const { count } = await load(request.manifestUrl);
         // Cold-start downloads are separate from per-image inference time.
         // The main thread must not start a match timer before this ack.
-        scope.postMessage({ id: request.id, type: 'ready' });
+        scope.postMessage({ id: request.id, type: 'ready', count });
         return;
       }
       await match(request);

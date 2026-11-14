@@ -1,6 +1,6 @@
-# Rare Room V2 — Produktionsidentität
+# E-Binder — Produktionsidentität
 
-Ausgewählt vom Inhaber: B — Rare Room, „Dein Fund. Dein Moment.“. Supersedes Midnight/Cyan and PR #18. Authoritative source: `public/E-Binder_Brand-Lab_v2.html` from `fix/brand-lab-webkit-320`, preserved unchanged.
+**Aktive Identität: E-Binder**, „Dein Fund. Dein Moment.“. Die frühere Bezeichnung „Rare Room V2“ ist historisch und durch die Owner-Rücknahme vom 14. November 2026 sowie den Astra-Review ersetzt. Vorhandene Lime-/Flächentokens und die E-Binder-Wortmarke bleiben; kein neues Logo erfinden. Historische Quelle: `public/E-Binder_Brand-Lab_v2.html` aus `fix/brand-lab-webkit-320`, unverändert.
 
 “Die Lücke”: original binder-pocket E and missing-card sparkle. `scripts/rare-room-v2.mjs` preserves the source vectors and SVG construction; `generate-pwa-icons.mjs` renders them to SVG and PNG, including opaque maskable icons. Never redraw the symbol or typeset the wordmark.
 
@@ -27,7 +27,7 @@ Die Sammlung priorisiert ihre Karten statt doppelter Kennzahlkacheln. Offene Erf
 
 ### Navigation und Scanner (13. November 2026)
 
-- Die mobile Leiste ist eine native Tab-Bar: `Home | Entdecken | Scan | Binder | Profil`. Es gibt genau ein aktives `aria-current="page"` pro Bildschirm; der Binder-Tab öffnet `Deine Binder`, die Vault-Segmente (Binder · Karten · Portfolio) tragen `aria-current="true"`. Die Desktop-Navigation wiederholt keine mobile Route.
+- Die mobile Leiste ist eine native Tab-Bar: `Home | Entdecken | Scan | Sammlung | Profil`. Es gibt genau ein aktives `aria-current="page"` pro Bildschirm; der Sammlung-Tab öffnet `Deine Binder`, die Vault-Segmente (Binder · Karten · Portfolio) tragen `aria-current="true"`. Die Desktop-Navigation wiederholt keine mobile Route.
 - Home und der Scan-Tab öffnen den Live-Sucher direkt („One scanner surface“). „Karten hinzufügen“ bleibt der manuelle Katalog-/Dateiweg und öffnet keinen zweiten Dialog automatisch. Aufnahmen werden erst beim Öffnen der Prüfung in den Bestandszustand übernommen.
 - Die leere Sammlung hat genau eine Lime-Primäraktion und eine sekundäre Demo-Aktion. Überschriften-Aktionen stapeln unter 360 px.
 - Jede Schaltfläche/Karte/Tab antwortet mit `:active`; Hover-Regeln liegen hinter `(hover: hover)`. Sheet-Ziehen, Backdrop und Escape fragen bei ungespeicherten Feldern nach; `window.confirm` ist durch das eigene Bestätigungs-Sheet ersetzt.

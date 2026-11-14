@@ -1,4 +1,4 @@
-import { openVault } from './navigation';
+import { dismissUnsavedChangesIfAsked, openVault } from './navigation';
 import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -154,6 +154,7 @@ test('templates create planned slots without possession, owned copies cannot be 
     page.getByRole('button', { name: 'Platz leeren' }),
   ).toBeDisabled();
   await page.keyboard.press('Escape');
+  await dismissUnsavedChangesIfAsked(page);
   if (!(await page.locator('.w-page-controls').getAttribute('open'))) {
     if (
       !(await page
@@ -170,6 +171,7 @@ test('templates create planned slots without possession, owned copies cannot be 
     'Keine freie Karte passt.',
   );
   await page.keyboard.press('Escape');
+  await dismissUnsavedChangesIfAsked(page);
   await openVault(page, 'sammlung');
   await expect(page.locator('.w-owned-grid button')).toHaveCount(1);
   await page.locator('.w-owned-grid button').click();

@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   decodeRecognition,
+  otsuThreshold,
   recognitionTensor,
 } from '../../src/domain/vision-codec';
 import { recognitionClues } from '../../src/data/card-catalog';
@@ -77,4 +78,20 @@ it('searches a bounded lower band and right edge without leaving the photo', () 
     expect(x + width).toBeLessThanOrEqual(1);
     expect(y + height).toBeLessThanOrEqual(1);
   }
+});
+
+it('uses Otsu to separate a low-contrast footer into ink and paper', () => {
+  const values = [
+    ...Array.from({ length: 200 }, () => 28),
+    ...Array.from({ length: 200 }, () => 214),
+  ];
+  const threshold = otsuThreshold(values);
+  expect(threshold).toBeGreaterThanOrEqual(28);
+  expect(threshold).toBeLessThan(214);
+  expect(values.filter((value) => value <= threshold)).toHaveLength(200);
+});
+
+it('rejects empty or non-finite Otsu input instead of inventing a threshold', () => {
+  expect(() => otsuThreshold([])).toThrow();
+  expect(() => otsuThreshold([0, Number.NaN, 255])).toThrow();
 });

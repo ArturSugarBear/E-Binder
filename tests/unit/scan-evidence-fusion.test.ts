@@ -179,6 +179,7 @@ describe('P0 scanner evidence fusion', () => {
     const session = {
       match: vi.fn(async () => [hit(lucario)]),
       close: vi.fn(),
+      limited: false,
     };
     const result = await resolvePhotoScan(
       new Blob(['photo']),

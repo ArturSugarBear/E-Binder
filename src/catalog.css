@@ -641,7 +641,7 @@
   display: none;
 }
 
-/* Rare Room: discover is a two-stage collector journey, not a long filter form. */
+/* E-Binder: discover is a two-stage collector journey, not a long filter form. */
 .w-discover-mode {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -728,7 +728,7 @@
   justify-content: flex-start;
 }
 
-/* Missing publisher art is a deliberate Rare Room typographic identity,
+/* Missing publisher art is a deliberate E-Binder typographic identity,
    never the generic generated pseudo-logo from the catalogue audit. */
 .w-set-symbol.w-set-fallback {
   display: flex;

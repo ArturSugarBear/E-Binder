@@ -28,6 +28,11 @@ test('live scanner offers a clear camera-permission fallback without collecting 
     exact: true,
   });
   await expect(live).toBeVisible();
+  // The live sheet exposes the real recognition stages, never a percentage.
+  await expect(live.locator('.w-live-analysis-stages li')).toHaveCount(4);
+  await expect(live.locator('.w-live-analysis-stages li').first()).toHaveText(
+    'Foto',
+  );
   await expect(live.locator('video[autoplay][playsinline]')).toHaveCount(1);
   await expect(live.locator('.w-live-status')).toContainText(
     'Live-Kamera nicht verfügbar',

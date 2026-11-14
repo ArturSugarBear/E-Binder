@@ -26,6 +26,7 @@ import {
 } from '../data/scan-auto-resolve';
 import { scanEvidence } from '../data/scan-review';
 import { fuseScanEvidence } from '../data/scan-evidence-fusion';
+import type { LiveAnalysisStage } from '../domain/live-analysis';
 import {
   recordBetaEvent,
   betaDiagnosticsAuthorized,
@@ -401,6 +402,21 @@ export function openAddCards(
     ctx.state.captures.find((item) => item.id === captureId);
   const tell = (text: string, error = false) =>
     notices.replaceChildren(message(text, error ? 'error' : 'note'));
+  let rewardTimer: ReturnType<typeof setTimeout> | undefined;
+  // A confirmed card is the only honest "success" moment. One short foil
+  // settle plus a tiny haptic; never a celebration before human confirmation.
+  const rewardConfirmedCard = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    clearTimeout(rewardTimer);
+    notices.classList.remove('is-confirmed-reward');
+    void notices.offsetWidth;
+    notices.classList.add('is-confirmed-reward');
+    navigator.vibrate?.(18);
+    rewardTimer = setTimeout(
+      () => notices.classList.remove('is-confirmed-reward'),
+      1000,
+    );
+  };
   const showCapture = () => {
     photoArea.replaceChildren();
     for (const url of previewUrls) URL.revokeObjectURL(url);
@@ -703,12 +719,16 @@ export function openAddCards(
   function startLiveOcr(
     id: string,
     photo: File,
-    onAnalysisState: (active: boolean, detail?: string) => void,
+    onAnalysisState: (
+      active: boolean,
+      detail?: string,
+      stage?: LiveAnalysisStage,
+    ) => void,
   ): void {
     if (closed || liveOcrAbort.signal.aborted || liveOcrJobs.has(id)) return;
     liveProgressHook = onAnalysisState;
-    onAnalysisState(true);
-    onAnalysisState(true, 'Aufnahme wartet auf die lokale Erkennung …');
+    onAnalysisState(true, undefined, 'capture');
+    onAnalysisState(true, 'Aufnahme wartet auf die lokale Erkennung …', 'ocr');
     // Begin image inference immediately. OCR is only an independent
     // verification signal; waiting for OCR must not delay visual retrieval.
     // A failed pilot never manufactures candidates or aborts photo review.
@@ -738,7 +758,7 @@ export function openAddCards(
         if (liveOcrSession && remaining() > 300) {
           let modelReady = false;
           try {
-            onAnalysisState(true, 'Erkennungsmodell wird vorbereitet …');
+            onAnalysisState(true, 'Erkennungsmodell wird vorbereitet …', 'ocr');
             await liveOcrSession.warmup();
             if (
               closed ||
@@ -751,7 +771,11 @@ export function openAddCards(
             started = performance.now();
             modelReady = true;
             let attempts = 1;
-            onAnalysisState(true, 'Set, Nummer und Name werden gelesen …');
+            onAnalysisState(
+              true,
+              'Set, Nummer und Name werden gelesen …',
+              'ocr',
+            );
             text = await liveOcrSession.recognize(
               photo,
               false,
@@ -797,6 +821,7 @@ export function openAddCards(
                 region.startsWith('footer')
                   ? 'Sammlernummer wird nochmals geprüft …'
                   : 'Vollständiger Kartenname wird geprüft …',
+                'ocr',
               );
               const extra = await liveOcrSession.recognize(
                 photo,
@@ -840,6 +865,7 @@ export function openAddCards(
             useVisual
               ? 'Kartengrafik wird mit Referenzbildern verglichen …'
               : 'Kartenkatalog wird abgeglichen …',
+            useVisual ? 'visual' : 'catalog',
           );
           const controller = new AbortController();
           const timeout = setTimeout(
@@ -886,6 +912,7 @@ export function openAddCards(
         }
         if (closed || liveOcrAbort.signal.aborted || !transientPhotos.has(id))
           return;
+        onAnalysisState(true, 'Ausgabe wird geprüft …', 'catalog');
         const candidates = [
           ...new Map(
             [...(automatic?.candidates ?? []), ...candidatesFromLocal].map(
@@ -946,7 +973,15 @@ export function openAddCards(
         // reaching the catalogue stage.
         releaseOcr();
         onAnalysisState(false);
-        if (completionStatus) onAnalysisState(false, completionStatus);
+        if (completionStatus)
+          onAnalysisState(
+            false,
+            completionStatus,
+            completionStatus.startsWith('Erkennung fehlgeschlagen') ||
+              completionStatus.startsWith('Kein sicherer Treffer')
+              ? 'error'
+              : 'ready',
+          );
         liveOcrJobs.delete(id);
       });
     liveOcrJobs.set(id, task);
@@ -1259,8 +1294,9 @@ export function openAddCards(
       ];
       const printedEnergy = anniversaryEnergyFromText(text, language.value);
       const local = candidatesFromText(text, known);
-      // OCR is complete; only actual completed stages move the indicator.
-      progress.value = 0.65;
+      // OCR is complete; the remaining catalogue work is indeterminate.
+      // Never show a fabricated fraction for work that has not finished.
+      progress.removeAttribute('value');
       status.textContent =
         'Text erkannt · Set, Sammlernummer und Kartenbild werden abgeglichen …';
       journey.update('recognize', 'Kartenkatalog wird überprüft …');
@@ -1493,6 +1529,7 @@ export function openAddCards(
         ? 'Karte übernommen · nächste Karte prüfen.'
         : 'Karte übernommen · fertig oder nächste Karte scannen.',
     );
+    rewardConfirmedCard();
     if (reviewingLiveQueue && !captureId) {
       sheet.dialog.classList.add('w-quick-finished');
     }
@@ -2351,6 +2388,7 @@ export function openAddCards(
               ? 'Karte übernommen · nächste Karte prüfen.'
               : 'Karte übernommen · fertig oder nächste Karte scannen.',
           );
+          rewardConfirmedCard();
           if (reviewingLiveQueue && !captureId) {
             sheet.dialog.classList.add('w-quick-finished');
           }

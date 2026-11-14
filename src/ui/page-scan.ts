@@ -987,16 +987,23 @@ export function openPageScanner(
           ];
           // Reuse the strict identity gate shared with single-card scanning.
           // The visual model must never invent a language, set or printing.
+          // A limited pilot may only surface references corroborated by this
+          // photo's printed number, never an arbitrary nearest neighbour.
+          const visualChoices = visual?.limited
+            ? visualReview.supported
+            : visualReview.choices;
           const candidateSignal = AbortSignal.any([
             abort.signal,
             AbortSignal.timeout(10000),
           ]);
-          const resolvedVisual = await resolveVisualPrintings(
-            visualReview.choices,
-            existingCards,
-            candidateSignal,
-            { online: navigator.onLine },
-          );
+          const resolvedVisual = visualChoices.length
+            ? await resolveVisualPrintings(
+                visualChoices,
+                existingCards,
+                candidateSignal,
+                { online: navigator.onLine },
+              )
+            : [];
           if (closed || abort.signal.aborted) break;
           const printedEnergy = anniversaryEnergyFromText(
             text,
