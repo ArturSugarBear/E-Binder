@@ -237,6 +237,25 @@ normaler Test), dann minimale Änderung in `scan-auto-resolve.ts` und ggf.
 `Target crashed`-Fehler trat nur unter Speicherdruck auf; nach Freigabe der
 MCP-Chromium-Instanzen lief derselbe Test isoliert durch.
 
+### CI-Lauf des Draft-PR
+
+- Run [43582058671](https://github.com/ArturSugarBear/E-Binder/actions/runs/43582058671)
+  (`build`, Draft-PR): `npm run check`, Vision-Asset-Erzeugung, Hash-/Coverage-Gates
+  und CodeQL sind **grün**. `deploy` und `verify-production` wurden wegen des
+  Draft-Status **übersprungen**; es gab kein Deployment.
+- Browser-Regression: **425 passed, 13 failed, 1 flaky, 26 skipped**. Die
+  12 Fehler in `interaction-templates`, `photo-review` (2×) und `workspace`
+  treten **identisch auf `master`** auf (Run
+  [43579929397](https://github.com/ArturSugarBear/E-Binder/actions/runs/43579929397):
+  427 passed, 12 failed) und sind damit vorbestehend, nicht durch diesen Branch
+  verursacht.
+- Der zusätzliche WebKit-Fehler `apple-ui.spec.ts:221` (Font-Weight) ist ein
+  Flake: lokal lief `npx playwright test tests/e2e/apple-ui.spec.ts
+--project=webkit --workers=1` mit **7/7 grün**, einschließlich dieses Tests.
+- Kein Merge, kein Promote, kein Deployment. Der Build-Job ist rot, weil die
+  vorbestehenden Master-Fehler die Browser-Regression blockieren; das muss
+  getrennt behoben werden.
+
 ## 8. Ausdrücklich nicht geprüft / nicht behoben
 
 - **Kein Browserlauf mit dem echten Pilotmodell.** `public/assets/vision/`
