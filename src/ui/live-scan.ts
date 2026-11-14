@@ -24,12 +24,23 @@ import {
   MAX_PENDING_SCAN_CAPTURES,
   type LiveCaptureOutcome,
 } from '../domain/scan-session-guardrails';
+import {
+  LIVE_ANALYSIS_STAGES,
+  isWorkingStage,
+  liveStageLabel,
+  liveStageRank,
+  type LiveAnalysisStage,
+} from '../domain/live-analysis';
 import { action, el, errorText, modal } from './workspace-dom';
 
 type CaptureHandler = (
   file: File,
   aligned: boolean,
-  onAnalysisState: (active: boolean, detail?: string) => void,
+  onAnalysisState: (
+    active: boolean,
+    detail?: string,
+    stage?: LiveAnalysisStage,
+  ) => void,
 ) => Promise<LiveCaptureOutcome>;
 
 function visibleCrop(video: HTMLVideoElement, width: number, height: number) {
@@ -208,12 +219,20 @@ export function openLiveScanner(
     'w-live-analysis-caption',
     'Kartendetails werden lokal geprüft …',
   );
+  const analysisStages = el(
+    'ol',
+    'w-live-analysis-stages',
+    ...LIVE_ANALYSIS_STAGES.map((item) => el('li', '', liveStageLabel(item))),
+  );
+  analysisStages.setAttribute('aria-label', 'Arbeitsschritte der Erkennung');
   const analysis = el(
     'div',
     'w-live-analysis',
     el('span', 'w-live-analysis-line'),
+    analysisStages,
     analysisCaption,
   );
+  analysis.dataset.stage = 'capture';
   analysis.setAttribute('role', 'status');
   analysis.hidden = true;
   const resultStatus = el('p', 'w-muted w-live-last-result');
@@ -221,8 +240,46 @@ export function openLiveScanner(
   resultStatus.hidden = true;
 
   let ongoingAnalysis = 0;
-  const onAnalysisState = (active: boolean, detail?: string) => {
+  let rewardTimer: ReturnType<typeof setTimeout> | undefined;
+  const setAnalysisStage = (next?: LiveAnalysisStage) => {
+    if (!next) return;
+    const rank = liveStageRank(next);
+    analysis.dataset.stage = next;
+    stage.dataset.analysisStage = next;
+    resultStatus.dataset.stage = next;
+    [...analysisStages.children].forEach((item, index) => {
+      const step = item as HTMLElement;
+      step.dataset.state =
+        index < rank ? 'done' : index === rank ? 'active' : 'pending';
+      step.classList.toggle('is-complete', index < rank);
+      step.classList.toggle(
+        'is-current',
+        index === rank && isWorkingStage(next),
+      );
+    });
+    clearTimeout(rewardTimer);
+    if (next === 'ready') {
+      stage.classList.add('is-scan-reward');
+      rewardTimer = setTimeout(
+        () => stage.classList.remove('is-scan-reward'),
+        1600,
+      );
+      // A short tactile confirmation, never a fake success probability.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+        navigator.vibrate?.(12);
+    } else if (next === 'error') {
+      stage.classList.add('is-scan-error');
+    } else {
+      stage.classList.remove('is-scan-reward', 'is-scan-error');
+    }
+  };
+  const onAnalysisState = (
+    active: boolean,
+    detail?: string,
+    nextStage?: LiveAnalysisStage,
+  ) => {
     if (closed) return;
+    if (nextStage) setAnalysisStage(nextStage);
     // Status text changes come from actual OCR/retry/catalogue work;
     // they do not increase the number of pending recognitions.
     if (detail) {
@@ -454,6 +511,9 @@ export function openLiveScanner(
     polygon.removeAttribute('points');
     stage.classList.remove('has-card-outline');
     stage.dataset.scanPhase = 'ready';
+    setAnalysisStage('capture');
+    analysis.hidden = true;
+    resultStatus.hidden = true;
     stageLabel.textContent = 'Nächste Karte ausrichten';
     status.textContent = 'Karte in den Rahmen halten · Ecken werden gesucht';
     trigger.hidden = true;

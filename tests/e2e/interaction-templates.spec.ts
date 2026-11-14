@@ -1,4 +1,4 @@
-import { openVault } from './navigation';
+import { confirmSheet, openVault } from './navigation';
 import { test, expect } from './fixtures';
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
@@ -71,15 +71,15 @@ test('the demo shows the original physical page and can restart without replacin
     .getByRole('button', { name: 'Platz leeren', exact: true })
     .click();
   await expect(page.locator('.w-binder-paper img')).toHaveCount(8);
-  page.once('dialog', (dialog) => dialog.dismiss());
   await page
     .getByRole('button', { name: 'Demo neu starten', exact: true })
     .click();
+  await confirmSheet(page, 'Abbrechen');
   await expect(page.locator('.w-binder-paper img')).toHaveCount(8);
-  page.once('dialog', (dialog) => dialog.accept());
   await page
     .getByRole('button', { name: 'Demo neu starten', exact: true })
     .click();
+  await confirmSheet(page, 'Zurücksetzen');
   await expect(page.locator('.w-binder-paper img')).toHaveCount(9);
   await page.reload();
   await expect(page.locator('.w-binder-paper img')).toHaveCount(9);

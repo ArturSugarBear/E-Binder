@@ -43,3 +43,19 @@ export async function openVault(
   await expect(page).toHaveURL(new RegExp(`#${destination}$`));
   return steps;
 }
+
+/** Confirm the app's own sheet. `window.confirm` is no longer used. */
+export async function confirmSheet(page: Page, action: string): Promise<void> {
+  const sheet = page.locator('dialog.w-confirm-sheet[open]');
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole('button', { name: action, exact: true }).click();
+  await expect(sheet).toHaveCount(0);
+}
+
+/** Close an "unsaved input" guard without accepting a destructive action. */
+export async function dismissUnsavedChangesIfAsked(page: Page): Promise<void> {
+  const sheet = page.locator('dialog.w-confirm-sheet[open]');
+  if (!(await sheet.count())) return;
+  const discard = sheet.getByRole('button', { name: 'Verwerfen', exact: true });
+  if (await discard.count()) await discard.click();
+}
