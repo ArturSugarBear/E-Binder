@@ -52,6 +52,10 @@ test('binder page follows the finger and an aborted gesture keeps the page', asy
   await page
     .getByRole('button', { name: 'Mit Demo ausprobieren', exact: true })
     .click();
+  await page
+    .locator('.w-vault-tabs')
+    .getByRole('link', { name: 'Binder', exact: true })
+    .click();
   const rail = page.getByRole('navigation', {
     name: 'Binderseiten durchblättern',
   });
@@ -88,7 +92,10 @@ test('binder page follows the finger and an aborted gesture keeps the page', asy
     clientX: startX - 90,
     clientY: y + 2,
   });
-  await expect(rail.locator('[aria-current="page"]')).toContainText('Seite 2');
+  await expect(rail.locator('[aria-current="page"]')).toHaveAttribute(
+    'aria-label',
+    /^Seite 2/,
+  );
 
   // A short drag below the direction threshold must not change the page.
   const second = (await paper.boundingBox())!;
@@ -113,5 +120,8 @@ test('binder page follows the finger and an aborted gesture keeps the page', asy
     clientX: second.x + second.width * 0.6 - 30,
     clientY: second.y + 104,
   });
-  await expect(rail.locator('[aria-current="page"]')).toContainText('Seite 2');
+  await expect(rail.locator('[aria-current="page"]')).toHaveAttribute(
+    'aria-label',
+    /^Seite 2/,
+  );
 });

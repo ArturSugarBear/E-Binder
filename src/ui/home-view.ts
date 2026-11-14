@@ -342,6 +342,8 @@ function quickAction(
 ): HTMLElement {
   const button = action(title, onClick, 'secondary');
   button.classList.add('w-home-quick-tile');
+  // Keep the accessible name short; the description is supporting copy.
+  button.setAttribute('aria-label', title);
   button.replaceChildren(
     el('strong', '', title),
     el('small', '', description),

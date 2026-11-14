@@ -10,18 +10,18 @@ Browser: vorhandene Chromium-/WebKit-Projekte und mobile Konfiguration. Reale Ge
 
 ## Journey-Matrix
 
-| ID | Ablauf | Bestehensbedingung / Beleg |
-| --- | --- | --- |
-| J01 Einstieg | Frischer lokaler Zustand → Home → Scan → Kamera verweigern → alternative Suche → Karte wählen → bestätigen | Kein Pflichtkonto; keine Sackgasse; eindeutige Ausgabe; erst Bestätigung erzeugt Besitz; Reload erhält Menge 1. |
-| J02 Rückkehr | Gefüllter Bestand → App starten → letzte Binderseite → Sammlung → Detail → zurück | Eigene Karte/Bindervorschau auf 390×844 ohne Scrollen; Fortsetzung korrekt; Filter/Scrollposition erhalten; kein wiederholtes Onboarding. |
-| J03 Binder | 20 Seiten → vor/zurück ziehen → Geste abbrechen → Slot öffnen → zuweisen → Reload | Fingertracking sichtbar; Abbruch ohne Seitenwechsel; neun feste Slots; keine doppelte Exemplarvergabe; aktive Rail-Seite sichtbar. |
-| J04 Kartendetail | Dieselbe Ausgabe aus Entdecken, Sammlung und Binder öffnen; JA-Fall; Menge ändern | Identität und geeigneter Preis konsistent; Kontextaktion korrekt; verifizierter DE-Name oder ehrlicher fehlender Alias; Mengenänderung persistiert. |
-| J05 Entdecken | Sprache/Set/Filter/Sortierung ändern → Detail → zurück; Bildfehler provozieren | Kontext bleibt; Katalogzustände unterscheiden Offline/leer/Fehler; falsche Ausgabe wird nie als Bildfallback gezeigt; Fortschritt zählt eindeutige Drucke. |
-| J06 Portfolio | Feste Quotes mit 10 EUR × 2, 5 EUR × 1 und einem unbewerteten Exemplar → Binder zuordnen → Quote/Bestand ändern | 25 EUR bekannter Teilwert, 3/4 Exemplare bepreist; Zuordnung ändert Gesamtwert nicht; fehlend ist nicht null; neue nicht vergleichbare Historie nicht als Kursbewegung verbinden. |
-| J07 Scanserie | 20 verschiedene Aufnahmen; darunter JA, nicht indiziert, unscharf, Wiederholung; danach Binder mit leerem Slot | Kamera bleibt nutzbar; Queue ohne Verlust; keine fremden Pilotkandidaten ohne Evidenz; eindeutige Fehler/Retry; Positionen korrekt; kein unbestätigter Besitz. |
-| J08 Änderungen | Name/Notiz bearbeiten → Drag, Backdrop, Escape, Browser-Zurück, X; danach bewusst verwerfen/speichern | Kein stiller Verlust; Guard konsistent; Fokus zurück; keine doppelten Dialoge; Speichern erst nach tatsächlichem Persistenzerfolg. |
-| J09 PWA/Daten | Export → Import in leeren Testbestand; ungültiger Import; offline; Update; Wiederstart | Roundtrip exakt; ungültiger Import ohne Mutation; offline ehrliche Capability; Update erhält Bestand; Build/Commit sichtbar. |
-| J10 Zugriff/Optik | Tastatur und Screenreader-Grundpfade; 320/390/430/800/1280; große Schrift; Reduced Motion/Transparency | Keine verdeckten Actions; benannte Controls/aktives Ziel; Kontrast mindestens WCAG AA für relevante Texte/Controls; 44px-Produktziele; japanische Sprache ausgezeichnet. |
+| ID                | Ablauf                                                                                                          | Bestehensbedingung / Beleg                                                                                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| J01 Einstieg      | Frischer lokaler Zustand → Home → Scan → Kamera verweigern → alternative Suche → Karte wählen → bestätigen      | Kein Pflichtkonto; keine Sackgasse; eindeutige Ausgabe; erst Bestätigung erzeugt Besitz; Reload erhält Menge 1.                                                                   |
+| J02 Rückkehr      | Gefüllter Bestand → App starten → letzte Binderseite → Sammlung → Detail → zurück                               | Eigene Karte/Bindervorschau auf 390×844 ohne Scrollen; Fortsetzung korrekt; Filter/Scrollposition erhalten; kein wiederholtes Onboarding.                                         |
+| J03 Binder        | 20 Seiten → vor/zurück ziehen → Geste abbrechen → Slot öffnen → zuweisen → Reload                               | Fingertracking sichtbar; Abbruch ohne Seitenwechsel; neun feste Slots; keine doppelte Exemplarvergabe; aktive Rail-Seite sichtbar.                                                |
+| J04 Kartendetail  | Dieselbe Ausgabe aus Entdecken, Sammlung und Binder öffnen; JA-Fall; Menge ändern                               | Identität und geeigneter Preis konsistent; Kontextaktion korrekt; verifizierter DE-Name oder ehrlicher fehlender Alias; Mengenänderung persistiert.                               |
+| J05 Entdecken     | Sprache/Set/Filter/Sortierung ändern → Detail → zurück; Bildfehler provozieren                                  | Kontext bleibt; Katalogzustände unterscheiden Offline/leer/Fehler; falsche Ausgabe wird nie als Bildfallback gezeigt; Fortschritt zählt eindeutige Drucke.                        |
+| J06 Portfolio     | Feste Quotes mit 10 EUR × 2, 5 EUR × 1 und einem unbewerteten Exemplar → Binder zuordnen → Quote/Bestand ändern | 25 EUR bekannter Teilwert, 3/4 Exemplare bepreist; Zuordnung ändert Gesamtwert nicht; fehlend ist nicht null; neue nicht vergleichbare Historie nicht als Kursbewegung verbinden. |
+| J07 Scanserie     | 20 verschiedene Aufnahmen; darunter JA, nicht indiziert, unscharf, Wiederholung; danach Binder mit leerem Slot  | Kamera bleibt nutzbar; Queue ohne Verlust; keine fremden Pilotkandidaten ohne Evidenz; eindeutige Fehler/Retry; Positionen korrekt; kein unbestätigter Besitz.                    |
+| J08 Änderungen    | Name/Notiz bearbeiten → Drag, Backdrop, Escape, Browser-Zurück, X; danach bewusst verwerfen/speichern           | Kein stiller Verlust; Guard konsistent; Fokus zurück; keine doppelten Dialoge; Speichern erst nach tatsächlichem Persistenzerfolg.                                                |
+| J09 PWA/Daten     | Export → Import in leeren Testbestand; ungültiger Import; offline; Update; Wiederstart                          | Roundtrip exakt; ungültiger Import ohne Mutation; offline ehrliche Capability; Update erhält Bestand; Build/Commit sichtbar.                                                      |
+| J10 Zugriff/Optik | Tastatur und Screenreader-Grundpfade; 320/390/430/800/1280; große Schrift; Reduced Motion/Transparency          | Keine verdeckten Actions; benannte Controls/aktives Ziel; Kontrast mindestens WCAG AA für relevante Texte/Controls; 44px-Produktziele; japanische Sprache ausgezeichnet.          |
 
 ## Zahlen als Zielbudgets, nicht als Ergebnis
 
@@ -41,6 +41,7 @@ Budgets dürfen nach realer Baseline begründet angepasst werden; Änderung mit 
 Vor Modell-/Threshold-Tuning einen gehaltenen Testkorpus fixieren: mindestens 150 unabhängige reale Kartenaufnahmen, mindestens 50 je DE/EN/JA; zusätzlich mindestens 30 Open-Set-/Nichtkarten-/stark unlesbare Negativfälle. Unterschiedliche Drucke, Sleeves, Reflexe und Perspektiven aufnehmen. Bildduplikate, gleiche physische Aufnahme und nahe Serien nicht zwischen Training/Validierung/Test verteilen. Wenn Daten fehlen, Arbeit als begrenzte Beta ausweisen.
 
 Entwicklungsziele für den deklarierten unterstützten Bereich:
+
 - Exact-print Top-3 Recall ≥95 % auf lesbaren, im Referenzkatalog/Index unterstützten Karten, getrennt je Sprache berichten.
 - Falsche „eindeutig erkannt“-Entscheidungen ≤1 % im gehaltenen Gesamttest; Nenner und Unsicherheit angeben. Kleine Stichprobe kann keine allgemeine 1-%-Garantie belegen.
 - Keine automatische Besitzanlage ohne Bestätigung in allen Tests.
@@ -58,6 +59,7 @@ Nicht nur Screenshots erzeugen: ansehen und anhand von Hierarchie, Artworkgröß
 ## Automatisierte Prüfung
 
 Node 24 gemäß package.json. Bestehende Scripts verwenden:
+
 - `npm run check`: Format, Lint, Unit, Datenvalidierung, TypeScript, Build und PWA-Postbuild.
 - `npm run test:e2e` bzw. gezielte vorhandene Specs mit tatsächlich konfigurierten Projektnamen aus playwright.config.
 - Relevante existierende Specs: apple-ui, glass-shell, portfolio, binder-page-rail, binder-page-scan, mobile-binder-entry, interaction-templates sowie die Scan-/Katalog-/PWA-Fälle.

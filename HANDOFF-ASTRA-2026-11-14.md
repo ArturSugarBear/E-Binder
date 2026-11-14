@@ -157,8 +157,14 @@ Truth behandeln.
 - `npm run build`: grün (nach R01–R03, inkl. PWA-Validierung).
 - PR #120 CI: vollständige Chromium-/WebKit-Regression grün (`5b1399d`).
 - Lokal: Scanner-E2E 17/17, Bestätigungs-E2E 20/20 (vor R01–R03).
-- **Nicht gelaufen:** Binder-E2E nach DOM-Reihenfolge, PWA-/Glass-E2E nach
-  Tab-Label, WebKit nach R01–R03, Mobile-Chromium nach R01–R03.
+- Nach R01–R03: `binder-page-rail` **2/2 grün** (inkl. Drag/Abbruch),
+  `glass-shell` **4/4 grün**, `pwa` **4 passed, 1 skipped**; der schwere
+  OCR-Offline-Test (`pwa.spec.ts:205`) stürzt lokal isoliert mit
+  Chromium `Target crashed` ab (Speicherdruck). CI-Run `43587668937` war für
+  denselben PWA-Stand grün; als Umgebungsgrenze dokumentiert, nicht als
+  Produktbeweis.
+- **Noch nicht gelaufen:** WebKit nach R01–R03, Mobile-Chromium nach R01–R03,
+  vollständige Discover-/Portfolio-E2E nach Integration der Subagent-Branches.
 - Bekannt: `tests/unit/photo-ground-truth.test.ts` kann unter Last am
   CLI-Timeout scheitern (umgebungsbedingt, nicht durch diese Änderungen).
 - Chromium „Target crashed“ tritt unter Speicherdruck auf; Contexts einzeln
