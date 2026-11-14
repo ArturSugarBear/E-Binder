@@ -35,7 +35,7 @@ test('full collector glass has clear layers and a real lime active segment', asy
     const style = getComputedStyle(node);
     return {
       background: style.backgroundColor,
-      blur: style.backdropFilter || style.webkitBackdropFilter,
+      blur: style.backdropFilter || style.getPropertyValue('-webkit-backdrop-filter'),
       border: style.borderTopColor,
       shadow: style.boxShadow,
     };
