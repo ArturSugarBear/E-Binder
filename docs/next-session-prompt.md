@@ -44,7 +44,10 @@ card entering the collection.
 ## Evidence already established
 
 - `tests/e2e/scanner-live-fallback.spec.ts` is marked `test.fixme`. It encodes
-  the intended contract for the Home/dock photo fallback.
+  the intended contract for the Home/dock photo fallback. Verified on
+  14 November 2026: with `.fixme` removed, the test fails at
+  `expect(live).toBeVisible()` because the sheet has already closed; the chosen
+  photo is lost.
 - `openLiveScannerFlow` in `src/ui/add-cards.ts` (~line 2549) creates a hidden
   `fallbackCamera` file input and clicks it, but never attaches a `change`
   handler. Closing the live sheet calls `onClose`, which removes the input

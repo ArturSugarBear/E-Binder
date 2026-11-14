@@ -64,9 +64,11 @@ before the native picker returns. Choosing a photo therefore closes the scanner
 and silently discards the photo.
 
 Red test: `tests/e2e/scanner-live-fallback.spec.ts` is marked `test.fixme`.
-Remove `.fixme` first, watch it fail, then fix the lifecycle. The intended
-contract is in the test comment: keep the live scanner open, queue the photo as
-“1 offene Aufnahme”, and open the review from “Ergebnisse prüfen (1)”.
+Remove `.fixme` first, watch it fail, then fix the lifecycle. Verified on
+14 November 2026: the unskipped test fails at `expect(live).toBeVisible()`
+because the sheet has already closed. The intended contract is in the test
+comment: keep the live scanner open, queue the photo as “1 offene Aufnahme”, and
+open the review from “Ergebnisse prüfen (1)”.
 
 Do not confuse this with the add-dialog `camera` input, which does have a
 `change` handler at `src/ui/add-cards.ts` (~line 1094).
